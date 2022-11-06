@@ -1,0 +1,5 @@
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/clean_metadata/output
+./pmids/ | /export/home/dor/cxu/innovation_projs/derived/scrape_pmids/output
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/data/
+./total/ | /export/home/dor/cxu/innovation_projs/derived/append_pmids/output
+./filtered/ | /export/home/dor/cxu/innovation_projs/derived/get_total_jrnl_articles/output
