@@ -1,0 +1,2 @@
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_metadata/output/metadata
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/data/
