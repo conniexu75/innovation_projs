@@ -1,0 +1,78 @@
+set more off
+clear all
+capture log close
+program drop _all
+set scheme modern
+pause on
+set seed 8975
+here, set
+set maxvar 120000
+
+program main
+    global samp select_jrnl
+    append_metadata, data(pt)
+    clean_pubtype
+end
+
+program append_metadata
+    syntax, data(str)
+	local filelist: dir "../external/samp" files "`data'_${samp}*"
+	local i = 1
+	foreach file of local filelist {
+		import delimited pmid date mesh journal affil athrs pt gr using "../external/samp/`file'", clear
+		tostring pmid, replace
+		drop if inlist(pmid, "pmid", "v1", "NA")
+		destring pmid, replace
+		local name = subinstr("`file'",".csv","",.)
+		local namelist `namelist' `name'
+        compress, nocoalesce
+		save ../temp/`name', replace 
+	} 
+	clear 
+	foreach file of local namelist {
+		append using ../temp/`file'
+	}
+    compress, nocoalesce
+    gduplicates drop pmid, force
+	save "../output/master_`data'_${samp}_appended.dta", replace
+end
+
+program clean_pubtype
+    use ../output/master_pt_${samp}_appended, clear
+	gen pt_na = pt == "NA"
+	tab pt_na
+    drop pt_na
+	replace pt = subinstr(pt, char(34), "", .)
+    replace pt = subinstr(pt, "</PublicationTypeList>", "",.)
+    replace pt = subinstr(pt, "<PublicationTypeList> ", "",.)
+    split pt, p("</PublicationType>")
+	ren pt raw_pt
+    qui ds pt*
+    local pts `r(varlist)'
+    local num_pts : list sizeof pts
+    gen start = .
+    forval i = 1/`num_pts' { 
+        replace start = strpos(pt`i', ">")+1
+        replace pt`i' = substr(pt`i', start, strlen(pt`i')-start+1)
+    }
+    gen to_drop = 0
+    gen pub_type = ""
+    forval i = 1/`num_pts' {
+        replace to_drop = 1 if inlist(pt`i', "Autobiography", "Biography", "Case Reports", "Classical Article", "Comment", "Comparative Study", "Congress", "Dataset", "Editorial")
+        replace to_drop = 1 if inlist(pt`i', "Evaluation Study", "Historical Article", "Introductory Journal Article", "Letter" , "News", "Clinical Conference", "Practice Guideline", "Guideline")
+        replace to_drop = 1 if inlist(pt`i', "Meta-Analysis", "Personal Narrative", "Portrait", "Published Erratum", "Retracted Publication", "Review", "Video-Audio Media", "Webcast", "Legal Case")
+        replace to_drop = 1 if inlist(pt`i', "Retraction of Publication", "Twin Study", "Systematic Review", "Address" , "Bibliography", "Consensus Development Conference" , "Consensus Development Conference, NIH")
+        replace to_drop = 1 if inlist(pt`i', "Corrected and Republished Article", "Duplicate Publication","Interactive Tutorial", "Expression of Concern", "Lecture","Multicenter Study", "Patient Education Handout" , "Validation Study")
+        replace pub_type = "Journal Article" if pt`i' == "Journal Article"
+        replace pub_type = "Clinical Study" if strpos(pt`i', "Clinical Study")
+        replace pub_type = "Clinical Trial" if strpos(pt`i', "Clinical Trial")
+        replace pub_type = pt`i' if mi(pub_type)
+    }
+	drop if to_drop == 1
+    gcontract pmid
+    drop _freq
+    save ../output/all_jrnl_articles_${samp}, replace
+end
+
+** 
+main
