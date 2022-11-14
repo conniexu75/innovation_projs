@@ -105,40 +105,40 @@ pull_pt = function(id) {
   return(output)
 }
 ################### PULL BASIC and TRANSLATIONAL SCIENCE METADATA FROM SELECT JOURNALS ###################################
-#queries_sub <- read_dta(file = '../external/samp/BTC_pmids.dta')
-#cat <- c("basic", "translational")
-#for(c in cat) {
-#    queries <- queries_sub %>% 
-#      filter(btc == c)
-#    pmid <- queries$pmid
-#    len <- length(pmid)
-#    n <- ceiling(len/1000)
-#    for (i in 1:n) {
-#      while(TRUE) {
-#        print(i)
-#        start <- (i-1)*1000+1
-#        end <- i*1000
-#        test <- try(sapply(X = pmid[start:end], FUN = pull_affs))
-#        if(!is(test, 'try-error')) break
-#      }
-#      info = test
-#      master = data.frame(pmid = pmid[start:end], date = info[1,], mesh = info[2,],
-#                          journal=info[3,], affil=info[4,], athrs = info[5,], pt = info[6,], gr = info[7,])
-#      file_name = paste("../output/metadata/",c,"_select_jrnl_",start,"_", end,".csv", sep="")
-#      write_csv(master, file = file_name)
-#    }
-#}
+queries_sub <- read_dta(file = '../external/samp/BTC_pmids.dta')
+cat <- c("basic", "translational")
+for(c in cat) {
+    queries <- queries_sub %>% 
+      filter(btc == c)
+    pmid <- queries$pmid
+    len <- length(pmid)
+    n <- ceiling(len/100)
+    for (i in 1:n) {
+      while(TRUE) {
+        print(i)
+        start <- (i-1)*100+1
+        end <- i*100
+        test <- try(sapply(X = pmid[start:end], FUN = pull_affs))
+        if(!is(test, 'try-error')) break
+      }
+      info = test
+      master = data.frame(pmid = pmid[start:end], date = info[1,], mesh = info[2,],
+                          journal=info[3,], affil=info[4,], athrs = info[5,], pt = info[6,], gr = info[7,])
+      file_name = paste("../output/metadata/",c,"_select_jrnl_",start,"_", end,".csv", sep="")
+      write_csv(master, file = file_name)
+    }
+}
 
 ####################### PULL PUB TYPE OF ALL PMIDS FROM SELECT JRNLS ########################################################
 queries <- read_dta(file = '../external/samp/select_jrnls_pmids.dta')
 pmid <- queries$pmid
 len <- length(pmid)
-n <- ceiling(len/20)
-for (i in 10601:n) {
+n <- ceiling(len/100)
+for (i in 1:n) {
   while(TRUE) {
       print(i)
-      start <- (i-1)*20+1
-      end <- i*20
+      start <- (i-1)*100+1
+      end <- i*100
       test <- try(sapply(X = pmid[start:end], FUN = pull_affs))
       if(!is(test, 'try-error')) break
   }
