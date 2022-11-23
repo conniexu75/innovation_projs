@@ -87,7 +87,7 @@ print(N)
 years = as.character(1988:2022)
 year_queries = paste0('(', years, '/01/01[PDAT] : ', years, '/12/31[PDAT])')
 
-queries_sub = read_tsv(file = '../external/queries/search_terms_BTC_select_jrnl.txt')
+queries_sub = read_tsv(file = '../external/queries/search_terms_basic_indices_select_jrnl.txt')
 
 queries = rep(queries_sub$Query, each=length(year_queries))
 query_names = rep(queries_sub$Query_Name, each=length(year_queries))
@@ -96,7 +96,9 @@ queries = paste0(year_queries, ' AND ', queries)
 query_names = paste0(query_names, '_', years)
 
 #Run through scraping function to pull out PMIDs
-for (counter in 1:7) {
+# 5 is the number of queries we're using in the .txt file
+# 35 is the number of years between 1988 and 2022
+for (counter in 1:5) {
   start <- (counter-1)*35+1
   end <- counter*35
   PMIDs =  sapply(X = queries[start:end], FUN = pull_pmids) %>%
@@ -113,18 +115,18 @@ for (counter in 1:7) {
 }
 
 ### Select Med Journals and Basic Science Journals (basic science articles + translational) ========================================
-type <- c("basic", "trans")
-for (t in type) {
-  queries_sub = read_tsv(file = paste0('../external/queries/search_terms_',t,'_select_jrnls.txt'))
-  queries = paste0(queries_sub$Query, ' AND (1988/01/01[PDAT] : 2022/12/31[PDAT])')
-  query_names = queries_sub$Query_Name
-  #Run through scraping function to pull out PMIDs
-  PMIDs = sapply(X = queries, FUN = pull_pmids) %>%
-    unname()
-  PMIDs = as.numeric(PMIDs)
-  PMIDdf = data.frame(pmid=PMIDs)
-  write_csv(PMIDdf, paste0('../output/',t,'_select_jrnls_pmids.csv'))
-}
+#type <- c("basic", "trans")
+#for (t in type) {
+#  queries_sub = read_tsv(file = paste0('../external/queries/search_terms_',t,'_select_jrnls.txt'))
+#  queries = paste0(queries_sub$Query, ' AND (1988/01/01[PDAT] : 2022/12/31[PDAT])')
+#  query_names = queries_sub$Query_Name
+#  #Run through scraping function to pull out PMIDs
+#  PMIDs = sapply(X = queries, FUN = pull_pmids) %>%
+#    unname()
+#  PMIDs = as.numeric(PMIDs)
+#  PMIDdf = data.frame(pmid=PMIDs)
+#  write_csv(PMIDdf, paste0('../output/',t,'_select_jrnls_pmids.csv'))
+#}
 
 ### Select Med Journals and Basic Science Journals (all articles) ========================================
 jrnls = c("nejm", "jama", "lancet", "bmj", "annals", "science", "nature", "cell")
