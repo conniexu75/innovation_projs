@@ -1,0 +1,2 @@
+Query_Name	Query
+cell	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("Cell"[Journal])

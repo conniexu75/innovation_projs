@@ -1,0 +1,2 @@
+Query_Name	Query
+jama	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("JAMA"[Journal] OR "J Am Med Assoc"[Journal])
