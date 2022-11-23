@@ -26,33 +26,25 @@ program append_btc
     foreach file in `filelist' {
         append using ../temp/`file'
     }
-    save ../temp/BTC_appended, replace
-
+    save ../temp/query_appended, replace
     split query_name, p("_")
-    ren query_name1 btc
+    ren query_name1 cat 
     ren query_name2 year
     destring year, replace
     drop query_name 
-    replace pmid = pmid*10000 if inlist(btc, "total", "totalCTs")
+    duplicates tag pmid cat, gen(dup)
+	bys pmid cat: egen minyr = min(year)
+    drop if year > minyr & dup > 0
+    drop dup
+    replace pmid = pmid*10000 if inlist(cat, "fundamental", "therapeutics", "diseases")
     duplicates tag pmid, gen(dup)
-    gen nothc = btc != "healthcare"
-		bys pmid: egen tot_nothc = total(nothc)
-		drop if dup & btc == "healthcare" & tot_nothc > 0
-		drop dup
-	duplicates tag pmid, gen(dup)
-	gen clin = btc == "clinical" if dup > 0
-		bys pmid: egen tot_clin = total(clin)
-		drop if btc == "translational" & tot_clin > 0 & dup
-		drop dup tot_clin clin tot_nothc nothc
-	bys pmid btc: egen minyr = min(year)
-		drop if year > minyr
-	isid pmid
-	replace pmid = pmid/10000 if inlist(btc, "total", "totalCTs")
-	duplicates tag pmid, gen(dup)
-	drop if dup & inlist(btc, "total", "totalCTs")
-	replace btc = "other" if btc == "total"
-	isid pmid
-	drop dup minyr
+    gen fund = cat == "fundamental"
+    bys pmid: egen has_fund = max(fund)
+    drop if dup == 1 & fund == 1 & has_fund == 1
+    drop dup
+	gisid pmid
+	replace pmid = pmid/10000 if inlist(cat, "fundamental", "therapeutics", "diseases")
+    drop minyr fund has_fund
 	save "../output/BTC_pmids.dta", replace
 end
 
