@@ -33,26 +33,17 @@ program append_btc
     ren query_name2 year
     destring year, replace
     drop query_name 
-    replace pmid = pmid*10000 if inlist(btc, "total", "totalCTs")
-    duplicates tag pmid, gen(dup)
-    gen nothc = btc != "healthcare"
-		bys pmid: egen tot_nothc = total(nothc)
-		drop if dup & btc == "healthcare" & tot_nothc > 0
-		drop dup
-	duplicates tag pmid, gen(dup)
-	gen clin = btc == "clinical" if dup > 0
-		bys pmid: egen tot_clin = total(clin)
-		drop if btc == "translational" & tot_clin > 0 & dup
-		drop dup tot_clin clin tot_nothc nothc
+    replace pmid = pmid*10000 if inlist(btc, "fundamental", "diseases", "therapeutics")
+    duplicates tag pmid btc, gen(dup)
 	bys pmid btc: egen minyr = min(year)
-		drop if year > minyr
-	isid pmid
-	replace pmid = pmid/10000 if inlist(btc, "total", "totalCTs")
+    drop if year > minyr & dup > 0
+    drop dup minyr
 	duplicates tag pmid, gen(dup)
-	drop if dup & inlist(btc, "total", "totalCTs")
-	replace btc = "other" if btc == "total"
-	isid pmid
-	drop dup minyr
+    gen fund = btc == "fundamental"
+    bys pmid: egen tot_fund = max(fund)
+    drop if dup > 0 & tot_fund == 1 & fund != 1
+	gisid pmid
+	replace pmid = pmid/10000 if inlist(btc, "fundamental", "diseases", "therapeutics")
 	save "../output/BTC_pmids.dta", replace
 end
 
