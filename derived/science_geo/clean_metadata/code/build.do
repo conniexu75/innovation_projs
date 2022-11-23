@@ -187,8 +187,8 @@ program clean_pubtype
        replace to_drop = 1 if inlist(pt`i', "Autobiography", "Biography", "Case Reports", "Classical Article", "Comment", "Comparative Study", "Congress", "Dataset", "Editorial")
        replace to_drop = 1 if inlist(pt`i', "Evaluation Study", "Historical Article", "Introductory Journal Article", "Letter" , "News", "Clinical Conference", "Practice Guideline", "Guideline")
        replace to_drop = 1 if inlist(pt`i', "Meta-Analysis", "Personal Narrative", "Portrait", "Published Erratum", "Retracted Publication", "Review", "Video-Audio Media", "Webcast", "Legal Case")
-       replace to_drop = 1 if inlist(pt`i', "Retraction of Publication", "Twin Study", "Systematic Review", "Address" , "Bibliography", "Consensus Development Conference" , "Consensus Development        Conference, NIH")
-       replace to_drop = 1 if inlist(pt`i', "Corrected and Republished Article", "Duplicate Publication","Interactive Tutorial", "Expression of Concern", "Lecture","Multicenter Study", "Patient          Education Handout" , "Validation Study") 
+       replace to_drop = 1 if inlist(pt`i', "Retraction of Publication", "Twin Study", "Systematic Review", "Address" , "Bibliography", "Consensus Development Conference" , "Consensus Development Conference, NIH")
+       replace to_drop = 1 if inlist(pt`i', "Corrected and Republished Article", "Duplicate Publication","Interactive Tutorial", "Expression of Concern", "Lecture","Multicenter Study", "Patient Education Handout" , "Validation Study") 
         replace pub_type = "Journal Article" if pt`i' == "Journal Article"
         replace pub_type = "Clinical Study" if strpos(pt`i', "Clinical Study")
         replace pub_type = "Clinical Trial" if strpos(pt`i', "Clinical Trial")
@@ -879,6 +879,47 @@ program clean_geo_affls
     foreach c in `found_cities' {
         replace institution = "University of `c'" if strpos(affiliation, "University of `c'") > 0 & city == "`c'" & mi(institution)
     }
+	
+	// random biotech
+	replace institution = "Novartis" if pmid == 28753431
+    replace institution = "Bernhard-Nocht-Institute" if strpos(affiliation, "Bernhard") > 0 & strpos(affiliation, "Nocht")> 0 & strpos(affiliation, "Institute")>0
+
+    foreach i in "Bundeswehr" "Irrua Specialist Teaching Hospital" "Bioqual" "Institute for Health Metrics and Evaluation" "National Institute of Public Health" "African Population and Health Research Center" ///
+          "Chinese Center for Disease Control and Prevention" "London School of Hygiene & Tropical Medicine" "Alcohol, Drug Abuse, and Mental Health Administration" "Hopital Beaujon" ///
+          "Institute for Research in Biomedicine" "St Bartholomew's Hospital" "Institute of Bioinformatics" "Basel Institute for Immunology" "Beijing Genomics Institute" "NHS Blood and Transplant" ///
+          "Polyphor AG" "Denali Therapeutics" "Gustave Roussy Cancer Campus" "Lustgarten Foundation Pancreatic Cancer Research Laboratory" "BioNTech" "PTC Therapeutics" "deCODE Genetics" ///
+          "Africa Health Research Institute" "German Center for Infection Research" "QIMR Berghofer Medical Research Institute" "Army Medical Research Institute of Infectious Diseases" "Biogen" ///
+          "The Cancer Cell Map Initiative" "Guangdong Provincial Center for Disease Control and Prevention" "Neoleukin Therapeutics" "Beijing Proteome Research Center" "Sun Yat-sen University" ///
+          "Academy for Scientific and Innovative Research" "Massachusetts Department of Public Health" "Chinese Academy of Medical Sciences" "BC Cancer" "Global Virus Network" "KiTZ" ///
+          "Humanitas Clinical and Research Center" "Candiolo Cancer Institute" "Northwell Health" "National Centre for Disease Control" "Peter MacCallum Cancer Centre" "Cancer Cell Map Initiative"  ///
+          "Peter MacCallum Cancer Centre" "Cancer Therapeutics CRC" "IRCCS" "Infinity Pharmaceuticals" "Oncology Institute of Southern Switzerland" ///
+          "Walter and Eliza Hall Institute" "Guangdong Provincial Institution of Public Health" "Netherlands Cancer Institute" "Sinovac Biotech" "Sustainable Sciences Institute" "University of Torino" ///
+          "Illumina" "innate Pharma" "Tel-Aviv University" "La Jolla Institute for Allergy and Immunology" "Kenema Government Hospital" "Public Health Scotland" "Commonwealth Scientific and Industrial Research Organisation" ///
+          "Helmholtz Innovation Lab BaoBab" "National Centre for Infectious Diseases" "Persiaran Institusi" "Environment and Climate Change Canada" "Peking University" "Lunenfeld-Tanenbaum Research Institute" "INGM" "FLI" ///
+          "Institut de Biologie Physico-Chimique" "Northeast Structural Genomics Consortium" "Community Research Advisors Group" "Salk Institute" "Isis Pharmaceuticals" "A*STAR Institute of Medical Biology" ///
+          "AGIOS Pharmaceuticals" "AP-HP" "University and Hospital Trust of Verona" "Duke-NUS Medical School" "Acuitas Therapeutics" "Adaptive Biotechnologies" "Aeras" "Alliance International for Medical Action" ///
+          "Almazov Federal Medical Research Centre" "BIOQUAL" "Baker Heart & Diabetes Institute" "Baylor Genetics" "Baylor Institute for Immunology Research" "Beijing Institute of Respiratory Medicine" ///
+          "Beijing Key Laboratory of New Molecular Diagnostics Technology" "Capital Medical University" "Benaroya Research Institute" "Berlin Institute for Medical Systems Biology" ///
+          "Max Delbrueck Center for Molecular Medicine" "23andMe" "Visterra Inc." "Vitalant Research Institute" "Tulane National Primate Research Center" "Aetna" "Tokyo Metropolitan Institute of Public Health" "Francis Crick Institute" ///
+          "Argonne National Laboratory" "Washington State Department of Health" "Institute of Molecular Genetics of the Czech Academy of Sciences" "Centre Hospitalier Universitaire de Treichville and Treichville University Hospital" {
+            replace institution = "`i'" if strpos(affiliation, "`i'")>0 & mi(institution)
+     }
+    replace institution = institution + " " + country if institution == "Ministry of Health" & !mi(country)
+    replace institution = "Francis Crick Institute" if institution == "The Francis Crick Institute"
+    replace institution = "University of North Carolina at Chapel Hill" if strpos(affiliation, "University of North Carolina")> 0
+    replace institution = "NHS Blood and Transplant" if strpos(affiliation, "National Health Service Blood and Transplant")>0 & mi(institution)
+
+    replace institution = "Chinese Academy of Medical Sciences" if strpos(affiliation, "Peking Union Medical College")>0
+    replace institution = "Chinese Academy of Sciences" if strpos(affiliation, "Institute of Basic Medical Sciences")>0
+    replace institution = "INSERM" if strpos(affiliation, "National Institute for Health and Medical Research")> 0
+    replace institution = "University Medical Center Utrecht" if strpos(affiliation, "University Medical Centre Utrecht")> 0
+    replace institution = "Tel Aviv University" if institution == "Tel-Aviv University"
+    replace institution = "University College London" if strpos(affiliation, "UCL")>0 & mi(institution)
+    replace institution = "University of Hamburg" if strpos(affiliation, "Universitatsklinikum Hamburg")>0 
+    replace institution = "University of Munich" if strpos(affiliation, "LMU Munich")>0  & mi(institution)
+    replace institution = "University of Munich" if strpos(affiliation, "Ludwig Maximilians University")>0 & mi(institution)
+    replace institution = "University of Munich" if strpos(affiliation, "Ludwig-Maximilians Universitat")>0 & mi(institution)
+    replace institution = "Peking University" if strpos(affiliation, "Peking")>0 & strpos(affiliation, "University")>0
    // fill in locations of institutions 
     merge m:1 institution using ../temp/unique_institutions, assert(1 2 3) keep(1 3) nogen
     replace country = country_name if mi(country)
@@ -917,6 +958,42 @@ program clean_geo_affls
     replace city = "Parkville" if institution == "Walter and Eliza Hall Institute of Medical Research"
     replace institution = "Max Planck" if strpos(affiliation, "Max Planck") > 0
     replace city = "St. Andrews" if institution == "University of St. Andrews"
+	replace country = "China" if institution == "Peking University"
+    replace city = "Beijing" if institution == "Peking University" 
+    replace country = "China" if strpos(affiliation, "PRC") & mi(country)
+    replace country = "China" if strpos(affiliation, "P.R.C.") & mi(country)
+    replace city = "Beijing" if strpos(affiliation, "Beijing")>0 & country == "China"
+    replace city = "Xi'an" if strpos(affiliation, "Xi'An")>0 & country == "China"
+    replace city = "Xi'an" if strpos(affiliation, "Xi'an")>0 & country == "China"
+    replace city = "Hong Kong" if strpos(affiliation, "Hong Kong")>0
+    replace country = "China" if city == "Hong Kong"
+    replace city = "Yunnan" if strpos(affiliation, "Yunnan")>0 & country == "China"
+    replace city = "Shanghai" if strpos(affiliation, "Shanghai")>0 & country == "China"
+    replace city = "Shandong" if strpos(affiliation, "Shandong")>0 & country == "China"
+    replace city = "Guangdong" if strpos(affiliation, "Guangdong")>0 & country == "China"
+    replace city = "Suzhou" if strpos(affiliation, "Suzhou")>0 & country == "China"
+    replace city = "Xuzhou" if strpos(affiliation, "Xuzhou")>0 & country == "China"
+    replace city = "Yangling" if strpos(affiliation, "Yangling")>0 & country == "China"
+    replace city = "Sichaun" if strpos(affiliation, "Sichuan")>0 & country == "China"
+    replace city = "Changchun" if strpos(affiliation, "Changchun")>0 & country == "China"
+    replace country = "United Kingdom" if (strpos(affiliation, "London")>0 | strpos(affiliation, "Glasgow") > 0 | strpos(affiliation, "Liverpool")>0) & mi(country)
+    replace city = "London" if strpos(affiliation, "London")>0 &country == "United Kingdom" 
+    replace city = "Cambridge" if strpos(affiliation, "Cambridge")>0 & mi(city)         
+    replace city = "DC" if strpos(affiliation, "DC")>0 & mi(city) & country == "United States"
+    replace city = "Boston" if strpos(affiliation, "Boston")>0 & mi(city) & country == "United States"
+    replace city = "Bethesda" if strpos(affiliation, "Bethesda")>0 & mi(city) & country == "United States"
+    replace city = "Gig Harbor" if strpos(affiliation, "Gig Harbor")>0 & mi(city) & country == "United States"
+    replace city = "Foster City" if strpos(affiliation, "Foster City")>0 & mi(city) & country == "United States"
+    replace city = "New York" if strpos(affiliation, "NY")>0 & mi(city) & country == "United States"
+    replace city = "Saint Louis" if strpos(affiliation, "St Louis")>0 & mi(city) & country == "United States"
+    replace city = "Saint Paul" if strpos(affiliation, "St Paul")>0 & mi(city) & country == "United States"
+    replace city = "Atlanta" if strpos(affiliation, "Atlanta")>0 & mi(city) & country == "United States"
+    replace city = "Argonne" if strpos(affiliation, "Argonne")>0 & mi(city) & country == "United States"
+    replace city = "Chapel Hill" if institution == "University of North Carolina at Chapel Hill" 
+    replace city = "Moscow" if strpos(affiliation, "Moscow")>0 & mi(city) & country == "Russia"
+    replace city = "Derio" if strpos(affiliation, "Derio")>0 & mi(city) & country == "Spain"
+    replace city = "Glasgow" if strpos(affiliation, "Glasgow")>0 & mi(city) & country == "United Kingdom"
+    replace city = "Tarrytown" if strpos(affiliation, "Tarrytown")>0 & mi(city) & country == "United States"
     compress , nocoalesce
     save ../output/cleaned_all_`data'_${samp}, replace
 
