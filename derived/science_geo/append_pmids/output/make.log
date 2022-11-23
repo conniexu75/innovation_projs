@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2022-11-23 13:42:59
+Makelog started: 2022-11-23 13:53:30
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -86,8 +86,10 @@ Notes:
  28.     drop if dup > 0 & tot_fund == 1 & fund != 1
  29.         gisid pmid
  30.         replace pmid = pmid/10000 if inlist(btc, "fundamental", "diseases", "therapeutics")
- 31.         save "../output/BTC_pmids.dta", replace
- 32. end
+ 31.     rename btc cat
+ 32.     drop dup fund tot_fund
+ 33.         save "../output/BTC_pmids.dta", replace
+ 34. end
 
 . 
 . program append_jrnls 
@@ -2679,6 +2681,6 @@ file ../output/select_jrnls_pmids.dta saved
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2022-11-23 13:43:15
+Makelog ended: 2022-11-23 13:53:43
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/code
 --------------------------------------------------------------------------------
