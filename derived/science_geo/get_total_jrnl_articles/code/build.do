@@ -12,6 +12,7 @@ program main
     global samp select_jrnl
     append_metadata, data(pt)
     clean_pubtype
+    extract_pmids_to_clean
 end
 
 program append_metadata
@@ -74,5 +75,15 @@ program clean_pubtype
     save ../output/all_jrnl_articles_${samp}, replace
 end
 
+program extract_pmids_to_clean
+    use ../output/all_jrnl_articles_${samp}, clear
+    merge 1:m pmid using ../external/cats/BTC_pmids, assert(1 2 3) keep(3) nogen
+    save ../output/pmids_category_xwalk, replace
+    gcontract pmid 
+    drop _freq
+    save ../output/contracted_pmids, replace
+    merge 1:1 pmid using ../output/master_pt_${samp}_appended, assert(2 3) keep(3) nogen
+	save "../output/${samp}_to_clean.dta", replace
+end
 ** 
 main
