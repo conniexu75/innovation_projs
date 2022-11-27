@@ -10,24 +10,21 @@ set maxvar 120000
 
 program main
 global samp select_jrnl
-foreach type in  basic translational { 
-    append_metadata, data(`type')
-    clean_mesh, data(`type')
-    clean_date, data(`type')
-    clean_journal, data(`type')
-    clean_pubtype, data(`type')
-    clean_authors, data(`type')
-    clean_affls, data(`type')
+    *append_metadata
+    clean_mesh
+    clean_date
+    clean_journal
+    clean_pubtype
+    clean_authors
+    clean_affls
     save ../temp/pre_reshape_`type'_${samp}, replace
-    reshape_mult_affiliations, data(`type')
-    reshape_mesh_terms, data(`type')
-    clean_geo_affls, data(`type')
-}
+    reshape_mult_affiliations
+    reshape_mesh_terms
+    clean_geo_affls
 end
 
 program append_metadata
-    syntax, data(str)
-	local filelist: dir "../external/samp" files "`data'_${samp}*"
+	local filelist: dir "../external/samp" files "${samp}*"
 	local i = 1
 	foreach file of local filelist {
 		import delimited pmid date mesh journal affil athrs pt gr using "../external/samp/`file'", clear
@@ -45,12 +42,11 @@ program append_metadata
 	}
     compress, nocoalesce
     gduplicates drop pmid, force
-	save "../output/master_`data'_${samp}_appended.dta", replace
+	save "../output/master_${samp}_appended.dta", replace
 end
 
 program clean_mesh
-    syntax, data(str)
-    use ../output/master_`data'_${samp}_appended, clear
+    use ../external/samp/${samp}_to_clean, clear
 	gen mesh_na = mesh == "NA"
 	tab mesh_na
     drop mesh_na
@@ -109,12 +105,12 @@ program clean_mesh
 		}
 		qui compress mesh`i', nocoalesce
 	}*/
-    save ../temp/cleaned_mesh_`data'_${samp}, replace
+    save ../temp/cleaned_mesh_${samp}, replace
     drop mesh*
 end
 
 program clean_date
-    syntax, data(str)
+    
 	rename date date_raw
 	gen start = strpos(date_raw, "<Year>") + 6
 	gen y = substr(date_raw, start, 4)
@@ -134,11 +130,11 @@ program clean_date
 	gen date = mdy(m, d, y)
 	format date  %td
 	drop d m y
-    save ../temp/cleaned_date_`data'_${samp}, replace
+    save ../temp/cleaned_date_${samp}, replace
 end
 
 program clean_journal
-    syntax, data(str)
+    
 	gen journal_na = journal == "NA"
 	tab journal_na
 
@@ -159,12 +155,12 @@ program clean_journal
     if "`data'" == "basic" {
         keep if inlist(journal_abbr, "Cell", "Nature", "Science")
     }
-    save ../temp/cleaned_jrnl_`data'_${samp}, replace
+    save ../temp/cleaned_jrnl_${samp}, replace
 end
 
 program clean_pubtype
-    syntax, data(str)
-    use ../temp/cleaned_jrnl_`data'_${samp},clear 
+    
+    use ../temp/cleaned_jrnl_${samp},clear 
 	gen pt_na = pt == "NA"
 	tab pt_na
     drop pt_na
@@ -195,12 +191,12 @@ program clean_pubtype
         replace pub_type = pt`i' if mi(pub_type)
     }
 	drop if to_drop == 1
-    save ../temp/cleaned_pubtype_`data'_${samp}, replace
+    save ../temp/cleaned_pubtype_${samp}, replace
 end
 
 program clean_authors
-    syntax, data(str)
-	use ../temp/cleaned_pubtype_`data'_${samp},clear 
+    
+	use ../temp/cleaned_pubtype_${samp},clear 
 	rename athrs athrs_raw
 	gen athrs = athrs_raw
 	replace athrs = subinstr(athrs, char(34), "", .)
@@ -226,12 +222,12 @@ program clean_authors
 		gen affiliation`i' = substr(athrs`i',affiliation_start, affiliation_end- affiliation_start)
 		gegen num_affiliations`i' = noccur(athrs`i'), string("<Affiliation>")
 	}
-    save ../temp/cleaned_authors_`data'_${samp}, replace
+    save ../temp/cleaned_authors_${samp}, replace
 end
 
 program clean_affls
-    syntax, data(str)
-    use ../temp/cleaned_authors_`data'_${samp},clear 
+    
+    use ../temp/cleaned_authors_${samp},clear 
     missings dropvars, force
 	foreach var in last_name first_name affiliation {
 		cap drop `var'_start `var'_end 
@@ -257,8 +253,8 @@ program clean_affls
 end
 
 program reshape_mult_affiliations
-    syntax, data(str)
-    use ../temp/pre_reshape_`data'_${samp}, clear
+    
+    use ../temp/pre_reshape_${samp}, clear
     keep if pub_type == "Journal Article"
     sum most_affiliations
     local most = r(max)
@@ -273,14 +269,13 @@ program reshape_mult_affiliations
 	rename affiliation_ affiliation
 	*drop if mi(affiliation)
     compress, nocoalesce
-	save ../output/pmid_author_affiliation_list_`data'_${samp}, replace		
+	save ../output/pmid_author_affiliation_list_${samp}, replace		
 end
 
 program reshape_mesh_terms
-    syntax, data(str)
-    *use ../temp/pre_reshape_`data'_${samp}, clear
+    *use ../temp/pre_reshape_${samp}, clear
     *keep if pub_type == "Journal Article"
-    use ../temp/cleaned_mesh_`data'_${samp}, clear
+    use ../temp/cleaned_mesh_${samp}, clear
     keep pmid mesh*
     cap drop mesh_na mesh_raw
     local max = 0
@@ -303,11 +298,10 @@ program reshape_mesh_terms
     rename mesh_ mesh
     replace mesh = subinstr(mesh, "&amp", "&", .)
     compress, nocoalesce
-    save ../output/major_mesh_terms_`data'_${samp}, replace
+    save ../output/major_mesh_terms_${samp}, replace
 end
 
 program clean_geo_affls
-    syntax, data(str)
     import delimited ../external/geo/country_list.csv, varnames(1) clear
     qui glevelsof name, local(country_names)
     qui glevelsof code, local(country_abbrs)
@@ -388,7 +382,7 @@ program clean_geo_affls
     drop dup 
     save ../temp/unique_institutions, replace
 
-    use ../output/pmid_author_affiliation_list_`data'_${samp}, clear
+    use ../output/pmid_author_affiliation_list_${samp}, clear
     replace affiliation = subinstr(affiliation , "&amp;","&",.)
     replace affiliation = "" if strpos(affiliation, "listed in the supplementary materials") > 0 | strpos(affiliation, "supplementary materials") > 0
 
@@ -420,7 +414,7 @@ program clean_geo_affls
     replace add_to_affiliation = add_to_affiliation - 1
     replace which_affiliation = which_affiliation + add_to_affiliation
     replace affiliation= subinstr(affiliation, "1] ", "", .)
-    save ../temp/pmid_author_affiliation_list_expanded_`data'_${samp}, replace
+    save ../temp/pmid_author_affiliation_list_expanded_${samp}, replace
     drop add_to_affiliation
 
     gen edit_affiliation = affiliation
@@ -464,9 +458,9 @@ program clean_geo_affls
     replace country = "United Kingdom" if strpos(affiliation, "Scotland") > 0
     replace country = "United States" if inlist(country, " USA.", " USA ", " USA") 
     replace country = "United States" if mi(country) & (strpos(affiliation, "Harvard University") > 0 | strpos(affiliation, "Stanford University") > 0 | strpos(affiliation, "Johns Hopkins University")> 0)
-    save ../temp/cleaned_countries_`data'_${samp}, replace
+    save ../temp/cleaned_countries_${samp}, replace
     
-    use ../temp/cleaned_countries_`data'_${samp}, clear
+    use ../temp/cleaned_countries_${samp}, clear
     gen us_state = ""
     gen nstates = 0
     foreach s in `state_names' {
@@ -483,9 +477,9 @@ program clean_geo_affls
 	replace us_state = "DC" if strpos(affiliation, " DC ") > 0 & country == "United States"
     replace us_state = "NJ" if strpos(affiliation, "Princeton University") > 0
     replace us_state = "WA" if strpos(affiliation, "Alaska Fisheries Science Center") > 0
-    save ../temp/cleaned_states_`data'_${samp}, replace
+    save ../temp/cleaned_states_${samp}, replace
 
-    use ../temp/cleaned_states_`data'_${samp}, clear
+    use ../temp/cleaned_states_${samp}, clear
     gen city = ""
     local i = 1
     foreach c in `uscity_names' { 
@@ -531,7 +525,7 @@ program clean_geo_affls
     replace country = "United States" if !mi(us_state)
     replace country = "United States" if mi(city) & !mi(city_zip)
     replace city = city_zip if mi(city) & !mi(city_zip)
-    save ../temp/cleaned_uscities_`data'_${samp}, replace
+    save ../temp/cleaned_uscities_${samp}, replace
     *replace us_state = state_zip if !mi(zip) & _merge == 3 
     *replace city = city_zip if !mi(zip) & _merge == 3
     // world cities
@@ -592,9 +586,9 @@ program clean_geo_affls
     replace city = "Crete" if strpos(affiliation, "Crete, Greece") > 0 
     replace city = "Montreal" if strpos(affiliation, "Montreal") > 0 & country == "Canada"
     replace city = "Geneva" if strpos(affiliation, "Geneva") > 0 & country == "Switzerland"
-    save ../temp/cleaned_cities_`data'_${samp}, replace
+    save ../temp/cleaned_cities_${samp}, replace
    
-    use ../temp/cleaned_cities_`data'_${samp}, replace 
+    use ../temp/cleaned_cities_${samp}, replace 
     gen institution = ""
     foreach i in `institutions' {
         if !inlist("`i'", "University of Texas", "Broad Institute of MIT and Harvard", "Howard Hughes Medical Institute") {
@@ -995,7 +989,7 @@ program clean_geo_affls
     replace city = "Glasgow" if strpos(affiliation, "Glasgow")>0 & mi(city) & country == "United Kingdom"
     replace city = "Tarrytown" if strpos(affiliation, "Tarrytown")>0 & mi(city) & country == "United States"
     compress , nocoalesce
-    save ../output/cleaned_all_`data'_${samp}, replace
+    save ../output/cleaned_all_${samp}, replace
 
     // extras 
     drop if pmid == 28445112
@@ -1005,7 +999,7 @@ program clean_geo_affls
 
     }
     keep if inrange(date, td(01jan2015), td(31mar2022))
-    save ../output/cleaned_last5yrs_`data'_${samp}, replace
+    save ../output/cleaned_last5yrs_${samp}, replace
 end 
 
 program output_tables
