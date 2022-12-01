@@ -1,0 +1,2 @@
+./xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/get_total_jrnl_articles/output
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_metadata/output
