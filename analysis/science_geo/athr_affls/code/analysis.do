@@ -30,26 +30,6 @@ program main
 end
 
 program get_total_articles 
-/*    local jrnls  nejm jama lancet bmj annals science nature cell
-    foreach jrnl in `jrnls' {
-        forval yr = 2015/2022 {
-            import delimited ../external/pmids/`jrnl'`yr'.csv, clear
-            save ../temp/`jrnl'`yr', replace
-        }
-        clear
-        forval yr = 2015/2022 {
-            append using ../temp/`jrnl'`yr'
-        }
-        gen journal_abbr = "`jrnl'"
-        save ../temp/`jrnl', replace
-    }
-    clear
-    foreach jrnl in `jrnls' {
-        append using ../temp/`jrnl'
-    }
-    save ../temp/${samp}, replace
-    gcontract year journal_abbr, freq(num_articles)
-    save ../temp/${samp}_counts, replace*/
     use ../external/filtered/all_jrnl_articles_select_jrnl, clear
     *drop if inlist(pmid, 33471991, 28445112, 28121514, 30345907, 27192541, 25029335, 23862974, 30332564, 31995857, 34161704)
     *drop if inlist(pmid, 29669224, 35196427,26943629,28657829,34161705,31166681,29539279)
