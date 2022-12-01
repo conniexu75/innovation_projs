@@ -1,2 +1,2 @@
-./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/get_total_jrnl_articles/output/
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_metadata/output/
 ./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
