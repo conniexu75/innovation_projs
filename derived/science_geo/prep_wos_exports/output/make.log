@@ -1,0 +1,766 @@
+--------------------------------------------------------------------------------
+Makelog started: 2022-11-30 23:49:57
+Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_wos_exports/code
+--------------------------------------------------------------------------------
+External links successfully created!
+
+  ___  ____  ____  ____  ____ ©
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core , expiring 17 Nov 2023
+Serial number: 501709306977
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/derived/science_geo/prep_wos_export
+> s/code/build.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/home/dor/cxu/innovation_projs/derived/science_geo/prep_wos_exports/code
+> /
+
+. set maxvar 120000
+
+
+. 
+. program main
+  1.     foreach samp in select_jrnl {
+  2.         create_wos_queries, samp(`samp')
+  3.     }
+  4. end
+
+. 
+. program create_wos_queries
+  1.     syntax, samp(str)
+  2.     use ../external/`samp'/contracted_pmids.dta, clear
+  3.     gen group = int((_n-1)/500)
+  4.     tostring pmid, replace
+  5.     bys group: gen top = _n == 1
+  6.     forval ii = 1/499 {
+  7.         replace pmid = pmid + " OR " + pmid[_n+`ii'] if top & group == gro
+> up[_n+`ii']
+  8.     }
+  9.     gen peak = substr(pmid, -15, .) // to look at last pmid on the list an
+> d verify
+ 10.                                     // it's the same as the 500th pmid in 
+> the group
+.     drop if !top
+ 11.     replace pmid = "PMID=(" + pmid
+ 12.     replace pmid = pmid + ")"
+ 13.     ren pmid query
+ 14.     drop top peak
+ 15.     export excel using "../output/wos_`samp'_queries.xlsx", replace
+ 16. end
+
+. main
+pmid was double now str8
+variable pmid was str8 now str20
+(171 real changes made)
+variable pmid was str20 now str32
+(171 real changes made)
+variable pmid was str32 now str44
+(171 real changes made)
+variable pmid was str44 now str56
+(171 real changes made)
+variable pmid was str56 now str68
+(171 real changes made)
+variable pmid was str68 now str80
+(171 real changes made)
+variable pmid was str80 now str92
+(171 real changes made)
+variable pmid was str92 now str104
+(171 real changes made)
+variable pmid was str104 now str116
+(171 real changes made)
+variable pmid was str116 now str128
+(171 real changes made)
+variable pmid was str128 now str140
+(171 real changes made)
+variable pmid was str140 now str152
+(171 real changes made)
+variable pmid was str152 now str164
+(171 real changes made)
+variable pmid was str164 now str176
+(171 real changes made)
+variable pmid was str176 now str188
+(171 real changes made)
+variable pmid was str188 now str200
+(171 real changes made)
+variable pmid was str200 now str212
+(171 real changes made)
+variable pmid was str212 now str224
+(171 real changes made)
+variable pmid was str224 now str236
+(171 real changes made)
+variable pmid was str236 now str248
+(171 real changes made)
+variable pmid was str248 now str260
+(171 real changes made)
+variable pmid was str260 now str272
+(171 real changes made)
+variable pmid was str272 now str284
+(171 real changes made)
+variable pmid was str284 now str296
+(171 real changes made)
+variable pmid was str296 now str308
+(171 real changes made)
+variable pmid was str308 now str320
+(171 real changes made)
+variable pmid was str320 now str332
+(171 real changes made)
+variable pmid was str332 now str344
+(171 real changes made)
+variable pmid was str344 now str356
+(171 real changes made)
+variable pmid was str356 now str368
+(171 real changes made)
+variable pmid was str368 now str380
+(171 real changes made)
+variable pmid was str380 now str392
+(171 real changes made)
+variable pmid was str392 now str404
+(171 real changes made)
+variable pmid was str404 now str416
+(171 real changes made)
+variable pmid was str416 now str428
+(171 real changes made)
+variable pmid was str428 now str440
+(171 real changes made)
+variable pmid was str440 now str452
+(171 real changes made)
+variable pmid was str452 now str464
+(171 real changes made)
+variable pmid was str464 now str476
+(171 real changes made)
+variable pmid was str476 now str488
+(171 real changes made)
+variable pmid was str488 now str500
+(171 real changes made)
+variable pmid was str500 now str512
+(171 real changes made)
+variable pmid was str512 now str524
+(171 real changes made)
+variable pmid was str524 now str536
+(171 real changes made)
+variable pmid was str536 now str548
+(171 real changes made)
+variable pmid was str548 now str560
+(171 real changes made)
+variable pmid was str560 now str572
+(171 real changes made)
+variable pmid was str572 now str584
+(171 real changes made)
+variable pmid was str584 now str596
+(171 real changes made)
+variable pmid was str596 now str608
+(171 real changes made)
+variable pmid was str608 now str620
+(171 real changes made)
+variable pmid was str620 now str632
+(171 real changes made)
+variable pmid was str632 now str644
+(171 real changes made)
+variable pmid was str644 now str656
+(171 real changes made)
+variable pmid was str656 now str668
+(171 real changes made)
+variable pmid was str668 now str680
+(171 real changes made)
+variable pmid was str680 now str692
+(171 real changes made)
+variable pmid was str692 now str704
+(171 real changes made)
+variable pmid was str704 now str716
+(171 real changes made)
+variable pmid was str716 now str728
+(171 real changes made)
+variable pmid was str728 now str740
+(171 real changes made)
+variable pmid was str740 now str752
+(171 real changes made)
+variable pmid was str752 now str764
+(171 real changes made)
+variable pmid was str764 now str776
+(171 real changes made)
+variable pmid was str776 now str788
+(171 real changes made)
+variable pmid was str788 now str800
+(171 real changes made)
+variable pmid was str800 now str812
+(171 real changes made)
+variable pmid was str812 now str824
+(171 real changes made)
+variable pmid was str824 now str836
+(171 real changes made)
+variable pmid was str836 now str848
+(171 real changes made)
+variable pmid was str848 now str860
+(171 real changes made)
+variable pmid was str860 now str872
+(171 real changes made)
+variable pmid was str872 now str884
+(171 real changes made)
+variable pmid was str884 now str896
+(171 real changes made)
+variable pmid was str896 now str908
+(171 real changes made)
+variable pmid was str908 now str920
+(171 real changes made)
+variable pmid was str920 now str932
+(171 real changes made)
+variable pmid was str932 now str944
+(171 real changes made)
+variable pmid was str944 now str956
+(171 real changes made)
+variable pmid was str956 now str968
+(171 real changes made)
+variable pmid was str968 now str980
+(171 real changes made)
+variable pmid was str980 now str992
+(171 real changes made)
+variable pmid was str992 now str1004
+(171 real changes made)
+variable pmid was str1004 now str1016
+(171 real changes made)
+variable pmid was str1016 now str1028
+(171 real changes made)
+variable pmid was str1028 now str1040
+(171 real changes made)
+variable pmid was str1040 now str1052
+(171 real changes made)
+variable pmid was str1052 now str1064
+(171 real changes made)
+variable pmid was str1064 now str1076
+(171 real changes made)
+variable pmid was str1076 now str1088
+(171 real changes made)
+variable pmid was str1088 now str1100
+(171 real changes made)
+variable pmid was str1100 now str1112
+(171 real changes made)
+variable pmid was str1112 now str1124
+(171 real changes made)
+variable pmid was str1124 now str1136
+(171 real changes made)
+variable pmid was str1136 now str1148
+(171 real changes made)
+variable pmid was str1148 now str1160
+(171 real changes made)
+variable pmid was str1160 now str1172
+(171 real changes made)
+variable pmid was str1172 now str1184
+(171 real changes made)
+variable pmid was str1184 now str1196
+(171 real changes made)
+variable pmid was str1196 now str1208
+(171 real changes made)
+variable pmid was str1208 now str1220
+(171 real changes made)
+variable pmid was str1220 now str1232
+(171 real changes made)
+variable pmid was str1232 now str1244
+(171 real changes made)
+variable pmid was str1244 now str1256
+(171 real changes made)
+variable pmid was str1256 now str1268
+(171 real changes made)
+variable pmid was str1268 now str1280
+(171 real changes made)
+variable pmid was str1280 now str1292
+(171 real changes made)
+variable pmid was str1292 now str1304
+(171 real changes made)
+variable pmid was str1304 now str1316
+(171 real changes made)
+variable pmid was str1316 now str1328
+(171 real changes made)
+variable pmid was str1328 now str1340
+(171 real changes made)
+variable pmid was str1340 now str1352
+(171 real changes made)
+variable pmid was str1352 now str1364
+(171 real changes made)
+variable pmid was str1364 now str1376
+(171 real changes made)
+variable pmid was str1376 now str1388
+(171 real changes made)
+variable pmid was str1388 now str1400
+(171 real changes made)
+variable pmid was str1400 now str1412
+(171 real changes made)
+variable pmid was str1412 now str1424
+(171 real changes made)
+variable pmid was str1424 now str1436
+(171 real changes made)
+variable pmid was str1436 now str1448
+(171 real changes made)
+variable pmid was str1448 now str1460
+(171 real changes made)
+variable pmid was str1460 now str1472
+(171 real changes made)
+variable pmid was str1472 now str1484
+(171 real changes made)
+variable pmid was str1484 now str1496
+(171 real changes made)
+variable pmid was str1496 now str1508
+(171 real changes made)
+variable pmid was str1508 now str1520
+(171 real changes made)
+variable pmid was str1520 now str1532
+(171 real changes made)
+variable pmid was str1532 now str1544
+(171 real changes made)
+variable pmid was str1544 now str1556
+(171 real changes made)
+variable pmid was str1556 now str1568
+(171 real changes made)
+variable pmid was str1568 now str1580
+(171 real changes made)
+variable pmid was str1580 now str1592
+(171 real changes made)
+variable pmid was str1592 now str1604
+(171 real changes made)
+variable pmid was str1604 now str1616
+(171 real changes made)
+variable pmid was str1616 now str1628
+(171 real changes made)
+variable pmid was str1628 now str1640
+(171 real changes made)
+variable pmid was str1640 now str1652
+(171 real changes made)
+variable pmid was str1652 now str1664
+(171 real changes made)
+variable pmid was str1664 now str1676
+(171 real changes made)
+variable pmid was str1676 now str1688
+(171 real changes made)
+variable pmid was str1688 now str1700
+(171 real changes made)
+variable pmid was str1700 now str1712
+(171 real changes made)
+variable pmid was str1712 now str1724
+(171 real changes made)
+variable pmid was str1724 now str1736
+(171 real changes made)
+variable pmid was str1736 now str1748
+(171 real changes made)
+variable pmid was str1748 now str1760
+(171 real changes made)
+variable pmid was str1760 now str1772
+(171 real changes made)
+variable pmid was str1772 now str1784
+(171 real changes made)
+variable pmid was str1784 now str1796
+(171 real changes made)
+variable pmid was str1796 now str1808
+(171 real changes made)
+variable pmid was str1808 now str1820
+(171 real changes made)
+variable pmid was str1820 now str1832
+(171 real changes made)
+variable pmid was str1832 now str1844
+(171 real changes made)
+variable pmid was str1844 now str1856
+(171 real changes made)
+variable pmid was str1856 now str1868
+(171 real changes made)
+variable pmid was str1868 now str1880
+(171 real changes made)
+variable pmid was str1880 now str1892
+(171 real changes made)
+variable pmid was str1892 now str1904
+(171 real changes made)
+variable pmid was str1904 now str1916
+(171 real changes made)
+variable pmid was str1916 now str1928
+(171 real changes made)
+variable pmid was str1928 now str1940
+(171 real changes made)
+variable pmid was str1940 now str1952
+(171 real changes made)
+variable pmid was str1952 now str1964
+(171 real changes made)
+variable pmid was str1964 now str1976
+(171 real changes made)
+variable pmid was str1976 now str1988
+(171 real changes made)
+variable pmid was str1988 now str2000
+(171 real changes made)
+variable pmid was str2000 now str2012
+(171 real changes made)
+variable pmid was str2012 now str2024
+(171 real changes made)
+variable pmid was str2024 now str2036
+(171 real changes made)
+variable pmid was str2036 now strL
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(171 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(170 real changes made)
+(85,126 missing values generated)
+(85,126 observations deleted)
+(171 real changes made)
+(171 real changes made)
+file ../output/wos_select_jrnl_queries.xlsx saved
+
+. 
+end of do-file
+
+--------------------------------------------------------------------------------
+Makelog ended: 2022-11-30 23:50:12
+Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_wos_exports/code
+--------------------------------------------------------------------------------
