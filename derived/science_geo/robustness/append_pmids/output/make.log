@@ -1,0 +1,3490 @@
+--------------------------------------------------------------------------------
+Makelog started: 2022-11-29 11:35:41
+Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/append_pmids/code
+--------------------------------------------------------------------------------
+External links successfully created!
+
+  ___  ____  ____  ____  ____ ©
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core , expiring 17 Nov 2023
+Serial number: 501709306977
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/appe
+> nd_pmids/code/build.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. preliminaries
+
+. version 17
+
+. set maxvar 120000, perm
+(set maxvar preference recorded)
+
+
+. 
+. program main   
+  1.     append_subsamples
+  2.     append_jrnls
+  3. end
+
+. 
+. program append_subsamples
+  1.     foreach samp in nat dem {
+  2.         local upper = strupper("`samp'")
+  3.         local filelist: dir "../external/samp/`upper'/" files "`samp'_*.csv"
+  4.         foreach file in `filelist' {
+  5.             import delimited using "../external/samp/`upper'/`file'", varnames(1) clear
+  6.             tostring pmid, replace
+  7.             tostring query_name, replace
+  8.             drop if pmid == "NA"
+  9.             destring pmid, replace
+ 10.             save ../temp/`file', replace
+ 11.         }
+ 12.         clear
+ 13.         foreach file in `filelist' {
+ 14.             append using ../temp/`file'
+ 15.         }
+ 16.         save ../temp/`upper'_appended, replace
+ 17.         
+.         split query_name, p("_")
+ 18.         ren query_name1 cat 
+ 19.         ren query_name2 year
+ 20.         destring year, replace
+ 21.         drop query_name 
+ 22.         replace pmid = pmid*10000 if inlist(cat, "fundamental", "diseases", "therapeutics")
+ 23.         duplicates tag pmid cat, gen(dup)
+ 24.         bys pmid cat: egen minyr = min(year)
+ 25.         drop if year > minyr & dup > 0
+ 26.         drop dup minyr
+ 27.         duplicates tag pmid, gen(dup)
+ 28.         gen fund = cat == "fundamental"
+ 29.         bys pmid: egen tot_fund = max(fund)
+ 30.         drop if dup > 0 & tot_fund == 1 & fund != 1
+ 31.         gisid pmid
+ 32.         replace pmid = pmid/10000 if inlist(cat, "fundamental", "diseases", "therapeutics")
+ 33.         drop tot_fund fund dup
+ 34.         save "../output/`upper'_indicies_pmids.dta", replace
+ 35. }
+ 36. end
+
+. 
+. program append_jrnls 
+  1.     local jrnls nature_sub demsci 
+  2.     foreach jrnl in `jrnls' {
+  3.         forval yr = 1988/2022 {
+  4.             import delimited ../external/samp/`jrnl'`yr'.csv, clear
+  5.             tostring pmid, replace
+  6.             drop if pmid == "NA"
+  7.             destring pmid, replace
+  8.             save ../temp/`jrnl'`yr', replace
+  9.         }
+ 10.         clear
+ 11.         forval yr = 1988/2022 {
+ 12.             append using ../temp/`jrnl'`yr'
+ 13.         }
+ 14.         gen journal_abbr = "`jrnl'"
+ 15.         save ../temp/`jrnl', replace
+ 16.         bys pmid: egen minyr = min(year)
+ 17.         drop if year > minyr
+ 18.         drop minyr
+ 19.         gisid pmid
+ 20.         save ../output/`jrnl'_all_pmids, replace
+ 21.     }
+ 22. end
+
+. main
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_basic_1988.csv not found)
+file ../temp/nat_basic_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_basic_1989.csv not found)
+file ../temp/nat_basic_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_basic_1990.csv not found)
+file ../temp/nat_basic_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_basic_1991.csv not found)
+file ../temp/nat_basic_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 40 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_1992.csv not found)
+file ../temp/nat_basic_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 41 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_1993.csv not found)
+file ../temp/nat_basic_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 52 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_1994.csv not found)
+file ../temp/nat_basic_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 133 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_1995.csv not found)
+file ../temp/nat_basic_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 257 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_1996.csv not found)
+file ../temp/nat_basic_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 262 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_1997.csv not found)
+file ../temp/nat_basic_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 303 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_1998.csv not found)
+file ../temp/nat_basic_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 413 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_1999.csv not found)
+file ../temp/nat_basic_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 536 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2000.csv not found)
+file ../temp/nat_basic_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 500 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2001.csv not found)
+file ../temp/nat_basic_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 476 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2002.csv not found)
+file ../temp/nat_basic_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 477 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2003.csv not found)
+file ../temp/nat_basic_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 428 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2004.csv not found)
+file ../temp/nat_basic_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 462 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2005.csv not found)
+file ../temp/nat_basic_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 537 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2006.csv not found)
+file ../temp/nat_basic_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 498 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2007.csv not found)
+file ../temp/nat_basic_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 479 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2008.csv not found)
+file ../temp/nat_basic_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 515 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2009.csv not found)
+file ../temp/nat_basic_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 489 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2010.csv not found)
+file ../temp/nat_basic_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 530 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2011.csv not found)
+file ../temp/nat_basic_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 461 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2012.csv not found)
+file ../temp/nat_basic_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 510 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2013.csv not found)
+file ../temp/nat_basic_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 523 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2014.csv not found)
+file ../temp/nat_basic_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 573 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2015.csv not found)
+file ../temp/nat_basic_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 621 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2016.csv not found)
+file ../temp/nat_basic_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 643 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2017.csv not found)
+file ../temp/nat_basic_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 600 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2018.csv not found)
+file ../temp/nat_basic_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 571 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2019.csv not found)
+file ../temp/nat_basic_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 552 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2020.csv not found)
+file ../temp/nat_basic_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 544 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2021.csv not found)
+file ../temp/nat_basic_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 530 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_basic_2022.csv not found)
+file ../temp/nat_basic_2022.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_translational_1988.csv not found)
+file ../temp/nat_translational_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_translational_1989.csv not found)
+file ../temp/nat_translational_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_translational_1990.csv not found)
+file ../temp/nat_translational_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_translational_1991.csv not found)
+file ../temp/nat_translational_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 72 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_1992.csv not found)
+file ../temp/nat_translational_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 125 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_1993.csv not found)
+file ../temp/nat_translational_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 110 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_1994.csv not found)
+file ../temp/nat_translational_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 220 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_1995.csv not found)
+file ../temp/nat_translational_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 265 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_1996.csv not found)
+file ../temp/nat_translational_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 216 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_1997.csv not found)
+file ../temp/nat_translational_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 199 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_1998.csv not found)
+file ../temp/nat_translational_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 195 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_1999.csv not found)
+file ../temp/nat_translational_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 247 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2000.csv not found)
+file ../temp/nat_translational_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 241 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2001.csv not found)
+file ../temp/nat_translational_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 209 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2002.csv not found)
+file ../temp/nat_translational_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 204 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2003.csv not found)
+file ../temp/nat_translational_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 188 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2004.csv not found)
+file ../temp/nat_translational_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 207 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2005.csv not found)
+file ../temp/nat_translational_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 207 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2006.csv not found)
+file ../temp/nat_translational_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 232 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2007.csv not found)
+file ../temp/nat_translational_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 246 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2008.csv not found)
+file ../temp/nat_translational_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 260 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2009.csv not found)
+file ../temp/nat_translational_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 228 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2010.csv not found)
+file ../temp/nat_translational_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 260 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2011.csv not found)
+file ../temp/nat_translational_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 309 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2012.csv not found)
+file ../temp/nat_translational_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 323 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2013.csv not found)
+file ../temp/nat_translational_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 314 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2014.csv not found)
+file ../temp/nat_translational_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 319 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2015.csv not found)
+file ../temp/nat_translational_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 301 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2016.csv not found)
+file ../temp/nat_translational_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 294 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2017.csv not found)
+file ../temp/nat_translational_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 299 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2018.csv not found)
+file ../temp/nat_translational_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 253 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2019.csv not found)
+file ../temp/nat_translational_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 246 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2020.csv not found)
+file ../temp/nat_translational_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 237 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2021.csv not found)
+file ../temp/nat_translational_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 259 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_translational_2022.csv not found)
+file ../temp/nat_translational_2022.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_fundamental_1988.csv not found)
+file ../temp/nat_fundamental_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_fundamental_1989.csv not found)
+file ../temp/nat_fundamental_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_fundamental_1990.csv not found)
+file ../temp/nat_fundamental_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_fundamental_1991.csv not found)
+file ../temp/nat_fundamental_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 40 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_1992.csv not found)
+file ../temp/nat_fundamental_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 41 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_1993.csv not found)
+file ../temp/nat_fundamental_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 52 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_1994.csv not found)
+file ../temp/nat_fundamental_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 133 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_1995.csv not found)
+file ../temp/nat_fundamental_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 256 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_1996.csv not found)
+file ../temp/nat_fundamental_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 259 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_1997.csv not found)
+file ../temp/nat_fundamental_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 300 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_1998.csv not found)
+file ../temp/nat_fundamental_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 413 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_1999.csv not found)
+file ../temp/nat_fundamental_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 535 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2000.csv not found)
+file ../temp/nat_fundamental_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 499 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2001.csv not found)
+file ../temp/nat_fundamental_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 475 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2002.csv not found)
+file ../temp/nat_fundamental_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 473 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2003.csv not found)
+file ../temp/nat_fundamental_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 421 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2004.csv not found)
+file ../temp/nat_fundamental_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 460 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2005.csv not found)
+file ../temp/nat_fundamental_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 531 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2006.csv not found)
+file ../temp/nat_fundamental_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 493 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2007.csv not found)
+file ../temp/nat_fundamental_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 473 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2008.csv not found)
+file ../temp/nat_fundamental_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 511 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2009.csv not found)
+file ../temp/nat_fundamental_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 477 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2010.csv not found)
+file ../temp/nat_fundamental_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 529 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2011.csv not found)
+file ../temp/nat_fundamental_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 458 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2012.csv not found)
+file ../temp/nat_fundamental_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 509 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2013.csv not found)
+file ../temp/nat_fundamental_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 515 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2014.csv not found)
+file ../temp/nat_fundamental_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 567 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2015.csv not found)
+file ../temp/nat_fundamental_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 620 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2016.csv not found)
+file ../temp/nat_fundamental_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 641 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2017.csv not found)
+file ../temp/nat_fundamental_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 600 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2018.csv not found)
+file ../temp/nat_fundamental_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 570 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2019.csv not found)
+file ../temp/nat_fundamental_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 551 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2020.csv not found)
+file ../temp/nat_fundamental_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 542 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2021.csv not found)
+file ../temp/nat_fundamental_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 528 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_fundamental_2022.csv not found)
+file ../temp/nat_fundamental_2022.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_diseases_1988.csv not found)
+file ../temp/nat_diseases_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_diseases_1989.csv not found)
+file ../temp/nat_diseases_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_diseases_1990.csv not found)
+file ../temp/nat_diseases_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_diseases_1991.csv not found)
+file ../temp/nat_diseases_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 81 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_1992.csv not found)
+file ../temp/nat_diseases_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 152 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_1993.csv not found)
+file ../temp/nat_diseases_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 133 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_1994.csv not found)
+file ../temp/nat_diseases_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 316 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_1995.csv not found)
+file ../temp/nat_diseases_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 355 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_1996.csv not found)
+file ../temp/nat_diseases_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 285 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_1997.csv not found)
+file ../temp/nat_diseases_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 248 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_1998.csv not found)
+file ../temp/nat_diseases_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 256 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_1999.csv not found)
+file ../temp/nat_diseases_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 313 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2000.csv not found)
+file ../temp/nat_diseases_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 294 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2001.csv not found)
+file ../temp/nat_diseases_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 255 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2002.csv not found)
+file ../temp/nat_diseases_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 254 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2003.csv not found)
+file ../temp/nat_diseases_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 251 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2004.csv not found)
+file ../temp/nat_diseases_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 262 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2005.csv not found)
+file ../temp/nat_diseases_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 268 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2006.csv not found)
+file ../temp/nat_diseases_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 303 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2007.csv not found)
+file ../temp/nat_diseases_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 322 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2008.csv not found)
+file ../temp/nat_diseases_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 342 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2009.csv not found)
+file ../temp/nat_diseases_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 330 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2010.csv not found)
+file ../temp/nat_diseases_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 352 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2011.csv not found)
+file ../temp/nat_diseases_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 395 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2012.csv not found)
+file ../temp/nat_diseases_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 417 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2013.csv not found)
+file ../temp/nat_diseases_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 423 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2014.csv not found)
+file ../temp/nat_diseases_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 428 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2015.csv not found)
+file ../temp/nat_diseases_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 394 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2016.csv not found)
+file ../temp/nat_diseases_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 411 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2017.csv not found)
+file ../temp/nat_diseases_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 435 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2018.csv not found)
+file ../temp/nat_diseases_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 375 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2019.csv not found)
+file ../temp/nat_diseases_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 388 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2020.csv not found)
+file ../temp/nat_diseases_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 382 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2021.csv not found)
+file ../temp/nat_diseases_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 424 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_diseases_2022.csv not found)
+file ../temp/nat_diseases_2022.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_therapeutics_1988.csv not found)
+file ../temp/nat_therapeutics_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_therapeutics_1989.csv not found)
+file ../temp/nat_therapeutics_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_therapeutics_1990.csv not found)
+file ../temp/nat_therapeutics_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_therapeutics_1991.csv not found)
+file ../temp/nat_therapeutics_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_therapeutics_1992.csv not found)
+file ../temp/nat_therapeutics_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_therapeutics_1993.csv not found)
+file ../temp/nat_therapeutics_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nat_therapeutics_1994.csv not found)
+file ../temp/nat_therapeutics_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_1995.csv not found)
+file ../temp/nat_therapeutics_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_1996.csv not found)
+file ../temp/nat_therapeutics_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_1997.csv not found)
+file ../temp/nat_therapeutics_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_1998.csv not found)
+file ../temp/nat_therapeutics_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_1999.csv not found)
+file ../temp/nat_therapeutics_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 2 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2000.csv not found)
+file ../temp/nat_therapeutics_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2001.csv not found)
+file ../temp/nat_therapeutics_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2002.csv not found)
+file ../temp/nat_therapeutics_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2003.csv not found)
+file ../temp/nat_therapeutics_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2004.csv not found)
+file ../temp/nat_therapeutics_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2005.csv not found)
+file ../temp/nat_therapeutics_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2006.csv not found)
+file ../temp/nat_therapeutics_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2007.csv not found)
+file ../temp/nat_therapeutics_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2008.csv not found)
+file ../temp/nat_therapeutics_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2009.csv not found)
+file ../temp/nat_therapeutics_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 13 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2010.csv not found)
+file ../temp/nat_therapeutics_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 8 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2011.csv not found)
+file ../temp/nat_therapeutics_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2012.csv not found)
+file ../temp/nat_therapeutics_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2013.csv not found)
+file ../temp/nat_therapeutics_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 11 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2014.csv not found)
+file ../temp/nat_therapeutics_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2015.csv not found)
+file ../temp/nat_therapeutics_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 8 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2016.csv not found)
+file ../temp/nat_therapeutics_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2017.csv not found)
+file ../temp/nat_therapeutics_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 11 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2018.csv not found)
+file ../temp/nat_therapeutics_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 14 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2019.csv not found)
+file ../temp/nat_therapeutics_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2020.csv not found)
+file ../temp/nat_therapeutics_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2021.csv not found)
+file ../temp/nat_therapeutics_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nat_therapeutics_2022.csv not found)
+file ../temp/nat_therapeutics_2022.csv saved as .dta format
+(variable query_name was str1, now str10 to accommodate using data's values)
+(variable query_name was str10, now str18 to accommodate using data's values)
+(file ../temp/NAT_appended.dta not found)
+file ../temp/NAT_appended.dta saved
+variables created as string: 
+query_name1  query_name2
+year: all characters numeric; replaced as int
+(23,515 real changes made)
+
+Duplicates in terms of pmid cat
+(2,348 observations deleted)
+
+Duplicates in terms of pmid
+(108 observations deleted)
+(22,179 real changes made)
+(file ../output/NAT_indicies_pmids.dta not found)
+file ../output/NAT_indicies_pmids.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 2,941 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1988.csv not found)
+file ../temp/dem_basic_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 3,314 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1989.csv not found)
+file ../temp/dem_basic_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 3,521 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1990.csv not found)
+file ../temp/dem_basic_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 3,821 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1991.csv not found)
+file ../temp/dem_basic_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 4,009 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1992.csv not found)
+file ../temp/dem_basic_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 4,130 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1993.csv not found)
+file ../temp/dem_basic_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,096 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1994.csv not found)
+file ../temp/dem_basic_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 4,960 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1995.csv not found)
+file ../temp/dem_basic_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,226 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1996.csv not found)
+file ../temp/dem_basic_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,009 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1997.csv not found)
+file ../temp/dem_basic_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,165 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1998.csv not found)
+file ../temp/dem_basic_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,667 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_1999.csv not found)
+file ../temp/dem_basic_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,018 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2000.csv not found)
+file ../temp/dem_basic_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,895 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2001.csv not found)
+file ../temp/dem_basic_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,832 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2002.csv not found)
+file ../temp/dem_basic_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 8,138 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2003.csv not found)
+file ../temp/dem_basic_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,895 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2004.csv not found)
+file ../temp/dem_basic_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,985 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2005.csv not found)
+file ../temp/dem_basic_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,515 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2006.csv not found)
+file ../temp/dem_basic_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,642 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2007.csv not found)
+file ../temp/dem_basic_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 6,335 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2008.csv not found)
+file ../temp/dem_basic_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,165 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2009.csv not found)
+file ../temp/dem_basic_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 9,047 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2010.csv not found)
+file ../temp/dem_basic_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2011.csv not found)
+file ../temp/dem_basic_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+query_name already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2012.csv not found)
+file ../temp/dem_basic_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,002 obs)
+pmid already string; no replace
+query_name already string; no replace
+(3 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2013.csv not found)
+file ../temp/dem_basic_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+query_name already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2014.csv not found)
+file ../temp/dem_basic_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+query_name already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2015.csv not found)
+file ../temp/dem_basic_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2016.csv not found)
+file ../temp/dem_basic_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2017.csv not found)
+file ../temp/dem_basic_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 9,670 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2018.csv not found)
+file ../temp/dem_basic_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 8,356 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2019.csv not found)
+file ../temp/dem_basic_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,906 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2020.csv not found)
+file ../temp/dem_basic_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 6,875 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2021.csv not found)
+file ../temp/dem_basic_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,164 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_basic_2022.csv not found)
+file ../temp/dem_basic_2022.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 267 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1988.csv not found)
+file ../temp/dem_translational_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 283 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1989.csv not found)
+file ../temp/dem_translational_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 256 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1990.csv not found)
+file ../temp/dem_translational_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 306 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1991.csv not found)
+file ../temp/dem_translational_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 313 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1992.csv not found)
+file ../temp/dem_translational_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 331 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1993.csv not found)
+file ../temp/dem_translational_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 392 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1994.csv not found)
+file ../temp/dem_translational_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 421 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1995.csv not found)
+file ../temp/dem_translational_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 484 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1996.csv not found)
+file ../temp/dem_translational_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 535 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1997.csv not found)
+file ../temp/dem_translational_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 604 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1998.csv not found)
+file ../temp/dem_translational_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 652 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_1999.csv not found)
+file ../temp/dem_translational_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 703 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2000.csv not found)
+file ../temp/dem_translational_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,028 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2001.csv not found)
+file ../temp/dem_translational_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,059 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2002.csv not found)
+file ../temp/dem_translational_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,178 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2003.csv not found)
+file ../temp/dem_translational_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,201 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2004.csv not found)
+file ../temp/dem_translational_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,070 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2005.csv not found)
+file ../temp/dem_translational_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,204 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2006.csv not found)
+file ../temp/dem_translational_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,479 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2007.csv not found)
+file ../temp/dem_translational_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,719 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2008.csv not found)
+file ../temp/dem_translational_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,986 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2009.csv not found)
+file ../temp/dem_translational_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 2,805 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2010.csv not found)
+file ../temp/dem_translational_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,482 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2011.csv not found)
+file ../temp/dem_translational_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,098 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2012.csv not found)
+file ../temp/dem_translational_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9,263 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2013.csv not found)
+file ../temp/dem_translational_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 8,625 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2014.csv not found)
+file ../temp/dem_translational_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,503 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2015.csv not found)
+file ../temp/dem_translational_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,794 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2016.csv not found)
+file ../temp/dem_translational_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,376 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2017.csv not found)
+file ../temp/dem_translational_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,473 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2018.csv not found)
+file ../temp/dem_translational_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,130 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2019.csv not found)
+file ../temp/dem_translational_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,240 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2020.csv not found)
+file ../temp/dem_translational_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,027 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2021.csv not found)
+file ../temp/dem_translational_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3,648 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_translational_2022.csv not found)
+file ../temp/dem_translational_2022.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 2,935 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1988.csv not found)
+file ../temp/dem_fundamental_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3,308 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1989.csv not found)
+file ../temp/dem_fundamental_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3,511 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1990.csv not found)
+file ../temp/dem_fundamental_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3,819 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1991.csv not found)
+file ../temp/dem_fundamental_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,000 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1992.csv not found)
+file ../temp/dem_fundamental_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,126 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1993.csv not found)
+file ../temp/dem_fundamental_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,092 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1994.csv not found)
+file ../temp/dem_fundamental_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,954 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1995.csv not found)
+file ../temp/dem_fundamental_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,226 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1996.csv not found)
+file ../temp/dem_fundamental_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,006 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1997.csv not found)
+file ../temp/dem_fundamental_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,161 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1998.csv not found)
+file ../temp/dem_fundamental_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,665 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_1999.csv not found)
+file ../temp/dem_fundamental_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,014 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2000.csv not found)
+file ../temp/dem_fundamental_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,888 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2001.csv not found)
+file ../temp/dem_fundamental_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,825 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2002.csv not found)
+file ../temp/dem_fundamental_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 8,126 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2003.csv not found)
+file ../temp/dem_fundamental_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,888 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2004.csv not found)
+file ../temp/dem_fundamental_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,981 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2005.csv not found)
+file ../temp/dem_fundamental_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,505 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2006.csv not found)
+file ../temp/dem_fundamental_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,636 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2007.csv not found)
+file ../temp/dem_fundamental_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 6,329 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2008.csv not found)
+file ../temp/dem_fundamental_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,153 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2009.csv not found)
+file ../temp/dem_fundamental_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9,033 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2010.csv not found)
+file ../temp/dem_fundamental_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2011.csv not found)
+file ../temp/dem_fundamental_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+query_name already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2012.csv not found)
+file ../temp/dem_fundamental_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,002 obs)
+pmid already string; no replace
+query_name already string; no replace
+(3 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2013.csv not found)
+file ../temp/dem_fundamental_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+query_name already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2014.csv not found)
+file ../temp/dem_fundamental_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+query_name already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2015.csv not found)
+file ../temp/dem_fundamental_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2016.csv not found)
+file ../temp/dem_fundamental_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2017.csv not found)
+file ../temp/dem_fundamental_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9,624 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2018.csv not found)
+file ../temp/dem_fundamental_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 8,301 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2019.csv not found)
+file ../temp/dem_fundamental_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,858 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2020.csv not found)
+file ../temp/dem_fundamental_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 6,833 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2021.csv not found)
+file ../temp/dem_fundamental_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,147 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_fundamental_2022.csv not found)
+file ../temp/dem_fundamental_2022.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 320 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1988.csv not found)
+file ../temp/dem_diseases_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 334 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1989.csv not found)
+file ../temp/dem_diseases_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 303 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1990.csv not found)
+file ../temp/dem_diseases_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 363 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1991.csv not found)
+file ../temp/dem_diseases_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 381 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1992.csv not found)
+file ../temp/dem_diseases_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 383 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1993.csv not found)
+file ../temp/dem_diseases_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 429 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1994.csv not found)
+file ../temp/dem_diseases_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 474 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1995.csv not found)
+file ../temp/dem_diseases_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 538 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1996.csv not found)
+file ../temp/dem_diseases_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 595 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1997.csv not found)
+file ../temp/dem_diseases_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 661 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1998.csv not found)
+file ../temp/dem_diseases_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 726 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_1999.csv not found)
+file ../temp/dem_diseases_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 793 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2000.csv not found)
+file ../temp/dem_diseases_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,130 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2001.csv not found)
+file ../temp/dem_diseases_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,196 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2002.csv not found)
+file ../temp/dem_diseases_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,307 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2003.csv not found)
+file ../temp/dem_diseases_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,340 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2004.csv not found)
+file ../temp/dem_diseases_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,209 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2005.csv not found)
+file ../temp/dem_diseases_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,355 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2006.csv not found)
+file ../temp/dem_diseases_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,738 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2007.csv not found)
+file ../temp/dem_diseases_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 2,061 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2008.csv not found)
+file ../temp/dem_diseases_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 2,538 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2009.csv not found)
+file ../temp/dem_diseases_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3,660 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2010.csv not found)
+file ../temp/dem_diseases_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 6,146 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2011.csv not found)
+file ../temp/dem_diseases_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2012.csv not found)
+file ../temp/dem_diseases_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2013.csv not found)
+file ../temp/dem_diseases_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2014.csv not found)
+file ../temp/dem_diseases_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+query_name already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2015.csv not found)
+file ../temp/dem_diseases_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9,717 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2016.csv not found)
+file ../temp/dem_diseases_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 9,229 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2017.csv not found)
+file ../temp/dem_diseases_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,929 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2018.csv not found)
+file ../temp/dem_diseases_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,162 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2019.csv not found)
+file ../temp/dem_diseases_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,949 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2020.csv not found)
+file ../temp/dem_diseases_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 8,038 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2021.csv not found)
+file ../temp/dem_diseases_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,204 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_diseases_2022.csv not found)
+file ../temp/dem_diseases_2022.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 8 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1988.csv not found)
+file ../temp/dem_therapeutics_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 12 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1989.csv not found)
+file ../temp/dem_therapeutics_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 16 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1990.csv not found)
+file ../temp/dem_therapeutics_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1991.csv not found)
+file ../temp/dem_therapeutics_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 15 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1992.csv not found)
+file ../temp/dem_therapeutics_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 8 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1993.csv not found)
+file ../temp/dem_therapeutics_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 13 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1994.csv not found)
+file ../temp/dem_therapeutics_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 16 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1995.csv not found)
+file ../temp/dem_therapeutics_1995.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 3 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1996.csv not found)
+file ../temp/dem_therapeutics_1996.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1997.csv not found)
+file ../temp/dem_therapeutics_1997.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1998.csv not found)
+file ../temp/dem_therapeutics_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 10 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_1999.csv not found)
+file ../temp/dem_therapeutics_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 15 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2000.csv not found)
+file ../temp/dem_therapeutics_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 23 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2001.csv not found)
+file ../temp/dem_therapeutics_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 21 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2002.csv not found)
+file ../temp/dem_therapeutics_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 30 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2003.csv not found)
+file ../temp/dem_therapeutics_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 21 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2004.csv not found)
+file ../temp/dem_therapeutics_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 18 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2005.csv not found)
+file ../temp/dem_therapeutics_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 21 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2006.csv not found)
+file ../temp/dem_therapeutics_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 22 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2007.csv not found)
+file ../temp/dem_therapeutics_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 33 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2008.csv not found)
+file ../temp/dem_therapeutics_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 49 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2009.csv not found)
+file ../temp/dem_therapeutics_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 65 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2010.csv not found)
+file ../temp/dem_therapeutics_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 120 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2011.csv not found)
+file ../temp/dem_therapeutics_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 221 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2012.csv not found)
+file ../temp/dem_therapeutics_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 336 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2013.csv not found)
+file ../temp/dem_therapeutics_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 358 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2014.csv not found)
+file ../temp/dem_therapeutics_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 350 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2015.csv not found)
+file ../temp/dem_therapeutics_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 306 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2016.csv not found)
+file ../temp/dem_therapeutics_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 288 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2017.csv not found)
+file ../temp/dem_therapeutics_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 314 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2018.csv not found)
+file ../temp/dem_therapeutics_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 295 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2019.csv not found)
+file ../temp/dem_therapeutics_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 355 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2020.csv not found)
+file ../temp/dem_therapeutics_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 322 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2021.csv not found)
+file ../temp/dem_therapeutics_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 232 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/dem_therapeutics_2022.csv not found)
+file ../temp/dem_therapeutics_2022.csv saved as .dta format
+(variable query_name was str10, now str18 to accommodate using data's values)
+(file ../temp/DEM_appended.dta not found)
+file ../temp/DEM_appended.dta saved
+variables created as string: 
+query_name1  query_name2
+year: all characters numeric; replaced as int
+variable pmid was long now double
+(370,077 real changes made)
+
+Duplicates in terms of pmid cat
+(31,322 observations deleted)
+
+Duplicates in terms of pmid
+(1,815 observations deleted)
+(353,141 real changes made)
+(file ../output/DEM_indicies_pmids.dta not found)
+file ../output/DEM_indicies_pmids.dta saved
+(encoding automatically selected: ISO-8859-2)
+(2 vars, 1 obs)
+pmid already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nature_sub1988.dta not found)
+file ../temp/nature_sub1988.dta saved
+(encoding automatically selected: ISO-8859-2)
+(2 vars, 1 obs)
+pmid already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nature_sub1989.dta not found)
+file ../temp/nature_sub1989.dta saved
+(encoding automatically selected: ISO-8859-2)
+(2 vars, 1 obs)
+pmid already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nature_sub1990.dta not found)
+file ../temp/nature_sub1990.dta saved
+(encoding automatically selected: ISO-8859-2)
+(2 vars, 1 obs)
+pmid already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/nature_sub1991.dta not found)
+file ../temp/nature_sub1991.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 122 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub1992.dta not found)
+file ../temp/nature_sub1992.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 193 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub1993.dta not found)
+file ../temp/nature_sub1993.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 185 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub1994.dta not found)
+file ../temp/nature_sub1994.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 476 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub1995.dta not found)
+file ../temp/nature_sub1995.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 665 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub1996.dta not found)
+file ../temp/nature_sub1996.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 628 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub1997.dta not found)
+file ../temp/nature_sub1997.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 643 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub1998.dta not found)
+file ../temp/nature_sub1998.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,006 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub1999.dta not found)
+file ../temp/nature_sub1999.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,465 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2000.dta not found)
+file ../temp/nature_sub2000.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 878 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2001.dta not found)
+file ../temp/nature_sub2001.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 818 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2002.dta not found)
+file ../temp/nature_sub2002.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 825 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2003.dta not found)
+file ../temp/nature_sub2003.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 778 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2004.dta not found)
+file ../temp/nature_sub2004.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 820 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2005.dta not found)
+file ../temp/nature_sub2005.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 933 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2006.dta not found)
+file ../temp/nature_sub2006.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 888 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2007.dta not found)
+file ../temp/nature_sub2007.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 874 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2008.dta not found)
+file ../temp/nature_sub2008.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 914 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2009.dta not found)
+file ../temp/nature_sub2009.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 903 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2010.dta not found)
+file ../temp/nature_sub2010.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 959 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2011.dta not found)
+file ../temp/nature_sub2011.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 944 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2012.dta not found)
+file ../temp/nature_sub2012.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 988 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2013.dta not found)
+file ../temp/nature_sub2013.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,027 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2014.dta not found)
+file ../temp/nature_sub2014.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,118 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2015.dta not found)
+file ../temp/nature_sub2015.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,229 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2016.dta not found)
+file ../temp/nature_sub2016.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,285 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2017.dta not found)
+file ../temp/nature_sub2017.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,290 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2018.dta not found)
+file ../temp/nature_sub2018.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,154 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2019.dta not found)
+file ../temp/nature_sub2019.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,167 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2020.dta not found)
+file ../temp/nature_sub2020.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,114 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2021.dta not found)
+file ../temp/nature_sub2021.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 1,302 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/nature_sub2022.dta not found)
+file ../temp/nature_sub2022.dta saved
+(file ../temp/nature_sub.dta not found)
+file ../temp/nature_sub.dta saved
+(1,245 observations deleted)
+(file ../output/nature_sub_all_pmids.dta not found)
+file ../output/nature_sub_all_pmids.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 3,269 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1988.dta not found)
+file ../temp/demsci1988.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 3,669 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1989.dta not found)
+file ../temp/demsci1989.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 3,840 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1990.dta not found)
+file ../temp/demsci1990.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 4,204 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1991.dta not found)
+file ../temp/demsci1991.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 4,399 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1992.dta not found)
+file ../temp/demsci1992.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 4,521 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1993.dta not found)
+file ../temp/demsci1993.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,534 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1994.dta not found)
+file ../temp/demsci1994.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,444 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1995.dta not found)
+file ../temp/demsci1995.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,778 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1996.dta not found)
+file ../temp/demsci1996.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,610 obs)
+pmid was long now str7
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1997.dta not found)
+file ../temp/demsci1997.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 5,836 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1998.dta not found)
+file ../temp/demsci1998.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 6,405 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci1999.dta not found)
+file ../temp/demsci1999.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,834 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2000.dta not found)
+file ../temp/demsci2000.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 9,029 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2001.dta not found)
+file ../temp/demsci2001.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 9,045 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2002.dta not found)
+file ../temp/demsci2002.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 9,459 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2003.dta not found)
+file ../temp/demsci2003.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 9,247 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2004.dta not found)
+file ../temp/demsci2004.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,210 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2005.dta not found)
+file ../temp/demsci2005.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 6,895 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2006.dta not found)
+file ../temp/demsci2006.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 7,443 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2007.dta not found)
+file ../temp/demsci2007.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 8,530 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2008.dta not found)
+file ../temp/demsci2008.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 9,902 obs)
+pmid was long now str8
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2009.dta not found)
+file ../temp/demsci2009.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,000 obs)
+pmid already string; no replace
+(1 observation deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2010.dta not found)
+file ../temp/demsci2010.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2011.dta not found)
+file ../temp/demsci2011.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,003 obs)
+pmid already string; no replace
+(4 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2012.dta not found)
+file ../temp/demsci2012.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,005 obs)
+pmid already string; no replace
+(6 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2013.dta not found)
+file ../temp/demsci2013.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,004 obs)
+pmid already string; no replace
+(5 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2014.dta not found)
+file ../temp/demsci2014.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,004 obs)
+pmid already string; no replace
+(5 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2015.dta not found)
+file ../temp/demsci2015.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,002 obs)
+pmid already string; no replace
+(3 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2016.dta not found)
+file ../temp/demsci2016.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,002 obs)
+pmid already string; no replace
+(3 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2017.dta not found)
+file ../temp/demsci2017.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,002 obs)
+pmid already string; no replace
+(3 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2018.dta not found)
+file ../temp/demsci2018.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2019.dta not found)
+file ../temp/demsci2019.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2020.dta not found)
+file ../temp/demsci2020.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2021.dta not found)
+file ../temp/demsci2021.dta saved
+(encoding automatically selected: ISO-8859-9)
+(2 vars, 10,001 obs)
+pmid already string; no replace
+(2 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/demsci2022.dta not found)
+file ../temp/demsci2022.dta saved
+(file ../temp/demsci.dta not found)
+file ../temp/demsci.dta saved
+(10,323 observations deleted)
+(file ../output/demsci_all_pmids.dta not found)
+file ../output/demsci_all_pmids.dta saved
+
+. 
+end of do-file
+
+--------------------------------------------------------------------------------
+Makelog ended: 2022-11-29 11:36:15
+Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/append_pmids/code
+--------------------------------------------------------------------------------
