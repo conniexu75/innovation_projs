@@ -26,10 +26,13 @@ foreach cat in basic translational diseases fundamental therapeutics {
         save ../temp/${`cat'_name}_pmids, replace
 
         foreach samp in all last5yrs {
-        use ../external/samp/cleaned_`samp'_${samp}, clear
-        merge m:1 pmid using ../temp/${`cat'_name}_pmids, assert(1 2 3) keep(3) nogen
-        save ../output/cleaned_${`cat'_name}_`samp'_${samp}, replace
+            use ../external/samp/cleaned_`samp'_${samp}, clear
+            merge m:1 pmid using ../temp/${`cat'_name}_pmids, assert(1 2 3) keep(3) nogen
+            save ../output/cleaned_${`cat'_name}_`samp'_${samp}, replace
         }
+        use ../external/samp/major_mesh_terms_${samp}, clear
+        merge m:1 pmid using ../temp/${`cat'_name}_pmids, assert(1 2 3) keep(3) nogen
+        save ../output/mesh_${`cat'_name}_${samp}, replace
     }
 end
 ** 
