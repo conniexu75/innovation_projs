@@ -22,7 +22,7 @@ library(stringr)
 library(xml2)
 library(here)
 
-setwd(here())
+here::i_am("build.R")
 set.seed(8975)
 
 
@@ -82,71 +82,38 @@ print(N)
   return(pmid_list)
 }
 
-################### PULL ARTICLE PMID LISTS ###################################
-### BASIC, TRANSLATIONAL, AND CLINICAL SCIENCE JOURNAL ARTICLES, NATURE SUB JOURNALS===
-#years = as.character(1988:2022)
-#year_queries = paste0('(', years, '/01/01[PDAT] : ', years, '/12/31[PDAT])')
-#
-#queries_sub = read_tsv(file = '../external/queries/search_terms_basic_indices_natsub.txt')
-#
-#queries = rep(queries_sub$Query, each=length(year_queries))
-#query_names = rep(queries_sub$Query_Name, each=length(year_queries))
-#
-#queries = paste0(year_queries, ' AND ', queries)
-#query_names = paste0(query_names, '_', years)
-#
-##Run through scraping function to pull out PMIDs
-## 5 is the number of queries we're using in the .txt file
-## 35 is the number of years between 1988 and 2022
-#for (counter in 1:5) {
-#  start <- (counter-1)*35+1
-#  end <- counter*35
-#  PMIDs =  sapply(X = queries[start:end], FUN = pull_pmids) %>%
-#    unname()
-#  for (i in 1:35) {
-#    j = i + (counter-1)*35
-#    outfile = paste0('../output/NAT/nat_',
-#                     query_names[j],
-#                     '.csv')
-#    subset = data.frame(unlist(PMIDs[i]), rep(query_names[j], length(unlist(PMIDs[i])))) 
-#    colnames(subset)<-c('pmid','query_name')
-#    write_csv(subset, outfile)
-#  }
-#}
-#
-#### BASIC, TRANSLATIONAL, AND CLINICAL SCIENCE JOURNAL ARTICLES, DEMOCRATIC SCIENCE JOURNALS===
-#years = as.character(1988:2022)
-#year_queries = paste0('(', years, '/01/01[PDAT] : ', years, '/12/31[PDAT])')
-#
-#queries_sub = read_tsv(file = '../external/queries/search_terms_basic_indices_demsci.txt')
-#
-#queries = rep(queries_sub$Query, each=length(year_queries))
-#query_names = rep(queries_sub$Query_Name, each=length(year_queries))
-#
-#queries = paste0(year_queries, ' AND ', queries)
-#query_names = paste0(query_names, '_', years)
-#
-##Run through scraping function to pull out PMIDs
-## 5 is the number of queries we're using in the .txt file
-## 35 is the number of years between 1988 and 2022
-#for (counter in 1:5) {
-#  start <- (counter-1)*35+1
-#  end <- counter*35
-#  PMIDs =  sapply(X = queries[start:end], FUN = pull_pmids) %>%
-#    unname()
-#  for (i in 1:35) {
-#    j = i + (counter-1)*35
-#    outfile = paste0('../output/DEM/dem_',
-#                     query_names[j],
-#                     '.csv')
-#    subset = data.frame(unlist(PMIDs[i]), rep(query_names[j], length(unlist(PMIDs[i])))) 
-#    colnames(subset)<-c('pmid','query_name')
-#    write_csv(subset, outfile)
-#  }
-#}
-
-### Journal articles not clinical from select journals (all articles) ========================================
-jrnls = c("nature_sub", "demsci")
+################### PULL ARTICLES BY INDEX PMID LISTS ###################################
+jrnls = c("natsub", "demsci", "scijrnls")
+years = as.character(1988:2022)
+year_queries = paste0('(', years, '/01/01[PDAT] : ', years, '/12/31[PDAT])')
+for (j in jrnls) {
+    j3 = substr(j,1,3)
+    queries_sub = read_tsv(file = paste0('../external/queries/search_terms_basic_indices_',j,'.txt'))
+    queries = rep(queries_sub$Query, each=length(year_queries))
+    query_names = rep(queries_sub$Query_Name, each=length(year_queries))
+    queries = paste0(year_queries, ' AND ', queries)
+    query_names = paste0(query_names, '_', years)
+    #Run through scraping function to pull out PMIDs
+    # 5 is the number of queries we're using in the .txt file
+    # 35 is the number of years between 1988 and 2022
+    for (counter in 1:5) {
+      start <- (counter-1)*35+1
+      end <- counter*35
+      PMIDs =  sapply(X = queries[start:end], FUN = pull_pmids) %>%
+        unname()
+      for (i in 1:35) {
+        j = i + (counter-1)*35
+        outfile = paste0('../output/',toupper(j3),'/',j3,'_',
+                         query_names[j],
+                         '.csv')
+        subset = data.frame(unlist(PMIDs[i]), rep(query_names[j], length(unlist(PMIDs[i])))) 
+        colnames(subset)<-c('pmid','query_name')
+        write_csv(subset, outfile)
+      }
+    }
+}
+### PULL ALL JRNL ARTICLES FROM SAMPLE ###  ========================================
+jrnls = c("natsub", "demsci", "scijrnls")
 years = as.character(1988:2022)
 year_queries = paste0('(', years, '/01/01[PDAT] : ', years, '/12/31[PDAT])')
 for (j in jrnls) {
