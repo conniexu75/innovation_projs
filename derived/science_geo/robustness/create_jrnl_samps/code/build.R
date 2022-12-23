@@ -163,7 +163,7 @@ for (j in jrnls) {
 
 
 ## PULL ALL JRNL ARTICLES FROM SAMPLE ###  ========================================
-jrnls = c("natsub", "scijrnls", "demsci")
+jrnls = c("nat_biotech","nat_cell_bio", "nat_chem_bio", "nat_genet", "nat_med", "nat_neuro", "neuron", "onco", "cell_stem_cell", "faseb", "jbc")
 years = as.character(1988:2022)
 year_queries = paste0('(', years, '/01/01[PDAT] : ', years, '/12/31[PDAT])')
 for (j in jrnls) {
