@@ -11,6 +11,7 @@ from gslab_make.write_logs import *
 clear_dir(['../output/', '../temp/', '../output_local/'])
 os.mkdir('../output/NAT/')
 os.mkdir('../output/DEM/')
+os.mkdir('../output/PLO/')
 os.mkdir('../output/SCI/')
 remove_dir(['../external/'])
 paths = {'makelog' : '../output/make.log', 'external_dir' : '../external/'}

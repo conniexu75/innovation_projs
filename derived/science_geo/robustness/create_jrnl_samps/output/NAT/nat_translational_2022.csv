@@ -1,4 +1,8 @@
 pmid,query_name
+36474071,translational_2022
+36474070,translational_2022
+36443443,translational_2022
+36411364,translational_2022
 36357680,translational_2022
 36357679,translational_2022
 36357676,translational_2022
@@ -11,6 +15,7 @@ pmid,query_name
 36302894,translational_2022
 36253535,translational_2022
 36229685,translational_2022
+36229674,translational_2022
 36229666,translational_2022
 36229606,translational_2022
 36216942,translational_2022
@@ -40,7 +45,6 @@ pmid,query_name
 36085511,translational_2022
 36085503,translational_2022
 36076086,translational_2022
-36076082,translational_2022
 36071171,translational_2022
 36050469,translational_2022
 36038630,translational_2022
@@ -51,7 +55,6 @@ pmid,query_name
 35996000,translational_2022
 35995954,translational_2022
 35995862,translational_2022
-35982307,translational_2022
 35982226,translational_2022
 35970919,translational_2022
 35953722,translational_2022
@@ -64,8 +67,8 @@ pmid,query_name
 35902743,translational_2022
 35879615,translational_2022
 35879551,translational_2022
-35879545,translational_2022
 35879413,translational_2022
+35879364,translational_2022
 35879363,translational_2022
 35869309,translational_2022
 35869308,translational_2022
@@ -73,6 +76,8 @@ pmid,query_name
 35864255,translational_2022
 35864250,translational_2022
 35864190,translational_2022
+35864171,translational_2022
+35864170,translational_2022
 35851877,translational_2022
 35831660,translational_2022
 35831656,translational_2022
@@ -82,7 +87,9 @@ pmid,query_name
 35817975,translational_2022
 35817971,translational_2022
 35804153,translational_2022
+35788568,translational_2022
 35788567,translational_2022
+35788566,translational_2022
 35788181,translational_2022
 35788180,translational_2022
 35788175,translational_2022
@@ -163,7 +170,6 @@ pmid,query_name
 35332331,translational_2022
 35332318,translational_2022
 35332263,translational_2022
-35322239,translational_2022
 35314845,translational_2022
 35314844,translational_2022
 35314841,translational_2022
@@ -228,7 +234,6 @@ pmid,query_name
 35058622,translational_2022
 35051990,translational_2022
 35051989,translational_2022
-35046573,translational_2022
 35046572,translational_2022
 35045566,translational_2022
 35042228,translational_2022
