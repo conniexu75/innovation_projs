@@ -1,0 +1,2 @@
+Query_Name	Query
+nat_cell_bio	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("Nat Cell Biol"[Journal])

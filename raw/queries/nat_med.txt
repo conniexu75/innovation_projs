@@ -1,0 +1,2 @@
+Query_Name	Query
+nat_med	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("Nat Med"[Journal])
