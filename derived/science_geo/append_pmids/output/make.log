@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2022-11-23 13:53:30
+Makelog started: 2022-12-23 11:20:24
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -49,15 +49,15 @@ Notes:
 
 . 
 . program main   
-  1.     append_btc
+  1.     append_cns
   2.     append_jrnls
   3. end
 
 . 
-. program append_btc
-  1.     local filelist: dir "../external/samp/BTC/" files "BTC_*.csv"
+. program append_cns
+  1.     local filelist: dir "../external/samp/CNS/" files "CNS_*.csv"
   2.     foreach file in `filelist' {
-  3.         import delimited using "../external/samp/BTC/`file'", clear
+  3.         import delimited using "../external/samp/CNS/`file'", clear
   4.         tostring pmid, replace
   5.         tostring query_name, replace
   6.         drop if pmid == "NA"
@@ -68,28 +68,26 @@ Notes:
  11.     foreach file in `filelist' {
  12.         append using ../temp/`file'
  13.     }
- 14.     save ../temp/BTC_appended, replace
+ 14.     save ../temp/CNS_appended, replace
  15. 
 .     split query_name, p("_")
- 16.     ren query_name1 btc
+ 16.     ren query_name1 cat 
  17.     ren query_name2 year
  18.     destring year, replace
  19.     drop query_name 
- 20.     replace pmid = pmid*10000 if inlist(btc, "fundamental", "diseases", "therapeutics")
- 21.     duplicates tag pmid btc, gen(dup)
- 22.         bys pmid btc: egen minyr = min(year)
+ 20.     replace pmid = pmid*10000 if inlist(cat, "fundamental", "diseases", "therapeutics")
+ 21.     duplicates tag pmid cat, gen(dup)
+ 22.         bys pmid cat: egen minyr = min(year)
  23.     drop if year > minyr & dup > 0
  24.     drop dup minyr
  25.         duplicates tag pmid, gen(dup)
- 26.     gen fund = btc == "fundamental"
+ 26.     gen fund = cat == "fundamental"
  27.     bys pmid: egen tot_fund = max(fund)
  28.     drop if dup > 0 & tot_fund == 1 & fund != 1
  29.         gisid pmid
- 30.         replace pmid = pmid/10000 if inlist(btc, "fundamental", "diseases", "therapeutics")
- 31.     rename btc cat
- 32.     drop dup fund tot_fund
- 33.         save "../output/BTC_pmids.dta", replace
- 34. end
+ 30.         replace pmid = pmid/10000 if inlist(cat, "fundamental", "diseases", "therapeutics")
+ 31.         save "../output/CNS_pmids.dta", replace
+ 32. end
 
 . 
 . program append_jrnls 
@@ -114,7 +112,7 @@ Notes:
  19.     drop if year > minyr
  20.     drop minyr
  21.     gisid pmid
- 22.     save ../output/select_jrnls_pmids, replace
+ 22.     save ../output/cns_med_all_pmids, replace
  23. end
 
 . main
@@ -124,2407 +122,2407 @@ pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1988.csv not found)
-file ../temp/BTC_basic_1988.csv saved as .dta format
+(file ../temp/CNS_basic_1988.csv not found)
+file ../temp/CNS_basic_1988.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,711 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1989.csv not found)
-file ../temp/BTC_basic_1989.csv saved as .dta format
+(file ../temp/CNS_basic_1989.csv not found)
+file ../temp/CNS_basic_1989.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,676 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1990.csv not found)
-file ../temp/BTC_basic_1990.csv saved as .dta format
+(file ../temp/CNS_basic_1990.csv not found)
+file ../temp/CNS_basic_1990.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,553 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1991.csv not found)
-file ../temp/BTC_basic_1991.csv saved as .dta format
+(file ../temp/CNS_basic_1991.csv not found)
+file ../temp/CNS_basic_1991.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,569 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1992.csv not found)
-file ../temp/BTC_basic_1992.csv saved as .dta format
+(file ../temp/CNS_basic_1992.csv not found)
+file ../temp/CNS_basic_1992.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,682 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1993.csv not found)
-file ../temp/BTC_basic_1993.csv saved as .dta format
+(file ../temp/CNS_basic_1993.csv not found)
+file ../temp/CNS_basic_1993.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,674 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1994.csv not found)
-file ../temp/BTC_basic_1994.csv saved as .dta format
+(file ../temp/CNS_basic_1994.csv not found)
+file ../temp/CNS_basic_1994.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,733 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1995.csv not found)
-file ../temp/BTC_basic_1995.csv saved as .dta format
+(file ../temp/CNS_basic_1995.csv not found)
+file ../temp/CNS_basic_1995.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,693 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1996.csv not found)
-file ../temp/BTC_basic_1996.csv saved as .dta format
+(file ../temp/CNS_basic_1996.csv not found)
+file ../temp/CNS_basic_1996.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,668 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1997.csv not found)
-file ../temp/BTC_basic_1997.csv saved as .dta format
+(file ../temp/CNS_basic_1997.csv not found)
+file ../temp/CNS_basic_1997.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,608 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1998.csv not found)
-file ../temp/BTC_basic_1998.csv saved as .dta format
+(file ../temp/CNS_basic_1998.csv not found)
+file ../temp/CNS_basic_1998.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,607 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_1999.csv not found)
-file ../temp/BTC_basic_1999.csv saved as .dta format
+(file ../temp/CNS_basic_1999.csv not found)
+file ../temp/CNS_basic_1999.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,987 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2000.csv not found)
-file ../temp/BTC_basic_2000.csv saved as .dta format
+(file ../temp/CNS_basic_2000.csv not found)
+file ../temp/CNS_basic_2000.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,066 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2001.csv not found)
-file ../temp/BTC_basic_2001.csv saved as .dta format
+(file ../temp/CNS_basic_2001.csv not found)
+file ../temp/CNS_basic_2001.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,102 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2002.csv not found)
-file ../temp/BTC_basic_2002.csv saved as .dta format
+(file ../temp/CNS_basic_2002.csv not found)
+file ../temp/CNS_basic_2002.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,007 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2003.csv not found)
-file ../temp/BTC_basic_2003.csv saved as .dta format
+(file ../temp/CNS_basic_2003.csv not found)
+file ../temp/CNS_basic_2003.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,051 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2004.csv not found)
-file ../temp/BTC_basic_2004.csv saved as .dta format
+(file ../temp/CNS_basic_2004.csv not found)
+file ../temp/CNS_basic_2004.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,081 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2005.csv not found)
-file ../temp/BTC_basic_2005.csv saved as .dta format
+(file ../temp/CNS_basic_2005.csv not found)
+file ../temp/CNS_basic_2005.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,964 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2006.csv not found)
-file ../temp/BTC_basic_2006.csv saved as .dta format
+(file ../temp/CNS_basic_2006.csv not found)
+file ../temp/CNS_basic_2006.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,930 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2007.csv not found)
-file ../temp/BTC_basic_2007.csv saved as .dta format
+(file ../temp/CNS_basic_2007.csv not found)
+file ../temp/CNS_basic_2007.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,943 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2008.csv not found)
-file ../temp/BTC_basic_2008.csv saved as .dta format
+(file ../temp/CNS_basic_2008.csv not found)
+file ../temp/CNS_basic_2008.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,044 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2009.csv not found)
-file ../temp/BTC_basic_2009.csv saved as .dta format
+(file ../temp/CNS_basic_2009.csv not found)
+file ../temp/CNS_basic_2009.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,803 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2010.csv not found)
-file ../temp/BTC_basic_2010.csv saved as .dta format
+(file ../temp/CNS_basic_2010.csv not found)
+file ../temp/CNS_basic_2010.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,888 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2011.csv not found)
-file ../temp/BTC_basic_2011.csv saved as .dta format
+(file ../temp/CNS_basic_2011.csv not found)
+file ../temp/CNS_basic_2011.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,990 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2012.csv not found)
-file ../temp/BTC_basic_2012.csv saved as .dta format
+(file ../temp/CNS_basic_2012.csv not found)
+file ../temp/CNS_basic_2012.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,074 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2013.csv not found)
-file ../temp/BTC_basic_2013.csv saved as .dta format
+(file ../temp/CNS_basic_2013.csv not found)
+file ../temp/CNS_basic_2013.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,254 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2014.csv not found)
-file ../temp/BTC_basic_2014.csv saved as .dta format
+(file ../temp/CNS_basic_2014.csv not found)
+file ../temp/CNS_basic_2014.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,157 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2015.csv not found)
-file ../temp/BTC_basic_2015.csv saved as .dta format
+(file ../temp/CNS_basic_2015.csv not found)
+file ../temp/CNS_basic_2015.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,248 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2016.csv not found)
-file ../temp/BTC_basic_2016.csv saved as .dta format
+(file ../temp/CNS_basic_2016.csv not found)
+file ../temp/CNS_basic_2016.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,113 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2017.csv not found)
-file ../temp/BTC_basic_2017.csv saved as .dta format
+(file ../temp/CNS_basic_2017.csv not found)
+file ../temp/CNS_basic_2017.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 2,013 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2018.csv not found)
-file ../temp/BTC_basic_2018.csv saved as .dta format
+(file ../temp/CNS_basic_2018.csv not found)
+file ../temp/CNS_basic_2018.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
 (2 vars, 1,909 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2019.csv not found)
-file ../temp/BTC_basic_2019.csv saved as .dta format
+(file ../temp/CNS_basic_2019.csv not found)
+file ../temp/CNS_basic_2019.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,768 obs)
+(2 vars, 1,775 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2020.csv not found)
-file ../temp/BTC_basic_2020.csv saved as .dta format
+(file ../temp/CNS_basic_2020.csv not found)
+file ../temp/CNS_basic_2020.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,632 obs)
+(2 vars, 1,657 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2021.csv not found)
-file ../temp/BTC_basic_2021.csv saved as .dta format
+(file ../temp/CNS_basic_2021.csv not found)
+file ../temp/CNS_basic_2021.csv saved as .dta format
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,613 obs)
+(2 vars, 1,788 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_basic_2022.csv not found)
-file ../temp/BTC_basic_2022.csv saved as .dta format
+(file ../temp/CNS_basic_2022.csv not found)
+file ../temp/CNS_basic_2022.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,123 obs)
+(2 vars, 1,122 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1988.csv not found)
-file ../temp/BTC_translational_1988.csv saved as .dta format
+(file ../temp/CNS_translational_1988.csv not found)
+file ../temp/CNS_translational_1988.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,014 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1989.csv not found)
-file ../temp/BTC_translational_1989.csv saved as .dta format
+(file ../temp/CNS_translational_1989.csv not found)
+file ../temp/CNS_translational_1989.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 990 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1990.csv not found)
-file ../temp/BTC_translational_1990.csv saved as .dta format
+(file ../temp/CNS_translational_1990.csv not found)
+file ../temp/CNS_translational_1990.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 834 obs)
+(2 vars, 835 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1991.csv not found)
-file ../temp/BTC_translational_1991.csv saved as .dta format
+(file ../temp/CNS_translational_1991.csv not found)
+file ../temp/CNS_translational_1991.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 893 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1992.csv not found)
-file ../temp/BTC_translational_1992.csv saved as .dta format
+(file ../temp/CNS_translational_1992.csv not found)
+file ../temp/CNS_translational_1992.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,011 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1993.csv not found)
-file ../temp/BTC_translational_1993.csv saved as .dta format
+(file ../temp/CNS_translational_1993.csv not found)
+file ../temp/CNS_translational_1993.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 989 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1994.csv not found)
-file ../temp/BTC_translational_1994.csv saved as .dta format
+(file ../temp/CNS_translational_1994.csv not found)
+file ../temp/CNS_translational_1994.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 959 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1995.csv not found)
-file ../temp/BTC_translational_1995.csv saved as .dta format
+(file ../temp/CNS_translational_1995.csv not found)
+file ../temp/CNS_translational_1995.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 977 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1996.csv not found)
-file ../temp/BTC_translational_1996.csv saved as .dta format
+(file ../temp/CNS_translational_1996.csv not found)
+file ../temp/CNS_translational_1996.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 972 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1997.csv not found)
-file ../temp/BTC_translational_1997.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 965 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1998.csv not found)
-file ../temp/BTC_translational_1998.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 990 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_1999.csv not found)
-file ../temp/BTC_translational_1999.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 975 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2000.csv not found)
-file ../temp/BTC_translational_2000.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 983 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2001.csv not found)
-file ../temp/BTC_translational_2001.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 1,041 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2002.csv not found)
-file ../temp/BTC_translational_2002.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 1,000 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2003.csv not found)
-file ../temp/BTC_translational_2003.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 1,064 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2004.csv not found)
-file ../temp/BTC_translational_2004.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 990 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2005.csv not found)
-file ../temp/BTC_translational_2005.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 945 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2006.csv not found)
-file ../temp/BTC_translational_2006.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 894 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2007.csv not found)
-file ../temp/BTC_translational_2007.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 945 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2008.csv not found)
-file ../temp/BTC_translational_2008.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 916 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2009.csv not found)
-file ../temp/BTC_translational_2009.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 1,005 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2010.csv not found)
-file ../temp/BTC_translational_2010.csv saved as .dta format
+(file ../temp/CNS_translational_1997.csv not found)
+file ../temp/CNS_translational_1997.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 964 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2011.csv not found)
-file ../temp/BTC_translational_2011.csv saved as .dta format
+(file ../temp/CNS_translational_1998.csv not found)
+file ../temp/CNS_translational_1998.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,081 obs)
+(2 vars, 991 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2012.csv not found)
-file ../temp/BTC_translational_2012.csv saved as .dta format
+(file ../temp/CNS_translational_1999.csv not found)
+file ../temp/CNS_translational_1999.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,151 obs)
+(2 vars, 975 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2013.csv not found)
-file ../temp/BTC_translational_2013.csv saved as .dta format
+(file ../temp/CNS_translational_2000.csv not found)
+file ../temp/CNS_translational_2000.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,304 obs)
+(2 vars, 983 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2014.csv not found)
-file ../temp/BTC_translational_2014.csv saved as .dta format
+(file ../temp/CNS_translational_2001.csv not found)
+file ../temp/CNS_translational_2001.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,264 obs)
+(2 vars, 1,041 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2015.csv not found)
-file ../temp/BTC_translational_2015.csv saved as .dta format
+(file ../temp/CNS_translational_2002.csv not found)
+file ../temp/CNS_translational_2002.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,238 obs)
+(2 vars, 999 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2016.csv not found)
-file ../temp/BTC_translational_2016.csv saved as .dta format
+(file ../temp/CNS_translational_2003.csv not found)
+file ../temp/CNS_translational_2003.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,107 obs)
+(2 vars, 1,064 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2017.csv not found)
-file ../temp/BTC_translational_2017.csv saved as .dta format
+(file ../temp/CNS_translational_2004.csv not found)
+file ../temp/CNS_translational_2004.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,005 obs)
+(2 vars, 989 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2018.csv not found)
-file ../temp/BTC_translational_2018.csv saved as .dta format
+(file ../temp/CNS_translational_2005.csv not found)
+file ../temp/CNS_translational_2005.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 935 obs)
+(2 vars, 941 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2019.csv not found)
-file ../temp/BTC_translational_2019.csv saved as .dta format
+(file ../temp/CNS_translational_2006.csv not found)
+file ../temp/CNS_translational_2006.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,431 obs)
+(2 vars, 893 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2020.csv not found)
-file ../temp/BTC_translational_2020.csv saved as .dta format
+(file ../temp/CNS_translational_2007.csv not found)
+file ../temp/CNS_translational_2007.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,314 obs)
+(2 vars, 939 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2021.csv not found)
-file ../temp/BTC_translational_2021.csv saved as .dta format
+(file ../temp/CNS_translational_2008.csv not found)
+file ../temp/CNS_translational_2008.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,363 obs)
+(2 vars, 912 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_translational_2022.csv not found)
-file ../temp/BTC_translational_2022.csv saved as .dta format
+(file ../temp/CNS_translational_2009.csv not found)
+file ../temp/CNS_translational_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,001 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2010.csv not found)
+file ../temp/CNS_translational_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 962 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2011.csv not found)
+file ../temp/CNS_translational_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,077 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2012.csv not found)
+file ../temp/CNS_translational_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,144 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2013.csv not found)
+file ../temp/CNS_translational_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,297 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2014.csv not found)
+file ../temp/CNS_translational_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,261 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2015.csv not found)
+file ../temp/CNS_translational_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,227 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2016.csv not found)
+file ../temp/CNS_translational_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,105 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2017.csv not found)
+file ../temp/CNS_translational_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,000 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2018.csv not found)
+file ../temp/CNS_translational_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 933 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2019.csv not found)
+file ../temp/CNS_translational_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,420 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2020.csv not found)
+file ../temp/CNS_translational_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,287 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2021.csv not found)
+file ../temp/CNS_translational_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,451 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_translational_2022.csv not found)
+file ../temp/CNS_translational_2022.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,661 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1988.csv not found)
-file ../temp/BTC_fundamental_1988.csv saved as .dta format
+(file ../temp/CNS_fundamental_1988.csv not found)
+file ../temp/CNS_fundamental_1988.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,703 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1989.csv not found)
-file ../temp/BTC_fundamental_1989.csv saved as .dta format
+(file ../temp/CNS_fundamental_1989.csv not found)
+file ../temp/CNS_fundamental_1989.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,670 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1990.csv not found)
-file ../temp/BTC_fundamental_1990.csv saved as .dta format
+(file ../temp/CNS_fundamental_1990.csv not found)
+file ../temp/CNS_fundamental_1990.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,543 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1991.csv not found)
-file ../temp/BTC_fundamental_1991.csv saved as .dta format
+(file ../temp/CNS_fundamental_1991.csv not found)
+file ../temp/CNS_fundamental_1991.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,563 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1992.csv not found)
-file ../temp/BTC_fundamental_1992.csv saved as .dta format
+(file ../temp/CNS_fundamental_1992.csv not found)
+file ../temp/CNS_fundamental_1992.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,673 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1993.csv not found)
-file ../temp/BTC_fundamental_1993.csv saved as .dta format
+(file ../temp/CNS_fundamental_1993.csv not found)
+file ../temp/CNS_fundamental_1993.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,659 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1994.csv not found)
-file ../temp/BTC_fundamental_1994.csv saved as .dta format
+(file ../temp/CNS_fundamental_1994.csv not found)
+file ../temp/CNS_fundamental_1994.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,725 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1995.csv not found)
-file ../temp/BTC_fundamental_1995.csv saved as .dta format
+(file ../temp/CNS_fundamental_1995.csv not found)
+file ../temp/CNS_fundamental_1995.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,675 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1996.csv not found)
-file ../temp/BTC_fundamental_1996.csv saved as .dta format
+(file ../temp/CNS_fundamental_1996.csv not found)
+file ../temp/CNS_fundamental_1996.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,662 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1997.csv not found)
-file ../temp/BTC_fundamental_1997.csv saved as .dta format
+(file ../temp/CNS_fundamental_1997.csv not found)
+file ../temp/CNS_fundamental_1997.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,604 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1998.csv not found)
-file ../temp/BTC_fundamental_1998.csv saved as .dta format
+(file ../temp/CNS_fundamental_1998.csv not found)
+file ../temp/CNS_fundamental_1998.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,588 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_1999.csv not found)
-file ../temp/BTC_fundamental_1999.csv saved as .dta format
+(file ../temp/CNS_fundamental_1999.csv not found)
+file ../temp/CNS_fundamental_1999.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,973 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2000.csv not found)
-file ../temp/BTC_fundamental_2000.csv saved as .dta format
+(file ../temp/CNS_fundamental_2000.csv not found)
+file ../temp/CNS_fundamental_2000.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,051 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2001.csv not found)
-file ../temp/BTC_fundamental_2001.csv saved as .dta format
+(file ../temp/CNS_fundamental_2001.csv not found)
+file ../temp/CNS_fundamental_2001.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,087 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2002.csv not found)
-file ../temp/BTC_fundamental_2002.csv saved as .dta format
+(file ../temp/CNS_fundamental_2002.csv not found)
+file ../temp/CNS_fundamental_2002.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,989 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2003.csv not found)
-file ../temp/BTC_fundamental_2003.csv saved as .dta format
+(file ../temp/CNS_fundamental_2003.csv not found)
+file ../temp/CNS_fundamental_2003.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,027 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2004.csv not found)
-file ../temp/BTC_fundamental_2004.csv saved as .dta format
+(file ../temp/CNS_fundamental_2004.csv not found)
+file ../temp/CNS_fundamental_2004.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,062 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2005.csv not found)
-file ../temp/BTC_fundamental_2005.csv saved as .dta format
+(file ../temp/CNS_fundamental_2005.csv not found)
+file ../temp/CNS_fundamental_2005.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,955 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2006.csv not found)
-file ../temp/BTC_fundamental_2006.csv saved as .dta format
+(file ../temp/CNS_fundamental_2006.csv not found)
+file ../temp/CNS_fundamental_2006.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,902 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2007.csv not found)
-file ../temp/BTC_fundamental_2007.csv saved as .dta format
+(file ../temp/CNS_fundamental_2007.csv not found)
+file ../temp/CNS_fundamental_2007.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,915 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2008.csv not found)
-file ../temp/BTC_fundamental_2008.csv saved as .dta format
+(file ../temp/CNS_fundamental_2008.csv not found)
+file ../temp/CNS_fundamental_2008.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,015 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2009.csv not found)
-file ../temp/BTC_fundamental_2009.csv saved as .dta format
+(file ../temp/CNS_fundamental_2009.csv not found)
+file ../temp/CNS_fundamental_2009.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,782 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2010.csv not found)
-file ../temp/BTC_fundamental_2010.csv saved as .dta format
+(file ../temp/CNS_fundamental_2010.csv not found)
+file ../temp/CNS_fundamental_2010.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,865 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2011.csv not found)
-file ../temp/BTC_fundamental_2011.csv saved as .dta format
+(file ../temp/CNS_fundamental_2011.csv not found)
+file ../temp/CNS_fundamental_2011.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,957 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2012.csv not found)
-file ../temp/BTC_fundamental_2012.csv saved as .dta format
+(file ../temp/CNS_fundamental_2012.csv not found)
+file ../temp/CNS_fundamental_2012.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,054 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2013.csv not found)
-file ../temp/BTC_fundamental_2013.csv saved as .dta format
+(file ../temp/CNS_fundamental_2013.csv not found)
+file ../temp/CNS_fundamental_2013.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,233 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2014.csv not found)
-file ../temp/BTC_fundamental_2014.csv saved as .dta format
+(file ../temp/CNS_fundamental_2014.csv not found)
+file ../temp/CNS_fundamental_2014.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,121 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2015.csv not found)
-file ../temp/BTC_fundamental_2015.csv saved as .dta format
+(file ../temp/CNS_fundamental_2015.csv not found)
+file ../temp/CNS_fundamental_2015.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,217 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2016.csv not found)
-file ../temp/BTC_fundamental_2016.csv saved as .dta format
+(file ../temp/CNS_fundamental_2016.csv not found)
+file ../temp/CNS_fundamental_2016.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,079 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2017.csv not found)
-file ../temp/BTC_fundamental_2017.csv saved as .dta format
+(file ../temp/CNS_fundamental_2017.csv not found)
+file ../temp/CNS_fundamental_2017.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,979 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2018.csv not found)
-file ../temp/BTC_fundamental_2018.csv saved as .dta format
+(file ../temp/CNS_fundamental_2018.csv not found)
+file ../temp/CNS_fundamental_2018.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,874 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2019.csv not found)
-file ../temp/BTC_fundamental_2019.csv saved as .dta format
+(file ../temp/CNS_fundamental_2019.csv not found)
+file ../temp/CNS_fundamental_2019.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,730 obs)
+(2 vars, 1,737 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2020.csv not found)
-file ../temp/BTC_fundamental_2020.csv saved as .dta format
+(file ../temp/CNS_fundamental_2020.csv not found)
+file ../temp/CNS_fundamental_2020.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,607 obs)
+(2 vars, 1,632 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2021.csv not found)
-file ../temp/BTC_fundamental_2021.csv saved as .dta format
+(file ../temp/CNS_fundamental_2021.csv not found)
+file ../temp/CNS_fundamental_2021.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1,589 obs)
+(2 vars, 1,762 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_fundamental_2022.csv not found)
-file ../temp/BTC_fundamental_2022.csv saved as .dta format
+(file ../temp/CNS_fundamental_2022.csv not found)
+file ../temp/CNS_fundamental_2022.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,130 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1988.csv not found)
-file ../temp/BTC_diseases_1988.csv saved as .dta format
+(file ../temp/CNS_diseases_1988.csv not found)
+file ../temp/CNS_diseases_1988.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,944 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1989.csv not found)
-file ../temp/BTC_diseases_1989.csv saved as .dta format
+(file ../temp/CNS_diseases_1989.csv not found)
+file ../temp/CNS_diseases_1989.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,864 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1990.csv not found)
-file ../temp/BTC_diseases_1990.csv saved as .dta format
+(file ../temp/CNS_diseases_1990.csv not found)
+file ../temp/CNS_diseases_1990.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,636 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1991.csv not found)
-file ../temp/BTC_diseases_1991.csv saved as .dta format
+(file ../temp/CNS_diseases_1991.csv not found)
+file ../temp/CNS_diseases_1991.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,752 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1992.csv not found)
-file ../temp/BTC_diseases_1992.csv saved as .dta format
+(file ../temp/CNS_diseases_1992.csv not found)
+file ../temp/CNS_diseases_1992.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,915 obs)
 pmid was long now str7
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1993.csv not found)
-file ../temp/BTC_diseases_1993.csv saved as .dta format
+(file ../temp/CNS_diseases_1993.csv not found)
+file ../temp/CNS_diseases_1993.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,862 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1994.csv not found)
-file ../temp/BTC_diseases_1994.csv saved as .dta format
+(file ../temp/CNS_diseases_1994.csv not found)
+file ../temp/CNS_diseases_1994.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,797 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1995.csv not found)
-file ../temp/BTC_diseases_1995.csv saved as .dta format
+(file ../temp/CNS_diseases_1995.csv not found)
+file ../temp/CNS_diseases_1995.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,879 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1996.csv not found)
-file ../temp/BTC_diseases_1996.csv saved as .dta format
+(file ../temp/CNS_diseases_1996.csv not found)
+file ../temp/CNS_diseases_1996.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,844 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1997.csv not found)
-file ../temp/BTC_diseases_1997.csv saved as .dta format
+(file ../temp/CNS_diseases_1997.csv not found)
+file ../temp/CNS_diseases_1997.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,851 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1998.csv not found)
-file ../temp/BTC_diseases_1998.csv saved as .dta format
+(file ../temp/CNS_diseases_1998.csv not found)
+file ../temp/CNS_diseases_1998.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,891 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_1999.csv not found)
-file ../temp/BTC_diseases_1999.csv saved as .dta format
+(file ../temp/CNS_diseases_1999.csv not found)
+file ../temp/CNS_diseases_1999.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,910 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2000.csv not found)
-file ../temp/BTC_diseases_2000.csv saved as .dta format
+(file ../temp/CNS_diseases_2000.csv not found)
+file ../temp/CNS_diseases_2000.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,045 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2001.csv not found)
-file ../temp/BTC_diseases_2001.csv saved as .dta format
+(file ../temp/CNS_diseases_2001.csv not found)
+file ../temp/CNS_diseases_2001.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,055 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2002.csv not found)
-file ../temp/BTC_diseases_2002.csv saved as .dta format
+(file ../temp/CNS_diseases_2002.csv not found)
+file ../temp/CNS_diseases_2002.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,173 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2003.csv not found)
-file ../temp/BTC_diseases_2003.csv saved as .dta format
+(file ../temp/CNS_diseases_2003.csv not found)
+file ../temp/CNS_diseases_2003.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,109 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2004.csv not found)
-file ../temp/BTC_diseases_2004.csv saved as .dta format
+(file ../temp/CNS_diseases_2004.csv not found)
+file ../temp/CNS_diseases_2004.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,894 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2005.csv not found)
-file ../temp/BTC_diseases_2005.csv saved as .dta format
+(file ../temp/CNS_diseases_2005.csv not found)
+file ../temp/CNS_diseases_2005.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,773 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2006.csv not found)
-file ../temp/BTC_diseases_2006.csv saved as .dta format
+(file ../temp/CNS_diseases_2006.csv not found)
+file ../temp/CNS_diseases_2006.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,690 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2007.csv not found)
-file ../temp/BTC_diseases_2007.csv saved as .dta format
+(file ../temp/CNS_diseases_2007.csv not found)
+file ../temp/CNS_diseases_2007.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,811 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2008.csv not found)
-file ../temp/BTC_diseases_2008.csv saved as .dta format
+(file ../temp/CNS_diseases_2008.csv not found)
+file ../temp/CNS_diseases_2008.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,878 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2009.csv not found)
-file ../temp/BTC_diseases_2009.csv saved as .dta format
+(file ../temp/CNS_diseases_2009.csv not found)
+file ../temp/CNS_diseases_2009.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,910 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2010.csv not found)
-file ../temp/BTC_diseases_2010.csv saved as .dta format
+(file ../temp/CNS_diseases_2010.csv not found)
+file ../temp/CNS_diseases_2010.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,038 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2011.csv not found)
-file ../temp/BTC_diseases_2011.csv saved as .dta format
+(file ../temp/CNS_diseases_2011.csv not found)
+file ../temp/CNS_diseases_2011.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,198 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2012.csv not found)
-file ../temp/BTC_diseases_2012.csv saved as .dta format
+(file ../temp/CNS_diseases_2012.csv not found)
+file ../temp/CNS_diseases_2012.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,198 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2013.csv not found)
-file ../temp/BTC_diseases_2013.csv saved as .dta format
+(file ../temp/CNS_diseases_2013.csv not found)
+file ../temp/CNS_diseases_2013.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,508 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2014.csv not found)
-file ../temp/BTC_diseases_2014.csv saved as .dta format
+(file ../temp/CNS_diseases_2014.csv not found)
+file ../temp/CNS_diseases_2014.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,457 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2015.csv not found)
-file ../temp/BTC_diseases_2015.csv saved as .dta format
+(file ../temp/CNS_diseases_2015.csv not found)
+file ../temp/CNS_diseases_2015.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,476 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2016.csv not found)
-file ../temp/BTC_diseases_2016.csv saved as .dta format
+(file ../temp/CNS_diseases_2016.csv not found)
+file ../temp/CNS_diseases_2016.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,266 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2017.csv not found)
-file ../temp/BTC_diseases_2017.csv saved as .dta format
+(file ../temp/CNS_diseases_2017.csv not found)
+file ../temp/CNS_diseases_2017.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,057 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2018.csv not found)
-file ../temp/BTC_diseases_2018.csv saved as .dta format
+(file ../temp/CNS_diseases_2018.csv not found)
+file ../temp/CNS_diseases_2018.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 2,062 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2019.csv not found)
-file ../temp/BTC_diseases_2019.csv saved as .dta format
+(file ../temp/CNS_diseases_2019.csv not found)
+file ../temp/CNS_diseases_2019.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 2,832 obs)
+(2 vars, 2,825 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2020.csv not found)
-file ../temp/BTC_diseases_2020.csv saved as .dta format
+(file ../temp/CNS_diseases_2020.csv not found)
+file ../temp/CNS_diseases_2020.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 2,554 obs)
+(2 vars, 2,522 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2021.csv not found)
-file ../temp/BTC_diseases_2021.csv saved as .dta format
+(file ../temp/CNS_diseases_2021.csv not found)
+file ../temp/CNS_diseases_2021.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 2,619 obs)
+(2 vars, 2,815 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_diseases_2022.csv not found)
-file ../temp/BTC_diseases_2022.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 81 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1988.csv not found)
-file ../temp/BTC_therapeutics_1988.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 76 obs)
-pmid was long now str7
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1989.csv not found)
-file ../temp/BTC_therapeutics_1989.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 88 obs)
-pmid was long now str7
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1990.csv not found)
-file ../temp/BTC_therapeutics_1990.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 74 obs)
-pmid was long now str7
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1991.csv not found)
-file ../temp/BTC_therapeutics_1991.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 71 obs)
-pmid was long now str7
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1992.csv not found)
-file ../temp/BTC_therapeutics_1992.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 72 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1993.csv not found)
-file ../temp/BTC_therapeutics_1993.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 75 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1994.csv not found)
-file ../temp/BTC_therapeutics_1994.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 71 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1995.csv not found)
-file ../temp/BTC_therapeutics_1995.csv saved as .dta format
+(file ../temp/CNS_diseases_2022.csv not found)
+file ../temp/CNS_diseases_2022.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 85 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1996.csv not found)
-file ../temp/BTC_therapeutics_1996.csv saved as .dta format
+(file ../temp/CNS_therapeutics_1988.csv not found)
+file ../temp/CNS_therapeutics_1988.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 85 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_1989.csv not found)
+file ../temp/CNS_therapeutics_1989.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 98 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_1990.csv not found)
+file ../temp/CNS_therapeutics_1990.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 86 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_1991.csv not found)
+file ../temp/CNS_therapeutics_1991.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 76 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_1992.csv not found)
+file ../temp/CNS_therapeutics_1992.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 81 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_1993.csv not found)
+file ../temp/CNS_therapeutics_1993.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 84 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_1994.csv not found)
+file ../temp/CNS_therapeutics_1994.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 81 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_1995.csv not found)
+file ../temp/CNS_therapeutics_1995.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 97 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1997.csv not found)
-file ../temp/BTC_therapeutics_1997.csv saved as .dta format
+(file ../temp/CNS_therapeutics_1996.csv not found)
+file ../temp/CNS_therapeutics_1996.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 89 obs)
+(2 vars, 111 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1998.csv not found)
-file ../temp/BTC_therapeutics_1998.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 123 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_1999.csv not found)
-file ../temp/BTC_therapeutics_1999.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 127 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2000.csv not found)
-file ../temp/BTC_therapeutics_2000.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 83 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2001.csv not found)
-file ../temp/BTC_therapeutics_2001.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 92 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2002.csv not found)
-file ../temp/BTC_therapeutics_2002.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 128 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2003.csv not found)
-file ../temp/BTC_therapeutics_2003.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 113 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2004.csv not found)
-file ../temp/BTC_therapeutics_2004.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 108 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2005.csv not found)
-file ../temp/BTC_therapeutics_2005.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 69 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2006.csv not found)
-file ../temp/BTC_therapeutics_2006.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 88 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2007.csv not found)
-file ../temp/BTC_therapeutics_2007.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 83 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2008.csv not found)
-file ../temp/BTC_therapeutics_2008.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 87 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2009.csv not found)
-file ../temp/BTC_therapeutics_2009.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 90 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2010.csv not found)
-file ../temp/BTC_therapeutics_2010.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 120 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2011.csv not found)
-file ../temp/BTC_therapeutics_2011.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 141 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2012.csv not found)
-file ../temp/BTC_therapeutics_2012.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 168 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2013.csv not found)
-file ../temp/BTC_therapeutics_2013.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 120 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2014.csv not found)
-file ../temp/BTC_therapeutics_2014.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 171 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2015.csv not found)
-file ../temp/BTC_therapeutics_2015.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 173 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2016.csv not found)
-file ../temp/BTC_therapeutics_2016.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 168 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2017.csv not found)
-file ../temp/BTC_therapeutics_2017.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 125 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2018.csv not found)
-file ../temp/BTC_therapeutics_2018.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 140 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2019.csv not found)
-file ../temp/BTC_therapeutics_2019.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 98 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2020.csv not found)
-file ../temp/BTC_therapeutics_2020.csv saved as .dta format
-(encoding automatically selected: ISO-8859-1)
-(2 vars, 75 obs)
-pmid was long now str8
-query_name already string; no replace
-(0 observations deleted)
-pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2021.csv not found)
-file ../temp/BTC_therapeutics_2021.csv saved as .dta format
+(file ../temp/CNS_therapeutics_1997.csv not found)
+file ../temp/CNS_therapeutics_1997.csv saved as .dta format
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 100 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
-(file ../temp/BTC_therapeutics_2022.csv not found)
-file ../temp/BTC_therapeutics_2022.csv saved as .dta format
+(file ../temp/CNS_therapeutics_1998.csv not found)
+file ../temp/CNS_therapeutics_1998.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 133 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_1999.csv not found)
+file ../temp/CNS_therapeutics_1999.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 139 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2000.csv not found)
+file ../temp/CNS_therapeutics_2000.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 89 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2001.csv not found)
+file ../temp/CNS_therapeutics_2001.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 104 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2002.csv not found)
+file ../temp/CNS_therapeutics_2002.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 133 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2003.csv not found)
+file ../temp/CNS_therapeutics_2003.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 121 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2004.csv not found)
+file ../temp/CNS_therapeutics_2004.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 118 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2005.csv not found)
+file ../temp/CNS_therapeutics_2005.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 74 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2006.csv not found)
+file ../temp/CNS_therapeutics_2006.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 94 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2007.csv not found)
+file ../temp/CNS_therapeutics_2007.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 94 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2008.csv not found)
+file ../temp/CNS_therapeutics_2008.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 95 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2009.csv not found)
+file ../temp/CNS_therapeutics_2009.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 95 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2010.csv not found)
+file ../temp/CNS_therapeutics_2010.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 123 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2011.csv not found)
+file ../temp/CNS_therapeutics_2011.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 153 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2012.csv not found)
+file ../temp/CNS_therapeutics_2012.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 179 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2013.csv not found)
+file ../temp/CNS_therapeutics_2013.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 129 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2014.csv not found)
+file ../temp/CNS_therapeutics_2014.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 183 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2015.csv not found)
+file ../temp/CNS_therapeutics_2015.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 182 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2016.csv not found)
+file ../temp/CNS_therapeutics_2016.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 180 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2017.csv not found)
+file ../temp/CNS_therapeutics_2017.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 132 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2018.csv not found)
+file ../temp/CNS_therapeutics_2018.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 152 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2019.csv not found)
+file ../temp/CNS_therapeutics_2019.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 120 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2020.csv not found)
+file ../temp/CNS_therapeutics_2020.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 130 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2021.csv not found)
+file ../temp/CNS_therapeutics_2021.csv saved as .dta format
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 161 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/CNS_therapeutics_2022.csv not found)
+file ../temp/CNS_therapeutics_2022.csv saved as .dta format
 (variable query_name was str10, now str18 to accommodate using data's values)
-(file ../temp/BTC_appended.dta not found)
-file ../temp/BTC_appended.dta saved
+(file ../temp/CNS_appended.dta not found)
+file ../temp/CNS_appended.dta saved
 variables created as string: 
 query_name1  query_name2
 year: all characters numeric; replaced as int
 variable pmid was long now double
-(140,336 real changes made)
+(141,126 real changes made)
 
-Duplicates in terms of pmid btc
-(3,421 observations deleted)
+Duplicates in terms of pmid cat
+(3,430 observations deleted)
 
 Duplicates in terms of pmid
-(725 observations deleted)
-(137,661 real changes made)
-(file ../output/BTC_pmids.dta not found)
-file ../output/BTC_pmids.dta saved
+(768 observations deleted)
+(138,391 real changes made)
+(file ../output/CNS_pmids.dta not found)
+file ../output/CNS_pmids.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 389 obs)
+(2 vars, 452 obs)
 (file ../temp/nejm1988.dta not found)
 file ../temp/nejm1988.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 373 obs)
+(2 vars, 456 obs)
 (file ../temp/nejm1989.dta not found)
 file ../temp/nejm1989.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 389 obs)
+(2 vars, 493 obs)
 (file ../temp/nejm1990.dta not found)
 file ../temp/nejm1990.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 347 obs)
+(2 vars, 480 obs)
 (file ../temp/nejm1991.dta not found)
 file ../temp/nejm1991.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 354 obs)
+(2 vars, 538 obs)
 (file ../temp/nejm1992.dta not found)
 file ../temp/nejm1992.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 403 obs)
+(2 vars, 512 obs)
 (file ../temp/nejm1993.dta not found)
 file ../temp/nejm1993.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 426 obs)
+(2 vars, 500 obs)
 (file ../temp/nejm1994.dta not found)
 file ../temp/nejm1994.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 387 obs)
+(2 vars, 487 obs)
 (file ../temp/nejm1995.dta not found)
 file ../temp/nejm1995.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 394 obs)
+(2 vars, 480 obs)
 (file ../temp/nejm1996.dta not found)
 file ../temp/nejm1996.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 365 obs)
+(2 vars, 467 obs)
 (file ../temp/nejm1997.dta not found)
 file ../temp/nejm1997.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 374 obs)
+(2 vars, 471 obs)
 (file ../temp/nejm1998.dta not found)
 file ../temp/nejm1998.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 407 obs)
+(2 vars, 504 obs)
 (file ../temp/nejm1999.dta not found)
 file ../temp/nejm1999.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 443 obs)
+(2 vars, 534 obs)
 (file ../temp/nejm2000.dta not found)
 file ../temp/nejm2000.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 365 obs)
+(2 vars, 464 obs)
 (file ../temp/nejm2001.dta not found)
 file ../temp/nejm2001.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 442 obs)
+(2 vars, 531 obs)
 (file ../temp/nejm2002.dta not found)
 file ../temp/nejm2002.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 526 obs)
+(2 vars, 622 obs)
 (file ../temp/nejm2003.dta not found)
 file ../temp/nejm2003.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 641 obs)
+(2 vars, 747 obs)
 (file ../temp/nejm2004.dta not found)
 file ../temp/nejm2004.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 575 obs)
+(2 vars, 681 obs)
 (file ../temp/nejm2005.dta not found)
 file ../temp/nejm2005.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 516 obs)
+(2 vars, 640 obs)
 (file ../temp/nejm2006.dta not found)
 file ../temp/nejm2006.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 527 obs)
+(2 vars, 639 obs)
 (file ../temp/nejm2007.dta not found)
 file ../temp/nejm2007.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 525 obs)
+(2 vars, 635 obs)
 (file ../temp/nejm2008.dta not found)
 file ../temp/nejm2008.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 618 obs)
+(2 vars, 738 obs)
 (file ../temp/nejm2009.dta not found)
 file ../temp/nejm2009.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 587 obs)
+(2 vars, 732 obs)
 (file ../temp/nejm2010.dta not found)
 file ../temp/nejm2010.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 601 obs)
+(2 vars, 741 obs)
 (file ../temp/nejm2011.dta not found)
 file ../temp/nejm2011.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 575 obs)
+(2 vars, 721 obs)
 (file ../temp/nejm2012.dta not found)
 file ../temp/nejm2012.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 583 obs)
+(2 vars, 723 obs)
 (file ../temp/nejm2013.dta not found)
 file ../temp/nejm2013.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 573 obs)
+(2 vars, 727 obs)
 (file ../temp/nejm2014.dta not found)
 file ../temp/nejm2014.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 532 obs)
+(2 vars, 718 obs)
 (file ../temp/nejm2015.dta not found)
 file ../temp/nejm2015.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 560 obs)
+(2 vars, 730 obs)
 (file ../temp/nejm2016.dta not found)
 file ../temp/nejm2016.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 574 obs)
+(2 vars, 734 obs)
 (file ../temp/nejm2017.dta not found)
 file ../temp/nejm2017.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 578 obs)
+(2 vars, 758 obs)
 (file ../temp/nejm2018.dta not found)
 file ../temp/nejm2018.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 537 obs)
+(2 vars, 731 obs)
 (file ../temp/nejm2019.dta not found)
 file ../temp/nejm2019.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 644 obs)
+(2 vars, 838 obs)
 (file ../temp/nejm2020.dta not found)
 file ../temp/nejm2020.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 534 obs)
+(2 vars, 725 obs)
 (file ../temp/nejm2021.dta not found)
 file ../temp/nejm2021.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 474 obs)
+(2 vars, 680 obs)
 (file ../temp/nejm2022.dta not found)
 file ../temp/nejm2022.dta saved
 (file ../temp/nejm.dta not found)
 file ../temp/nejm.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 642 obs)
+(2 vars, 686 obs)
 (file ../temp/jama1988.dta not found)
 file ../temp/jama1988.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 685 obs)
+(2 vars, 733 obs)
 (file ../temp/jama1989.dta not found)
 file ../temp/jama1989.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 693 obs)
+(2 vars, 747 obs)
 (file ../temp/jama1990.dta not found)
 file ../temp/jama1990.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 727 obs)
+(2 vars, 773 obs)
 (file ../temp/jama1991.dta not found)
 file ../temp/jama1991.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 720 obs)
+(2 vars, 763 obs)
 (file ../temp/jama1992.dta not found)
 file ../temp/jama1992.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 701 obs)
+(2 vars, 733 obs)
 (file ../temp/jama1993.dta not found)
 file ../temp/jama1993.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 651 obs)
+(2 vars, 699 obs)
 (file ../temp/jama1994.dta not found)
 file ../temp/jama1994.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 647 obs)
+(2 vars, 687 obs)
 (file ../temp/jama1995.dta not found)
 file ../temp/jama1995.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 604 obs)
+(2 vars, 646 obs)
 (file ../temp/jama1996.dta not found)
 file ../temp/jama1996.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 628 obs)
+(2 vars, 669 obs)
 (file ../temp/jama1997.dta not found)
 file ../temp/jama1997.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 646 obs)
+(2 vars, 703 obs)
 (file ../temp/jama1998.dta not found)
 file ../temp/jama1998.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 600 obs)
+(2 vars, 657 obs)
 (file ../temp/jama1999.dta not found)
 file ../temp/jama1999.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 914 obs)
+(2 vars, 984 obs)
 (file ../temp/jama2000.dta not found)
 file ../temp/jama2000.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 651 obs)
+(2 vars, 704 obs)
 (file ../temp/jama2001.dta not found)
 file ../temp/jama2001.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 562 obs)
+(2 vars, 631 obs)
 (file ../temp/jama2002.dta not found)
 file ../temp/jama2002.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 440 obs)
+(2 vars, 525 obs)
 (file ../temp/jama2003.dta not found)
 file ../temp/jama2003.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 353 obs)
+(2 vars, 429 obs)
 (file ../temp/jama2004.dta not found)
 file ../temp/jama2004.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 401 obs)
+(2 vars, 459 obs)
 (file ../temp/jama2005.dta not found)
 file ../temp/jama2005.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 363 obs)
+(2 vars, 427 obs)
 (file ../temp/jama2006.dta not found)
 file ../temp/jama2006.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 415 obs)
+(2 vars, 466 obs)
 (file ../temp/jama2007.dta not found)
 file ../temp/jama2007.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 424 obs)
+(2 vars, 479 obs)
 (file ../temp/jama2008.dta not found)
 file ../temp/jama2008.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 468 obs)
+(2 vars, 522 obs)
 (file ../temp/jama2009.dta not found)
 file ../temp/jama2009.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 481 obs)
+(2 vars, 533 obs)
 (file ../temp/jama2010.dta not found)
 file ../temp/jama2010.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 511 obs)
+(2 vars, 550 obs)
 (file ../temp/jama2011.dta not found)
 file ../temp/jama2011.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 502 obs)
+(2 vars, 574 obs)
 (file ../temp/jama2012.dta not found)
 file ../temp/jama2012.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 573 obs)
+(2 vars, 656 obs)
 (file ../temp/jama2013.dta not found)
 file ../temp/jama2013.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 610 obs)
+(2 vars, 715 obs)
 (file ../temp/jama2014.dta not found)
 file ../temp/jama2014.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 688 obs)
+(2 vars, 774 obs)
 (file ../temp/jama2015.dta not found)
 file ../temp/jama2015.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 783 obs)
+(2 vars, 873 obs)
 (file ../temp/jama2016.dta not found)
 file ../temp/jama2016.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 960 obs)
+(2 vars, 1,061 obs)
 (file ../temp/jama2017.dta not found)
 file ../temp/jama2017.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 976 obs)
+(2 vars, 1,058 obs)
 (file ../temp/jama2018.dta not found)
 file ../temp/jama2018.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,028 obs)
+(2 vars, 1,116 obs)
 (file ../temp/jama2019.dta not found)
 file ../temp/jama2019.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,122 obs)
+(2 vars, 1,210 obs)
 (file ../temp/jama2020.dta not found)
 file ../temp/jama2020.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 954 obs)
+(2 vars, 1,051 obs)
 (file ../temp/jama2021.dta not found)
 file ../temp/jama2021.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,131 obs)
+(2 vars, 1,295 obs)
 (file ../temp/jama2022.dta not found)
 file ../temp/jama2022.dta saved
 (file ../temp/jama.dta not found)
 file ../temp/jama.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 541 obs)
+(2 vars, 698 obs)
 (file ../temp/lancet1988.dta not found)
 file ../temp/lancet1988.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 535 obs)
+(2 vars, 732 obs)
 (file ../temp/lancet1989.dta not found)
 file ../temp/lancet1989.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 491 obs)
+(2 vars, 665 obs)
 (file ../temp/lancet1990.dta not found)
 file ../temp/lancet1990.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 427 obs)
+(2 vars, 675 obs)
 (file ../temp/lancet1991.dta not found)
 file ../temp/lancet1991.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 433 obs)
+(2 vars, 604 obs)
 (file ../temp/lancet1992.dta not found)
 file ../temp/lancet1992.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 695 obs)
+(2 vars, 856 obs)
 (file ../temp/lancet1993.dta not found)
 file ../temp/lancet1993.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 659 obs)
+(2 vars, 831 obs)
 (file ../temp/lancet1994.dta not found)
 file ../temp/lancet1994.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 678 obs)
+(2 vars, 818 obs)
 (file ../temp/lancet1995.dta not found)
 file ../temp/lancet1995.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 751 obs)
+(2 vars, 889 obs)
 (file ../temp/lancet1996.dta not found)
 file ../temp/lancet1996.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 755 obs)
+(2 vars, 914 obs)
 (file ../temp/lancet1997.dta not found)
 file ../temp/lancet1997.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 811 obs)
+(2 vars, 958 obs)
 (file ../temp/lancet1998.dta not found)
 file ../temp/lancet1998.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 946 obs)
+(2 vars, 1,133 obs)
 (file ../temp/lancet1999.dta not found)
 file ../temp/lancet1999.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 839 obs)
+(2 vars, 1,004 obs)
 (file ../temp/lancet2000.dta not found)
 file ../temp/lancet2000.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 875 obs)
+(2 vars, 996 obs)
 (file ../temp/lancet2001.dta not found)
 file ../temp/lancet2001.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 891 obs)
+(2 vars, 1,016 obs)
 (file ../temp/lancet2002.dta not found)
 file ../temp/lancet2002.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 971 obs)
+(2 vars, 1,055 obs)
 (file ../temp/lancet2003.dta not found)
 file ../temp/lancet2003.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 929 obs)
+(2 vars, 1,012 obs)
 (file ../temp/lancet2004.dta not found)
 file ../temp/lancet2004.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 830 obs)
+(2 vars, 908 obs)
 (file ../temp/lancet2005.dta not found)
 file ../temp/lancet2005.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 725 obs)
+(2 vars, 783 obs)
 (file ../temp/lancet2006.dta not found)
 file ../temp/lancet2006.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 641 obs)
+(2 vars, 740 obs)
 (file ../temp/lancet2007.dta not found)
 file ../temp/lancet2007.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 713 obs)
+(2 vars, 840 obs)
 (file ../temp/lancet2008.dta not found)
 file ../temp/lancet2008.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 726 obs)
+(2 vars, 827 obs)
 (file ../temp/lancet2009.dta not found)
 file ../temp/lancet2009.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 650 obs)
+(2 vars, 746 obs)
 (file ../temp/lancet2010.dta not found)
 file ../temp/lancet2010.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 768 obs)
+(2 vars, 876 obs)
 (file ../temp/lancet2011.dta not found)
 file ../temp/lancet2011.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 792 obs)
+(2 vars, 890 obs)
 (file ../temp/lancet2012.dta not found)
 file ../temp/lancet2012.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 769 obs)
+(2 vars, 885 obs)
 (file ../temp/lancet2013.dta not found)
 file ../temp/lancet2013.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 841 obs)
+(2 vars, 967 obs)
 (file ../temp/lancet2014.dta not found)
 file ../temp/lancet2014.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,016 obs)
+(2 vars, 1,178 obs)
 (file ../temp/lancet2015.dta not found)
 file ../temp/lancet2015.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 948 obs)
+(2 vars, 1,092 obs)
 (file ../temp/lancet2016.dta not found)
 file ../temp/lancet2016.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 946 obs)
+(2 vars, 1,089 obs)
 (file ../temp/lancet2017.dta not found)
 file ../temp/lancet2017.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 862 obs)
+(2 vars, 988 obs)
 (file ../temp/lancet2018.dta not found)
 file ../temp/lancet2018.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 888 obs)
+(2 vars, 1,027 obs)
 (file ../temp/lancet2019.dta not found)
 file ../temp/lancet2019.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 770 obs)
+(2 vars, 870 obs)
 (file ../temp/lancet2020.dta not found)
 file ../temp/lancet2020.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 815 obs)
+(2 vars, 921 obs)
 (file ../temp/lancet2021.dta not found)
 file ../temp/lancet2021.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 656 obs)
+(2 vars, 806 obs)
 (file ../temp/lancet2022.dta not found)
 file ../temp/lancet2022.dta saved
 (file ../temp/lancet.dta not found)
 file ../temp/lancet.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,022 obs)
+(2 vars, 1,109 obs)
 (file ../temp/bmj1988.dta not found)
 file ../temp/bmj1988.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 866 obs)
+(2 vars, 956 obs)
 (file ../temp/bmj1989.dta not found)
 file ../temp/bmj1989.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 759 obs)
+(2 vars, 843 obs)
 (file ../temp/bmj1990.dta not found)
 file ../temp/bmj1990.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 591 obs)
+(2 vars, 650 obs)
 (file ../temp/bmj1991.dta not found)
 file ../temp/bmj1991.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 633 obs)
+(2 vars, 700 obs)
 (file ../temp/bmj1992.dta not found)
 file ../temp/bmj1992.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 614 obs)
+(2 vars, 686 obs)
 (file ../temp/bmj1993.dta not found)
 file ../temp/bmj1993.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 654 obs)
+(2 vars, 707 obs)
 (file ../temp/bmj1994.dta not found)
 file ../temp/bmj1994.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 629 obs)
+(2 vars, 684 obs)
 (file ../temp/bmj1995.dta not found)
 file ../temp/bmj1995.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 660 obs)
+(2 vars, 725 obs)
 (file ../temp/bmj1996.dta not found)
 file ../temp/bmj1996.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 634 obs)
+(2 vars, 692 obs)
 (file ../temp/bmj1997.dta not found)
 file ../temp/bmj1997.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,412 obs)
+(2 vars, 1,495 obs)
 (file ../temp/bmj1998.dta not found)
 file ../temp/bmj1998.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,912 obs)
+(2 vars, 1,977 obs)
 (file ../temp/bmj1999.dta not found)
 file ../temp/bmj1999.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,589 obs)
+(2 vars, 1,651 obs)
 (file ../temp/bmj2000.dta not found)
 file ../temp/bmj2000.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 560 obs)
+(2 vars, 619 obs)
 (file ../temp/bmj2001.dta not found)
 file ../temp/bmj2001.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 646 obs)
+(2 vars, 717 obs)
 (file ../temp/bmj2002.dta not found)
 file ../temp/bmj2002.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 747 obs)
+(2 vars, 801 obs)
 (file ../temp/bmj2003.dta not found)
 file ../temp/bmj2003.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 644 obs)
+(2 vars, 714 obs)
 (file ../temp/bmj2004.dta not found)
 file ../temp/bmj2004.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 613 obs)
+(2 vars, 669 obs)
 (file ../temp/bmj2005.dta not found)
 file ../temp/bmj2005.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 522 obs)
+(2 vars, 591 obs)
 (file ../temp/bmj2006.dta not found)
 file ../temp/bmj2006.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 558 obs)
+(2 vars, 606 obs)
 (file ../temp/bmj2007.dta not found)
 file ../temp/bmj2007.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 692 obs)
+(2 vars, 746 obs)
 (file ../temp/bmj2008.dta not found)
 file ../temp/bmj2008.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 683 obs)
+(2 vars, 746 obs)
 (file ../temp/bmj2009.dta not found)
 file ../temp/bmj2009.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 711 obs)
+(2 vars, 774 obs)
 (file ../temp/bmj2010.dta not found)
 file ../temp/bmj2010.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 828 obs)
+(2 vars, 880 obs)
 (file ../temp/bmj2011.dta not found)
 file ../temp/bmj2011.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 950 obs)
+(2 vars, 1,000 obs)
 (file ../temp/bmj2012.dta not found)
 file ../temp/bmj2012.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 905 obs)
+(2 vars, 957 obs)
 (file ../temp/bmj2013.dta not found)
 file ../temp/bmj2013.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 836 obs)
+(2 vars, 877 obs)
 (file ../temp/bmj2014.dta not found)
 file ../temp/bmj2014.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 887 obs)
+(2 vars, 956 obs)
 (file ../temp/bmj2015.dta not found)
 file ../temp/bmj2015.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,293 obs)
+(2 vars, 1,336 obs)
 (file ../temp/bmj2016.dta not found)
 file ../temp/bmj2016.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,169 obs)
+(2 vars, 1,203 obs)
 (file ../temp/bmj2017.dta not found)
 file ../temp/bmj2017.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,382 obs)
+(2 vars, 1,434 obs)
 (file ../temp/bmj2018.dta not found)
 file ../temp/bmj2018.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 2,099 obs)
+(2 vars, 2,148 obs)
 (file ../temp/bmj2019.dta not found)
 file ../temp/bmj2019.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 2,211 obs)
+(2 vars, 2,252 obs)
 (file ../temp/bmj2020.dta not found)
 file ../temp/bmj2020.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 2,076 obs)
+(2 vars, 2,129 obs)
 (file ../temp/bmj2021.dta not found)
 file ../temp/bmj2021.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,849 obs)
+(2 vars, 2,011 obs)
 (file ../temp/bmj2022.dta not found)
 file ../temp/bmj2022.dta saved
 (file ../temp/bmj.dta not found)
 file ../temp/bmj.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 289 obs)
+(2 vars, 315 obs)
 (file ../temp/annals1988.dta not found)
 file ../temp/annals1988.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 271 obs)
+(2 vars, 311 obs)
 (file ../temp/annals1989.dta not found)
 file ../temp/annals1989.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 237 obs)
+(2 vars, 288 obs)
 (file ../temp/annals1990.dta not found)
 file ../temp/annals1990.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 231 obs)
+(2 vars, 287 obs)
 (file ../temp/annals1991.dta not found)
 file ../temp/annals1991.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 254 obs)
+(2 vars, 309 obs)
 (file ../temp/annals1992.dta not found)
 file ../temp/annals1992.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 254 obs)
+(2 vars, 307 obs)
 (file ../temp/annals1993.dta not found)
 file ../temp/annals1993.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 207 obs)
+(2 vars, 272 obs)
 (file ../temp/annals1994.dta not found)
 file ../temp/annals1994.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 200 obs)
+(2 vars, 250 obs)
 (file ../temp/annals1995.dta not found)
 file ../temp/annals1995.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 221 obs)
+(2 vars, 268 obs)
 (file ../temp/annals1996.dta not found)
 file ../temp/annals1996.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 227 obs)
+(2 vars, 265 obs)
 (file ../temp/annals1997.dta not found)
 file ../temp/annals1997.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 248 obs)
+(2 vars, 277 obs)
 (file ../temp/annals1998.dta not found)
 file ../temp/annals1998.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 236 obs)
+(2 vars, 261 obs)
 (file ../temp/annals1999.dta not found)
 file ../temp/annals1999.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 253 obs)
+(2 vars, 290 obs)
 (file ../temp/annals2000.dta not found)
 file ../temp/annals2000.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 272 obs)
+(2 vars, 311 obs)
 (file ../temp/annals2001.dta not found)
 file ../temp/annals2001.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 270 obs)
+(2 vars, 304 obs)
 (file ../temp/annals2002.dta not found)
 file ../temp/annals2002.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 356 obs)
+(2 vars, 381 obs)
 (file ../temp/annals2003.dta not found)
 file ../temp/annals2003.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 324 obs)
+(2 vars, 363 obs)
 (file ../temp/annals2004.dta not found)
 file ../temp/annals2004.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 216 obs)
+(2 vars, 247 obs)
 (file ../temp/annals2005.dta not found)
 file ../temp/annals2005.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 189 obs)
+(2 vars, 220 obs)
 (file ../temp/annals2006.dta not found)
 file ../temp/annals2006.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 188 obs)
+(2 vars, 228 obs)
 (file ../temp/annals2007.dta not found)
 file ../temp/annals2007.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 196 obs)
+(2 vars, 218 obs)
 (file ../temp/annals2008.dta not found)
 file ../temp/annals2008.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 338 obs)
+(2 vars, 373 obs)
 (file ../temp/annals2009.dta not found)
 file ../temp/annals2009.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 348 obs)
+(2 vars, 380 obs)
 (file ../temp/annals2010.dta not found)
 file ../temp/annals2010.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 353 obs)
+(2 vars, 376 obs)
 (file ../temp/annals2011.dta not found)
 file ../temp/annals2011.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 355 obs)
+(2 vars, 378 obs)
 (file ../temp/annals2012.dta not found)
 file ../temp/annals2012.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 373 obs)
+(2 vars, 399 obs)
 (file ../temp/annals2013.dta not found)
 file ../temp/annals2013.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 402 obs)
+(2 vars, 435 obs)
 (file ../temp/annals2014.dta not found)
 file ../temp/annals2014.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 409 obs)
+(2 vars, 442 obs)
 (file ../temp/annals2015.dta not found)
 file ../temp/annals2015.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 582 obs)
+(2 vars, 622 obs)
 (file ../temp/annals2016.dta not found)
 file ../temp/annals2016.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 699 obs)
+(2 vars, 737 obs)
 (file ../temp/annals2017.dta not found)
 file ../temp/annals2017.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 540 obs)
+(2 vars, 577 obs)
 (file ../temp/annals2018.dta not found)
 file ../temp/annals2018.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 654 obs)
+(2 vars, 687 obs)
 (file ../temp/annals2019.dta not found)
 file ../temp/annals2019.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 706 obs)
+(2 vars, 743 obs)
 (file ../temp/annals2020.dta not found)
 file ../temp/annals2020.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 511 obs)
+(2 vars, 562 obs)
 (file ../temp/annals2021.dta not found)
 file ../temp/annals2021.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 415 obs)
+(2 vars, 522 obs)
 (file ../temp/annals2022.dta not found)
 file ../temp/annals2022.dta saved
 (file ../temp/annals.dta not found)
 file ../temp/annals.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,868 obs)
+(2 vars, 1,877 obs)
 (file ../temp/science1988.dta not found)
 file ../temp/science1988.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,863 obs)
+(2 vars, 1,874 obs)
 (file ../temp/science1989.dta not found)
 file ../temp/science1989.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 2,068 obs)
+(2 vars, 2,075 obs)
 (file ../temp/science1990.dta not found)
 file ../temp/science1990.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 2,150 obs)
+(2 vars, 2,154 obs)
 (file ../temp/science1991.dta not found)
 file ../temp/science1991.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 2,104 obs)
+(2 vars, 2,115 obs)
 (file ../temp/science1992.dta not found)
 file ../temp/science1992.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 2,308 obs)
+(2 vars, 2,317 obs)
 (file ../temp/science1993.dta not found)
 file ../temp/science1993.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 2,306 obs)
+(2 vars, 2,307 obs)
 (file ../temp/science1994.dta not found)
 file ../temp/science1994.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,886 obs)
+(2 vars, 1,889 obs)
 (file ../temp/science1995.dta not found)
 file ../temp/science1995.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,272 obs)
+(2 vars, 1,274 obs)
 (file ../temp/science1996.dta not found)
 file ../temp/science1996.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 834 obs)
+(2 vars, 837 obs)
 (file ../temp/science1997.dta not found)
 file ../temp/science1997.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,052 obs)
+(2 vars, 1,059 obs)
 (file ../temp/science1998.dta not found)
 file ../temp/science1998.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,081 obs)
+(2 vars, 1,084 obs)
 (file ../temp/science1999.dta not found)
 file ../temp/science1999.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,399 obs)
+(2 vars, 1,404 obs)
 (file ../temp/science2000.dta not found)
 file ../temp/science2000.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,341 obs)
+(2 vars, 1,343 obs)
 (file ../temp/science2001.dta not found)
 file ../temp/science2001.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,435 obs)
+(2 vars, 1,440 obs)
 (file ../temp/science2002.dta not found)
 file ../temp/science2002.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,335 obs)
+(2 vars, 1,336 obs)
 (file ../temp/science2003.dta not found)
 file ../temp/science2003.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,310 obs)
+(2 vars, 1,314 obs)
 (file ../temp/science2004.dta not found)
 file ../temp/science2004.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,303 obs)
+(2 vars, 1,305 obs)
 (file ../temp/science2005.dta not found)
 file ../temp/science2005.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,351 obs)
+(2 vars, 1,355 obs)
 (file ../temp/science2006.dta not found)
 file ../temp/science2006.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,352 obs)
+(2 vars, 1,355 obs)
 (file ../temp/science2007.dta not found)
 file ../temp/science2007.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,353 obs)
+(2 vars, 1,358 obs)
 (file ../temp/science2008.dta not found)
 file ../temp/science2008.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,370 obs)
+(2 vars, 1,376 obs)
 (file ../temp/science2009.dta not found)
 file ../temp/science2009.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,325 obs)
+(2 vars, 1,329 obs)
 (file ../temp/science2010.dta not found)
 file ../temp/science2010.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,363 obs)
+(2 vars, 1,371 obs)
 (file ../temp/science2011.dta not found)
 file ../temp/science2011.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,377 obs)
+(2 vars, 1,382 obs)
 (file ../temp/science2012.dta not found)
 file ../temp/science2012.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,346 obs)
+(2 vars, 1,351 obs)
 (file ../temp/science2013.dta not found)
 file ../temp/science2013.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,325 obs)
+(2 vars, 1,331 obs)
 (file ../temp/science2014.dta not found)
 file ../temp/science2014.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,345 obs)
+(2 vars, 1,350 obs)
 (file ../temp/science2015.dta not found)
 file ../temp/science2015.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,548 obs)
+(2 vars, 1,551 obs)
 (file ../temp/science2016.dta not found)
 file ../temp/science2016.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,983 obs)
+(2 vars, 1,984 obs)
 (file ../temp/science2017.dta not found)
 file ../temp/science2017.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,528 obs)
+(2 vars, 1,531 obs)
 (file ../temp/science2018.dta not found)
 file ../temp/science2018.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,440 obs)
+(2 vars, 1,444 obs)
 (file ../temp/science2019.dta not found)
 file ../temp/science2019.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,476 obs)
+(2 vars, 1,479 obs)
 (file ../temp/science2020.dta not found)
 file ../temp/science2020.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,448 obs)
+(2 vars, 1,453 obs)
 (file ../temp/science2021.dta not found)
 file ../temp/science2021.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,214 obs)
+(2 vars, 1,335 obs)
 (file ../temp/science2022.dta not found)
 file ../temp/science2022.dta saved
 (file ../temp/science.dta not found)
 file ../temp/science.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 620 obs)
+(2 vars, 633 obs)
 (file ../temp/nature1988.dta not found)
 file ../temp/nature1988.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 629 obs)
+(2 vars, 636 obs)
 (file ../temp/nature1989.dta not found)
 file ../temp/nature1989.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 692 obs)
+(2 vars, 701 obs)
 (file ../temp/nature1990.dta not found)
 file ../temp/nature1990.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 577 obs)
+(2 vars, 579 obs)
 (file ../temp/nature1991.dta not found)
 file ../temp/nature1991.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 628 obs)
+(2 vars, 631 obs)
 (file ../temp/nature1992.dta not found)
 file ../temp/nature1992.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 652 obs)
+(2 vars, 653 obs)
 (file ../temp/nature1993.dta not found)
 file ../temp/nature1993.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 608 obs)
+(2 vars, 609 obs)
 (file ../temp/nature1994.dta not found)
 file ../temp/nature1994.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 639 obs)
+(2 vars, 640 obs)
 (file ../temp/nature1995.dta not found)
 file ../temp/nature1995.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 585 obs)
+(2 vars, 588 obs)
 (file ../temp/nature1996.dta not found)
 file ../temp/nature1996.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 586 obs)
+(2 vars, 587 obs)
 (file ../temp/nature1997.dta not found)
 file ../temp/nature1997.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 547 obs)
+(2 vars, 551 obs)
 (file ../temp/nature1998.dta not found)
 file ../temp/nature1998.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 623 obs)
+(2 vars, 630 obs)
 (file ../temp/nature1999.dta not found)
 file ../temp/nature1999.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,689 obs)
+(2 vars, 1,693 obs)
 (file ../temp/nature2000.dta not found)
 file ../temp/nature2000.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,389 obs)
+(2 vars, 1,390 obs)
 (file ../temp/nature2001.dta not found)
 file ../temp/nature2001.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,268 obs)
+(2 vars, 1,273 obs)
 (file ../temp/nature2002.dta not found)
 file ../temp/nature2002.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,305 obs)
+(2 vars, 1,310 obs)
 (file ../temp/nature2003.dta not found)
 file ../temp/nature2003.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,267 obs)
+(2 vars, 1,269 obs)
 (file ../temp/nature2004.dta not found)
 file ../temp/nature2004.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,404 obs)
+(2 vars, 1,407 obs)
 (file ../temp/nature2005.dta not found)
 file ../temp/nature2005.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,197 obs)
+(2 vars, 1,200 obs)
 (file ../temp/nature2006.dta not found)
 file ../temp/nature2006.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,101 obs)
+(2 vars, 1,103 obs)
 (file ../temp/nature2007.dta not found)
 file ../temp/nature2007.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,123 obs)
+(2 vars, 1,124 obs)
 (file ../temp/nature2008.dta not found)
 file ../temp/nature2008.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,112 obs)
+(2 vars, 1,114 obs)
 (file ../temp/nature2009.dta not found)
 file ../temp/nature2009.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,173 obs)
+(2 vars, 1,181 obs)
 (file ../temp/nature2010.dta not found)
 file ../temp/nature2010.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,241 obs)
+(2 vars, 1,243 obs)
 (file ../temp/nature2011.dta not found)
 file ../temp/nature2011.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,285 obs)
+(2 vars, 1,288 obs)
 (file ../temp/nature2012.dta not found)
 file ../temp/nature2012.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,312 obs)
+(2 vars, 1,315 obs)
 (file ../temp/nature2013.dta not found)
 file ../temp/nature2013.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,650 obs)
+(2 vars, 1,654 obs)
 (file ../temp/nature2014.dta not found)
 file ../temp/nature2014.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,646 obs)
+(2 vars, 1,649 obs)
 (file ../temp/nature2015.dta not found)
 file ../temp/nature2015.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,952 obs)
+(2 vars, 1,955 obs)
 (file ../temp/nature2016.dta not found)
 file ../temp/nature2016.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,809 obs)
+(2 vars, 1,813 obs)
 (file ../temp/nature2017.dta not found)
 file ../temp/nature2017.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,686 obs)
+(2 vars, 1,693 obs)
 (file ../temp/nature2018.dta not found)
 file ../temp/nature2018.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,312 obs)
+(2 vars, 1,319 obs)
 (file ../temp/nature2019.dta not found)
 file ../temp/nature2019.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,326 obs)
+(2 vars, 1,334 obs)
 (file ../temp/nature2020.dta not found)
 file ../temp/nature2020.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,281 obs)
+(2 vars, 1,297 obs)
 (file ../temp/nature2021.dta not found)
 file ../temp/nature2021.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 1,403 obs)
+(2 vars, 1,544 obs)
 (file ../temp/nature2022.dta not found)
 file ../temp/nature2022.dta saved
 (file ../temp/nature.dta not found)
@@ -2606,7 +2604,7 @@ file ../temp/cell2005.dta saved
 (file ../temp/cell2006.dta not found)
 file ../temp/cell2006.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 534 obs)
+(2 vars, 535 obs)
 (file ../temp/cell2007.dta not found)
 file ../temp/cell2007.dta saved
 (encoding automatically selected: ISO-8859-9)
@@ -2638,49 +2636,49 @@ file ../temp/cell2013.dta saved
 (file ../temp/cell2014.dta not found)
 file ../temp/cell2014.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 604 obs)
+(2 vars, 606 obs)
 (file ../temp/cell2015.dta not found)
 file ../temp/cell2015.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 679 obs)
+(2 vars, 681 obs)
 (file ../temp/cell2016.dta not found)
 file ../temp/cell2016.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 556 obs)
+(2 vars, 557 obs)
 (file ../temp/cell2017.dta not found)
 file ../temp/cell2017.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 645 obs)
+(2 vars, 649 obs)
 (file ../temp/cell2018.dta not found)
 file ../temp/cell2018.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 564 obs)
+(2 vars, 566 obs)
 (file ../temp/cell2019.dta not found)
 file ../temp/cell2019.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 579 obs)
+(2 vars, 582 obs)
 (file ../temp/cell2020.dta not found)
 file ../temp/cell2020.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 493 obs)
+(2 vars, 500 obs)
 (file ../temp/cell2021.dta not found)
 file ../temp/cell2021.dta saved
 (encoding automatically selected: ISO-8859-9)
-(2 vars, 371 obs)
+(2 vars, 400 obs)
 (file ../temp/cell2022.dta not found)
 file ../temp/cell2022.dta saved
 (file ../temp/cell.dta not found)
 file ../temp/cell.dta saved
 (variable journal_abbr was str4, now str6 to accommodate using data's values)
 (variable journal_abbr was str6, now str7 to accommodate using data's values)
-(2,524 observations deleted)
-(file ../output/select_jrnls_pmids.dta not found)
-file ../output/select_jrnls_pmids.dta saved
+(2,896 observations deleted)
+(file ../output/cns_med_all_pmids.dta not found)
+file ../output/cns_med_all_pmids.dta saved
 
 . 
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2022-11-23 13:53:43
+Makelog ended: 2022-12-23 11:20:49
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/code
 --------------------------------------------------------------------------------
