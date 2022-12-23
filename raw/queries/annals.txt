@@ -1,2 +1,2 @@
 Query_Name	Query
-annals	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("Ann Intern Med"[Journal])
+annals	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("Ann Intern Med"[Journal])

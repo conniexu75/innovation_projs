@@ -1,2 +1,2 @@
 Query_Name	Query
-nature	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("Nature"[Journal])
+nature	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("Nature"[Journal])

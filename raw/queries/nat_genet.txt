@@ -1,2 +1,2 @@
 Query_Name	Query
-nat_genet	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("Nat Genet"[Journal])
+nat_genet	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("Nat Genet"[Journal])

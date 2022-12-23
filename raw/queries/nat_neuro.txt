@@ -1,2 +1,2 @@
 Query_Name	Query
-nat_neuro	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND (Nat Neurosci"[Journal])
+nat_neuro	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND (Nat Neurosci"[Journal])

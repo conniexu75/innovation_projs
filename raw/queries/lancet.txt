@@ -1,2 +1,2 @@
 Query_Name	Query
-lancet	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("Lancet"[Journal])
+lancet	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("Lancet"[Journal])

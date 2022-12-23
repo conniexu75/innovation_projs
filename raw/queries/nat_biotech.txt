@@ -1,2 +1,2 @@
 Query_Name	Query
-nat_biotech	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("Nat Biotechnol"[Journal])
+nat_biotech	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("Nat Biotechnol"[Journal])

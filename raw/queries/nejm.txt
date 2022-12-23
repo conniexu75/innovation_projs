@@ -1,2 +1,2 @@
 Query_Name	Query
-nejm	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("N Engl J Med"[Journal])
+nejm	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("N Engl J Med"[Journal])

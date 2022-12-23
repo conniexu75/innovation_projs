@@ -1,2 +1,2 @@
 Query_Name	Query
-faseb	("Journal Article"[Publication Type] NOT "Clinical Study"[Publication Type]) AND ("FASEB J"[Journal])
+faseb	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("FASEB J"[Journal])
