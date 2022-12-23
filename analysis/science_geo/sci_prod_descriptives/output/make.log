@@ -1,0 +1,1767 @@
+--------------------------------------------------------------------------------
+Makelog started: 2022-12-23 00:55:33
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/athr_affls/code
+--------------------------------------------------------------------------------
+External links successfully created!
+
+  ___  ____  ____  ____  ____ ©
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core , expiring 17 Nov 2023
+Serial number: 501709306977
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/athr_affls/cod
+> e/analysis.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/home/dor/cxu/innovation_projs/analysis/science_geo/athr_affls/code/
+
+. 
+. program main
+  1.     global country_name "countries"
+  2.     global us_state_name "US states"
+  3.     global area_name "US cities"
+  4.     global city_full_name "world cities"
+  5.     global inst_name "institutions"
+  6.     foreach samp in select_jrnl natsub scijrnls demsci {
+  7.         local samp_type = cond("`samp'" == "select_jrnl", "main", "robust"
+> )
+  8.         qui get_total_articles, samp(`samp') samp_type(`samp_type')
+  9.         foreach data in fund dis thera {
+ 10.             avg_affiliations, data(`data') samp(`samp') samp_type(`samp_ty
+> pe')
+ 11.             top_jrnls, data(`data') samp(`samp') 
+ 12.             athr_loc, data(`data') samp(`samp') 
+ 13.             calc_broad_hhmi, data(`data') samp(`samp') 
+ 14.             qui trends, data(`data') samp(`samp') 
+ 15.             qui top_mesh_terms, data(`data') samp(`samp') samp_type(`samp_
+> type')
+ 16.             qui output_tables, data(`data') samp(`samp') 
+ 17.         }
+ 18.         qui comp_w_fund, samp(`samp') 
+ 19.     }
+ 20. end
+
+. 
+. program get_total_articles 
+  1.     syntax, samp(str) samp_type(str)
+  2.     use ../external/`samp_type'_total/`samp'_all_pmids, clear
+  3.     drop if inlist(pmid, 33471991, 28445112, 28121514, 30345907, 27192541,
+>  25029335, 23862974, 30332564, 31995857, 34161704)
+  4.     drop if inlist(pmid, 29669224, 35196427,26943629,28657829,34161705,311
+> 66681,29539279)
+  5.     gcontract year journal_abbr, freq(num_articles)
+  6.     save ../temp/`samp'_counts, replace
+  7.     *use ../external/filtered/all_jrnl_articles_select_jrnl, clear
+.     *save ../temp/all_jrnl_articles_select_jrnl, replace
+. *    use ../external/total/select_jrnls_pmids, clear
+. *    merge m:1 pmid using ../temp/all_jrnl_articles_select_jrnl, assert(1 3) 
+> keep(3) nogen
+. *    save ../temp/select_jrnls_pmids, replace
+. end
+
+. 
+. program avg_affiliations
+  1.     syntax, data(str) samp(str) samp_type(str)
+  2.     use ../external/`samp_type'_split/cleaned_`data'_all_`samp', clear
+  3.     qui {
+  4.         merge m:1  pmid using ../external/`samp_type'_filtered/all_jrnl_ar
+> ticles_`samp', assert(1 2 3) keep(3) nogen
+  5.         merge m:1 pmid using ../external/`samp_type'_total/`samp'_all_pmid
+> s, assert(2 3) keep(3) nogen
+  6.         *gen year = year(date)
+.         cap drop affil
+  7.         replace affiliation = strtrim(affiliation)
+  8.         replace affiliation = "" if affiliation == "The authors' affiliati
+> ons are listed in the Appendix."
+  9.         replace affiliation = "" if affiliation == "."
+ 10.         replace affiliation = "" if strpos(affiliation, "@")>0 & mi(instit
+> ution)
+ 11.         gen mi_affl = mi(affiliation)
+ 12.         bys pmid which_athr: gen which_mi_affl = sum(mi_affl)
+ 13.         drop if which_mi_affl > 1
+ 14.         drop which_mi_affl mi_affl
+ 15.         // we don't want to count broad and HHMI if they are affiliated wi
+> th other institutions. 
+.         bys pmid which_athr: gen athr_id = _n == 1
+ 16.         bys pmid (which_athr): gen which_athr2 = sum(athr_id)
+ 17.         drop which_athr athr_id
+ 18.         rename which_athr2 which_athr
+ 19.         bys pmid which_athr: gen num_affls = _N
+ 20.         bys pmid which_athr: gen author_counter = _n == 1
+ 21.         replace num_affls = . if num_affls == 1 & mi(affiliation)
+ 22.         replace institution = "Broad" if strpos(affiliation, "Broad Instit
+> ute of MIT and Harvard") > 0 | strpos(affiliation, "Broad Institute") > 0
+ 23.         gen only_broad = num_affls == 1 & broad_affl == 1
+ 24.         bys pmid which_athr: egen has_broad_affl = max(broad_affl)
+ 25.         replace has_broad_affl = 0 if only_broad == 1
+ 26.         drop if institution == "Broad" & only_broad == 0
+ 27.         bys pmid which_athr: replace num_affls = _N
+ 28.         cap rename hmmi_affl hhmi_affl
+ 29.         replace hhmi_affl = 1 if strpos(affiliation, "Howard Hughes") > 0 
+> | strpos(affiliation, "HHMI") > 0 
+ 30. 
+.         // the below can be moved to server
+.         replace institution = "HHMI-Janelia" if hhmi_affl == 1 & strpos(affil
+> iation, "Janelia") > 0 
+ 31.         replace hhmi_affl = 0 if institution == "HHMI-Janelia"
+ 32.         replace institution = "HHMI" if hhmi_affl == 1 & mi(institution) &
+>  num_affls == 1 & city == "Cambridge"
+ 33.         drop if num_affls > 1 & hhmi_affl == 1 & mi(institution) 
+ 34.         bys pmid which_athr: egen has_hhmi_affl = max(hhmi_affl)
+ 35.         qui hashsort pmid which_athr which_affiliation
+ 36.         bys pmid which_athr: gen athr_id = _n == 1
+ 37.         bys pmid (which_athr): gen which_athr2 = sum(athr_id)
+ 38.         drop which_athr athr_id
+ 39.         rename which_athr2 which_athr
+ 40.         bys pmid which_athr: replace which_affiliation = _n
+ 41.         bys pmid which_athr: replace num_affls = _N
+ 42.         bys pmid which_athr institution: gen inst_counter = _n == 1 if !mi
+> (institution)
+ 43.         bys pmid which_athr: egen num_insts = total(inst_counter)
+ 44.         gen mi_inst = mi(institution)
+ 45.         bys pmid which_athr: egen has_mi_inst = max(mi_inst)
+ 46.         drop if inst_counter != 1 & num_affls > 1 & num_insts == 1 & has_m
+> i_inst == 0
+ 47.         bys pmid which_athr: replace which_affiliation = _n
+ 48.         bys pmid which_athr: replace num_affls = _N
+ 49.         bys pmid: egen num_athrs = max(which_athr)
+ 50.         gen affl_wt = 1/num_athrs * 1/num_affls
+ 51.         replace journal_abbr = "Science" if journal == "Science"
+ 52.         replace journal_abbr = "BMJ" if journal == "British medical journa
+> l (Clinical research ed.)"
+ 53.         replace journal_abbr = "annals" if journal_abbr == "Ann Intern Med
+> "
+ 54.         replace journal_abbr = "nejm" if journal_abbr == "N Engl J Med"
+ 55.         replace journal_abbr = "nat_biotech" if journal_abbr == "Nat Biote
+> chnol"
+ 56.         replace journal_abbr = "nat_cell_bio" if journal_abbr == "Nat Cell
+>  Bio"
+ 57.         replace journal_abbr = "nat_chem_bio" if journal_abbr == "Nat Chem
+>  Bio"
+ 58.         replace journal_abbr = "nat_genet" if journal_abbr == "Nat Genet"
+ 59.         replace journal_abbr = "nat_med" if journal_abbr == "Nat Med"
+ 60.         replace journal_abbr = "faseb" if journal_abbr == "FASEB J"
+ 61.         replace journal_abbr = "jbc" if journal_abbr == "J Biol Chem"
+ 62.         replace journal_abbr = "onco" if journal_abbr == "Oncogene"
+ 63.         replace journal_abbr = "plos" if journal_abbr == "PLoS One"
+ 64.         replace journal_abbr = "cell_stem_cell" if journal_abbr == "Cell S
+> tem Cell"
+ 65.         replace journal_abbr = "nat_neuro" if journal_abbr == "Nat Neurosc
+> i"
+ 66.         replace journal_abbr = "neuron" if journal_abbr == "Neuron"
+ 67.         replace journal_abbr = lower(journal_abbr)
+ 68.         cap drop _merge
+ 69.     }
+ 70.     qui gen mi_affl = mi(affiliation)
+ 71.     qui bys pmid: egen all_mi_affl = min(mi_affl)
+ 72.     gunique pmid
+ 73.     gunique pmid if all_mi_affl == 1
+ 74.     qui drop if all_mi_affl == 1
+ 75.     gunique pmid
+ 76.     gunique pmid which_athr
+ 77.     gunique pmid which_athr which_affiliation if !mi(affiliation)
+ 78.     qui {
+ 79.         gen us_city = city if country == "United States"  & !inlist(city, 
+> "Center")
+ 80.         gen area = us_city
+ 81.         replace area = "Boston-Cambridge" if inlist(us_city, "Boston", "Ca
+> mbridge")
+ 82.         replace area = "Bay Area"  if (inlist(us_city, "Stanford", "San Fr
+> ancisco", "Berkeley", "Palo Alto") | inlist(us_city, "Mountain View", "San Jo
+> se", "Oakland", "Sunnyvale", "Cupertino", "Menlo Park") | inlist(us_city, "So
+> uth San Francisco" , "Foster City")) & us_state == "CA" 
+ 83.         replace area = "San Diego-La Jolla" if inlist(us_city, "La Jolla",
+>  "San Diego")
+ 84.         replace area = "Bethesda-DC" if inlist(us_city, "Bethesda", "Washi
+> ngton")
+ 85.         replace area = "Research Triangle" if inlist(us_city, "Durham", "C
+> hapel Hill", "Raleigh", "Research Triangle Park", "Cary" , "RTP")
+ 86.         gen city_country = area + ", " + country if !mi(area) & !mi(countr
+> y)
+ 87.         replace city_country = city + ", " + country if !mi(city) & mi(cit
+> y_country) & !mi(country)
+ 88.         replace city_country = "Uncoded cities in " + country if mi(city_c
+> ountry) & !mi(country)
+ 89.         rename city_country city_full
+ 90.     }
+ 91.     bys pmid: gen pmid_counter = _n == 1
+ 92.     rename institution inst
+ 93.     cap drop _merge
+ 94.     qui save ../temp/cleaned_all_`data'_`samp', replace
+ 95.     preserve
+ 96.     gcollapse (mean) num_athrs num_affls, by(year)
+ 97.     tw line num_affls year, xlabel(1988(2)2022, angle(45) labsize(vsmall))
+>  ytitle("Average Number of Affiliations per Author", size(small)) xtitle(Year
+> , size(small)) ylabel(1(0.2)5, labsize(vsmall))
+ 98.     qui graph export ../output/figures/avg_affls_overtime_`data'_`samp'.pd
+> f, replace
+ 99.     *qui graph export ../output/figures/avg_affls_overtime_`data'_`samp'.p
+> ng, replace
+.     tw line num_athrs year, xlabel(1988(2)2022, angle(45) labsize(vsmall)) yt
+> itle("Average Number of Authors per Article", size(small)) xtitle(Year, size(
+> small)) ylabel(0(5)80, labsize(vsmall))
+100.     qui graph export ../output/figures/avg_athrs_overtime_`data'_`samp'.pd
+> f, replace
+101.     *qui graph export ../output/figures/avg_athrs_overtime_`data'_`samp'.p
+> ng, replace
+.     restore
+102.     qui keep if inrange(date, td(01jan2015), td(31mar2022))
+103.     gunique pmid
+104.     gunique pmid which_athr
+105.     gunique pmid which_athr which_affiliation if !mi(affiliation)
+106.     qui save ../temp/cleaned_last5yrs_`data'_`samp', replace
+107.     preserve
+108.     qui gcontract pmid year
+109.     drop _freq
+110.     qui save ../temp/list_of_pmids_last5yrs_`data'_`samp', replace
+111.     restore
+112. end
+
+. 
+. program top_jrnls
+  1.     syntax, data(str) samp(str) 
+  2.     use ../temp/cleaned_all_`data'_`samp', clear
+  3.     preserve
+  4.     gcollapse (sum) pmid_counter, by(journal_abbr year)
+  5.     qui merge 1:1 journal_abbr year using ../temp/`samp'_counts, assert(1 
+> 2 3) keep(3) nogen
+  6.     gen percent_of_tot = pmid_counter/num_articles
+  7.     gcollapse (mean) avg_articles = pmid_counter avg_perc = percent_of_tot
+> , by(journal_abbr)
+  8.     qui hashsort -avg_articles
+  9.     qui replace avg_perc = avg_perc * 100
+ 10.     li 
+ 11.     mkmat avg_articles avg_perc, mat(top_jrnls_`data'_`samp')
+ 12.     restore
+ 13. end 
+
+. 
+. program athr_loc
+  1.     syntax, data(str) samp(str) 
+  2.     use ../temp/cleaned_last5yrs_`data'_`samp', clear
+  3.     foreach loc in country us_state area city_full inst {
+  4.         qui gunique pmid //which_athr //if !mi(affiliation)
+  5.         qui sum affl_wt
+  6.         local total = round(r(sum))
+  7.         *local total = r(unique)
+.         qui sum affl_wt if !mi(`loc') 
+  8.         local denom = r(sum) 
+  9.         preserve
+ 10.         if inlist("`loc'", "us_state", "area") {
+ 11.             qui keep if country == "United States"
+ 12.         }
+ 13.         gcollapse (sum) affl_wt, by(`loc')
+ 14.         qui hashsort -affl_wt 
+ 15.         qui gen perc = affl_wt / `total' * 100
+ 16.         li if mi(`loc')
+ 17.         qui drop if mi(`loc')
+ 18.         qui gen cum_perc = sum(perc) 
+ 19.         li `loc' perc in 1/20
+ 20.         mkmat affl_wt perc cum_perc in 1/20, mat(top_`loc'_`samp')
+ 21.         mat top_`loc'_`data'_`samp' = top_`loc'_`samp' \ (.,`total', .)
+ 22.         qui levelsof `loc' in 1/2
+ 23.         global top2_`loc'_`data' "`r(levels)'"
+ 24.         if inlist("`loc'", "inst", "city_full") {
+ 25.             qui levelsof `loc' in 1/20
+ 26.             global `loc'_`data' "`r(levels)'"
+ 27.         }
+ 28.         qui gen rank_grp = "first" if _n == 1
+ 29.         qui levelsof `loc' if _n == 1
+ 30.         global `loc'_first "`r(levels)'"
+ 31.         qui levelsof `loc' if _n == 2
+ 32.         global `loc'_second "`r(levels)'"
+ 33.         qui replace rank_grp = "second" if _n == 2
+ 34.         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10)
+ 35.         qui replace rank_grp = "remaining" if mi(rank_grp)
+ 36.         keep `loc' rank_grp
+ 37.         qui save ../temp/`loc'_rank_`data'_`samp', replace
+ 38.         restore
+ 39.     }
+ 40. end
+
+. 
+. program calc_broad_hhmi
+  1.    syntax, data(str) samp(str) 
+  2.    use ../temp/cleaned_last5yrs_`data'_`samp', clear
+  3.    qui gunique pmid which_athr
+  4.    local num_athrs = r(unique)
+  5.    qui gunique pmid which_athr if country == "United States"
+  6.    local num_athrs_US = r(unique)
+  7.    foreach i in broad hhmi {
+  8.        qui gunique pmid which_athr if has_`i'_affl == 1
+  9.        local num_`i' = r(unique)
+ 10.        di `num_`i'' " authors of " `num_athrs' " are " "`i' affiliated or 
+> " `num_`i''/`num_athrs'*100 " percent"
+ 11.        qui gunique pmid which_athr if has_`i'_affl == 1 & country == "Unit
+> ed States"
+ 12.        local num_`i'_US = r(unique)
+ 13.        di `num_`i'_US' " US authors of " `num_athrs_US' " are " "`i' affil
+> iated or " `num_`i'_US'/`num_athrs_US'*100 " percent"
+ 14.        // hhmi has to be us
+.        preserve
+ 15.        keep if country == "United States"
+ 16.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Stanfor
+> d University" 
+ 17.        local num_`i'_stanford = r(unique)
+ 18.        di `num_`i'_stanford' " stanford authors of " `num_`i'_US' " are " 
+> "`i' affiliated or " `num_`i'_stanford'/`num_`i'_US'*100 " percent"
+ 19.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Harvard
+>  University" 
+ 20.        local num_`i'_harvard = r(unique)
+ 21.        di `num_`i'_harvard' " harvard authors of " `num_`i'_US' " are " "`
+> i' affiliated or " `num_`i'_harvard'/`num_`i'_US'*100 " percent"
+ 22.        restore
+ 23.        if "`i'" == "broad" {
+ 24.            preserve
+ 25.            keep if inlist(inst, "Harvard University", "Massachusetts Insti
+> tute of Technology", "Boston Children's Hospital", "Dana Farber Cancer Instit
+> ute", "Massachusetts General Hospital", "Brigham and Women's Hospital", "Beth
+>  Israel Deaconess Medical Center")
+ 26.            qui gunique pmid which_athr if has_`i'_affl == 1 
+ 27.            local num_athrs_broad = r(unique)
+ 28.            qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Har
+> vard University" 
+ 29.            local num_`i'_harvard = r(unique)
+ 30.            di `num_`i'_harvard' " harvard authors of " `num_athrs_broad' "
+>  are " "`i' affiliated or " `num_`i'_harvard'/`num_athrs_broad'*100 " percent
+> "
+ 31.            qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Mas
+> sachusetts Institute of Technology" 
+ 32.            local num_`i'_mit= r(unique)
+ 33.            di `num_`i'_mit' " mit authors of " `num_athrs_broad' " are " "
+> `i' affiliated or " `num_`i'_mit'/`num_athrs_broad'*100 " percent"
+ 34.            restore 
+ 35.         }
+ 36.     }
+ 37. end
+
+. 
+. program trends
+  1.     syntax, data(str) samp(str) 
+  2.     use ../temp/cleaned_all_`data'_`samp', clear
+  3.     qui bys pmid year: gen counter = _n == 1
+  4.     qui bys year: egen tot_in_yr = total(counter)
+  5.     foreach loc in country us_state area city_full inst {
+  6.         preserve
+  7.         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp', assert
+> (1 3) keep(1 3) nogen
+  8.         qui egen year_bin  = cut(year),  at(1988 1990 1992 1994 1996 1998 
+> 2000 2002 2004 2006 2008 2010 2012 2014 2016 2018 2020 2022 2024)
+  9.         *qui egen year_bin = cut(year),  at(1988 1992 1996 2000 2004 2008 
+> 2012 2016 2020 2024) 
+.         keep if which_athr == 1
+ 10.         qui replace affl_wt = 1/num_affls
+ 11.         local year_var year_bin
+ 12.         qui bys pmid `year_var': replace counter = _n == 1
+ 13.         qui bys `year_var': egen tot_in_`year_var' = total(counter)
+ 14.         qui replace rank_grp = "remaining" if mi(rank_grp)
+ 15.         collapse (sum) affl_wt (mean) tot_in_`year_var' (firstnm) `loc' , 
+> by(rank_grp `year_var')
+ 16.         qui gen perc = affl_wt/tot_in_`year_var' * 100
+ 17.         qui bys `year_var': egen tot = sum(perc)
+ 18.         qui replace tot = round(tot)
+ 19.         assert tot==100
+ 20.         qui drop tot
+ 21.         label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Rest o
+> f the top 10 ${`loc'_name}" 4 "Remaining places"
+ 22.         label var rank_grp rank_grp
+ 23.         qui gen group = 1 if rank_grp == "first"
+ 24.         qui replace group = 2 if rank_grp == "second"
+ 25.         qui replace group = 3 if rank_grp == "rest of top 10" 
+ 26.         qui replace group = 4 if rank_grp == "remaining"
+ 27.         qui hashsort `year_var' -group
+ 28.         qui bys `year_var': gen stack_perc = sum(perc)
+ 29.         keep rank_grp `year_var' `loc' perc group stack_perc
+ 30.         local stacklines
+ 31.         qui xtset group `year_var' 
+ 32.         qui levelsof group, local(rank_grps)
+ 33.         local items = `r(r)'
+ 34.         foreach x of local rank_grps {
+ 35.            colorpalette HTML purple, n(`items') nograph
+ 36.            local stacklines `stacklines' area stack_perc `year_var' if gro
+> up == `x', fcolor("`r(p`x')'") lcolor(black) lwidth(*0.2) || 
+ 37.         }
+ 38.         qui gen labely = . 
+ 39.         qui gen rev_group = -group
+ 40.         qui bys `year_var' (rev_group): replace labely = perc / 2 if group
+>  == 4
+ 41.         qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-
+> 1] if group == 3
+ 42.         qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-
+> 1] + perc[_n-2] if group == 2
+ 43.         qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-
+> 1] + perc[_n-2] + perc[_n-3] if group == 1
+ 44.         qui gen labely_lab = "Everywhere else" if group == 4
+ 45.         qui replace labely_lab = "Rest of the top 10 ${`loc'_name}" if gro
+> up == 3
+ 46.         qui replace labely_lab = ${`loc'_second} if group == 2
+ 47.         qui replace labely_lab = ${`loc'_first} if group == 1
+ 48.         qui replace labely_lab = subinstr(labely_lab, "United States", "US
+> ", .)
+ 49.         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "U
+> K", .)
+ 50.         graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2
+> 022, ms(smcircle) ///
+>           msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabe
+> l(labely_lab)), ///
+>           ytitle("Percent of Published Papers", size(small)) xtitle("Year", s
+> ize(small)) xlabel(1988(2)2022, angle(45) labsize(vsmall)) ylabel(0(10)100, l
+> absize(vsmall)) ///
+>           graphregion(margin(r+25)) plotregion(margin(zero)) ///
+>           legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3
+>  "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places") ring(1) pos(
+> 6) rows(2))
+ 51.         qui graph export ../output/figures/`loc'_stacked_`data'_`samp'.pdf
+> , replace
+ 52.         restore
+ 53.     }
+ 54. end 
+
+. 
+. program comp_w_fund
+  1.     syntax, samp(str) 
+  2.     foreach trans in dis thera {
+  3.          local fund_name "Fundamental"
+  4.          if "`trans'" == "dis"  local `trans'_name "Disease"
+  5.          if "`trans'" == "thera"  local `trans'_name "Therapeutics"
+  6.          foreach type in city_full inst {
+  7.             qui {
+  8.                 global top_20 : list global(`type'_fund) | global(`type'_`
+> trans')
+  9.                 use ../temp/cleaned_last5yrs_fund_`samp', clear
+ 10.                 gen type = "fund"
+ 11.                 append using ../temp/cleaned_last5yrs_`trans'_`samp'
+ 12.                 replace type = "trans" if mi(type)
+ 13.                 gen to_keep = 0
+ 14.                 foreach i of global top_20 {
+ 15.                     replace to_keep = 1 if `type' == "`i'" 
+ 16.                 }
+ 17.                 gcollapse (sum) affl_wt (mean) to_keep, by(`type' type)
+ 18.                 qui sum affl_wt if type == "fund"
+ 19.                 gen share = affl_wt/round(r(sum))*100 if type == "fund"
+ 20.                 qui sum affl_wt if type == "trans"
+ 21.                 replace share = affl_wt/round(r(sum))*100 if type == "tran
+> s"
+ 22.                 drop if mi(`type')
+ 23.                 hashsort type -affl_wt
+ 24.                 by type: gen rank = _n 
+ 25.                 keep if to_keep == 1
+ 26.                 qui sum rank
+ 27.                 local rank_lmt = r(max) 
+ 28.                 reshape wide affl_wt rank share, i(`type') j(type) string
+ 29.                 gen onefund = _n
+ 30.                 gen onetrans = _n 
+ 31.                 gen zerofund = onefund-1
+ 32.                 gen zerotrans = onetrans-1
+ 33.                 // inst labels
+.                 cap replace inst = "Caltech" if inst == "California Institute
+>  of Technology"
+ 34.                 cap replace inst = "CDC" if inst == "Centers for Disease C
+> ontrol and Prevention"
+ 35.                 cap replace inst = "Columbia" if inst == "Columbia Univers
+> ity"
+ 36.                 cap replace inst = "Cornell" if inst == "Cornell Universit
+> y"
+ 37.                 cap replace inst = "Duke" if inst == "Duke University"
+ 38.                 cap replace inst = "Harvard" if inst == "Harvard Universit
+> y"
+ 39.                 cap replace inst = "JHU" if inst == "Johns Hopkins Univers
+> ity"
+ 40.                 cap replace inst = "Rockefeller Univ." if inst == "The Roc
+> kefeller University"
+ 41.                 cap replace inst = "MIT" if inst == "Massachusetts Institu
+> te of Technology"
+ 42.                 cap replace inst = "Memorial Sloan" if inst == "Memorial S
+> loan-Kettering Cancer Center"
+ 43.                 cap replace inst = "NYU" if inst == "New York University"
+ 44.                 cap replace inst = "Stanford" if inst == "Stanford Univers
+> ity"
+ 45.                 cap replace inst = "UCL" if inst == "University College Lo
+> ndon"
+ 46.                 cap replace inst = "UC Berkeley" if inst == "University of
+>  California, Berkeley"
+ 47.                 cap replace inst = "UCLA" if inst == "University of Califo
+> rnia, Los Angeles"
+ 48.                 cap replace inst = "UCSD" if inst == "University of Califo
+> rnia, San Diego"
+ 49.                 cap replace inst = "UCSF" if inst == "University of Califo
+> rnia, San Francisco"
+ 50.                 cap replace inst = "UChicago" if inst == "University of Ch
+> icago"
+ 51.                 cap replace inst = "UMich" if inst == "University of Michi
+> gan"
+ 52.                 cap replace inst = "UPenn" if inst == "University of Penns
+> ylvania"
+ 53.                 cap replace inst = "Yale" if inst == "Yale University"
+ 54.                 cap replace inst = "Wash U" if inst == "Washington Univers
+> ity in St. Louis"
+ 55.                 cap replace inst = "CAS" if inst == "Chinese Academy of Sc
+> iences"
+ 56.                 cap replace inst = "Oxford" if inst == "University of Oxfo
+> rd"
+ 57.                 cap replace inst = "Cambridge" if inst == "University of C
+> ambridge"
+ 58.                 cap replace inst = "UT Dallas" if inst == "University of T
+> exas, Dallas"
+ 59.                 cap replace inst = "UMich" if inst == "University of Michi
+> gan, Ann Arbor"
+ 60.                 cap replace inst = "Dana Farber" if inst == "Dana Farber C
+> ancer Institute"
+ 61. 
+.                 // cities
+.                 cap replace city_full = subinstr(city_country, "United States
+> ", "US",.)
+ 62.                 cap replace city_full = subinstr(city_country, "United Kin
+> gdom", "UK",.)
+ 63.                 local lmt = 20
+ 64.                 gen lab = `type' if rankfund <= `lmt' | ranktrans<= `lmt'
+ 65.                 gen lab_share = `type' 
+ 66.                 cap replace lab_share = "" if inlist(inst, "UT Dallas", "U
+> niversity of Washington", "Peking University", "Memorial Sloan", "UPenn", "UC
+> L", "Medical Research Council")
+ 67.                 cap replace lab_share = "" if inlist(inst,  "UCLA", "UChic
+> ago", "Oxford", "UMich", "Columbia", "Rockefeller Univ.")
+ 68.                 cap replace lab_share = "" if inlist(city_full, "Princeton
+> , US", "Shanghai, China", "Saint Louis, US", "Research Triangle, US" , "Dalla
+> s, US")
+ 69.                 cap replace lab_share = "" if inlist(city_full, "Seattle, 
+> US", "Los Angeles, US",  "Houston, US", "Heidelberg, Germany", "Toronto, Cana
+> da", "Chicago, US")
+ 70.                 cap replace lab_share = "" if inlist(city_full, "Baltimore
+> , US", "Oxford, UK", "Paris, France", "Pasadena, US", "Philadelphia, US")
+ 71. 
+.                 egen clock = mlabvpos(rankfund ranktrans)
+ 72.                 cap replace clock = 4 if city_full == "Los Angeles, US"
+ 73.                 cap replace clock = 6 if city_full == "New York, US"
+ 74.                 cap replace clock = 3 if city_full == "Atlanta, US"
+ 75.                 cap replace clock = 3 if city_full == "Bethesda-DC, US"
+ 76.                 cap replace clock = 6 if city_full == "Boston-Cambridge, U
+> S"
+ 77.                 cap replace clock = 7 if city_full == "Cambridge, UK"
+ 78.                 cap replace clock = 9 if city_full == "Bay Area, US"
+ 79.                 cap replace clock = 3 if city_full == "New York, US"
+ 80.                 cap replace clock = 3 if city_full == "London, UL"
+ 81.                 cap replace clock = 3 if city_full == "New Haven, US"
+ 82.                 cap replace clock = 6 if city_full == "Ann Arbor, US"
+ 83.                 cap replace clock = 3 if city_full == "Beijing, China"
+ 84.                 cap replace clock = 3 if city_full == "San Diego-La Jolla,
+>  US"
+ 85.                 cap replace clock = 9 if city_full == "Cambridge, UK"
+ 86.                 cap replace clock = 11 if inst == "University of Cambridge
+> "
+ 87.                 cap replace clock = 3 if inst == "Brigham and Women's Hosp
+> ital"
+ 88.                 cap replace clock = 12 if inst == "UC Berkeley"
+ 89.                 cap replace clock = 5 if inst == "Wash U"
+ 90.                 cap replace clock = 3 if inst == "MIT"
+ 91.                 cap replace clock = 12 if inst == "Caltech"
+ 92.                 cap replace clock = 9 if inst == "Stanford"
+ 93.                 cap replace clock = 9 if inst == "UCSD"
+ 94.                 cap replace clock = 9 if inst == "UCSF"
+ 95.                 cap replace clock = 9 if inst == "Yale"
+ 96.                 cap replace clock = 9 if inst == "NIH"
+ 97.                 cap replace clock = 4 if inst == "Cambridge"
+ 98.                 cap replace clock = 3 if inst == "CNRS"
+ 99.                 cap replace clock = 12 if inst == "Harvard"
+100.                 cap replace inst = "CAS" if inst == "Chinese Academy of Sc
+> iences"
+101.                 cap replace clock = 9 if inst == "CAS"
+102.                 cap replace clock = 3 if inst == "CDC"
+103.                 cap replace clock = 3 if inst == "JHU"
+104.                 cap replace clock = 6 if inst == "Wash U"
+105.                 local rank_lmt = 20
+106.                 tw scatter rankfund ranktrans if inrange(rankfund , 1,`ran
+> k_lmt') & inrange(ranktrans ,1,`rank_lmt'), ///
+>                   mlabel(lab) mlabsize(vsmall) mlabcolor(black) mlabvp(clock)
+>  || ///
+>                   (line onefund onetrans if onefund <= `rank_lmt', lpattern(d
+> ash) lcolor(lavender)), ///
+>                   xtitle("``trans'_name' Research Output Rank", size(small)) 
+> ytitle("`fund_name' Science Research Output Rank", size(small)) ///
+>                   xlabel(1(1)`rank_lmt', labsize(vsmall)) ylabel(1(1)`rank_lm
+> t', labsize(vsmall)) xsc(reverse) ysc(reverse) legend(off)
+107.                 graph export ../output/figures/bt_`type'_`trans'_`samp'_sc
+> atter.pdf, replace
+108.                 local lim = 12
+109.                 local skip = 1
+110.                 if "`type'" == "inst" local lim = 5
+111.                 if "`type'" == "inst" local skip = 0.5 
+112.                 tw scatter sharefund sharetrans, ///
+>                   mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(
+> clock) || ///
+>                   (line zerofund zerotrans if zerofund <= `lim', lpattern(das
+> h) lcolor(lavender)), ///
+>                   xtitle("Share of Worldwide ``trans'_name' Research Output (
+> %)", size(small)) ytitle("Share of Worldwide `fund_name' Science Research Out
+> put (%)", size(small)) ///
+>                   xlabel(0(`skip')`lim', labsize(vsmall)) ylabel(0(`skip')`li
+> m', labsize(vsmall)) legend(off)
+113.                 graph export ../output/figures/bt_`type'_`trans'_`samp'_sh
+> are_scatter.pdf, replace
+114.             }
+115.             corr sharefund sharetrans
+116.         }
+117.     }
+118. end
+
+.     
+. program top_mesh_terms
+  1.     syntax, data(str) samp(str) samp_type(str)
+  2.     use ../external/`samp_type'_split/mesh_`data'_`samp'.dta, clear
+  3.     qui merge m:1  pmid using ../external/`samp_type'_filtered/all_jrnl_ar
+> ticles_`samp', assert(1 2 3) keep(3) nogen
+  4.     qui merge m:1 pmid using ../temp/list_of_pmids_last5yrs_`data'_`samp',
+>  keep(3) nogen
+  5.     qui gunique pmid
+  6.     local total_articles = r(unique)
+  7.     qui replace mesh = subinstr(mesh, "=Y>","",.)
+  8.     qui replace mesh = subinstr(mesh, "=N>","",.)
+  9.     qui gen gen_mesh = mesh if strpos(mesh, ",") == 0 & strpos(mesh, ";") 
+> == 0
+ 10.     qui replace gen_mesh = mesh if strpos(mesh, "Models") > 0
+ 11.     qui replace gen_mesh = subinstr(gen_mesh, "&; ", "&",.)
+ 12.     qui gen rev_mesh = reverse(mesh)
+ 13.     qui replace rev_mesh = substr(rev_mesh, strpos(rev_mesh, ",")+1, strle
+> n(rev_mesh)-strpos(rev_mesh, ","))
+ 14.     qui replace rev_mesh = reverse(rev_mesh)
+ 15.     qui replace gen_mesh = rev_mesh if mi(gen_mesh) 
+ 16.     qui drop rev_mesh
+ 17.     preserve
+ 18.     qui gcontract pmid mesh, nomiss
+ 19.     qui save ../temp/contracted_mesh_`data'_`samp', replace
+ 20.     restore
+ 21.     gcontract pmid gen_mesh, nomiss
+ 22.     qui save ../temp/contracted_gen_mesh_`data'_`samp', replace
+ 23. 
+.     foreach mesh in mesh gen_mesh {
+ 24.         use ../temp/contracted_`mesh'_`data'_`samp', clear
+ 25.         qui bys pmid: gen wt = 1/_N
+ 26.         qui bys pmid: gen num_`mesh' = _N
+ 27.         sum num_`mesh'
+ 28.         cap drop _freq
+ 29.         gcollapse (sum) article_wt = wt , by(`mesh')
+ 30.         qui hashsort -article_wt
+ 31.         qui gen perc = article_wt/`total_articles'*100
+ 32.         qui gen cum_perc = sum(perc) 
+ 33.         qui sum article_wt
+ 34.         local total = round(r(sum))
+ 35.         li in 1/20
+ 36.         mkmat article_wt perc cum_perc in 1/20, mat(top_`mesh'_`samp')
+ 37.         mat top_`mesh'_`data'_`samp' = top_`mesh'_`samp' \ (.,`total', .)
+ 38.         qui levelsof `mesh' in 1/3, local(`mesh'_terms_`data')
+ 39.         qui gen rank = _n
+ 40.         qui replace rank = 4 if rank > 3
+ 41.         qui replace `mesh' = "other" if rank == 4
+ 42.         qui gen inst = "total"
+ 43.         gcollapse (sum) article_wt perc cum_perc, by(inst `mesh' rank)
+ 44.         drop rank
+ 45.         qui save ../temp/`mesh'_`data'_`samp', replace
+ 46.         
+.         use ../temp/cleaned_last5yrs_`data'_`samp', clear
+ 47.         gcollapse (sum) affl_wt , by(pmid inst)
+ 48.         qui joinby pmid using ../temp/contracted_`mesh'_`data'_`samp'
+ 49.         qui bys pmid inst : gen num_`mesh' = _N
+ 50.         qui gen article_wt = affl_wt * 1/num_`mesh'
+ 51.         qui keep if inlist(inst, "Harvard University", "Stanford Universit
+> y", "University of California, San Francisco", "NIH")
+ 52.         gen keep_`mesh' = 0
+ 53.         foreach m in ``mesh'_terms_`data'' {
+ 54.             qui replace keep_`mesh' = 1 if `mesh' == "`m'"
+ 55.         }
+ 56.         qui replace `mesh' = "other" if keep_`mesh' == 0
+ 57.         gcollapse (sum) article_wt , by(inst `mesh')
+ 58.         qui bys inst : egen tot = total(article_wt)
+ 59.         qui hashsort inst -article_wt
+ 60.         gen perc = article_wt/tot
+ 61.         gen cum_perc = sum(perc)
+ 62.         drop tot
+ 63.         append using ../temp/`mesh'_`data'_`samp'
+ 64.         qui save ../temp/`mesh'_`data'_`samp', replace
+ 65.     }
+ 66. end
+
+. 
+. program output_tables
+  1.     syntax, data(str) samp(str)
+  2.     foreach file in top_jrnls top_country top_us_state top_area top_city_f
+> ull top_inst top_mesh top_gen_mesh {
+  3.         qui matrix_to_txt, saving("../output/tables/`file'_`data'_`samp'.t
+> xt") matrix(`file'_`data'_`samp') ///
+>            title(<tab:`file'_`data'>) format(%20.4f) replace
+  4.          }
+  5.  end
+
+. ** 
+. main
+N = 361,702; 47,113 unbalanced groups of sizes 1 to 1,392
+N = 15,549; 2,979 unbalanced groups of sizes 1 to 313
+N = 346,153; 44,134 unbalanced groups of sizes 1 to 1,392
+N = 346,153; 318,269 unbalanced groups of sizes 1 to 29
+N = 180,498; 180,498 balanced groups of size 1
+N = 118,828; 8,643 unbalanced groups of sizes 1 to 1,392
+N = 118,828; 96,501 unbalanced groups of sizes 1 to 29
+N = 117,824; 117,824 balanced groups of size 1
+
+     +--------------------------------+
+     | journa~r   avg_ar~s   avg_perc |
+     |--------------------------------|
+  1. |   nature   472.4286      48.52 |
+  2. |  science   434.4857   30.73605 |
+  3. |     cell   259.1714   54.83606 |
+  4. |      bmj   24.48571   2.889709 |
+  5. |   lancet   24.22857   3.431024 |
+     |--------------------------------|
+  6. |     jama   23.51429    3.53021 |
+  7. |     nejm   18.08571   3.717711 |
+  8. |   annals   4.848485   1.515223 |
+     +--------------------------------+
+
+     +------------------------------+
+     | country   affl_wt       perc |
+     |------------------------------|
+ 15. |           71.1122   .8227722 |
+     +------------------------------+
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States   54.47173 |
+  2. | United Kingdom   8.692699 |
+  3. |        Germany   6.813352 |
+  4. |          China   5.401609 |
+  5. |    Switzerland   2.949517 |
+     |---------------------------|
+  6. |         France   2.642803 |
+  7. |         Canada    2.44332 |
+  8. |          Japan   2.188629 |
+  9. |      Australia   1.764326 |
+ 10. |    Netherlands   1.464044 |
+     |---------------------------|
+ 11. |         Israel   1.196967 |
+ 12. |        Austria   .9693704 |
+ 13. |         Sweden   .9662723 |
+ 14. |          Spain   .8794565 |
+ 15. |        Denmark   .7075036 |
+     |---------------------------|
+ 16. |        Belgium   .6189017 |
+ 17. |          Italy   .5422559 |
+ 18. |    South Korea   .4761473 |
+ 19. |      Singapore   .4098295 |
+ 20. |         Norway   .2785455 |
+     +---------------------------+
+
+     +-------------------------------+
+     | us_state   affl_wt       perc |
+     |-------------------------------|
+ 22. |            31.2846   .3619646 |
+     +-------------------------------+
+
+     +---------------------+
+     | us_state       perc |
+     |---------------------|
+  1. |       CA    14.7125 |
+  2. |       MA   9.809207 |
+  3. |       NY   6.426401 |
+  4. |       WA    2.69902 |
+  5. |       MD   2.671664 |
+     |---------------------|
+  6. |       TX   2.165181 |
+  7. |       PA   1.850002 |
+  8. |       IL   1.487102 |
+  9. |       CT    1.42101 |
+ 10. |       NC   1.406072 |
+     |---------------------|
+ 11. |       NJ   1.279922 |
+ 12. |       VA   .9299397 |
+ 13. |       MI   .7275212 |
+ 14. |       CO   .6724424 |
+ 15. |       TN   .6263286 |
+     |---------------------|
+ 16. |       GA   .5414669 |
+ 17. |       OH   .5116889 |
+ 18. |       MN   .4779494 |
+ 19. |       OR   .4685646 |
+ 20. |       FL   .4358686 |
+     +---------------------+
+
+     +----------------------------+
+     | area    affl_wt       perc |
+     |----------------------------|
+ 47. |        13.59298   .1572716 |
+     +----------------------------+
+
+     +-------------------------------+
+     |               area       perc |
+     |-------------------------------|
+  1. |   Boston-Cambridge   9.062433 |
+  2. |           Bay Area   8.620186 |
+  3. |           New York   5.162402 |
+  4. | San Diego-La Jolla   2.516078 |
+  5. |        Bethesda-DC   1.590231 |
+     |-------------------------------|
+  6. |            Seattle   1.573811 |
+  7. |  Research Triangle   1.363093 |
+  8. |          New Haven   1.302953 |
+  9. |        Los Angeles   1.214465 |
+ 10. |       Philadelphia   1.170875 |
+     |-------------------------------|
+ 11. |             Dallas   1.064163 |
+ 12. |          Baltimore   1.060497 |
+ 13. |           Pasadena   1.008048 |
+ 14. |          Princeton   .9647998 |
+ 15. |            Chicago   .8249416 |
+     |-------------------------------|
+ 16. |        Saint Louis   .6595786 |
+ 17. |            Ashburn   .5892887 |
+ 18. |            Houston   .5496004 |
+ 19. |            Atlanta   .4888784 |
+ 20. |          Ann Arbor   .4690693 |
+     +-------------------------------+
+
+      +-------------------------------+
+      | city_f~l   affl_wt       perc |
+      |-------------------------------|
+  25. |            71.1122   .8227722 |
+      +-------------------------------+
+
+     +----------------------------------------------+
+     |                         city_full       perc |
+     |----------------------------------------------|
+  1. |   Boston-Cambridge, United States   9.062433 |
+  2. |           Bay Area, United States   8.620186 |
+  3. |           New York, United States   5.162402 |
+  4. |                    Beijing, China   2.726141 |
+  5. | San Diego-La Jolla, United States   2.516078 |
+     |----------------------------------------------|
+  6. |            London, United Kingdom   2.368894 |
+  7. |         Cambridge, United Kingdom   2.142338 |
+  8. |        Bethesda-DC, United States   1.590231 |
+  9. |            Seattle, United States   1.573811 |
+ 10. |  Research Triangle, United States   1.363093 |
+     |----------------------------------------------|
+ 11. |          New Haven, United States   1.302953 |
+ 12. |            Oxford, United Kingdom   1.221384 |
+ 13. |        Los Angeles, United States   1.214465 |
+ 14. |       Philadelphia, United States   1.170875 |
+ 15. |             Dallas, United States   1.064163 |
+     |----------------------------------------------|
+ 16. |          Baltimore, United States   1.060497 |
+ 17. |           Pasadena, United States   1.008048 |
+ 18. |                     Paris, France   1.003645 |
+ 19. |                   Shanghai, China   .9749079 |
+ 20. |          Princeton, United States   .9647998 |
+     +----------------------------------------------+
+
+      +----------------------------+
+      | inst    affl_wt       perc |
+      |----------------------------|
+   1. |        812.6632   9.402559 |
+      +----------------------------+
+
+     +----------------------------------------------------+
+     |                                    inst       perc |
+     |----------------------------------------------------|
+  1. |                      Harvard University   4.381947 |
+  2. |                     Stanford University   3.953829 |
+  3. |                              Max Planck   2.367942 |
+  4. | University of California, San Francisco   2.000951 |
+  5. |      University of California, Berkeley   1.622205 |
+     |----------------------------------------------------|
+  6. |             Chinese Academy of Sciences    1.47865 |
+  7. |   Massachusetts Institute of Technology   1.445093 |
+  8. |              The Rockefeller University    1.39836 |
+  9. |                                     NIH   1.322277 |
+ 10. |                         Yale University   1.293809 |
+     |----------------------------------------------------|
+ 11. |                     Columbia University   1.277689 |
+ 12. |                                    CNRS    1.20351 |
+ 13. |                University of Washington   1.180198 |
+ 14. |                    University of Oxford   1.163931 |
+ 15. |     University of California, San Diego   1.053397 |
+     |----------------------------------------------------|
+ 16. |              University of Pennsylvania   .9751058 |
+ 17. |             University of Texas, Dallas    .974219 |
+ 18. |                Medical Research Council   .9571605 |
+ 19. |      California Institute of Technology   .9526427 |
+ 20. |   University of California, Los Angeles    .939935 |
+     +----------------------------------------------------+
+1167 authors of 96501 are broad affiliated or 1.2093139 percent
+1151 US authors of 49078 are broad affiliated or 2.3452463 percent
+(62,440 observations deleted)
+4 stanford authors of 1151 are broad affiliated or .34752389 percent
+540 harvard authors of 1151 are broad affiliated or 46.915725 percent
+(109,948 observations deleted)
+540 harvard authors of 1073 are broad affiliated or 50.326188 percent
+362 mit authors of 1073 are broad affiliated or 33.737185 percent
+3343 authors of 96501 are hhmi affiliated or 3.4642128 percent
+3337 US authors of 49078 are hhmi affiliated or 6.7993806 percent
+(62,440 observations deleted)
+458 stanford authors of 3337 are hhmi affiliated or 13.724903 percent
+480 harvard authors of 3337 are hhmi affiliated or 14.384177 percent
+N = 299,697; 32,983 unbalanced groups of sizes 1 to 1,558
+N = 18,718; 4,584 unbalanced groups of sizes 1 to 610
+N = 280,979; 28,399 unbalanced groups of sizes 1 to 1,558
+N = 280,979; 231,972 unbalanced groups of sizes 1 to 26
+N = 171,936; 171,936 balanced groups of size 1
+N = 125,997; 6,658 unbalanced groups of sizes 1 to 1,558
+N = 125,997; 85,377 unbalanced groups of sizes 1 to 26
+N = 124,640; 124,640 balanced groups of size 1
+
+     +--------------------------------+
+     | journa~r   avg_ar~s   avg_perc |
+     |--------------------------------|
+  1. |   lancet   144.2571   20.79296 |
+  2. |      bmj   138.7429   16.00268 |
+  3. |     jama   130.4857   20.50491 |
+  4. |     nejm   100.3714    21.2553 |
+  5. |   nature   95.62857   8.782034 |
+     |--------------------------------|
+  6. |  science         88   6.224595 |
+  7. |     cell   59.08571   11.96076 |
+  8. |   annals   58.15152   20.64682 |
+     +--------------------------------+
+
+     +------------------------------+
+     | country   affl_wt       perc |
+     |------------------------------|
+  3. |            224.42   3.370682 |
+     +------------------------------+
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States   55.39482 |
+  2. | United Kingdom   13.71224 |
+  3. |          China   3.216081 |
+  4. |         Canada   2.884679 |
+  5. |        Germany   2.663775 |
+     |---------------------------|
+  6. |    Switzerland   1.769392 |
+  7. |      Australia   1.717273 |
+  8. |         France   1.600504 |
+  9. |    Netherlands   1.341642 |
+ 10. |         Sweden   1.193567 |
+     |---------------------------|
+ 11. |        Denmark    .960411 |
+ 12. |          Italy   .8986325 |
+ 13. |          Japan   .8979781 |
+ 14. |          Spain   .7230166 |
+ 15. |         Israel   .6538215 |
+     |---------------------------|
+ 16. |        Belgium   .5769341 |
+ 17. |      Singapore   .5499057 |
+ 18. |   South Africa   .4858222 |
+ 19. |          India   .4842585 |
+ 20. |         Brazil   .4086138 |
+     +---------------------------+
+
+     +--------------------------------+
+     | us_state    affl_wt       perc |
+     |--------------------------------|
+  9. |            121.4232   1.823719 |
+     +--------------------------------+
+
+     +---------------------+
+     | us_state       perc |
+     |---------------------|
+  1. |       MA   10.15045 |
+  2. |       CA   8.262289 |
+  3. |       NY   6.407025 |
+  4. |       MD   5.039189 |
+  5. |       WA   3.552511 |
+     |---------------------|
+  6. |       TX   2.573294 |
+  7. |       PA   2.500967 |
+  8. |       IL   2.047383 |
+  9. |       GA   1.631422 |
+ 10. |       CT   1.624027 |
+     |---------------------|
+ 11. |       NC   1.445313 |
+ 12. |       MI   1.341009 |
+ 13. |       TN   .6956692 |
+ 14. |       MN   .6871169 |
+ 15. |       OH   .5205179 |
+     |---------------------|
+ 16. |       FL   .4670628 |
+ 17. |       CO   .4434662 |
+ 18. |       VA   .4086188 |
+ 19. |       DC   .3875426 |
+ 20. |       OR   .3654046 |
+     +---------------------+
+
+     +----------------------------+
+     | area    affl_wt       perc |
+     |----------------------------|
+ 18. |        45.05562   .6767141 |
+     +----------------------------+
+
+     +-------------------------------+
+     |               area       perc |
+     |-------------------------------|
+  1. |   Boston-Cambridge   10.35565 |
+  2. |           New York   5.429382 |
+  3. |           Bay Area   4.538238 |
+  4. |        Bethesda-DC   3.544732 |
+  5. |          Baltimore   2.159416 |
+     |-------------------------------|
+  6. |            Chicago   1.928807 |
+  7. |            Atlanta   1.877012 |
+  8. | San Diego-La Jolla   1.768566 |
+  9. |       Philadelphia   1.733149 |
+ 10. |          New Haven    1.50469 |
+     |-------------------------------|
+ 11. |            Seattle   1.383252 |
+ 12. |            Houston   1.342075 |
+ 13. |  Research Triangle   1.340063 |
+ 14. |          Ann Arbor   1.184269 |
+ 15. |        Saint Louis   1.084984 |
+     |-------------------------------|
+ 16. |        Los Angeles   .9570992 |
+ 17. |             Dallas   .7110258 |
+ 18. |      Silver Spring   .4534651 |
+ 19. |          Rochester   .4331139 |
+ 20. |            Memphis    .349324 |
+     +-------------------------------+
+
+      +-------------------------------+
+      | city_f~l   affl_wt       perc |
+      |-------------------------------|
+   6. |             224.42   3.370682 |
+      +-------------------------------+
+
+     +----------------------------------------------+
+     |                         city_full       perc |
+     |----------------------------------------------|
+  1. |   Boston-Cambridge, United States   10.35565 |
+  2. |            London, United Kingdom   5.723516 |
+  3. |           New York, United States   5.429382 |
+  4. |           Bay Area, United States   4.538238 |
+  5. |        Bethesda-DC, United States   3.544732 |
+     |----------------------------------------------|
+  6. |          Baltimore, United States   2.159416 |
+  7. |            Chicago, United States   1.928807 |
+  8. |            Atlanta, United States   1.877012 |
+  9. | San Diego-La Jolla, United States   1.768566 |
+ 10. |       Philadelphia, United States   1.733149 |
+     |----------------------------------------------|
+ 11. |          New Haven, United States    1.50469 |
+ 12. |            Seattle, United States   1.383252 |
+ 13. |            Oxford, United Kingdom   1.383179 |
+ 14. |         Cambridge, United Kingdom   1.350126 |
+ 15. |            Houston, United States   1.342075 |
+     |----------------------------------------------|
+ 16. |  Research Triangle, United States   1.340063 |
+ 17. |                    Beijing, China   1.224305 |
+ 18. |          Ann Arbor, United States   1.184269 |
+ 19. |                   Toronto, Canada   1.104705 |
+ 20. |        Saint Louis, United States   1.084984 |
+     +----------------------------------------------+
+
+      +----------------------------+
+      | inst    affl_wt       perc |
+      |----------------------------|
+   1. |        1178.562   17.70144 |
+      +----------------------------+
+
+     +----------------------------------------------------+
+     |                                    inst       perc |
+     |----------------------------------------------------|
+  1. |                      Harvard University   3.828402 |
+  2. |                                     NIH   2.384873 |
+  3. |            Brigham and Women's Hospital   2.010821 |
+  4. |                     Stanford University   1.983018 |
+  5. |                Johns Hopkins University    1.89376 |
+     |----------------------------------------------------|
+  6. |                         Yale University   1.496836 |
+  7. | University of California, San Francisco   1.441383 |
+  8. |              University of Pennsylvania   1.386886 |
+  9. |                    University of Oxford   1.279538 |
+ 10. |                                     CDC   1.266497 |
+     |----------------------------------------------------|
+ 11. |  Memorial Sloan-Kettering Cancer Center   1.194056 |
+ 12. |                   University of Chicago   1.160689 |
+ 13. |       University of Michigan, Ann Arbor   1.111708 |
+ 14. |                     Columbia University   1.043712 |
+ 15. |      Washington University in St. Louis   1.013131 |
+     |----------------------------------------------------|
+ 16. |               University College London   .9602988 |
+ 17. |                        Imperial College   .8737515 |
+ 18. |                 University of Cambridge   .8563007 |
+ 19. |                University of Washington   .8273041 |
+ 20. |     University of California, San Diego   .7932411 |
+     +----------------------------------------------------+
+1617 authors of 85377 are broad affiliated or 1.8939527 percent
+1594 US authors of 45867 are broad affiliated or 3.4752654 percent
+(64,647 observations deleted)
+46 stanford authors of 1594 are broad affiliated or 2.8858218 percent
+648 harvard authors of 1594 are broad affiliated or 40.652447 percent
+(116,754 observations deleted)
+648 harvard authors of 1236 are broad affiliated or 52.427184 percent
+204 mit authors of 1236 are broad affiliated or 16.504854 percent
+856 authors of 85377 are hhmi affiliated or 1.0026119 percent
+856 US authors of 45867 are hhmi affiliated or 1.8662655 percent
+(64,647 observations deleted)
+55 stanford authors of 856 are hhmi affiliated or 6.4252336 percent
+69 harvard authors of 856 are hhmi affiliated or 8.0607477 percent
+N = 5,759; 1,869 unbalanced groups of sizes 1 to 45
+N = 902; 499 unbalanced groups of sizes 1 to 32
+N = 4,857; 1,370 unbalanced groups of sizes 1 to 45
+N = 4,857; 4,429 unbalanced groups of sizes 1 to 9
+N = 2,787; 2,787 balanced groups of size 1
+N = 1,548; 328 unbalanced groups of sizes 1 to 40
+N = 1,548; 1,190 unbalanced groups of sizes 1 to 5
+N = 1,518; 1,518 balanced groups of size 1
+
+     +--------------------------------+
+     | journa~r   avg_ar~s   avg_perc |
+     |--------------------------------|
+  1. |      bmj   10.91429   1.316318 |
+  2. |     jama   10.74286   1.658978 |
+  3. |     nejm   7.705882   1.551823 |
+  4. |   lancet   4.029412   .5560422 |
+  5. |   annals   3.933333   1.278717 |
+     |--------------------------------|
+  6. |  science       2.08   .1414788 |
+  7. |   nature   1.583333   .1604521 |
+  8. |     cell       1.25   .2572673 |
+     +--------------------------------+
+
+     +------------------------------+
+     | country    affl_wt      perc |
+     |------------------------------|
+  3. |           27.16667   8.28252 |
+     +------------------------------+
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States    65.3587 |
+  2. | United Kingdom   12.88492 |
+  3. |         Canada   3.834326 |
+  4. |      Australia   1.115769 |
+  5. |    Netherlands   .9451219 |
+     |---------------------------|
+  6. |          China   .9348099 |
+  7. |    Switzerland   .8086528 |
+  8. |          Italy   .6097561 |
+  9. |        Ireland   .5511257 |
+ 10. |         Sweden   .4979675 |
+     |---------------------------|
+ 11. |        Germany   .4954268 |
+ 12. |         France   .4573171 |
+ 13. |        Denmark   .4319106 |
+ 14. |        Belgium   .4282811 |
+ 15. |          India    .348795 |
+     |---------------------------|
+ 16. |    New Zealand   .2286585 |
+ 17. |      Singapore    .203252 |
+ 18. |   South Africa   .1880081 |
+ 19. |       Malaysia    .174216 |
+ 20. |   Burkina Faso    .152439 |
+     +---------------------------+
+
+     +--------------------------------+
+     | us_state    affl_wt       perc |
+     |--------------------------------|
+  3. |            21.01786   6.407883 |
+     +--------------------------------+
+
+     +---------------------+
+     | us_state       perc |
+     |---------------------|
+  1. |       MA   14.16937 |
+  2. |       CA   6.584484 |
+  3. |       MD   4.844063 |
+  4. |       NY   4.614448 |
+  5. |       PA   4.506951 |
+     |---------------------|
+  6. |       WA   3.963582 |
+  7. |       IL   2.457172 |
+  8. |       NC   2.374661 |
+  9. |       WI   1.588269 |
+ 10. |       MI   1.219512 |
+     |---------------------|
+ 11. |       DC   1.077236 |
+ 12. |       RI   1.074354 |
+ 13. |       NJ   .9908537 |
+ 14. |       CT    .828615 |
+ 15. |       GA   .7767131 |
+     |---------------------|
+ 16. |       VA   .7621951 |
+ 17. |       OR   .6929554 |
+ 18. |       OH   .6859756 |
+ 19. |       MN   .6629888 |
+ 20. |       TX   .5894309 |
+     +---------------------+
+
+     +----------------------------+
+     | area    affl_wt       perc |
+     |----------------------------|
+  9. |        4.892857   1.491725 |
+     +----------------------------+
+
+     +------------------------------+
+     |              area       perc |
+     |------------------------------|
+  1. |  Boston-Cambridge   18.23936 |
+  2. |          Bay Area   4.294425 |
+  3. |       Bethesda-DC   4.001657 |
+  4. |      Philadelphia   3.475909 |
+  5. |          New York   3.226395 |
+     |------------------------------|
+  6. |         Baltimore   2.631388 |
+  7. | Research Triangle   2.340786 |
+  8. |           Chicago   2.246661 |
+  9. |         Ann Arbor   1.219512 |
+ 10. |           Madison   1.117886 |
+     |------------------------------|
+ 11. |       Los Angeles   1.113968 |
+ 12. |           Seattle   1.069418 |
+ 13. |        Piitsburgh   1.031042 |
+ 14. |        Providence   1.018922 |
+ 15. |         Rochester   .9678668 |
+     |------------------------------|
+ 16. |     Silver Spring   .9146342 |
+ 17. |       Saint Louis   .8993902 |
+ 18. |         New Haven   .8667247 |
+ 19. |           Atlanta   .8529326 |
+ 20. |          Portland   .8453944 |
+     +------------------------------+
+
+     +-------------------------------+
+     | city_f~l    affl_wt      perc |
+     |-------------------------------|
+  2. |            27.16667   8.28252 |
+     +-------------------------------+
+
+     +---------------------------------------------+
+     |                        city_full       perc |
+     |---------------------------------------------|
+  1. |  Boston-Cambridge, United States   18.23936 |
+  2. |           London, United Kingdom   5.436597 |
+  3. |          Bay Area, United States   4.294425 |
+  4. |       Bethesda-DC, United States   4.001657 |
+  5. |      Philadelphia, United States   3.475909 |
+     |---------------------------------------------|
+  6. |          New York, United States   3.226395 |
+  7. |         Baltimore, United States   2.631388 |
+  8. |          Glasgow, United Kingdom   2.506005 |
+  9. | Research Triangle, United States   2.340786 |
+ 10. |           Chicago, United States   2.246661 |
+     |---------------------------------------------|
+ 11. |           Oxford, United Kingdom   1.645146 |
+ 12. |                  Toronto, Canada   1.618184 |
+ 13. |  Uncoded cities in United States   1.491725 |
+ 14. |         Ann Arbor, United States   1.219512 |
+ 15. |           Madison, United States   1.117886 |
+     |---------------------------------------------|
+ 16. |       Los Angeles, United States   1.113968 |
+ 17. |           Seattle, United States   1.069418 |
+ 18. |        Piitsburgh, United States   1.031042 |
+ 19. |        Providence, United States   1.018922 |
+ 20. |         Rochester, United States   .9678668 |
+     +---------------------------------------------+
+
+     +----------------------------+
+     | inst    affl_wt       perc |
+     |----------------------------|
+  1. |        85.27426   25.99825 |
+     +----------------------------+
+
+     +--------------------------------------------------------+
+     |                                        inst       perc |
+     |--------------------------------------------------------|
+  1. |                Brigham and Women's Hospital   7.802338 |
+  2. |                          Harvard University   5.283009 |
+  3. |                  University of Pennsylvania   3.102284 |
+  4. |     University of California, San Francisco   3.074913 |
+  5. |                    Johns Hopkins University    2.32651 |
+     |--------------------------------------------------------|
+  6. |                        University of Oxford   1.398703 |
+  7. |                    University of Pittsburgh   1.371951 |
+  8. |           University of Michigan, Ann Arbor   1.219512 |
+  9. |                             Duke University   1.178862 |
+ 10. |                                         NIH   1.082086 |
+     |--------------------------------------------------------|
+ 11. |                       University of Chicago   1.077962 |
+ 12. | University of North Carolina at Chapel Hill   1.060298 |
+ 13. |                       Vanderbilt University   1.047595 |
+ 14. |       Massachusetts Institute of Technology    1.01626 |
+ 15. |                          Cornell University   1.007681 |
+     |--------------------------------------------------------|
+ 16. |                       University of Toronto   .9503242 |
+ 17. |                                   RAND Corp    .916086 |
+ 18. |          Washington University in St. Louis   .8993902 |
+ 19. |                            Brown University   .8773713 |
+ 20. |                             Yale University   .8667247 |
+     +--------------------------------------------------------+
+. authors of 1190 are broad affiliated or . percent
+. US authors of 773 are broad affiliated or . percent
+(548 observations deleted)
+. stanford authors of . are broad affiliated or . percent
+. harvard authors of . are broad affiliated or . percent
+(1,318 observations deleted)
+. harvard authors of . are broad affiliated or . percent
+. mit authors of . are broad affiliated or . percent
+. authors of 1190 are hhmi affiliated or . percent
+. US authors of 773 are hhmi affiliated or . percent
+(548 observations deleted)
+. stanford authors of . are hhmi affiliated or . percent
+. harvard authors of . are hhmi affiliated or . percent
+N = 106,613; 10,008 unbalanced groups of sizes 1 to 546
+N = 2,959; 486 unbalanced groups of sizes 1 to 160
+N = 103,654; 9,522 unbalanced groups of sizes 1 to 546
+N = 103,654; 92,425 unbalanced groups of sizes 1 to 9
+N = 61,215; 61,215 balanced groups of size 1
+N = 46,089; 2,858 unbalanced groups of sizes 1 to 546
+N = 46,089; 36,826 unbalanced groups of sizes 1 to 8
+N = 45,734; 45,734 balanced groups of size 1
+
+     +-----------------------------------+
+     | journal_a~r   avg_ar~s   avg_perc |
+     |-----------------------------------|
+  1. | nat_biotech   75.59259   34.34292 |
+  2. |   nat_genet   64.70968   29.87361 |
+  3. |     nat_med         42   19.66886 |
+     +-----------------------------------+
+
+     +-------------------------------+
+     | country    affl_wt       perc |
+     |-------------------------------|
+ 22. |           7.921595   .2771727 |
+     +-------------------------------+
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States   50.59189 |
+  2. | United Kingdom   7.666418 |
+  3. |          China   7.537352 |
+  4. |        Germany   6.329174 |
+  5. |          Japan   3.210315 |
+     |---------------------------|
+  6. |         France   3.033077 |
+  7. |         Canada   2.752202 |
+  8. |    Switzerland    2.58445 |
+  9. |    Netherlands   2.063886 |
+ 10. |      Australia   1.560225 |
+     |---------------------------|
+ 11. |    South Korea   1.267377 |
+ 12. |          Spain   1.261995 |
+ 13. |         Sweden   1.143047 |
+ 14. |          Italy   1.021214 |
+ 15. |        Denmark   .9859614 |
+     |---------------------------|
+ 16. |        Austria   .9742272 |
+ 17. |         Israel   .8220134 |
+ 18. |      Singapore   .7944702 |
+ 19. |        Belgium   .7862931 |
+ 20. |        Iceland   .4277723 |
+     +---------------------------+
+
+     +--------------------------------+
+     | us_state    affl_wt       perc |
+     |--------------------------------|
+ 29. |            2.888607   .1010709 |
+     +--------------------------------+
+
+     +---------------------+
+     | us_state       perc |
+     |---------------------|
+  1. |       CA   12.08033 |
+  2. |       MA   10.44791 |
+  3. |       NY   5.728415 |
+  4. |       TX   2.661146 |
+  5. |       WA   2.083476 |
+     |---------------------|
+  6. |       IL   1.961813 |
+  7. |       MD   1.901049 |
+  8. |       PA   1.872964 |
+  9. |       NC   1.719181 |
+ 10. |       CT    1.03571 |
+     |---------------------|
+ 11. |       MI   .9771361 |
+ 12. |       NJ   .8788568 |
+ 13. |       FL   .6337327 |
+ 14. |       GA   .5618821 |
+ 15. |       MN    .557056 |
+     |---------------------|
+ 16. |       WI   .5476379 |
+ 17. |       VA   .5391984 |
+ 18. |       CO   .5239143 |
+ 19. |       TN   .5076736 |
+ 20. |       IN   .5003548 |
+     +---------------------+
+
+     +---------------------------+
+     | area   affl_wt       perc |
+     |---------------------------|
+ 35. |         6.3972   .2238349 |
+     +---------------------------+
+
+     +-------------------------------+
+     |               area       perc |
+     |-------------------------------|
+  1. |   Boston-Cambridge   9.659449 |
+  2. |           Bay Area    6.65844 |
+  3. |           New York   4.030614 |
+  4. | San Diego-La Jolla   2.372437 |
+  5. |  Research Triangle   1.668695 |
+     |-------------------------------|
+  6. |            Houston   1.404896 |
+  7. |            Seattle   1.356353 |
+  8. |       Philadelphia   1.198338 |
+  9. |        Los Angeles   1.056271 |
+ 10. |            Chicago   1.052608 |
+     |-------------------------------|
+ 11. |        Bethesda-DC    .955589 |
+ 12. |          New Haven   .9267389 |
+ 13. |             Ithaca   .7564806 |
+ 14. |          Ann Arbor   .7545136 |
+ 15. |          Baltimore   .7249873 |
+     |-------------------------------|
+ 16. |             Dallas   .6972058 |
+ 17. |          Princeton   .6804135 |
+ 18. |        Saint Louis   .5852755 |
+ 19. |            Madison   .5249924 |
+ 20. |             Urbana    .403538 |
+     +-------------------------------+
+
+      +--------------------------------+
+      | city_f~l    affl_wt       perc |
+      |--------------------------------|
+  71. |            7.921595   .2771727 |
+      +--------------------------------+
+
+     +----------------------------------------------+
+     |                         city_full       perc |
+     |----------------------------------------------|
+  1. |   Boston-Cambridge, United States   9.659449 |
+  2. |           Bay Area, United States    6.65844 |
+  3. |           New York, United States   4.030614 |
+  4. |                    Beijing, China   2.850808 |
+  5. | San Diego-La Jolla, United States   2.372437 |
+     |----------------------------------------------|
+  6. |         Cambridge, United Kingdom   2.021088 |
+  7. |  Research Triangle, United States   1.668695 |
+  8. |                   Shanghai, China   1.405149 |
+  9. |            Houston, United States   1.404896 |
+ 10. |            London, United Kingdom    1.39076 |
+     |----------------------------------------------|
+ 11. |            Seattle, United States   1.356353 |
+ 12. |       Philadelphia, United States   1.198338 |
+ 13. |                     Paris, France   1.146594 |
+ 14. |                      Tokyo, Japan   1.109142 |
+ 15. |                   Toronto, Canada     1.1017 |
+     |----------------------------------------------|
+ 16. |            Oxford, United Kingdom   1.079438 |
+ 17. |        Los Angeles, United States   1.056271 |
+ 18. |            Chicago, United States   1.052608 |
+ 19. |               Heidelberg, Germany   1.018733 |
+ 20. |        Bethesda-DC, United States    .955589 |
+     +----------------------------------------------+
+
+      +---------------------------+
+      | inst   affl_wt       perc |
+      |---------------------------|
+   1. |        275.527   9.640552 |
+      +---------------------------+
+
+     +----------------------------------------------------+
+     |                                    inst       perc |
+     |----------------------------------------------------|
+  1. |                      Harvard University   3.797933 |
+  2. |                     Stanford University   2.925971 |
+  3. |             Chinese Academy of Sciences   2.069829 |
+  4. |   Massachusetts Institute of Technology   1.640591 |
+  5. |                              Max Planck   1.624166 |
+     |----------------------------------------------------|
+  6. | University of California, San Francisco   1.600897 |
+  7. |                      Cornell University   1.306476 |
+  8. |     University of California, San Diego   1.140073 |
+  9. |                                    CNRS   1.114679 |
+ 10. |                 University of Cambridge   1.109299 |
+     |----------------------------------------------------|
+ 11. |      University of California, Berkeley     1.0634 |
+ 12. |                                     NIH   1.014057 |
+ 13. |                    University of Oxford   .9579666 |
+ 14. |                         Yale University   .9245521 |
+ 15. |              University of Pennsylvania   .9115454 |
+     |----------------------------------------------------|
+ 16. |                University of Washington   .8990225 |
+ 17. |                       Peking University   .8925628 |
+ 18. |  Memorial Sloan-Kettering Cancer Center   .8418497 |
+ 19. |   University of California, Los Angeles   .8058761 |
+ 20. |                                   Broad   .8050784 |
+     +----------------------------------------------------+
+628 authors of 36826 are broad affiliated or 1.7053169 percent
+604 US authors of 16977 are broad affiliated or 3.5577546 percent
+(26,203 observations deleted)
+. stanford authors of 604 are broad affiliated or . percent
+399 harvard authors of 604 are broad affiliated or 66.059603 percent
+(42,673 observations deleted)
+399 harvard authors of 588 are broad affiliated or 67.857143 percent
+104 mit authors of 588 are broad affiliated or 17.687075 percent
+484 authors of 36826 are hhmi affiliated or 1.3142888 percent
+484 US authors of 16977 are hhmi affiliated or 2.8509159 percent
+(26,203 observations deleted)
+43 stanford authors of 484 are hhmi affiliated or 8.8842975 percent
+117 harvard authors of 484 are hhmi affiliated or 24.173554 percent
+N = 134,097; 7,121 unbalanced groups of sizes 1 to 567
+N = 4,370; 307 unbalanced groups of sizes 1 to 370
+N = 129,727; 6,814 unbalanced groups of sizes 1 to 567
+N = 129,727; 114,966 unbalanced groups of sizes 1 to 10
+N = 75,411; 75,411 balanced groups of size 1
+N = 57,108; 2,012 unbalanced groups of sizes 1 to 567
+N = 57,108; 45,414 unbalanced groups of sizes 1 to 9
+N = 56,810; 56,810 balanced groups of size 1
+
+     +-----------------------------------+
+     | journal_a~r   avg_ar~s   avg_perc |
+     |-----------------------------------|
+  1. |     nat_med   104.3214   46.64753 |
+  2. |   nat_genet   89.51613   41.26342 |
+  3. | nat_biotech   16.11111    7.62188 |
+     +-----------------------------------+
+
+     +-------------------------------+
+     | country    affl_wt       perc |
+     |-------------------------------|
+ 19. |           10.28761   .5113128 |
+     +-------------------------------+
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States    51.5355 |
+  2. | United Kingdom   9.772246 |
+  3. |          China   5.139711 |
+  4. |        Germany   5.019523 |
+  5. |         Canada   3.307794 |
+     |---------------------------|
+  6. |    Netherlands   2.676125 |
+  7. |          Japan   2.530477 |
+  8. |         France   2.471553 |
+  9. |    Switzerland   1.737784 |
+ 10. |          Italy   1.724347 |
+     |---------------------------|
+ 11. |          Spain   1.713062 |
+ 12. |         Sweden   1.517154 |
+ 13. |      Australia     1.3054 |
+ 14. |         Israel    1.16395 |
+ 15. |      Singapore   .8941133 |
+     |---------------------------|
+ 16. |    South Korea   .8521258 |
+ 17. |        Belgium   .8255868 |
+ 18. |        Austria   .5282821 |
+ 19. |        Denmark   .4995124 |
+ 20. |        Iceland   .4349093 |
+     +---------------------------+
+
+     +-----------------------------+
+     | us_state    affl_wt    perc |
+     |-----------------------------|
+ 24. |            3.456617   .1718 |
+     +-----------------------------+
+
+     +---------------------+
+     | us_state       perc |
+     |---------------------|
+  1. |       MA   11.32233 |
+  2. |       CA   9.940778 |
+  3. |       NY   7.000971 |
+  4. |       TX   3.205545 |
+  5. |       MD   3.079465 |
+     |---------------------|
+  6. |       WA   2.467791 |
+  7. |       PA    2.35529 |
+  8. |       CT   1.481015 |
+  9. |       NC   1.242751 |
+ 10. |       TN   1.189271 |
+     |---------------------|
+ 11. |       IL    1.11821 |
+ 12. |       OH   .9465302 |
+ 13. |       MI   .7739308 |
+ 14. |       FL   .5411929 |
+ 15. |       MN   .5257301 |
+     |---------------------|
+ 16. |       NJ   .5085663 |
+ 17. |       GA   .4198005 |
+ 18. |       VA   .3505939 |
+ 19. |       WI   .3405837 |
+ 20. |       UT   .3090223 |
+     +---------------------+
+
+     +---------------------------+
+     | area   affl_wt       perc |
+     |---------------------------|
+ 25. |        6.39487   .3178365 |
+     +---------------------------+
+
+     +-------------------------------+
+     |               area       perc |
+     |-------------------------------|
+  1. |   Boston-Cambridge   10.89749 |
+  2. |           New York   6.379865 |
+  3. |           Bay Area   5.912381 |
+  4. |            Houston   2.408614 |
+  5. |        Bethesda-DC   1.986363 |
+     |-------------------------------|
+  6. | San Diego-La Jolla   1.761782 |
+  7. |       Philadelphia   1.690326 |
+  8. |            Seattle   1.351181 |
+  9. |          New Haven   1.224282 |
+ 10. |  Research Triangle   1.185984 |
+     |-------------------------------|
+ 11. |        Los Angeles   1.031594 |
+ 12. |          Baltimore   .9090158 |
+ 13. |            Chicago   .8196388 |
+ 14. |        Saint Louis   .7655143 |
+ 15. |          Ann Arbor   .6673357 |
+     |-------------------------------|
+ 16. |            Memphis    .636634 |
+ 17. |          Nashville   .5526373 |
+ 18. |             Dallas   .4104751 |
+ 19. |          Cleveland   .3794914 |
+ 20. |          Rochester   .3601834 |
+     +-------------------------------+
+
+      +--------------------------------+
+      | city_f~l    affl_wt       perc |
+      |--------------------------------|
+  35. |            10.28761   .5113128 |
+      +--------------------------------+
+
+     +----------------------------------------------+
+     |                         city_full       perc |
+     |----------------------------------------------|
+  1. |   Boston-Cambridge, United States   10.89749 |
+  2. |           New York, United States   6.379865 |
+  3. |           Bay Area, United States   5.912381 |
+  4. |            London, United Kingdom   3.201937 |
+  5. |            Houston, United States   2.408614 |
+     |----------------------------------------------|
+  6. |        Bethesda-DC, United States   1.986363 |
+  7. |         Cambridge, United Kingdom   1.901556 |
+  8. | San Diego-La Jolla, United States   1.761782 |
+  9. |       Philadelphia, United States   1.690326 |
+ 10. |            Oxford, United Kingdom   1.362722 |
+     |----------------------------------------------|
+ 11. |            Seattle, United States   1.351181 |
+ 12. |                   Toronto, Canada    1.28873 |
+ 13. |          New Haven, United States   1.224282 |
+ 14. |                     Paris, France   1.186049 |
+ 15. |  Research Triangle, United States   1.185984 |
+     |----------------------------------------------|
+ 16. |                   Shanghai, China   1.174135 |
+ 17. |                    Beijing, China   1.136299 |
+ 18. |        Los Angeles, United States   1.031594 |
+ 19. |                      Tokyo, Japan   1.008972 |
+ 20. |            Amsterdam, Netherlands   .9183977 |
+     +----------------------------------------------+
+
+      +----------------------------+
+      | inst    affl_wt       perc |
+      |----------------------------|
+   1. |        241.1152   11.98385 |
+      +----------------------------+
+
+     +----------------------------------------------------+
+     |                                    inst       perc |
+     |----------------------------------------------------|
+  1. |                      Harvard University   3.366701 |
+  2. |                     Stanford University   2.607437 |
+  3. |                                     NIH   1.954854 |
+  4. |            Dana Farber Cancer Institute   1.866312 |
+  5. |  Memorial Sloan-Kettering Cancer Center   1.830319 |
+     |----------------------------------------------------|
+  6. | University of California, San Francisco   1.830048 |
+  7. |                             MD Anderson   1.495651 |
+  8. |                 University of Cambridge   1.265144 |
+  9. |                         Yale University    1.21559 |
+ 10. |                    University of Oxford   1.214578 |
+     |----------------------------------------------------|
+ 11. |              University of Pennsylvania   1.190464 |
+ 12. |                     Columbia University   1.114105 |
+ 13. |     University of California, San Diego   1.058308 |
+ 14. |            Brigham and Women's Hospital   .9957516 |
+ 15. |                      Cornell University   .9389646 |
+     |----------------------------------------------------|
+ 16. |                                   Broad   .7887082 |
+ 17. |          Massachusetts General Hospital   .7685525 |
+ 18. |                Johns Hopkins University   .7675017 |
+ 19. | Icahn School of Medicine at Mount Sinai   .7672794 |
+ 20. |      Washington University in St. Louis   .7587209 |
+     +----------------------------------------------------+
+920 authors of 45414 are broad affiliated or 2.025807 percent
+898 US authors of 21286 are broad affiliated or 4.2187353 percent
+(32,419 observations deleted)
+4 stanford authors of 898 are broad affiliated or .4454343 percent
+443 harvard authors of 898 are broad affiliated or 49.331849 percent
+(52,364 observations deleted)
+443 harvard authors of 843 are broad affiliated or 52.550415 percent
+66 mit authors of 843 are broad affiliated or 7.8291815 percent
+249 authors of 45414 are hhmi affiliated or .54828907 percent
+236 US authors of 21286 are hhmi affiliated or 1.10871 percent
+(32,419 observations deleted)
+23 stanford authors of 236 are hhmi affiliated or 9.7457627 percent
+10 harvard authors of 236 are hhmi affiliated or 4.2372881 percent
+N = 278; 65 unbalanced groups of sizes 1 to 31
+N = 27; 18 unbalanced groups of sizes 1 to 6
+N = 251; 47 unbalanced groups of sizes 1 to 31
+N = 251; 214 unbalanced groups of sizes 1 to 5
+N = 204; 204 balanced groups of size 1
+N = 156; 19 unbalanced groups of sizes 1 to 31
+N = 156; 126 unbalanced groups of sizes 1 to 5
+N = 156; 156 balanced groups of size 1
+
+     +-----------------------------------+
+     | journal_a~r   avg_ar~s   avg_perc |
+     |-----------------------------------|
+  1. |     nat_med        1.8   .7831529 |
+  2. | nat_biotech   1.714286   .8034214 |
+  3. |   nat_genet          1   .4739337 |
+     +-----------------------------------+
+
+     +------------------------------+
+     | country   affl_wt       perc |
+     |------------------------------|
+  4. |                 1   5.263158 |
+     +------------------------------+
+observation numbers out of range
+r(198);
+
+end of do-file
+r(198);
+
