@@ -9,18 +9,19 @@ here, set
 set maxvar 120000
 
 program main
-    foreach samp in select_jrnl {
-        create_wos_queries, samp(`samp')
+    foreach samp in cns_med scijrnls natsub demsci {
+        local fol = cond("`samp'"=="cns_med","main","robust")
+        create_wos_queries, samp(`samp') fol(`fol')
     }
 end
 
 program create_wos_queries
-    syntax, samp(str)
-    use ../external/`samp'/contracted_pmids.dta, clear
-    gen group = int((_n-1)/500)
+    syntax, samp(str) fol(str)
+    use ../external/`fol'/contracted_pmids_`samp'.dta, clear
+    gen group = int((_n-1)/450)
     tostring pmid, replace
     bys group: gen top = _n == 1
-    forval ii = 1/499 {
+    forval ii = 1/449 {
         replace pmid = pmid + " OR " + pmid[_n+`ii'] if top & group == group[_n+`ii']
     }
     gen peak = substr(pmid, -15, .) // to look at last pmid on the list and verify
