@@ -9,7 +9,7 @@ here, set
 set maxvar 120000
 
 program main
-    foreach samp in natsub demsci {
+    foreach samp in demsci natsub scijrnls {
         append_metadata, data(`samp')
         clean_pubtype, data(`samp')
         extract_pmids_to_clean, data(`samp')
