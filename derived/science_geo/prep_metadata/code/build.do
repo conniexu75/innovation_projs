@@ -9,15 +9,15 @@ here, set
 set maxvar 120000
 
 program main
-    global samp select_jrnl
-    append_metadata, data(pt)
-    clean_pubtype
-    extract_pmids_to_clean
+    local samp cns_med
+    append_metadata, data(`samp')
+    clean_pubtype, data(`samp')
+    extract_pmids_to_clean, data(`samp')
 end
 
 program append_metadata
     syntax, data(str)
-	local filelist: dir "../external/samp" files "`data'_${samp}*"
+	local filelist: dir "../external/samp" files "`data'_*"
 	local i = 1
 	foreach file of local filelist {
 		import delimited pmid date mesh journal affil athrs pt gr using "../external/samp/`file'", clear
@@ -35,11 +35,12 @@ program append_metadata
 	}
     compress, nocoalesce
     gduplicates drop pmid, force
-	save "../output/master_`data'_${samp}_appended.dta", replace
+	save "../output/master_`data'_appended.dta", replace
 end
 
 program clean_pubtype
-    use ../output/master_pt_${samp}_appended, clear
+    syntax, data(str)
+    use ../output/master_`data'_appended, clear
 	gen pt_na = pt == "NA"
 	tab pt_na
     drop pt_na
@@ -68,22 +69,24 @@ program clean_pubtype
         replace pub_type = "Clinical Study" if strpos(pt`i', "Clinical Study")
         replace pub_type = "Clinical Trial" if strpos(pt`i', "Clinical Trial")
         replace pub_type = pt`i' if mi(pub_type)
+        tab pub_type
     }
 	drop if to_drop == 1
     gcontract pmid
     drop _freq
-    save ../output/all_jrnl_articles_${samp}, replace
+    save ../output/all_jrnl_articles_`data', replace
 end
 
 program extract_pmids_to_clean
-    use ../output/all_jrnl_articles_${samp}, clear
-    merge 1:m pmid using ../external/cats/BTC_pmids, assert(1 2 3) keep(3) nogen
+    syntax, data(str)
+    use ../output/all_jrnl_articles_`data', clear
+    merge 1:m pmid using ../external/cats/CNS_pmids, assert(1 2 3) keep(3) nogen
     save ../output/pmids_category_xwalk, replace
     gcontract pmid 
     drop _freq
     save ../output/contracted_pmids, replace
-    merge 1:1 pmid using ../output/master_pt_${samp}_appended, assert(2 3) keep(3) nogen
-	save "../output/${samp}_to_clean.dta", replace
+    merge 1:1 pmid using ../output/master_`data'_appended, assert(2 3) keep(3) nogen
+	save "../output/`data'_to_clean.dta", replace
 end
 ** 
 main
