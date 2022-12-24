@@ -105,38 +105,13 @@ pull_pt = function(id) {
   }
   return(output)
 }
-################### PULL BASIC and TRANSLATIONAL SCIENCE METADATA FROM SELECT JOURNALS ###################################
-#queries_sub <- read_dta(file = '../external/samp/BTC_pmids.dta')
-#cats <- c("fundamental", "therapeutics", "diseases")
-##cats <- c("basic", "translational")
-#for(c in cats) {
-#    queries <- queries_sub %>% 
-#      filter(cat == c)
-#    pmid <- queries$pmid
-#    len <- length(pmid)
-#    n <- ceiling(len/500)
-#    for (i in 84:n) {
-#      while(TRUE) {
-#        print(i)
-#        start <- (i-1)*500+1
-#        end <- i*500 
-#        test <- try(sapply(X = pmid[start:end], FUN = pull_affs))
-#        if(!is(test, 'try-error')) break
-#      }
-#      info = test
-#      master = data.frame(pmid = pmid[start:end], date = info[1,], mesh = info[2,],
-#                          journal=info[3,], affil=info[4,], athrs = info[5,], pt = info[6,], gr = info[7,])
-#      file_name = paste("../output/metadata/",c,"_select_jrnl_",start,"_", end,".csv", sep="")
-#      write_csv(master, file = file_name)
-#    }
-#}
 
 ####################### PULL PUB TYPE OF ALL PMIDS FROM SELECT JRNLS ########################################################
-queries <- read_dta(file = '../external/samp/select_jrnls_pmids.dta')
+queries <- read_dta(file = '../external/samp/cns_med_all_pmids.dta')
 pmid <- queries$pmid
 len <- length(pmid)
 n <- ceiling(len/500)
-for (i in 89:n) {
+for (i in 1:n) {
   while(TRUE) {
       print(i)
       start <- (i-1)*500+1
@@ -148,6 +123,6 @@ for (i in 89:n) {
 #  master = data.frame(pmid = pmid[start:end], pt = info[1])
       master = data.frame(pmid = pmid[start:end], date = info[1,], mesh = info[2,],
                           journal=info[3,], affil=info[4,], athrs = info[5,], pt = info[6,], gr = info[7,])
-      file_name = paste("../output/metadata/","pt_select_jrnl_",start,"_", end,".csv", sep="")
+      file_name = paste("../output/metadata/","cns_med_",start,"_", end,".csv", sep="")
       write_csv(master, file = file_name)
 }
