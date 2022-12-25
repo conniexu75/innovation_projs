@@ -59,19 +59,29 @@ program clean_pubtype
     }
     gen to_drop = 0
     gen pub_type = ""
+    gen trial = 0 
+    gen study = 0
     forval i = 1/`num_pts' {
-        replace to_drop = 1 if inlist(pt`i', "Autobiography", "Biography", "Case Reports", "Classical Article", "Comment", "Comparative Study", "Congress", "Dataset", "Editorial")
-        replace to_drop = 1 if inlist(pt`i', "Evaluation Study", "Historical Article", "Introductory Journal Article", "Letter" , "News", "Clinical Conference", "Practice Guideline", "Guideline")
+        replace to_drop = 1 if inlist(pt`i', "Autobiography", "Biography", "Case Reports", "Classical Article", "Comment", "Congress", "Dataset", "Editorial")
+        replace to_drop = 1 if inlist(pt`i', "Historical Article", "Introductory Journal Article", "Letter" , "News", "Clinical Conference", "Practice Guideline", "Guideline")
         replace to_drop = 1 if inlist(pt`i', "Meta-Analysis", "Personal Narrative", "Portrait", "Published Erratum", "Retracted Publication", "Review", "Video-Audio Media", "Webcast", "Legal Case")
-        replace to_drop = 1 if inlist(pt`i', "Retraction of Publication", "Twin Study", "Systematic Review", "Address" , "Bibliography", "Consensus Development Conference" , "Consensus Development Conference, NIH")
-        replace to_drop = 1 if inlist(pt`i', "Corrected and Republished Article", "Duplicate Publication","Interactive Tutorial", "Expression of Concern", "Lecture","Multicenter Study", "Patient Education Handout" , "Validation Study")
-        replace pub_type = "Journal Article" if pt`i' == "Journal Article"
-        replace pub_type = "Clinical Study" if strpos(pt`i', "Clinical Study")
-        replace pub_type = "Clinical Trial" if strpos(pt`i', "Clinical Trial")
+        replace to_drop = 1 if inlist(pt`i', "Retraction of Publication", "Systematic Review", "Address" , "Bibliography", "Consensus Development Conference" , "Consensus Development Conference, NIH")
+        replace to_drop = 1 if inlist(pt`i', "Corrected and Republished Article", "Duplicate Publication","Interactive Tutorial", "Expression of Concern", "Lecture","Patient Education Handout" )
+        replace trial = 1 if strpos(pt`i', "Clinical Trial") > 0 | strpos(pt`i', "Randomized Controlled Trial")>0
+        replace study = 1 if strpos(pt`i', "Study") > 0 
+        replace pub_type = "Clinical Study" if strpos(pt`i', "Clinical Study") > 0  | strpos(pt`i', "Study") > 0
+        replace pub_type = "Clinical Trial" if strpos(pt`i', "Clinical Trial") > 0  | strpos(pt`i', "Randomized Controlled Trial")>0
+        replace pub_type = "Journal Article" if pt`i' == "Journal Article" 
         replace pub_type = pt`i' if mi(pub_type)
         tab pub_type
     }
-	drop if to_drop == 1
+	drop if (to_drop == 1 | study == 1 ) & trial == 0
+    preserve
+    keep if trial ==1
+    gcontract pmid
+    drop _freq
+    save ../output/pmids_trial_`data', replace
+    restore
     gcontract pmid
     drop _freq
     save ../output/all_jrnl_articles_`data', replace
@@ -82,9 +92,13 @@ program extract_pmids_to_clean
     use ../output/all_jrnl_articles_`data', clear
     merge 1:m pmid using ../external/cats/CNS_pmids, assert(1 2 3) keep(3) nogen
     save ../output/pmids_category_xwalk, replace
+    preserve
+    merge m:1 pmid using ../output/pmids_trial_`data', assert(1 2 3) keep(3) nogen
+    assert cat == "therapeutics"
+    restore
     gcontract pmid 
     drop _freq
-    save ../output/contracted_pmids, replace
+    save ../output/contracted_pmids_`data', replace
     merge 1:1 pmid using ../output/master_`data'_appended, assert(2 3) keep(3) nogen
 	save "../output/`data'_to_clean.dta", replace
 end
