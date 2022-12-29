@@ -12,6 +12,7 @@ program main
     local samp cns_med
     append_metadata, data(`samp')
     clean_pubtype, data(`samp')
+    clean_date, data(`samp')
     extract_pmids_to_clean, data(`samp')
 end
 
@@ -37,6 +38,7 @@ program append_metadata
     gduplicates drop pmid, force
 	save "../output/master_`data'_appended.dta", replace
 end
+
 
 program clean_pubtype
     syntax, data(str)
@@ -76,17 +78,46 @@ program clean_pubtype
         tab pub_type
     }
 	drop if (to_drop == 1 | study == 1 ) & trial == 0
+    drop start
     preserve
     keep if trial ==1
     gcontract pmid
     drop _freq
     save ../output/pmids_trial_`data', replace
     restore
+    preserve
     gcontract pmid
     drop _freq
     save ../output/all_jrnl_articles_`data', replace
+    restore
 end
 
+program clean_date
+    syntax, data(str)
+    rename date date_raw
+    gen start = strpos(date_raw, "<Year>") + 6
+    gen y = substr(date_raw, start, 4)
+    destring y, replace
+    drop start
+
+    gen start = strpos(date_raw, "<Month>") + 7
+    gen m = substr(date_raw, start, 2)
+    destring m, replace
+    drop start
+
+    gen start = strpos(date_raw, "<Day>") + 5
+    gen d = substr(date_raw, start, 2)
+    destring d, replace
+    drop start
+
+    gen date = mdy(m, d, y)
+    format date  %td
+    drop d m y 
+    drop if date > td(31mar2022) // Q1 sample restriction
+    gcontract pmid
+    drop _freq
+    save ../output/all_jrnl_articles_`data'Q1, replace
+end
 program extract_pmids_to_clean
     syntax, data(str)
     use ../output/all_jrnl_articles_`data', clear
