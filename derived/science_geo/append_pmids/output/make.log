@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2022-12-23 11:20:24
+Makelog started: 2022-12-28 22:43:57
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -68,7 +68,7 @@ Notes:
  11.     foreach file in `filelist' {
  12.         append using ../temp/`file'
  13.     }
- 14.     save ../temp/CNS_appended, replace
+ 14.     save ../temp/CNS_pmids, replace
  15. 
 .     split query_name, p("_")
  16.     ren query_name1 cat 
@@ -113,7 +113,17 @@ Notes:
  20.     drop minyr
  21.     gisid pmid
  22.     save ../output/cns_med_all_pmids, replace
- 23. end
+ 23. 
+.     preserve 
+ 24.     keep if inlist(journal_abbr, "cell","nature","science")
+ 25.     save ../output/cns_all_pmids, replace
+ 26.     restore
+ 27. 
+.     preserve 
+ 28.     keep if !inlist(journal_abbr, "cell","nature","science")
+ 29.     save ../output/med_all_pmids, replace
+ 30.     restore
+ 31. end
 
 . main
 (encoding automatically selected: ISO-8859-9)
@@ -1517,8 +1527,8 @@ pmid: all characters numeric; replaced as long
 (file ../temp/CNS_therapeutics_2022.csv not found)
 file ../temp/CNS_therapeutics_2022.csv saved as .dta format
 (variable query_name was str10, now str18 to accommodate using data's values)
-(file ../temp/CNS_appended.dta not found)
-file ../temp/CNS_appended.dta saved
+(file ../temp/CNS_pmids.dta not found)
+file ../temp/CNS_pmids.dta saved
 variables created as string: 
 query_name1  query_name2
 year: all characters numeric; replaced as int
@@ -2674,11 +2684,17 @@ file ../temp/cell.dta saved
 (2,896 observations deleted)
 (file ../output/cns_med_all_pmids.dta not found)
 file ../output/cns_med_all_pmids.dta saved
+(127,077 observations deleted)
+(file ../output/cns_all_pmids.dta not found)
+file ../output/cns_all_pmids.dta saved
+(108,575 observations deleted)
+(file ../output/med_all_pmids.dta not found)
+file ../output/med_all_pmids.dta saved
 
 . 
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2022-12-23 11:20:49
+Makelog ended: 2022-12-28 22:44:12
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/code
 --------------------------------------------------------------------------------
