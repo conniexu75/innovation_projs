@@ -1,0 +1,2 @@
+./wos/ | /export/home/dor/cxu/innovation_projs/raw/wos_extracts/
+./jrnls/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/output/
