@@ -90,6 +90,17 @@ program clean_pubtype
     drop _freq
     save ../output/all_jrnl_articles_`data', replace
     restore
+    
+    preserve
+    use ../output/all_jrnl_articles_`data', clear
+    merge 1:1 pmid using ../external/cats/cns_all_pmids, assert(1 2 3) keep(3) nogen
+    save ../output/all_jrnl_articles_cns, replace
+    restore
+    preserve
+    use ../output/all_jrnl_articles_`data', clear
+    merge 1:1 pmid using ../external/cats/med_all_pmids, assert(1 2 3) keep(3) nogen
+    save ../output/all_jrnl_articles_med, replace
+    restore
 end
 
 program clean_date
@@ -117,7 +128,16 @@ program clean_date
     gcontract pmid
     drop _freq
     save ../output/all_jrnl_articles_`data'Q1, replace
+    preserve
+    merge 1:1 pmid using ../external/cats/cns_all_pmids, assert(1 2 3) keep(3) nogen
+    save ../output/all_jrnl_articles_cnsQ1, replace
+    restore
+    preserve
+    merge 1:1 pmid using ../external/cats/med_all_pmids, assert(1 2 3) keep(3) nogen
+    save ../output/all_jrnl_articles_medQ1, replace
+    restore
 end
+
 program extract_pmids_to_clean
     syntax, data(str)
     use ../output/all_jrnl_articles_`data', clear
