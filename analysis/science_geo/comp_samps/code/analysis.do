@@ -160,25 +160,25 @@ program comp_samps
                   mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) || ///
                   (function y=x ,range(0 `max') lpattern(dash) lcolor(lavender)), ///
                   xtitle("``cat'_name' Research Rank - ``samp2'_name'", size(small)) ytitle("`cat_name' Science Research Rank - ``samp1'_name' ", size(small)) ///
-                  xlabel(1(1)`rank_lmt', labsize(vsmall)) ylabel(1(1)`rank_lmt', labsize(vsmall)) xsc(reverse) ysc(reverse) legend(on order(- "Correlation = `corr'") size(vsmall) pos(11) ring(0) region(lwidth(none)))
+                  xlabel(1(1)`rank_lmt', labsize(vsmall)) ylabel(1(1)`rank_lmt', labsize(vsmall)) xsc(reverse) ysc(reverse) legend(on order(- "Correlation = `corr'") size(vsmall) pos(5) ring(0) region(lwidth(none)))
                 *graph export ../output/figures/`samp1'_`samp2'_`cat'_`loc'_rank`suf'.pdf, replace
                 local skip = 5 
                 *if "`type'" == "inst" local lim = 5
                 if "`loc'" == "inst" local skip = 0.5 
                 if "`loc'" == "city_full" local skip = 1 
-                qui sum share`samp1' if  (inrange(rank`samp1' , 1,`rank_lmt') |  inrange(rank`samp2' , 1,`rank_lmt')) & !mi(share`samp1') & !mi(share`samp2')
+                qui sum share`samp1' if  !mi(share`samp1') & !mi(share`samp2') //(inrange(rank`samp1' , 1,`rank_lmt') |  inrange(rank`samp2' , 1,`rank_lmt')) & !mi(share`samp1') & !mi(share`samp2')
                 local max = r(max)
-                qui sum share`samp2' if  inrange(rank`samp1' , 1,`rank_lmt') |  inrange(rank`samp2' , 1,`rank_lmt') & !mi(share`samp1') & !mi(share`samp2')
+                qui sum share`samp2' if  !mi(share`samp1') & !mi(share`samp2') //inrange(rank`samp1' , 1,`rank_lmt') |  inrange(rank`samp2' , 1,`rank_lmt') & !mi(share`samp1') & !mi(share`samp2')
                 local max = max(r(max), `max')
                 local max = floor(`max') +1 
                 di `max'
-                corr share`samp1' share`samp2'  if  (inrange(rank`samp1' , 1,`rank_lmt') |  inrange(rank`samp2' , 1,`rank_lmt')) & (share`samp1'<=`max') & (share`samp2'<=`max')
+                corr share`samp1' share`samp2'  if  (share`samp1'<=`max') & (share`samp2'<=`max')
                 local corr :  di %3.2f r(rho)
                 tw scatter share`samp1' share`samp2' if (share`samp1'<=`max') & (share`samp2'<=`max'), ///  //if  (inrange(rank`samp1' , 1,`rank_lmt') |  inrange(rank`samp2' , 1,`rank_lmt')) & (share`samp1'<=`max') & (share`samp2'<=`max'), ///
                   mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) || ///
                   (function y=x ,range(0 `max') lpattern(dash) lcolor(lavender)), ///
                   xtitle("``cat'_name' Research Share (%) - ``samp2'_name'", size(small)) ytitle("``cat'_name' Science Research Share (%) - ``samp1'_name'", size(small)) ///
-                  xlabel(0(`skip')`max', labsize(vsmall)) ylabel(0(`skip')`max', labsize(vsmall)) legend(on order(- "Correlation = `corr'") size(vsmall) pos(11) ring(0) region(lwidth(none))) 
+                  xlabel(0(`skip')`max', labsize(vsmall)) ylabel(0(`skip')`max', labsize(vsmall)) legend(on order(- "Correlation = `corr'") size(vsmall) pos(5) ring(0) region(lwidth(none))) 
                 graph export ../output/figures/`samp1'_`samp2'_`cat'_`loc'_share`suf'.pdf, replace
             }
         }
