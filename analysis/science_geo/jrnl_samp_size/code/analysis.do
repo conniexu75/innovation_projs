@@ -13,7 +13,7 @@ program main
     global area_name "US cities"
     global city_full_name "world cities"
     global inst_name "institutions"
-    foreach samp in cns_med scisub { 
+    foreach samp in cns_med scisub demsci { 
         local samp_type = cond(strpos("`samp'", "cns")>0 | strpos("`samp'","med")>0, "main", "robust")
         get_total_articles, samp(`samp') samp_type(`samp_type')
         foreach data in fund dis thera {

@@ -1,0 +1,444 @@
+--------------------------------------------------------------------------------
+Makelog started: 2023-01-01 18:14:43
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code
+--------------------------------------------------------------------------------
+External links successfully created!
+
+  ___  ____  ____  ____  ____ ©
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core , expiring 17 Nov 2023
+Serial number: 501709306977
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size
+> /code/analysis.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code/
+
+. 
+. program main
+  1.     global country_name "countries"
+  2.     global us_state_name "US states"
+  3.     global area_name "US cities"
+  4.     global city_full_name "world cities"
+  5.     global inst_name "institutions"
+  6.     foreach samp in cns_med scisub demsci { 
+  7.         local samp_type = cond(strpos("`samp'", "cns")>0 | strpos("`samp'"
+> ,"med")>0, "main", "robust")
+  8.         get_total_articles, samp(`samp') samp_type(`samp_type')
+  9.         foreach data in fund dis thera {
+ 10.         di "SAMPLE IS : `samp' `data'"
+ 11.             top_jrnls, data(`data') samp(`samp') 
+ 12.             samp_size, data(`data') samp(`samp') 
+ 13.         }
+ 14. 
+.         mat top_jrnls_`samp' =  nullmat(top_jrnls_`samp') , top_jrnls_`samp'_
+> N
+ 15.         mat top_jrnls =  nullmat(top_jrnls) \ top_jrnls_`samp'
+ 16.     }
+ 17.     foreach file in top_jrnls {
+ 18.         qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`f
+> ile') ///
+>            title(<tab:`file'>) format(%20.4f) replace
+ 19.          }
+ 20. end
+
+. 
+. program get_total_articles 
+  1.     syntax, samp(str) samp_type(str)
+  2.     use ../external/`samp_type'_filtered/all_jrnl_articles_`samp'Q1, clear
+  3.     // delete some weird metastudies that we can't cleanly get affiliation
+> s from
+.     qui drop if inlist(pmid, 33471991, 28445112, 28121514, 30345907, 27192541
+> , 25029335, 23862974, 30332564, 31995857, 34161704)
+  4.     qui drop if inlist(pmid, 29669224, 35196427,26943629,28657829,34161705
+> ,31166681,29539279)
+  5.     cap drop _merge
+  6.     merge 1:1 pmid using ../external/wos/`samp'_appended, assert(1 2 3) //
+>  need to pull in all pmids from wos // to do after i scrape all wos
+  7.     qui drop if _merge == 2
+  8.     tab _merge
+  9.     keep if strpos(doc_type, "Article")>0
+ 10.     drop if strpos(doc_type, "Retracted")>0
+ 11.     qui keep if _merge == 3
+ 12.     drop _merge
+ 13.     merge 1:1 pmid using ../external/`samp_type'_total/`samp'_all_pmids, a
+> ssert(2 3) keep(3) nogen
+ 14.     replace year = pub_year if !mi(pub_year)
+ 15.     gcontract year journal_abbr, freq(num_articles)
+ 16.     save ../temp/`samp'_counts, replace
+ 17. end
+
+. 
+. program top_jrnls
+  1.     syntax, data(str) samp(str) 
+  2.     use ../external/cleaned_samps/cleaned_all_`data'_`samp', clear
+  3.     preserve
+  4.     gcollapse (sum) pmid_counter, by(journal_abbr year)
+  5.     qui merge 1:1 journal_abbr year using ../temp/`samp'_counts, assert(1 
+> 2 3) keep(2 3) nogen
+  6.     gen percent_of_tot = pmid_counter/num_articles
+  7.     gcollapse (mean) avg_articles = pmid_counter avg_perc = percent_of_tot
+>  num_articles, by(journal_abbr)
+  8.     gen order = 0
+  9.     replace order = 1 if inlist(journal_abbr, "science","nature","cell")
+ 10.     qui hashsort -order -num_articles
+ 11.     qui replace avg_perc = avg_perc * 100
+ 12.     li 
+ 13.     mkmat num_articles,  mat(top_jrnls_`samp'_N)
+ 14.     mkmat avg_perc ,  mat(top_jrnls_`data'_`samp')
+ 15.     mat top_jrnls_`samp' = nullmat(top_jrnls_`samp'), top_jrnls_`data'_`sa
+> mp'
+ 16.     restore
+ 17. end 
+
+. 
+. program samp_size
+  1.     syntax, data(str) samp(str) 
+  2.     foreach t in all last5yrs {
+  3.         use ../external/cleaned_samps/cleaned_`t'_`data'_`samp', clear
+  4.         di "SAMPLE IS  `data' `samp' `t':"
+  5.         qui gunique pmid
+  6.         di "# articles = " r(unique)
+  7.         qui gunique pmid which_athr
+  8.         di "# athr-articles = " r(unique)
+  9.         qui gunique pmid which_athr which_affiliation if !mi(affiliation)
+ 10.         di "# athr-affl-articles = " r(unique)
+ 11.     }
+ 12. end
+
+. ** 
+. main
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        87,381
+        from master                    11,030  (_merge==1)
+        from using                     76,351  (_merge==2)
+
+    Matched                           135,629  (_merge==3)
+    -----------------------------------------
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |     11,030        7.52        7.52
+            Matched (3) |    135,629       92.48      100.00
+------------------------+-----------------------------------
+                  Total |    146,659      100.00
+(53,382 observations deleted)
+(16 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            93,261  
+    -----------------------------------------
+(1,573 real changes made)
+(file ../temp/cns_med_counts.dta not found)
+file ../temp/cns_med_counts.dta saved
+SAMPLE IS : cns_med fund
+(12 missing values generated)
+(3 real changes made)
+
+     +------------------------------------------------------+
+     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------|
+  1. |  science   384.9714   54.93597   710.9143066       1 |
+  2. |   nature   435.9429   64.58071   690.7999878       1 |
+  3. |     cell   236.6857   81.22844   291.3143005       1 |
+  4. |      bmj   14.67647   5.539384   248.6285706       0 |
+  5. |   lancet   11.03125     4.4346   219.5428619       0 |
+     |------------------------------------------------------|
+  6. |     jama   10.20588   4.542399   204.6571503       0 |
+  7. |     nejm   6.705882   3.266072   199.3428497       0 |
+  8. |   annals    3.37931   3.319484   99.40000153       0 |
+     +------------------------------------------------------+
+SAMPLE IS  fund cns_med all:
+# articles = 38541
+# athr-articles = 288615
+# athr-affl-articles = 152488
+SAMPLE IS  fund cns_med last5yrs:
+# articles = 7201
+# athr-articles = 89471
+# athr-affl-articles = 109369
+SAMPLE IS : cns_med dis
+(2 missing values generated)
+(3 real changes made)
+
+     +------------------------------------------------------+
+     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------|
+  1. |  science   70.25714   10.28517   710.9143066       1 |
+  2. |   nature   83.65714   12.94094   690.7999878       1 |
+  3. |     cell       49.4   16.99673   291.3143005       1 |
+  4. |      bmj   92.71429   36.29549   248.6285706       0 |
+  5. |   lancet   73.71429   30.64426   219.5428619       0 |
+     |------------------------------------------------------|
+  6. |     jama   74.71429   35.97264   204.6571503       0 |
+  7. |     nejm   62.68571   30.63231   199.3428497       0 |
+  8. |   annals   43.54545   42.31316   99.40000153       0 |
+     +------------------------------------------------------+
+SAMPLE IS  dis cns_med all:
+# articles = 19187
+# athr-articles = 192317
+# athr-affl-articles = 127066
+SAMPLE IS  dis cns_med last5yrs:
+# articles = 3556
+# athr-articles = 71702
+# athr-affl-articles = 103593
+SAMPLE IS : cns_med thera
+(81 missing values generated)
+(3 real changes made)
+
+     +------------------------------------------------------+
+     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------|
+  1. |  science   1.894737   .2649606   710.9143066       1 |
+  2. |   nature        1.3   .1960497   690.7999878       1 |
+  3. |     cell        1.5   .4781674   291.3143005       1 |
+  4. |      bmj   9.666667    3.69897   248.6285706       0 |
+  5. |   lancet   2.676471    1.29349   219.5428619       0 |
+     |------------------------------------------------------|
+  6. |     jama   6.371429   3.402866   204.6571503       0 |
+  7. |     nejm   2.758621   1.342269   199.3428497       0 |
+  8. |   annals   2.925926   3.302202   99.40000153       0 |
+     +------------------------------------------------------+
+SAMPLE IS  thera cns_med all:
+# articles = 857
+# athr-articles = 5558
+# athr-affl-articles = 2935
+SAMPLE IS  thera cns_med last5yrs:
+# articles = 113
+# athr-articles = 1920
+# athr-affl-articles = 2102
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        14,829
+        from master                       588  (_merge==1)
+        from using                     14,241  (_merge==2)
+
+    Matched                            31,267  (_merge==3)
+    -----------------------------------------
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |        588        1.85        1.85
+            Matched (3) |     31,267       98.15      100.00
+------------------------+-----------------------------------
+                  Total |     31,855      100.00
+(4,025 observations deleted)
+(1 observation deleted)
+(variable pmid was long, now double to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            27,829  
+    -----------------------------------------
+(1,793 real changes made)
+(file ../temp/scisub_counts.dta not found)
+file ../temp/scisub_counts.dta saved
+SAMPLE IS : scisub fund
+(42 missing values generated)
+(0 real changes made)
+
+     +------------------------------------------------------------+
+     |   journal_abbr   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------------|
+  1. |         neuron   179.8235   87.61109   206.1764679       0 |
+  2. |      nat_neuro   123.7917   79.13362        156.25       0 |
+  3. |      nat_genet   59.03226   39.52807   151.6451569       0 |
+  4. |        nat_med         37   26.95394   137.1785736       0 |
+  5. |   nat_cell_bio          .          .   114.4583359       0 |
+     |------------------------------------------------------------|
+  6. |   nat_chem_bio          .          .   103.6666641       0 |
+  7. |    nat_biotech   62.37037   63.83082   96.22222137       0 |
+  8. | cell_stem_cell    59.1875   73.40842         82.25       0 |
+     +------------------------------------------------------------+
+SAMPLE IS  fund scisub all:
+# articles = 18506
+# athr-articles = 151424
+# athr-affl-articles = 96547
+SAMPLE IS  fund scisub last5yrs:
+# articles = 5405
+# athr-articles = 62339
+# athr-affl-articles = 77173
+SAMPLE IS : scisub dis
+(42 missing values generated)
+(0 real changes made)
+
+     +------------------------------------------------------------+
+     |   journal_abbr   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------------|
+  1. |         neuron   21.44118   9.991451   206.1764679       0 |
+  2. |      nat_neuro   23.29167   14.70988        156.25       0 |
+  3. |      nat_genet   82.51613   53.54438   151.6451569       0 |
+  4. |        nat_med   89.03571   64.82359   137.1785736       0 |
+  5. |   nat_cell_bio          .          .   114.4583359       0 |
+     |------------------------------------------------------------|
+  6. |   nat_chem_bio          .          .   103.6666641       0 |
+  7. |    nat_biotech   12.62963    15.1629   96.22222137       0 |
+  8. | cell_stem_cell         22   25.21857         82.25       0 |
+     +------------------------------------------------------------+
+SAMPLE IS  dis scisub all:
+# articles = 7649
+# athr-articles = 125440
+# athr-affl-articles = 82032
+SAMPLE IS  dis scisub last5yrs:
+# articles = 2576
+# athr-articles = 56059
+# athr-affl-articles = 69987
+SAMPLE IS : scisub thera
+(189 missing values generated)
+(0 real changes made)
+
+     +------------------------------------------------------------+
+     |   journal_abbr   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------------|
+  1. |         neuron          .          .   206.1764679       0 |
+  2. |      nat_neuro          1       .625        156.25       0 |
+  3. |      nat_genet          1   .6024096   151.6451569       0 |
+  4. |        nat_med          1   .6192881   137.1785736       0 |
+  5. |   nat_cell_bio          .          .   114.4583359       0 |
+     |------------------------------------------------------------|
+  6. |   nat_chem_bio          .          .   103.6666641       0 |
+  7. |    nat_biotech       1.25   1.220436   96.22222137       0 |
+  8. | cell_stem_cell          .          .         82.25       0 |
+     +------------------------------------------------------------+
+SAMPLE IS  thera scisub all:
+# articles = 18
+# athr-articles = 218
+# athr-affl-articles = 227
+SAMPLE IS  thera scisub last5yrs:
+# articles = 12
+# athr-articles = 185
+# athr-affl-articles = 221
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        54,807
+        from master                     7,791  (_merge==1)
+        from using                     47,016  (_merge==2)
+
+    Matched                           374,994  (_merge==3)
+    -----------------------------------------
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |      7,791        2.04        2.04
+            Matched (3) |    374,994       97.96      100.00
+------------------------+-----------------------------------
+                  Total |    382,785      100.00
+(11,334 observations deleted)
+(8 observations deleted)
+(variable pmid was long, now double to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           371,443  
+    -----------------------------------------
+(22,410 real changes made)
+(file ../temp/demsci_counts.dta not found)
+file ../temp/demsci_counts.dta saved
+SAMPLE IS : demsci fund
+(0 real changes made)
+
+     +------------------------------------------------------+
+     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------|
+  1. |     plos   6458.235   51.15717   13024.58789       0 |
+  2. |      jbc   3076.143   86.80216   3468.342773       0 |
+  3. |     onco   188.3714    37.6977   492.4857178       0 |
+  4. |    faseb   187.2286   62.21479   325.6000061       0 |
+     +------------------------------------------------------+
+SAMPLE IS  fund demsci all:
+# articles = 230601
+# athr-articles = 1325821
+# athr-affl-articles = 771824
+SAMPLE IS  fund demsci last5yrs:
+# articles = 78945
+# athr-articles = 493217
+# athr-affl-articles = 570127
+SAMPLE IS : demsci dis
+(0 real changes made)
+
+     +------------------------------------------------------+
+     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------|
+  1. |     plos   4629.588   33.50307   13024.58789       0 |
+  2. |      jbc   327.6286   11.68302   3468.342773       0 |
+  3. |     onco   297.5429   60.90669   492.4857178       0 |
+  4. |    faseb      124.6   32.07988   325.6000061       0 |
+     +------------------------------------------------------+
+SAMPLE IS  dis demsci all:
+# articles = 104945
+# athr-articles = 834661
+# athr-affl-articles = 668605
+SAMPLE IS  dis demsci last5yrs:
+# articles = 61529
+# athr-articles = 500619
+# athr-affl-articles = 592330
+SAMPLE IS : demsci thera
+(63 missing values generated)
+(0 real changes made)
+
+     +------------------------------------------------------+
+     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
+     |------------------------------------------------------|
+  1. |     plos         90   .6683432   13024.58789       0 |
+  2. |      jbc   3.321429    .096729   3468.342773       0 |
+  3. |     onco          1   .1394655   492.4857178       0 |
+  4. |    faseb   1.153846   .5663949   325.6000061       0 |
+     +------------------------------------------------------+
+SAMPLE IS  thera demsci all:
+# articles = 1550
+# athr-articles = 9556
+# athr-affl-articles = 9708
+SAMPLE IS  thera demsci last5yrs:
+# articles = 1235
+# athr-articles = 7714
+# athr-affl-articles = 9174
+
+. 
+end of do-file
+
+--------------------------------------------------------------------------------
+Makelog ended: 2023-01-01 18:17:11
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code
+--------------------------------------------------------------------------------
