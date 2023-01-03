@@ -1,2 +1,4 @@
 ./xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_metadata/output
+./jrnls/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/output
 ./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_metadata/output
+./inst_xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fill_mi_insts/output
