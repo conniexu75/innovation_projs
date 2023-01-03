@@ -1,2 +1,3 @@
 ./xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/prep_metadata/output
+./inst_xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fill_mi_insts/output
 ./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/clean_metadata/output
