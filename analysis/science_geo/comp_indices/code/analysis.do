@@ -13,20 +13,25 @@ program main
     global area_name "US cities"
     global city_full_name "world cities"
     global inst_name "institutions"
-    foreach samp in cns_med scisub { 
+    foreach samp in cns scisub demsci { 
         local samp_type = cond(strpos("`samp'", "cns")>0 | strpos("`samp'","med")>0, "main", "robust")
-        foreach data in fund dis thera {
+        foreach data in fund nofund {
         di "SAMPLE IS : `samp' `data'"
             foreach var in affl_wt cite_affl_wt {
                 athr_loc, data(`data') samp(`samp') wt_var(`var')
-                qui trends, data(`data') samp(`samp') wt_var(`var')
+                *qui trends, data(`data') samp(`samp') wt_var(`var')
             }
             qui output_tables, data(`data') samp(`samp') 
         }
+        corr_wt, samp(`samp')
         foreach var in affl_wt cite_affl_wt {
             qui comp_w_fund, samp(`samp')  wt_var(`var')
         }
     }
+    foreach file in corr_wt {
+        qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`file') ///
+           title(<tab:`file'>) format(%20.4f) replace
+         }
 end
 
 program athr_loc
@@ -71,7 +76,7 @@ program athr_loc
         qui replace rank_grp = "second" if _n == 2
         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10)
         qui replace rank_grp = "remaining" if mi(rank_grp)
-        keep `loc' rank_grp
+        keep `loc' perc rank_grp
         qui save ../temp/`loc'_rank_`data'_`samp'`suf', replace
         restore
     }
@@ -147,14 +152,30 @@ program trends
         restore
     }
 end 
+program corr_wt 
+    syntax, samp(str) 
+    foreach loc in country city_full inst {
+        use ../temp/`loc'_rank_fund_`samp',clear
+        gen cat = "unwt"
+        append using ../temp/`loc'_rank_fund_`samp'_wt
+        replace cat = "wt" if mi(cat)
+        drop rank_grp
+        reshape wide perc, i(`loc') j(cat) string
+        qui corr percunwt percwt
+        local corr = r(rho)
+        mat corr_wt_`samp' = nullmat(corr_wt_`samp') , `corr'
+    }
+    mat corr_wt = nullmat(corr_wt) \ corr_wt_`samp'
+end
 
 program comp_w_fund
     syntax, samp(str) wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
-    foreach trans in dis thera {
-         local fund_name "Fundamental"
+    foreach trans in nofund {
+         local fund_name "Fundamental Science"
          if "`trans'" == "dis"  local `trans'_name "Disease"
          if "`trans'" == "thera"  local `trans'_name "Therapeutics"
+         if "`trans'" == "nofund"  local `trans'_name "Translational Science"
          foreach type in city_full inst {
             qui {
                 global top_20 : list global(`type'_fund_`samp') | global(`type'_`trans'_`samp')
@@ -205,6 +226,7 @@ program comp_w_fund
                 cap replace inst = "UPenn" if inst == "University of Pennsylvania"
                 cap replace inst = "Yale" if inst == "Yale University"
                 cap replace inst = "Wash U" if inst == "Washington University in St. Louis"
+                cap replace inst = "Univ. of Washington" if inst == "University of Washington"
                 cap replace inst = "CAS" if inst == "Chinese Academy of Sciences"
                 cap replace inst = "Oxford" if inst == "University of Oxford"
                 cap replace inst = "Cambridge" if inst == "University of Cambridge"
@@ -221,12 +243,18 @@ program comp_w_fund
                 cap replace lab_share = "" if !(inlist(rankfund, 1, 2, 3,4, 5, 8) | inlist(ranktrans, 1, 2, 3,4, 5))
                 cap replace lab_share = "" if inlist(`type', "Oxford, UK", "Baltimore, US", "Seattle, US", "Cambridge, UK", "University of Washington", "Universidade de Sao Paulo") & "`trans'" == "thera"
                 cap replace lab_share = "" if inlist(`type', "Chinese Academy of Medical Sciences" ) & "`trans'" == "dis"
+                cap replace lab_share = "" if inlist(`type', "London, UK" , "UCSF", "Max Planck") & "`trans'" == "nofund" & "`suf'" == "_wt" 
+                cap replace lab_share = `type' if inlist(`type', "Houston, US", "Rockefeller Univ.", "MD Anderson", "Oxford", "Caltech" ) & "`trans'" == "nofund"
                 egen clock = mlabvpos(rankfund ranktrans)
                 cap replace clock = 3 if inlist(lab_share,"San Diego-La Jolla, US", "Stanford") & "`trans'" == "thera"
+                cap replace clock = 3 if inlist(lab_share,"San Diego-La Jolla, US", "Memorial Sloan", "Houston, US", "London, UK", "MD Anderson", "UC Berkeley") & "`trans'" == "nofund"
+                cap replace clock = 9 if inlist(lab_share,"Caltech") & "`trans'" == "nofund"
+                cap replace clock = 12 if inlist(lab_share,"Oxford") & "`trans'" == "nofund"
+                cap replace clock = 12 if inlist(lab_share,"Univ. of Washington") & "`trans'" == "nofund"
                 cap replace clock = 2 if inlist(lab_share,"Beijing, China") & "`trans'" == "thera"
                 cap replace clock = 12 if inlist(lab_share,"Pfizer" , "UC Berkeley") & "`cat'" == "thera"
                 cap replace clock = 6 if inlist(lab_share,"London, UK", "Bay Area, US") & "`trans'" == "thera"
-                cap replace clock = 9 if inlist(lab_share,"Rockefeller Univ.") & "`trans'" == "thera"
+                cap replace clock = 9 if inlist(lab_share,"Rockefeller Univ.") & "`trans'" == "nofund"
                 cap replace clock = 6 if inlist(lab_share,"Max Planck", "University of Washington", "Brigham and Women's Hospital" ) & "`trans'" == "dis"
                 cap replace clock = 3 if inlist(lab_share,"UCSF", "MIT", "Memorial Sloan", "Peking University" ) & "`trans'" == "dis"
                 cap replace clock = 12 if inlist(lab_share,"UC Berkeley" ) & "`trans'" == "dis"
@@ -234,7 +262,7 @@ program comp_w_fund
                 tw scatter rankfund ranktrans if inrange(rankfund , 1,`rank_lmt') & inrange(ranktrans ,1,`rank_lmt'), ///
                   mlabel(lab) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) || ///
                   (line onefund onetrans if onefund <= `rank_lmt', lpattern(dash) lcolor(lavender)), ///
-                  xtitle("``trans'_name' Research Output Rank", size(small)) ytitle("`fund_name' Science Research Output Rank", size(small)) ///
+                  xtitle("``trans'_name' Research Output Rank", size(small)) ytitle("`fund_name' Research Output Rank", size(small)) ///
                   xlabel(1(1)`rank_lmt', labsize(vsmall)) ylabel(1(1)`rank_lmt', labsize(vsmall)) xsc(reverse) ysc(reverse) legend(off)
                 *graph export ../output/figures/bt_`type'_`trans'_`samp'`suf'_scatter.pdf, replace
                 local skip = 1 
@@ -252,9 +280,11 @@ program comp_w_fund
                 tw scatter sharefund sharetrans if !mi(sharefund) & !mi(sharetrans), ///
                   mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) || ///
                   (line zerofund zerotrans if zerofund <= `max', lpattern(dash) lcolor(lavender)), ///
-                  xtitle("Share of Worldwide ``trans'_name' Research Output (%)", size(small)) ytitle("Share of Worldwide `fund_name' Science Research Output (%)", size(small)) ///
+                  xtitle("Share of Worldwide ``trans'_name' Research Output (%)", size(small)) ytitle("Share of Worldwide `fund_name' Research Output (%)", size(small)) ///
                   xlabel(0(`skip')`max', labsize(vsmall)) ylabel(0(`skip')`max', labsize(vsmall)) legend(on order(- "Correlation = `corr'") size(vsmall) pos(`pos') ring(0) region(lwidth(none)))
-                graph export ../output/figures/bt_`type'_`trans'_`samp'`suf'_share_scatter.pdf, replace
+                if "`samp'" == "cns" {
+                    graph export ../output/figures/bt_`type'_`trans'_`samp'`suf'_share_scatter.pdf, replace
+                }
             }
         }
     }
