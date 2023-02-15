@@ -17,39 +17,20 @@ program main
         di "OUTPUT START"
         local samp_type = cond("`samp'" == "cns", "main", "robust")
         *get_total_articles, samp(`samp') samp_type(`samp_type')
-        foreach data in fund dis thera {
-            foreach var in affl_wt cite_affl_wt {
+        foreach data in fund { //dis thera {
+            foreach var in cite_affl_wt {
                 athr_loc, data(`data') samp(`samp') wt_var(`var')
                 qui trends, data(`data') samp(`samp') wt_var(`var')
             }
             calc_broad_hhmi, data(`data') samp(`samp') 
             top_mesh_terms, data(`data') samp(`samp') samp_type(`samp_type')
+            top_mesh_terms, data(trans) samp(`samp') samp_type(`samp_type')
             qui output_tables, data(`data') samp(`samp') 
         }
         foreach var in affl_wt cite_affl_wt {
-            qui comp_w_fund, samp(`samp')  wt_var(`var')
+            *qui comp_w_fund, samp(`samp')  wt_var(`var')
         }
-    }
-end
-
-program get_total_articles 
-    syntax, samp(str) samp_type(str)
-    use ../external/`samp_type'_filtered/all_jrnl_articles_`samp'Q1, clear 
-    // delete some weird metastudies that we can't cleanly get affiliations from
-    qui drop if inlist(pmid, 33471991, 28445112, 28121514, 30345907, 27192541, 25029335, 23862974, 30332564, 31995857, 34161704)
-    qui drop if inlist(pmid, 29669224, 35196427,26943629,28657829,34161705,31166681,29539279)
-    cap drop _merge
-    qui merge 1:1 pmid using ../external/wos/`samp'_appended, assert(1 2 3)  // restrict to those that were found in wos 
-    qui drop if _merge == 2
-    tab _merge
-    qui keep if strpos(doc_type, "Article")>0
-    qui drop if strpos(doc_type, "Retracted")>0
-    qui keep if _merge == 3 
-    drop _merge
-    qui merge 1:1 pmid using ../external/`samp_type'_total/`samp'_all_pmids, assert(2 3) keep(3) nogen
-    qui replace year = pub_year if !mi(pub_year)
-    gcontract year journal_abbr, freq(num_articles)
-    save ../temp/`samp'_counts, replace
+    } // test if github work
 end
 
 program athr_loc
@@ -206,10 +187,10 @@ program trends
         replace `year_var' = 2022 if `year_var' == r(max)
         graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2022, ms(smcircle) ///
           msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
-          ytitle("Percent of Published Papers", size(small)) xtitle("Year", size(small)) xlabel(`min_year'(2)2022, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+          ytitle("Share of Worldwide Fundamental Science Research Output", size(small)) xtitle("Year", size(small)) xlabel(`min_year'(2)2022, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
           graphregion(margin(r+25)) plotregion(margin(zero)) ///
           legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places") ring(1) pos(6) rows(2))
-        qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf, replace
+        qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
         restore
     }
 end 
@@ -217,10 +198,11 @@ end
 program comp_w_fund
     syntax, samp(str) wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
-    foreach trans in dis thera {
-         local fund_name "Fundamental"
+    foreach trans in nofund {
+         local fund_name "Fundamental Science"
          if "`trans'" == "dis"  local `trans'_name "Disease"
          if "`trans'" == "thera"  local `trans'_name "Therapeutics"
+         if "`trans'" == "nofund"  local `trans'_name "Disease + Therapeutics"
          foreach type in city_full inst {
             qui {
                 global top_20 : list global(`type'_fund) | global(`type'_`trans')
