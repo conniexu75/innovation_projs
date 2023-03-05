@@ -16,10 +16,32 @@ program main
     global fundamental_name fund
     global therapeutics_name thera
     create_cat_samps
+    foreach samp in cns med cns_med {
+        clear
+        append using ../output/cleaned_dis_all_`samp'
+        append using ../output/cleaned_thera_all_`samp'
+        save ../output/cleaned_nofund_all_`samp', replace
+        append using ../output/cleaned_fund_all_`samp'
+        save ../output/cleaned_newfund_all_`samp', replace 
+
+        clear
+        append using ../output/cleaned_dis_last5yrs_`samp'
+        append using ../output/cleaned_thera_last5yrs_`samp'
+        save ../output/cleaned_nofund_last5yrs_`samp', replace
+        append using ../output/cleaned_fund_all_`samp'
+        save ../output/cleaned_newfund_last5yrs_`samp', replace 
+
+        clear
+        append using ../output/mesh_dis_`samp'
+        append using ../output/mesh_thera_`samp'
+        save ../output/mesh_nofund_`samp', replace
+        append using ../output/mesh_fund_all_`samp'
+        save ../output/output/mesh_newfund_`samp', replace
+    }
 end
 
 program create_cat_samps
-foreach cat in basic translational diseases fundamental therapeutics {
+foreach cat in diseases fundamental therapeutics {
         use ../external/xwalk/pmids_category_xwalk, clear
         keep if cat == "`cat'"
         gisid pmid
