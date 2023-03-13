@@ -1,0 +1,3 @@
+./med_pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/create_clinical/output/
+./cns_med_samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_metadata/output/
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
