@@ -6,4 +6,9 @@
 ./robust_total/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/append_pmids/output
 ./robust_split/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/split_metadata_by_type/output
 ./robust_full_samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/clean_metadata/output
+./thera_full_samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fix_thera_def/clean_metadata/output
+./thera_filtered/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fix_thera_def/prep_metadata/output
+./thera_xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fix_thera_def/append_pmids/output
+./clinical_split/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_clinical_metadata/output
+./clinical_filtered/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/create_clinical/output
 ./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output

@@ -21,6 +21,6 @@ link_externals(paths, ['links.txt'])
 import subprocess
 #subprocess.call('Rscript --no-save build.R > ../output/build.Rout', shell=True)
 # BUILD.DO
-run_stata(paths, program = 'analysis.do')
+run_stata(paths, program = 'build.do')
 end_makelog(paths)
 input('\n Press <Enter> to exit.')
