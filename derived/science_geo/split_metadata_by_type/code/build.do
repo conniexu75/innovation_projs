@@ -16,8 +16,8 @@ program main
     global fundamental_name fund
     global therapeutics_name thera
     create_cat_samps
-    foreach samp in cns med cns_med {
-        clear
+    foreach samp in cns {
+/*        clear
         append using ../output/cleaned_dis_all_`samp'
         append using ../output/cleaned_thera_all_`samp'
         save ../output/cleaned_nofund_all_`samp', replace
@@ -29,25 +29,30 @@ program main
         append using ../output/cleaned_thera_last5yrs_`samp'
         save ../output/cleaned_nofund_last5yrs_`samp', replace
         append using ../output/cleaned_fund_all_`samp'
-        save ../output/cleaned_newfund_last5yrs_`samp', replace 
+        save ../output/cleaned_newfund_last5yrs_`samp', replace */
+        use ../external/thera/major_mesh_terms_thera, clear
+        merge m:1 pmid using ../external/thera_xwalk/thera_pmids, assert(2 3) keep(3) nogen
+        merge m:1 pmid using ../external/wos/thera_appended, assert(1 2 3) keep(3) nogen
+        merge m:1 pmid using ../external/jrnls/`samp'_all_pmids, assert(1 2 3) keep(3)  nogen
+        save ../output/mesh_thera_cns, replace
 
         clear
         append using ../output/mesh_dis_`samp'
         append using ../output/mesh_thera_`samp'
-        save ../output/mesh_nofund_`samp', replace
-        append using ../output/mesh_fund_all_`samp'
-        save ../output/output/mesh_newfund_`samp', replace
+        *save ../output/mesh_nofund_`samp', replace
+        append using ../output/mesh_fund_`samp'
+        save ../output/mesh_newfund_`samp', replace
     }
 end
 
 program create_cat_samps
-foreach cat in diseases fundamental therapeutics {
+foreach cat in diseases fundamental {
         use ../external/xwalk/pmids_category_xwalk, clear
         keep if cat == "`cat'"
         gisid pmid
         save ../temp/${`cat'_name}_pmids, replace
 
-        foreach samp in all last5yrs {
+        foreach samp in all {
             use ../external/samp/cleaned_`samp'_${samp}, clear
             merge m:1 pmid using ../temp/${`cat'_name}_pmids, assert(1 2 3) keep(3) nogen
 
