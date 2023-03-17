@@ -16,16 +16,52 @@ program main
     global therapeutics_name thera
     foreach samp in natsub scijrnls demsci {
         create_cat_samps, samp(`samp')
+        use ../external/thera/major_mesh_terms_thera, clear
+        merge m:1 pmid using ../external/thera_xwalk/thera_pmids, assert(2 3) keep(3) nogen
+        merge m:1 pmid using ../external/wos/thera_appended, assert(1 2 3) keep(3) nogen
+        merge m:1 pmid using ../external/jrnls/`samp'_all_pmids, assert(1 2 3) keep(3)  nogen
+        save ../output/mesh_thera_`samp', replace
     }
-    foreach cat in basic translational diseases fundamental therapeutics {
-        foreach t in all last5yrs {
+    foreach cat in diseases fundamental {
+        foreach t in all  {
             clear
             foreach samp in natsub scijrnls {
                 append using ../output/cleaned_${`cat'_name}_`t'_`samp'
             }
             save ../output/cleaned_${`cat'_name}_`t'_scisub, replace
         }
+        clear
+        foreach samp in natsub scijrnls {
+            append using ../output/mesh_${`cat'_name}_`samp'
+        }
+        save ../output/mesh_${`cat'_name}_scisub, replace
     }
+    foreach cat in dis fund thera {
+        clear
+        foreach samp in natsub scijrnls {
+            append using ../output/mesh_`cat'_`samp'
+        }
+        save ../output/mesh_`cat'_scisub, replace
+    }
+
+    foreach samp in scisub demsci {
+        clear
+        append using ../output/mesh_dis_`samp'
+        append using ../output/mesh_fund_`samp'
+        append using ../output/mesh_thera_`samp'
+        save ../output/mesh_newfund_`samp', replace
+    }
+
+/*    foreach cat in diseases fundamental {
+        foreach t in all {
+            use ../output/cleaned_${`cat'_name}_`t'_demsci, clear
+            drop if journal_abbr == "PLoS One"
+            save ../output/cleaned_${`cat'_name}_`t'_noplos, replace
+            use ../output/cleaned_${`cat'_name}_`t'_demsci, clear
+            drop if journal_abbr == "PLoS One" | journal_abbr == "J Biol Chem"
+            save ../output/cleaned_${`cat'_name}_`t'_noopen, replace
+            }
+        }*/
 end
 
 program create_cat_samps
@@ -36,7 +72,7 @@ program create_cat_samps
         gisid pmid
         save ../temp/`samp'_${`cat'_name}_pmids, replace
 
-        foreach t in all last5yrs {
+        foreach t in all {
         use ../external/samp/cleaned_`t'_`samp', clear
         merge m:1 pmid using ../temp/`samp'_${`cat'_name}_pmids, assert(1 2 3) keep(3) nogen
 
