@@ -1,4 +1,5 @@
 set more off
+Gk
 clear all
 capture log close
 program drop _all
@@ -185,7 +186,7 @@ program clean_pubtype
         replace pub_type = pt`i' if mi(pub_type)
         tab pub_type
     }
-	drop if (to_drop == 1 | study == 1 ) & trial == 0
+	drop if (to_drop == 1) & trial == 0
     save ${temp}/cleaned_pubtype_${samp}, replace
 end
 
@@ -261,7 +262,7 @@ program reshape_mult_affiliations
 	sreshape long affiliation_, i(pmid which_athr last_name first_name pub_type trial) j(which_affiliation) missing(drop)
 	rename affiliation_ affiliation
     compress, nocoalesce
-	save ../output/pmid_author_affiliation_list_${samp}, replace		
+	save ../output/pmid_author_affiliation_list_clin_${samp}, replace		
 end
 
 program reshape_mesh_terms
@@ -293,7 +294,7 @@ program reshape_mesh_terms
 end
 
 program clean_geo
-/*    qui {
+    qui {
         import delimited ../external/geo/country_list.csv, varnames(1) clear
         qui glevelsof name, local(country_names)
         qui glevelsof code, local(country_abbrs)
@@ -372,13 +373,19 @@ program clean_geo
         gduplicates tag institution, gen(dup)
         keep if dup == 0 
         drop dup 
+        compress, nocoalesce
+        gen str_length = length(institution)
+        qui sum str_length
+        local max = r(max)
+        recast str`max' institution
+        drop str_length
         save ${temp}/unique_institutions, replace
     }
 
     di "Done creating xwalks"
     
     qui {
-        use ../output/pmid_author_affiliation_list_${samp}, clear
+        use ../output/pmid_author_affiliation_list_clin_${samp}, clear
         replace affiliation = subinstr(affiliation , "&amp;","&",.)
         replace affiliation = "" if strpos(affiliation, "listed in the supplementary materials") > 0 | strpos(affiliation, "supplementary materials") > 0
 
@@ -482,7 +489,7 @@ program clean_geo
     }
 
     di "done cleaned US states"
-
+stop
     qui {
         use ${temp}/cleaned_states_${samp}, clear
         gen city = ""
@@ -591,7 +598,7 @@ program clean_geo
         replace city = "Geneva" if strpos(affiliation, "Geneva") > 0 & country == "Switzerland"
         save ${temp}/cleaned_cities_${samp}, replace
     }
-    di "done clean cities"*/
+    di "done clean cities"
 
     qui {
         use ${temp}/cleaned_cities_${samp}, replace 
@@ -892,7 +899,7 @@ program clean_geo
               "The Cancer Cell Map Initiative" "Guangdong Provincial Center for Disease Control and Prevention" "Neoleukin Therapeutics" "Beijing Proteome Research Center" "Sun Yat-sen University" ///
               "Academy for Scientific and Innovative Research" "Massachusetts Department of Public Health" "Chinese Academy of Medical Sciences" "BC Cancer" "Global Virus Network" "KiTZ" ///
               "Humanitas Clinical and Research Center" "Candiolo Cancer Institute" "Northwell Health" "National Centre for Disease Control" "Peter MacCallum Cancer Centre" "Cancer Cell Map Initiative"  ///
-              "Peter MacCallum Cancer Centre" "Cancer Therapeutics CRC" "IRCCS" "Infinity Pharmaceuticals" "Oncology Institute of Southern Switzerland" ///
+              "Peter MacCallum Cancer Centre" "Cancer Therapeutics CRC" "Infinity Pharmaceuticals" "Oncology Institute of Southern Switzerland" ///
               "Walter and Eliza Hall Institute" "Guangdong Provincial Institution of Public Health" "Netherlands Cancer Institute" "Sinovac Biotech" "Sustainable Sciences Institute" "University of Torino" ///
               "Illumina" "innate Pharma" "Tel-Aviv University" "La Jolla Institute for Allergy and Immunology" "Kenema Government Hospital" "Public Health Scotland" "Commonwealth Scientific and Industrial Research Organisation" ///
               "Helmholtz Innovation Lab BaoBab" "National Centre for Infectious Diseases" "Persiaran Institusi" "Environment and Climate Change Canada" "Peking University" "Lunenfeld-Tanenbaum Research Institute" "INGM" "FLI" ///
@@ -1013,6 +1020,46 @@ program clean_geo
         bys pmid: gegen has_editor = max(is_jama)
         drop if has_lancet == 1 | has_london == 1 | has_bmj == 1 | has_jama == 1 | has_editor == 1
         drop is_lancet is_london is_bmj is_jama is_editor has_lancet has_london has_bmj has_jama has_editor
+        drop if inlist(pmid, 33471991, 28445112, 28121514, 30345907, 27192541, 25029335, 23862974, 30332564, 31995857, 34161704)
+        drop if inlist(pmid, 29669224, 35196427,26943629,28657829,34161705,31166681,29539279, 33264556, 33631065, 33306283, 33356051)
+        drop if inlist(pmid, 34587383, 34260849, 34937145, 34914868, 33332779, 36286256, 28657871, 35353979, 33631066, 27959715)
+        drop if inlist(pmid, 29045205, 27376580, 29800062)
+
+        foreach i in "Public Health Agency of Barcelona" "Westat" "The George Institute for Global Health" "University Hospital Knappschaftskrankenhaus Bochum" "American Medical Association" "Sharp End Advisory" "Clover Health" "D'Or Institute for Research and Education" "Western Slope Endocrinology" "BRICNet" "Beneficencia Portuguesa" "Sanquin Research" "HCor Research Institute" "GAMUT" "Kaiser Permanente Washington Health Research Institute" "Agency for Healthcare Research and Quality" "National Clinical Guideline Centre" "Brazilian Clinical Research Institute" "Hospital Alemao Oswaldo Cruz" "Louvain Drug Research Institute" "ClAnica Imbanaco" "Clinical Practice Assessment Unit" "Zealand University Hospital" "Murdoch Childrens Research Institute" "Centers for Medicare & Medicaid Services" "Society for Applied Studies" "China Academy of Chinese Medical Sciences" "Universidad del Valle" "Seattle Genetics" "Hellenic Institute for the Study of Sepsis" "KAIST" "IRCM" "CCRM" "Leap Therapeutics" "Tzaneio General Hospital of Piraeus" "Sotiria General Hospital of Chest Diseases" "IRCSS Sacro Cuore Hospital" "Elpis General Hospital" "Spallanzani Institute" "Wyeth-Ayerst Research" "APV Homogenizer Group" "BioCentury" "FDA" "Mesoblast" "Dark Horse Consultion" "BEFORE Brands" "Color Genomics" "Epinomics" "Roche " "Hospital of Jesolo" "Royal Botanic Gardens" "UNSW Sydney" "University of Nevada" "GEOMAR" "Monsanto" "National Institute of Health" "GSK" "Qingdao National Laboratory for Marine Science and Technology" "CONICET" "Monell Chemical Senses Center" "Burnham Institute" "Austrian Cluster for Tissue Regeneration" "Bio Architecture Lab" "National Orchid Conservation Center of China" "IFOM" "Joint Center for Structural Genomics" "Third Military Medical University" "National Institute of Agrobiological Sciences" "TIGEM" "Yunnan Key Laboratory of Primate Biomedical Research" "DuPont Pioneer" "Friedrich Miescher Institute" "Loyola University Chicago" "International Network for Quality Rice" "Rigel Pharmaceuticals" "Elan Pharmaceuticals" "Lexicon Pharmaceuticals" "Constellation Pharmaceuticals" "Immunocore" "XOMA" "National Institute of Infectious Diseases" "Yukiguni Maitake" "Trius Therapeutics" "BioElectron" "Seattle Structural Genomics Center for Infectious Diseases" "CNIO" "Naval Medical Research Center" "SAIT" "Hannover Medical School" "Center for Disease Control and Prevention" "Ulm University" "Point Loma Nazarene University" "Debre Tabor University" "Sackler School of Graduate Biomedical Sciences" "Vita-Salute San Raffaele University" "Turku University" "Hebrew University" "Pai-Chai University" "National Chung-Hsing University" "RAND" "Imperial Cancer Research Fund" "CIRAD" "U.S. Geological Survey" "USDA-ARS" { 
+            replace institution = "`i'" if strpos(affiliation, "`i'") > 0 & mi(institution)
+        }
+        replace institution = "Seoul National University" if strpos(affiliation, "Seoul National University") > 0
+        replace institution = "University of Washington" if institution == "Fred Hutchinson Cancer Research Center"
+        replace institution = "Loyola University Chicago" if institution == "Loyola University of Chicago"
+        replace institution = "CDC" if institution == "Center for Disease Control and Prevention" & strpos(affiliation, "Atlanta")>0
+        replace institution = "Friedrich Miescher Institute for Biomedical Research" if institution == "Friedrich Miescher Institute"
+        replace institution = "University of Bochum" if inlist(institution, "University Hospital Knappschaftskrankenhaus Bochum", "Ruhr-Universitat Bochum")
+        replace institution = "KAIST" if strpos(affiliation, "KAIST")>0 & country == "South Korea"
+        replace city = "Bochum" if institution == "University of Bochum"
+        replace country = "Germany" if institution == "University of Bochum"
+        replace institution = "AHRQ" if institution == "Agency for Healthcare Research and Quality" | (strpos(affiliation, "AHRQ")>0 & mi(institution))
+        replace institution = "Leiden University" if institution == "University of Leiden"
+        replace institution = "McGill University" if institution == "Clinical Practice Assessment Unit"
+        replace institution = "FDA" if strpos(institution, "Food and Drug Administration")>0 | strpos(affiliation, "Food and Drug Administration")>0
+        replace institution = "GlaxoSmithKline" if institution == "GSK"
+        replace institution = "University of New South Wales" if institution == "UNSW Sydney"
+        replace institution = "University of Wisconsin, Madison" if strpos(affiliation, "University of Wisconsin")>0 & city == "Madison" & mi(institution)
+        replace institution = "University of Wisconsin, Oshkosh" if strpos(affiliation, "University of Wisconsin")>0 & city == "Oshkosh" & mi(institution)
+        replace institution = "CONICET" if strpos(affiliation, "Consejo Nacional de Investigaciones")>0
+        replace institution = "University of Nevada, Las Vegas" if institution == "University of Nevada" & strpos(affiliation, "Las Vegas") > 0
+        replace institution = "University of Nevada, Reno" if institution == "University of Nevada" & strpos(affiliation, "Reno") > 0
+        replace institution = "Radboud University" if strpos(affiliation, "Radboud")>0 & strpos(strlower(affiliation), "university")>0
+        foreach cal in "Berkeley" "Los Angeles" "Santa Barbara" "San Diego" "Davis" "Irvine" "Santa Cruz" "Riverside" "Merced" "San Francisco" {
+            replace institution = "University of California, `cal'" if strpos(affiliation, "University of California `cal'") > 0
+            replace institution = "University of California, `cal'" if strpos(affiliation, "University of California-`cal'") > 0
+            replace institution = "University of California, `cal'" if strpos(affiliation, "University of California, `cal'") > 0
+            replace institution = "University of California, `cal'" if strpos(affiliation, "University of California at `cal'") > 0
+            replace institution = "University of California, `cal'" if strpos(affiliation, "UC `cal'") > 0
+            replace institution = "University of California, `cal'" if strpos(affiliation, "University of California") > 0 & strpos(affiliation, "`cal'")>0& mi(institution)
+            replace country = "United States" if institution == "University of California, `cal'"
+            replace city = "`cal'" if institution == "University of California, `cal'" & mi(city)
+        }
+
         compress , nocoalesce
         save ${temp}/cleaned_all_${samp}, replace
         *keep if inrange(date, td(01jan2015), td(31mar2022))
@@ -1021,13 +1068,15 @@ program clean_geo
     di "done extra edits and data saved"
 end 
 program merge_all
-    use ${temp}/cleaned_all_${samp}, clear
-    append using ${temp}/already_cleaned_${samp}
-    save ../output/cleaned_all_${samp}, replace
+    use ${temp}/already_cleaned_${samp}, clear
+    gen year = year(date)
+    append using ${temp}/cleaned_all_${samp}
+    save ../output/cleaned_clin_all_${samp}, replace
+    save ../output/cleaned_all_clin_${samp}, replace
 
     use ${temp}/mesh_already_cleaned_${samp}, clear
     append using ${temp}/major_mesh_terms_${samp}
-    save ../output/major_mesh_terms_${samp}, replace
+    save ../output/mesh_clin_${samp}, replace
 end
 ** 
 main
