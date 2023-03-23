@@ -11,4 +11,6 @@
 ./thera_xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fix_thera_def/append_pmids/output
 ./clinical_split/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_clinical_metadata/output
 ./clinical_filtered/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/create_clinical/output
+./fill_mi_insts/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fill_mi_insts/output
 ./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output
+./wos_affils/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/wos_affils/output
