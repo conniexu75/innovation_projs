@@ -13,20 +13,28 @@ program main
     global area_name "US cities"
     global city_full_name "world cities"
     global inst_name "institutions"
-    foreach samp in cns med scisub demsci { 
+    foreach samp in cns scisub demsci med { 
         local samp_type = cond(strpos("`samp'", "cns")>0 | strpos("`samp'","med")>0, "main", "robust")
+        if "`samp'" == "med" { 
+            local samp_type "clinical"
+        }
         get_total_articles, samp(`samp') samp_type(`samp_type')
-        foreach data in fund dis thera {
+        foreach data in newfund {
+        if "`samp'" == "med" {
+            local data clin
+        }
         di "SAMPLE IS : `samp' `data'"
             top_jrnls, data(`data') samp(`samp') 
             samp_size, data(`data') samp(`samp') 
             mat N_`samp' = nullmat(N_`samp') \ N_`data'_`samp'
         }
         mat N_samp = nullmat(N_samp) \ N_`samp'
-        mat top_jrnls_`samp' =  nullmat(top_jrnls_`samp') , top_jrnls_`samp'_N
-        mat top_jrnls =  nullmat(top_jrnls) \ top_jrnls_`samp'
+        if "`samp'" != "med" {
+            mat top_jrnls_`samp' =  nullmat(top_jrnls_`samp') , top_jrnls_`samp'_N
+            mat top_jrnls =  nullmat(top_jrnls) \ top_jrnls_`samp'
+        }
     }
-    foreach file in top_jrnls N_samp {
+    foreach file in top_jrnls N_samp top_jrnls_med {
         qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`file') ///
            title(<tab:`file'>) format(%20.4f) replace
          }
@@ -48,17 +56,19 @@ program get_total_articles
     drop if strpos(doc_type, "Retracted")>0
     qui keep if _merge == 3
     drop _merge
+    if "`samp'" == "med" local samp_type "main"
     merge 1:1 pmid using ../external/`samp_type'_total/`samp'_all_pmids, assert(2 3) keep(3) nogen
     replace year = pub_year if !mi(pub_year)
     preserve
     gcontract year journal_abbr, freq(num_articles)
+    drop if journal_abbr == "annals"
     save ../temp/`samp'_counts, replace
-    restore
-    merge 1:m pmid using ../external/cleaned_samps/cleaned_all_fund_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
+    restore 
+    /*merge 1:m pmid using ../external/cleaned_samps/cleaned_all_fund_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
     merge 1:m pmid using ../external/cleaned_samps/cleaned_all_dis_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
     merge 1:m pmid using ../external/cleaned_samps/cleaned_all_thera_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
     keep pmid year journal_abbr
-    save ../output/`samp'_unmatched, replace
+    save ../output/`samp'_unmatched, replace*/
 end
 program top_jrnls
     syntax, data(str) samp(str) 
