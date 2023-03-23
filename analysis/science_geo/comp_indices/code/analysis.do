@@ -13,9 +13,12 @@ program main
     global area_name "US cities"
     global city_full_name "world cities"
     global inst_name "institutions"
+    foreach var in affl_wt cite_affl_wt {
+        athr_loc, data(clin) samp(med) wt_var(`var')
+    }
     foreach samp in cns scisub demsci { 
         local samp_type = cond(strpos("`samp'", "cns")>0 | strpos("`samp'","med")>0, "main", "robust")
-        foreach data in fund nofund {
+        foreach data in newfund {
         di "SAMPLE IS : `samp' `data'"
             foreach var in affl_wt cite_affl_wt {
                 athr_loc, data(`data') samp(`samp') wt_var(`var')
@@ -155,9 +158,9 @@ end
 program corr_wt 
     syntax, samp(str) 
     foreach loc in country city_full inst {
-        use ../temp/`loc'_rank_fund_`samp',clear
+        use ../temp/`loc'_rank_newfund_`samp',clear
         gen cat = "unwt"
-        append using ../temp/`loc'_rank_fund_`samp'_wt
+        append using ../temp/`loc'_rank_newfund_`samp'_wt
         replace cat = "wt" if mi(cat)
         drop rank_grp
         reshape wide perc, i(`loc') j(cat) string
@@ -171,17 +174,18 @@ end
 program comp_w_fund
     syntax, samp(str) wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
-    foreach trans in nofund {
+    foreach trans in clin {
          local fund_name "Fundamental Science"
          if "`trans'" == "dis"  local `trans'_name "Disease"
+         if "`trans'" == "clin"  local `trans'_name "Clinical"
          if "`trans'" == "thera"  local `trans'_name "Therapeutics"
          if "`trans'" == "nofund"  local `trans'_name "Translational Science"
          foreach type in city_full inst {
             qui {
-                global top_20 : list global(`type'_fund_`samp') | global(`type'_`trans'_`samp')
-                use ../external/cleaned_samps/cleaned_last5yrs_fund_`samp', clear
+                global top_20 : list global(`type'_newfund_`samp') | global(`type'_`trans'_`samp')
+                use ../external/cleaned_samps/cleaned_last5yrs_newfund_`samp', clear
                 gen type = "fund"
-                append using ../external/cleaned_samps/cleaned_last5yrs_`trans'_`samp'
+                append using ../external/cleaned_samps/cleaned_last5yrs_`trans'_med
                 replace type = "trans" if mi(type)
                 gen to_keep = 0
                 foreach i of global top_20 {
