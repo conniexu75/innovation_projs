@@ -1,0 +1,28 @@
+{
+    "id": "F47DBA05",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1663448703677.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "id": "3902f2335c334ee6bfc2919ca67f6718",
+        "name": "PMIDs",
+        "title": "PMIDs",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 7644109711120325570,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1663448703677,
+    "read_only": false,
+    "read_only_alternatives": []
+}

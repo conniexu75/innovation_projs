@@ -1,0 +1,2 @@
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/investigate_thera/prep_metadata/output/
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
