@@ -1,10 +1,10 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-01-05 17:15:50
+Makelog started: 2023-03-23 12:39:16
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code
 --------------------------------------------------------------------------------
 External links successfully created!
 
-  ___  ____  ____  ____  ____ ©
+  ___  ____  ____  ____  ____ ®
  /__    /   ____/   /   ____/      17.0
 ___/   /   /___/   /   /___/       MP—Parallel Edition
 
@@ -53,27 +53,35 @@ Notes:
   3.     global area_name "US cities"
   4.     global city_full_name "world cities"
   5.     global inst_name "institutions"
-  6.     foreach samp in cns med scisub demsci { 
+  6.     foreach samp in cns scisub demsci med { 
   7.         local samp_type = cond(strpos("`samp'", "cns")>0 | strpos("`samp'"
 > ,"med")>0, "main", "robust")
-  8.         get_total_articles, samp(`samp') samp_type(`samp_type')
-  9.         foreach data in fund dis thera {
- 10.         di "SAMPLE IS : `samp' `data'"
- 11.             top_jrnls, data(`data') samp(`samp') 
- 12.             samp_size, data(`data') samp(`samp') 
- 13.             mat N_`samp' = nullmat(N_`samp') \ N_`data'_`samp'
- 14.         }
- 15.         mat N_samp = nullmat(N_samp) \ N_`samp'
- 16.         mat top_jrnls_`samp' =  nullmat(top_jrnls_`samp') , top_jrnls_`sam
-> p'_N
- 17.         mat top_jrnls =  nullmat(top_jrnls) \ top_jrnls_`samp'
- 18.     }
- 19.     foreach file in top_jrnls N_samp {
- 20.         qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`f
+  8.         if "`samp'" == "med" { 
+  9.             local samp_type "clinical"
+ 10.         }
+ 11.         get_total_articles, samp(`samp') samp_type(`samp_type')
+ 12.         foreach data in newfund {
+ 13.         if "`samp'" == "med" {
+ 14.             local data clin
+ 15.         }
+ 16.         di "SAMPLE IS : `samp' `data'"
+ 17.             top_jrnls, data(`data') samp(`samp') 
+ 18.             samp_size, data(`data') samp(`samp') 
+ 19.             mat N_`samp' = nullmat(N_`samp') \ N_`data'_`samp'
+ 20.         }
+ 21.         mat N_samp = nullmat(N_samp) \ N_`samp'
+ 22.         if "`samp'" != "med" {
+ 23.             mat top_jrnls_`samp' =  nullmat(top_jrnls_`samp') , top_jrnls_
+> `samp'_N
+ 24.             mat top_jrnls =  nullmat(top_jrnls) \ top_jrnls_`samp'
+ 25.         }
+ 26.     }
+ 27.     foreach file in top_jrnls N_samp top_jrnls_med {
+ 28.         qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`f
 > ile') ///
 >            title(<tab:`file'>) format(%20.4f) replace
- 21.          }
- 22. end
+ 29.          }
+ 30. end
 
 . 
 . program get_total_articles 
@@ -97,22 +105,24 @@ Notes:
  12.     drop if strpos(doc_type, "Retracted")>0
  13.     qui keep if _merge == 3
  14.     drop _merge
- 15.     merge 1:1 pmid using ../external/`samp_type'_total/`samp'_all_pmids, a
+ 15.     if "`samp'" == "med" local samp_type "main"
+ 16.     merge 1:1 pmid using ../external/`samp_type'_total/`samp'_all_pmids, a
 > ssert(2 3) keep(3) nogen
- 16.     replace year = pub_year if !mi(pub_year)
- 17.     preserve
- 18.     gcontract year journal_abbr, freq(num_articles)
- 19.     save ../temp/`samp'_counts, replace
- 20.     restore
- 21.     merge 1:m pmid using ../external/cleaned_samps/cleaned_all_fund_`samp'
-> , assert(1 3) keep(1) nogen keepusing(pmid)
- 22.     merge 1:m pmid using ../external/cleaned_samps/cleaned_all_dis_`samp',
->  assert(1 3) keep(1) nogen keepusing(pmid)
- 23.     merge 1:m pmid using ../external/cleaned_samps/cleaned_all_thera_`samp
-> ', assert(1 3) keep(1) nogen keepusing(pmid)
- 24.     keep pmid year journal_abbr
- 25.     save ../output/`samp'_unmatched, replace
- 26. end
+ 17.     replace year = pub_year if !mi(pub_year)
+ 18.     preserve
+ 19.     gcontract year journal_abbr, freq(num_articles)
+ 20.     drop if journal_abbr == "annals"
+ 21.     save ../temp/`samp'_counts, replace
+ 22.     restore 
+ 23.     /*merge 1:m pmid using ../external/cleaned_samps/cleaned_all_fund_`sam
+> p', assert(1 3) keep(1) nogen keepusing(pmid)
+>     merge 1:m pmid using ../external/cleaned_samps/cleaned_all_dis_`samp', as
+> sert(1 3) keep(1) nogen keepusing(pmid)
+>     merge 1:m pmid using ../external/cleaned_samps/cleaned_all_thera_`samp', 
+> assert(1 3) keep(1) nogen keepusing(pmid)
+>     keep pmid year journal_abbr
+>     save ../output/`samp'_unmatched, replace*/
+. end
 
 . program top_jrnls
   1.     syntax, data(str) samp(str) 
@@ -163,260 +173,69 @@ Notes:
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                        30,522
-        from master                     6,380  (_merge==1)
-        from using                     24,142  (_merge==2)
+    Not matched                        30,867
+        from master                     6,733  (_merge==1)
+        from using                     24,134  (_merge==2)
 
-    Matched                            75,652  (_merge==3)
+    Matched                            75,299  (_merge==3)
     -----------------------------------------
 
    Matching result from |
                   merge |      Freq.     Percent        Cum.
 ------------------------+-----------------------------------
-        Master only (1) |      6,380        7.78        7.78
-            Matched (3) |     75,652       92.22      100.00
+        Master only (1) |      6,733        8.21        8.21
+            Matched (3) |     75,299       91.79      100.00
 ------------------------+-----------------------------------
                   Total |     82,032      100.00
-(22,773 observations deleted)
+(22,783 observations deleted)
 (3 observations deleted)
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                            59,256  
+    Matched                            59,246  
     -----------------------------------------
 (1,061 real changes made)
+(0 observations deleted)
 (file ../temp/cns_counts.dta not found)
 file ../temp/cns_counts.dta saved
-(variable pmid was long, now double to accommodate using data's values)
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        21,947
-        from master                    21,947  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        14,924
-        from master                    14,924  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        14,567
-        from master                    14,567  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-(file ../output/cns_unmatched.dta not found)
-file ../output/cns_unmatched.dta saved
-SAMPLE IS : cns fund
+SAMPLE IS : cns newfund
 (3 real changes made)
 
      +------------------------------------------------------+
      | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
      |------------------------------------------------------|
-  1. |  science      388.4   55.40141   710.9143066       1 |
-  2. |   nature   441.1429   65.29025   690.7999878       1 |
-  3. |     cell   236.4286   81.17321   291.3143005       1 |
+  1. |  science   377.1429   54.39524   710.7999878       1 |
+  2. |   nature   442.5429    67.3965   690.6286011       1 |
+  3. |     cell   267.9429   91.63817   291.3143005       1 |
      +------------------------------------------------------+
-SAMPLE IS  fund cns all:
-# articles = 37309
-# athr-articles = 283096
-# athr-affl-articles = 147456
-SAMPLE IS  fund cns last5yrs:
-# articles = 7032
-# athr-articles = 87372
-# athr-affl-articles = 105628
-SAMPLE IS : cns dis
-(3 real changes made)
-
-     +------------------------------------------------------+
-     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
-     |------------------------------------------------------|
-  1. |  science   69.45714   10.17521   710.9143066       1 |
-  2. |   nature   82.68571   12.82475   690.7999878       1 |
-  3. |     cell   48.51429   16.72907   291.3143005       1 |
-     +------------------------------------------------------+
-SAMPLE IS  dis cns all:
-# articles = 7023
-# athr-articles = 103259
-# athr-affl-articles = 76319
-SAMPLE IS  dis cns last5yrs:
-# articles = 2349
-# athr-articles = 53464
-# athr-affl-articles = 66070
-SAMPLE IS : cns thera
-(22 missing values generated)
-(3 real changes made)
-
-     +------------------------------------------------------+
-     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
-     |------------------------------------------------------|
-  1. |  science   4.176471   .6019359   710.9143066       1 |
-  2. |   nature    4.71875   .6307905   690.7999878       1 |
-  3. |     cell   3.764706   1.187476   291.3143005       1 |
-     +------------------------------------------------------+
-SAMPLE IS  thera cns all:
-# articles = 357
-# athr-articles = 5182
-# athr-affl-articles = 5028
-SAMPLE IS  thera cns last5yrs:
-# articles = 165
-# athr-articles = 3646
-# athr-affl-articles = 4671
-(9 observations deleted)
-(11 observations deleted)
-(8 observations deleted)
-(3 observations deleted)
+SAMPLE IS  newfund cns all:
+# articles = 38067
+# athr-articles = 341139
+# athr-affl-articles = 279125
+SAMPLE IS  newfund cns last5yrs:
+# articles = 9137
+# athr-articles = 140398
+# athr-affl-articles = 220368
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                        56,709
-        from master                     4,650  (_merge==1)
-        from using                     52,059  (_merge==2)
+    Not matched                        14,825
+        from master                       592  (_merge==1)
+        from using                     14,233  (_merge==2)
 
-    Matched                            59,962  (_merge==3)
+    Matched                            31,263  (_merge==3)
     -----------------------------------------
 
    Matching result from |
                   merge |      Freq.     Percent        Cum.
 ------------------------+-----------------------------------
-        Master only (1) |      4,650        7.20        7.20
-            Matched (3) |     59,962       92.80      100.00
-------------------------+-----------------------------------
-                  Total |     64,612      100.00
-(30,608 observations deleted)
-(13 observations deleted)
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                            33,991  
-    -----------------------------------------
-(505 real changes made)
-(file ../temp/med_counts.dta not found)
-file ../temp/med_counts.dta saved
-(variable pmid was long, now double to accommodate using data's values)
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        32,470
-        from master                    32,470  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        20,501
-        from master                    20,501  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        17,522
-        from master                    17,522  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-(file ../output/med_unmatched.dta not found)
-file ../output/med_unmatched.dta saved
-SAMPLE IS : med fund
-(14 missing values generated)
-(0 real changes made)
-
-     +------------------------------------------------------+
-     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
-     |------------------------------------------------------|
-  1. |      bmj   14.76471   5.421526   248.6285706       0 |
-  2. |   lancet       11.5   4.558091   219.5428619       0 |
-  3. |     jama   10.27273   4.565741   204.6571503       0 |
-  4. |     nejm   6.529412   3.196597   198.9714355       0 |
-  5. |   annals   3.214286   3.077463   99.37142944       0 |
-     +------------------------------------------------------+
-SAMPLE IS  fund med all:
-# articles = 1521
-# athr-articles = 8332
-# athr-affl-articles = 4831
-SAMPLE IS  fund med last5yrs:
-# articles = 112
-# athr-articles = 1131
-# athr-affl-articles = 3231
-SAMPLE IS : med dis
-(2 missing values generated)
-(0 real changes made)
-
-     +------------------------------------------------------+
-     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
-     |------------------------------------------------------|
-  1. |      bmj   92.77143   35.77281   248.6285706       0 |
-  2. |   lancet   75.57143   31.02263   219.5428619       0 |
-  3. |     jama   72.65714   34.57483   204.6571503       0 |
-  4. |     nejm   61.77143   30.29696   198.9714355       0 |
-  5. |   annals   41.57576   40.40291   99.37142944       0 |
-     +------------------------------------------------------+
-SAMPLE IS  dis med all:
-# articles = 11969
-# athr-articles = 85783
-# athr-affl-articles = 45891
-SAMPLE IS  dis med last5yrs:
-# articles = 1003
-# athr-articles = 14563
-# athr-affl-articles = 32729
-SAMPLE IS : med thera
-(2 missing values generated)
-(0 real changes made)
-
-     +------------------------------------------------------+
-     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
-     |------------------------------------------------------|
-  1. |      bmj       21.4   9.940906   248.6285706       0 |
-  2. |   lancet   14.31429   7.234138   219.5428619       0 |
-  3. |     jama   20.68571   12.15587   204.6571503       0 |
-  4. |     nejm   19.14286   9.966699   198.9714355       0 |
-  5. |   annals   10.15152   10.57013   99.37142944       0 |
-     +------------------------------------------------------+
-SAMPLE IS  thera med all:
-# articles = 2979
-# athr-articles = 31667
-# athr-affl-articles = 80847
-SAMPLE IS  thera med last5yrs:
-# articles = 683
-# athr-articles = 14788
-# athr-affl-articles = 77421
-(0 observations deleted)
-(0 observations deleted)
-(0 observations deleted)
-(0 observations deleted)
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        14,829
-        from master                       588  (_merge==1)
-        from using                     14,241  (_merge==2)
-
-    Matched                            31,267  (_merge==3)
-    -----------------------------------------
-
-   Matching result from |
-                  merge |      Freq.     Percent        Cum.
-------------------------+-----------------------------------
-        Master only (1) |        588        1.85        1.85
-            Matched (3) |     31,267       98.15      100.00
+        Master only (1) |        592        1.86        1.86
+            Matched (3) |     31,263       98.14      100.00
 ------------------------+-----------------------------------
                   Total |     31,855      100.00
 (4,025 observations deleted)
@@ -428,111 +247,34 @@ SAMPLE IS  thera med last5yrs:
     Not matched                             0
     Matched                            27,829  
     -----------------------------------------
-(1,793 real changes made)
+(1,792 real changes made)
+(0 observations deleted)
 (file ../temp/scisub_counts.dta not found)
 file ../temp/scisub_counts.dta saved
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                         9,223
-        from master                     9,223  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                         1,585
-        from master                     1,585  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                         1,361
-        from master                     1,361  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-(file ../output/scisub_unmatched.dta not found)
-file ../output/scisub_unmatched.dta saved
-SAMPLE IS : scisub fund
+SAMPLE IS : scisub newfund
 (0 real changes made)
 
      +------------------------------------------------------------+
      |   journal_abbr   avg_ar~s   avg_perc   num_artic~s   order |
      |------------------------------------------------------------|
-  1. |         neuron   180.1765   87.79156   206.1764679       0 |
-  2. |      nat_neuro      125.5   80.29778        156.25       0 |
-  3. |      nat_genet   59.70968   39.91039   151.6451569       0 |
-  4. |        nat_med   36.85714   26.76436   137.1785736       0 |
-  5. |   nat_cell_bio   93.70833   79.97533   114.4583359       0 |
+  1. |         neuron   176.2941   85.64103   206.1764679       0 |
+  2. |      nat_neuro   118.5833   75.07793        156.25       0 |
+  3. |      nat_genet   123.7419    82.4359   151.6451569       0 |
+  4. |        nat_med   113.4286   82.34001   137.1785736       0 |
+  5. |   nat_cell_bio   101.5833   89.77684   114.4583359       0 |
      |------------------------------------------------------------|
-  6. |   nat_chem_bio         93     89.581   103.6666641       0 |
-  7. |    nat_biotech   63.55556   64.83092   96.22222137       0 |
-  8. | cell_stem_cell     59.125   73.33616         82.25       0 |
+  6. |   nat_chem_bio   95.94444    91.1012   103.6666641       0 |
+  7. |    nat_biotech   66.22222    70.3898   96.22222137       0 |
+  8. | cell_stem_cell     75.875   92.31258         82.25       0 |
      +------------------------------------------------------------+
-SAMPLE IS  fund scisub all:
-# articles = 18606
-# athr-articles = 152094
-# athr-affl-articles = 96769
-SAMPLE IS  fund scisub last5yrs:
-# articles = 5373
-# athr-articles = 61896
-# athr-affl-articles = 77236
-SAMPLE IS : scisub dis
-(0 real changes made)
-
-     +------------------------------------------------------------+
-     |   journal_abbr   avg_ar~s   avg_perc   num_artic~s   order |
-     |------------------------------------------------------------|
-  1. |         neuron   21.32353   9.946877   206.1764679       0 |
-  2. |      nat_neuro   23.29167   14.73681        156.25       0 |
-  3. |      nat_genet   83.80645   54.28961   151.6451569       0 |
-  4. |        nat_med      87.75    63.9922   137.1785736       0 |
-  5. |   nat_cell_bio   19.20833   18.71948   114.4583359       0 |
-     |------------------------------------------------------------|
-  6. |   nat_chem_bio        8.5   8.378374   103.6666641       0 |
-  7. |    nat_biotech   12.33333   14.79054   96.22222137       0 |
-  8. | cell_stem_cell         22   25.43836         82.25       0 |
-     +------------------------------------------------------------+
-SAMPLE IS  dis scisub all:
-# articles = 7638
-# athr-articles = 125114
-# athr-affl-articles = 80972
-SAMPLE IS  dis scisub last5yrs:
-# articles = 2520
-# athr-articles = 55025
-# athr-affl-articles = 68893
-SAMPLE IS : scisub thera
-(98 missing values generated)
-(0 real changes made)
-
-     +------------------------------------------------------------+
-     |   journal_abbr   avg_ar~s   avg_perc   num_artic~s   order |
-     |------------------------------------------------------------|
-  1. |         neuron      1.125   .4944871   206.1764679       0 |
-  2. |      nat_neuro        1.5   .9114042        156.25       0 |
-  3. |      nat_genet          1   .6329566   151.6451569       0 |
-  4. |        nat_med   4.153846   2.983914   137.1785736       0 |
-  5. |   nat_cell_bio        1.4   1.383242   114.4583359       0 |
-     |------------------------------------------------------------|
-  6. |   nat_chem_bio        1.5   1.504431   103.6666641       0 |
-  7. |    nat_biotech   2.047619   2.150197   96.22222137       0 |
-  8. | cell_stem_cell   1.142857   1.253335         82.25       0 |
-     +------------------------------------------------------------+
-SAMPLE IS  thera scisub all:
-# articles = 224
-# athr-articles = 3178
-# athr-affl-articles = 2892
-SAMPLE IS  thera scisub last5yrs:
-# articles = 123
-# athr-articles = 2252
-# athr-affl-articles = 2710
+SAMPLE IS  newfund scisub all:
+# articles = 23019
+# athr-articles = 252715
+# athr-affl-articles = 226758
+SAMPLE IS  newfund scisub last5yrs:
+# articles = 7499
+# athr-articles = 114430
+# athr-affl-articles = 182712
 (0 observations deleted)
 (0 observations deleted)
 (0 observations deleted)
@@ -541,123 +283,108 @@ SAMPLE IS  thera scisub last5yrs:
     Result                      Number of obs
     -----------------------------------------
     Not matched                        54,807
-        from master                     7,791  (_merge==1)
-        from using                     47,016  (_merge==2)
+        from master                     7,792  (_merge==1)
+        from using                     47,015  (_merge==2)
 
-    Matched                           374,994  (_merge==3)
+    Matched                           374,993  (_merge==3)
     -----------------------------------------
 
    Matching result from |
                   merge |      Freq.     Percent        Cum.
 ------------------------+-----------------------------------
-        Master only (1) |      7,791        2.04        2.04
-            Matched (3) |    374,994       97.96      100.00
+        Master only (1) |      7,792        2.04        2.04
+            Matched (3) |    374,993       97.96      100.00
 ------------------------+-----------------------------------
                   Total |    382,785      100.00
-(11,334 observations deleted)
+(11,337 observations deleted)
 (8 observations deleted)
 (variable pmid was long, now double to accommodate using data's values)
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                           371,443  
+    Matched                           371,440  
     -----------------------------------------
 (22,410 real changes made)
+(0 observations deleted)
 (file ../temp/demsci_counts.dta not found)
 file ../temp/demsci_counts.dta saved
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                       139,965
-        from master                   139,965  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        37,435
-        from master                    37,435  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        29,591
-        from master                    29,591  
-        from using                          0  
-
-    Matched                                 0  
-    -----------------------------------------
-(file ../output/demsci_unmatched.dta not found)
-file ../output/demsci_unmatched.dta saved
-SAMPLE IS : demsci fund
+SAMPLE IS : demsci newfund
 (0 real changes made)
 
      +------------------------------------------------------+
      | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
      |------------------------------------------------------|
-  1. |     plos   6442.941   51.51326   13024.58789       0 |
-  2. |      jbc     3105.8   87.37431   3468.342773       0 |
-  3. |     onco        189   37.79216   492.4857178       0 |
-  4. |    faseb   189.4286   63.02533   325.6000061       0 |
+  1. |     plos   10040.29   72.70188   13024.35254       0 |
+  2. |      jbc       3017   89.56652   3468.342773       0 |
+  3. |     onco   444.0571   91.22021   492.4857178       0 |
+  4. |    faseb   267.6857   81.89367   325.6285706       0 |
      +------------------------------------------------------+
-SAMPLE IS  fund demsci all:
-# articles = 231478
-# athr-articles = 1329844
-# athr-affl-articles = 762719
-SAMPLE IS  fund demsci last5yrs:
-# articles = 77683
-# athr-articles = 484663
-# athr-affl-articles = 559177
-SAMPLE IS : demsci dis
+SAMPLE IS  newfund demsci all:
+# articles = 301191
+# athr-articles = 1953765
+# athr-affl-articles = 1588513
+SAMPLE IS  newfund demsci last5yrs:
+# articles = 116865
+# athr-articles = 829601
+# athr-affl-articles = 1120110
+(10 observations deleted)
+(11 observations deleted)
+(8 observations deleted)
+(3 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        52,477
+        from master                     4,873  (_merge==1)
+        from using                     47,604  (_merge==2)
+
+    Matched                            64,235  (_merge==3)
+    -----------------------------------------
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        Master only (1) |      4,873        7.05        7.05
+            Matched (3) |     64,235       92.95      100.00
+------------------------+-----------------------------------
+                  Total |     69,108      100.00
+(31,040 observations deleted)
+(13 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            38,055  
+    -----------------------------------------
+(554 real changes made)
+(35 observations deleted)
+(file ../temp/med_counts.dta not found)
+file ../temp/med_counts.dta saved
+SAMPLE IS : med clin
 (0 real changes made)
 
      +------------------------------------------------------+
      | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
      |------------------------------------------------------|
-  1. |     plos   4486.176   32.83898   13024.58789       0 |
-  2. |      jbc   329.1714   11.67948   3468.342773       0 |
-  3. |     onco   296.3429   60.56012   492.4857178       0 |
-  4. |    faseb   124.9143   32.32451   325.6000061       0 |
+  1. |      bmj   173.4571    59.9355   281.7999878       0 |
+  2. |   lancet   153.2286   63.56968   246.7142792       0 |
+  3. |     jama   117.6857    54.3946   229.4857178       0 |
+  4. |     nejm   137.2571   63.04796   217.4571381       0 |
      +------------------------------------------------------+
-SAMPLE IS  dis demsci all:
-# articles = 102530
-# athr-articles = 815879
-# athr-affl-articles = 640331
-SAMPLE IS  dis demsci last5yrs:
-# articles = 58773
-# athr-articles = 478965
-# athr-affl-articles = 564819
-SAMPLE IS : demsci thera
-(20 missing values generated)
-(0 real changes made)
-
-     +------------------------------------------------------+
-     | journa~r   avg_ar~s   avg_perc   num_artic~s   order |
-     |------------------------------------------------------|
-  1. |     plos   424.9412   3.052536   13024.58789       0 |
-  2. |      jbc   9.558824   .2987335   3468.342773       0 |
-  3. |     onco   5.458333   1.101036   492.4857178       0 |
-  4. |    faseb   6.074074   1.495571   325.6000061       0 |
-     +------------------------------------------------------+
-SAMPLE IS  thera demsci all:
-# articles = 7844
-# athr-articles = 57806
-# athr-affl-articles = 54906
-SAMPLE IS  thera demsci last5yrs:
-# articles = 5840
-# athr-articles = 43084
-# athr-affl-articles = 50937
+SAMPLE IS  clin med all:
+# articles = 20357
+# athr-articles = 190603
+# athr-affl-articles = 140592
+SAMPLE IS  clin med last5yrs:
+# articles = 4234
+# athr-articles = 83926
+# athr-affl-articles = 108239
 
 . 
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-01-05 17:18:08
+Makelog ended: 2023-03-23 12:41:51
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code
 --------------------------------------------------------------------------------
