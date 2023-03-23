@@ -13,29 +13,93 @@ program main
     global area_name "US cities"
     global city_full_name "world cities"
     global inst_name "institutions"
-/*    foreach samp in cns_med natsub scijrnls demsci {
+    foreach samp in cns_med natsub scijrnls demsci med thera {
         local samp_type = cond(strpos("`samp'" , "cns")>0 | strpos("`samp'", "med")>0, "main", "robust")
+        if "`samp'" == "med" {
+            local samp_type = "clinical"
+            local samp = "clin_med"
+        }
+        if "`samp'" == "thera" {
+            local samp_type = "thera"
+        }
         append_mi, samp(`samp') samp_type(`samp_type')
+        append_inst, samp(`samp') samp_type(`samp_type')
     }
     clear
-    foreach samp in cns_med natsub scijrnls demsci {
-        append using ../temp/mi_`samp'
+    foreach samp in cns_med natsub scijrnls demsci med thera {
+        if "`samp'" == "med" {
+            local samp_type = "clinical"
+            local samp = "clin_med"
+        }
+         append using ../temp/all_inst_`samp'
+     }
+     gduplicates  drop
+     save ../output/all_insts, replace
+    foreach var in institution country city {
+        clear
+        foreach samp in cns_med natsub scijrnls demsci med thera {
+            if "`samp'" == "med" {
+                local samp_type = "clinical"
+                local samp = "clin_med"
+            }
+            append using ../temp/mi_`var'_`samp'
+        }
+        gduplicates drop
+        save ../temp/all_mi_`var', replace
     }
-    gduplicates drop
-    save ../temp/all_mi_insts, replace*/
     clean_inst
 end
 
+program append_inst
+    syntax, samp(str) samp_type(str)
+    use ../external/`samp_type'_full_samp/cleaned_all_`samp', clear
+    gcontract institution
+    drop _freq
+    drop if mi(institution)
+    save ../temp/all_inst_`samp', replace
+end 
 program append_mi
     syntax, samp(str) samp_type(str)
     use ../external/`samp_type'_full_samp/cleaned_all_`samp', clear
-    keep if mi(institution) & !mi(affiliation)
+    keep if (mi(institution)|mi(country)|mi(city)) & !mi(affiliation)
     keep institution affiliation country city pmid which_*
-    save ../temp/mi_`samp', replace
+    gen samp = "`samp'"
+    foreach var in institution country city {
+        preserve
+        keep if mi(`var')
+        save ../temp/mi_`var'_`samp', replace
+        restore
+    }
 end 
 
+program clean_city_country 
+    use ../temp/all_mi_city, clear
+    append using ../temp/all_mi_country
+    gduplicates drop
+    gen edit = affiliation
+    replace edit = strtrim(edit)
+
+    local cities Taoyuan Hualien Urbino Dessie Naples Antwerp Bilthoven Chungcheongbuk Kent Ede Sayo Gifu Oeiras Seeland Asturias Antwerp Gothenburg Irrua Twickenham Torino Safat Legon Shitsukawa Nagakute Tigray Victoria Miaoli Ghent Padua Storrs Birmensdorf  Illkirch Klecany Shiga Texcoco Gatersleben Boston Cambridge Richmond Guri Aviano Zhunan Dolgoprudny Bashkortostan  Oaxaca Kalisizo Hualian Mekelle Kingston Pirbright Nishinomiya  Durham Nouzilly Abuja Xinxiang Dasman Nugegoda Lyngby
+    foreach c in `cities' "San Sebastian" "New Lambton Heights" "Winston-Salem" "The Woodlands" "Beer-Sheva" {
+        replace city = "`c'" if strpos(edit, "`c'")>0 & city ==""
+    }
+    replace city = "Taipei" if strpos(edit, "Tri-Service General Hospital")>0
+    replace city = "Tromso" if strpos(edit, "University of TromsA")>0
+    replace city = "New York" if strpos(edit, "Mount Sinai")>0
+    replace city = "Matsuyama" if strpos(edit, "Ehime University")>0
+    replace city = "Kyoto" if strpos(edit, "Doshisha University")>0
+    replace city = "Minato" if strpos(edit, "Toroanomon Hospital")>0
+    replace city = "Kofu" if strpos(edit, "University of Yamanashi")>0
+    replace country = "Nigeria" if strpos(edit, "Nigeria")>0
+    replace city = "Warsaw" if strpos(edit, "Polish Academy of Sciences")>0
+    replace city = "Los Angeles" if strpos(edit, "UCLA")>0
+    keep pmid which*  city country
+    gduplicates drop pmid which*, force
+    rename (city country) (test_city test_country)
+    save ../output/filled_in_city_country, replace
+end 
 program clean_inst
-    use ../temp/all_mi_insts, clear
+    use ../temp/all_mi_institution, clear
     gen edit = affiliation
     replace edit = strtrim(edit)
     replace edit = "" if strpos(edit, "@") > 0 & strpos(edit, " ") == 0
@@ -87,7 +151,7 @@ program clean_inst
     keep pmid which* test_inst
     save ../temp/cleaned_insts, replace
     frame change cleaned_inst
-    keep pmid which* test_inst
+    keep pmid which* test_inst samp
     append using ../temp/cleaned_insts
     gduplicates drop pmid which*, force
     save ../output/filled_in_insts, replace
