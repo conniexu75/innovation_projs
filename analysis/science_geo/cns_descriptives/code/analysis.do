@@ -16,21 +16,17 @@ program main
     foreach samp in cns {
         di "OUTPUT START"
         local samp_type = cond("`samp'" == "cns", "main", "robust")
-        *get_total_articles, samp(`samp') samp_type(`samp_type')
-        foreach data in newfund { //dis thera {
-            foreach var in cite_affl_wt {
+        foreach data in newfund { 
+            foreach var in affl_wt cite_affl_wt {
                 athr_loc, data(`data') samp(`samp') wt_var(`var')
                 qui trends, data(`data') samp(`samp') wt_var(`var')
             }
             calc_broad_hhmi, data(`data') samp(`samp') 
             top_mesh_terms, data(`data') samp(`samp') samp_type(`samp_type')
-            top_mesh_terms, data(nofund) samp(`samp') samp_type(`samp_type')
             qui output_tables, data(`data') samp(`samp') 
         }
-        foreach var in affl_wt cite_affl_wt {
-            *qui comp_w_fund, samp(`samp')  wt_var(`var')
-        }
-    } // test if github work
+    } 
+    top_mesh_terms, data(clin) samp(med) samp_type(clinical)
 end
 
 program athr_loc
@@ -129,6 +125,8 @@ program trends
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/cleaned_samps/cleaned_all_`data'_`samp', clear
+    cap drop counter
+
     qui bys pmid year: gen counter = _n == 1
     qui bys year: egen tot_in_yr = total(counter)
     foreach loc in country city_full inst {
@@ -237,7 +235,7 @@ program comp_w_fund
                 global top_20 : list global(`type'_fund) | global(`type'_`trans')
                 use ../external/cleaned_samps/cleaned_last5yrs_fund_`samp', clear
                 gen type = "fund"
-                append using ../external/cleaned_samps/cleaned_last5yrs_`trans'_`samp'
+                append using ../external/cleaned_samps/cleaned_all_`trans'_`samp'
                 replace type = "trans" if mi(type)
                 gen to_keep = 0
                 foreach i of global top_20 {
@@ -366,7 +364,8 @@ end
     
 program top_mesh_terms
     syntax, data(str) samp(str) samp_type(str)
-    use ../external/`samp_type'_split/mesh_`data'_`samp'.dta, clear
+    use ../external/`samp_type'_split/mesh_`data'_`samp'.dta, clear 
+    cap keep pmid mesh which_mesh cat journal_abbr
     qui merge m:1  pmid using ../external/`samp_type'_filtered/all_jrnl_articles_`samp', assert(1 2 3) keep(3) nogen
     qui merge m:1 pmid using ../external/wos/`samp'_appended, assert(1 2 3)  // restrict to those that were found in wos 
     qui drop if _merge == 2
@@ -389,10 +388,10 @@ program top_mesh_terms
     qui replace gen_mesh = rev_mesh if mi(gen_mesh) 
     qui drop rev_mesh
     preserve
-    qui gcontract pmid mesh, nomiss
+    qui contract pmid mesh, nomiss
     qui save ../temp/contracted_mesh_`data'_`samp', replace
     restore
-    gcontract pmid gen_mesh, nomiss
+    contract pmid gen_mesh, nomiss
     qui save ../temp/contracted_gen_mesh_`data'_`samp', replace
 
     foreach mesh in mesh gen_mesh {
@@ -401,7 +400,7 @@ program top_mesh_terms
         qui bys pmid: gen num_`mesh' = _N
         sum num_`mesh'
         cap drop _freq
-        gcollapse (sum) article_wt = wt , by(`mesh')
+        collapse (sum) article_wt = wt , by(`mesh')
         qui hashsort -article_wt
         qui gen perc = article_wt/`total_articles'*100
         qui gen cum_perc = sum(perc) 
@@ -417,7 +416,7 @@ program top_mesh_terms
         qui replace rank = 4 if rank > 3
         qui replace `mesh' = "other" if rank == 4
         qui gen inst = "total"
-        gcollapse (sum) article_wt perc cum_perc, by(inst `mesh' rank)
+        collapse (sum) article_wt perc cum_perc, by(inst `mesh' rank)
         drop rank
         qui save ../temp/`mesh'_`data'_`samp', replace
        /* 

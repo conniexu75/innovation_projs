@@ -7,4 +7,6 @@
 ./robust_split/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/split_metadata_by_type/output
 ./robust_full_samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/clean_metadata/output
 ./cleaned_samps/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_analysis_samps/output
+./clinical_split/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_clinical_metadata/output
+./clinical_filtered/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/create_clinical/output
 ./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output

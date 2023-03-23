@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-01-28 09:24:35
+Makelog started: 2023-03-23 12:38:46
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -57,24 +57,19 @@ Notes:
   6.     foreach samp in cns {
   7.         di "OUTPUT START"
   8.         local samp_type = cond("`samp'" == "cns", "main", "robust")
-  9.         *get_total_articles, samp(`samp') samp_type(`samp_type')
-.         foreach data in fund { //dis thera {
- 10.             foreach var in cite_affl_wt {
+  9.         foreach data in newfund { 
+ 10.             foreach var in affl_wt cite_affl_wt {
  11.                 athr_loc, data(`data') samp(`samp') wt_var(`var')
  12.                 qui trends, data(`data') samp(`samp') wt_var(`var')
  13.             }
  14.             calc_broad_hhmi, data(`data') samp(`samp') 
  15.             top_mesh_terms, data(`data') samp(`samp') samp_type(`samp_type
 > ')
- 16.             top_mesh_terms, data(trans) samp(`samp') samp_type(`samp_type'
-> )
- 17.             qui output_tables, data(`data') samp(`samp') 
- 18.         }
- 19.         foreach var in affl_wt cite_affl_wt {
- 20.             *qui comp_w_fund, samp(`samp')  wt_var(`var')
-.         }
- 21.     }
- 22. end
+ 16.             qui output_tables, data(`data') samp(`samp') 
+ 17.         }
+ 18.     } 
+ 19.     top_mesh_terms, data(clin) samp(med) samp_type(clinical)
+ 20. end
 
 . 
 . program athr_loc
@@ -118,13 +113,15 @@ Notes:
  37.         qui levelsof `loc' if _n == 2
  38.         global `loc'_second "`r(levels)'"
  39.         qui replace rank_grp = "second" if _n == 2
- 40.         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10)
- 41.         qui replace rank_grp = "remaining" if mi(rank_grp)
- 42.         keep `loc' rank_grp
- 43.         qui save ../temp/`loc'_rank_`data'_`samp'`suf', replace
- 44.         restore
- 45.     }
- 46. end
+ 40.         qui replace rank_grp = "china" if `loc' == "China"
+ 41.         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10) & rank
+> _grp!="china"
+ 42.         qui replace rank_grp = "remaining" if mi(rank_grp)
+ 43.         keep `loc' rank_grp
+ 44.         qui save ../temp/`loc'_rank_`data'_`samp'`suf', replace
+ 45.         restore
+ 46.     }
+ 47. end
 
 . 
 . program calc_broad_hhmi
@@ -193,93 +190,138 @@ Notes:
   1.     syntax, data(str) samp(str)  wt_var(str)
   2.     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
   3.     use ../external/cleaned_samps/cleaned_all_`data'_`samp', clear
-  4.     qui bys pmid year: gen counter = _n == 1
-  5.     qui bys year: egen tot_in_yr = total(counter)
-  6.     foreach loc in country city_full inst {
-  7.         preserve
-  8.         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp'`suf', a
+  4.     cap drop counter
+  5. 
+.     qui bys pmid year: gen counter = _n == 1
+  6.     qui bys year: egen tot_in_yr = total(counter)
+  7.     foreach loc in country city_full inst {
+  8.         preserve
+  9.         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp'`suf', a
 > ssert(1 3) keep(1 3) nogen
-  9.         qui sum year
- 10.         local min_year = max(1988,r(min))
- 11.         qui egen year_bin  = cut(year),  at(1988 1991 1993 1995 1997 1999 
+ 10.         qui sum year
+ 11.         local min_year = max(1988,r(min))
+ 12.         qui egen year_bin  = cut(year),  at(1988 1991 1993 1995 1997 1999 
 > 2001 2003 2007 2009 2011 2013 2015 2017 2019 2021 2023)
- 12.         keep if which_athr == 1
- 13.         qui replace affl_wt = 1/num_affls
- 14.         local year_var year_bin
- 15.         qui bys pmid `year_var': replace counter = _n == 1
- 16.         qui bys `year_var': egen tot_in_`year_var' = total(counter)
- 17.         qui replace rank_grp = "remaining" if mi(rank_grp)
- 18.         bys pmid: replace cite_count = . if _n !=1 
- 19.         qui bys `year_var': egen tot_cites_in_`year_var' = total(cite_coun
+ 13.         keep if which_athr == 1
+ 14.         qui replace affl_wt = 1/num_affls
+ 15.         local year_var year_bin
+ 16.         qui bys pmid `year_var': replace counter = _n == 1
+ 17.         qui bys `year_var': egen tot_in_`year_var' = total(counter)
+ 18.         qui replace rank_grp = "remaining" if mi(rank_grp)
+ 19.         bys pmid: replace cite_count = . if _n !=1 
+ 20.         qui bys `year_var': egen tot_cites_in_`year_var' = total(cite_coun
 > t)
- 20.         replace cite_wt = cite_count/ tot_cites_in_`year_var' * tot_in_`ye
+ 21.         replace cite_wt = cite_count/ tot_cites_in_`year_var' * tot_in_`ye
 > ar_var'
- 21.         hashsort pmid cite_wt
- 22.         qui by pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
- 23.         replace cite_affl_wt = affl_wt * cite_wt
- 24.         collapse (sum) `wt_var' (mean) tot_in_`year_var' (firstnm) `loc' ,
+ 22.         hashsort pmid cite_wt
+ 23.         qui by pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
+ 24.         replace cite_affl_wt = affl_wt * cite_wt
+ 25.         collapse (sum) `wt_var' (mean) tot_in_`year_var' (firstnm) `loc' ,
 >  by(rank_grp `year_var')
- 25.         qui gen perc = `wt_var'/tot_in_`year_var' * 100
- 26.         qui bys `year_var': egen tot = sum(perc)
- 27.         qui replace tot = round(tot)
- 28.         assert tot==100
- 29.         qui drop tot
- 30.         label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Rest o
-> f the top 10 ${`loc'_name}" 4 "Remaining places"
- 31.         label var rank_grp rank_grp
- 32.         qui gen group = 1 if rank_grp == "first"
- 33.         qui replace group = 2 if rank_grp == "second"
- 34.         qui replace group = 3 if rank_grp == "rest of top 10" 
- 35.         qui replace group = 4 if rank_grp == "remaining"
- 36.         qui hashsort `year_var' -group
- 37.         qui bys `year_var': gen stack_perc = sum(perc)
- 38.         keep rank_grp `year_var' `loc' perc group stack_perc
- 39.         local stacklines
- 40.         qui xtset group `year_var' 
- 41.         qui levelsof group, local(rank_grps)
- 42.         local items = `r(r)'
- 43.         foreach x of local rank_grps {
- 44.            colorpalette HTML purple, n(`items') nograph
- 45.            local stacklines `stacklines' area stack_perc `year_var' if gro
+ 26.         qui gen perc = `wt_var'/tot_in_`year_var' * 100
+ 27.         qui bys `year_var': egen tot = sum(perc)
+ 28.         qui replace tot = round(tot)
+ 29.         assert tot==100
+ 30.         qui drop tot
+ 31.         if "`loc'" != "country" {
+ 32.             label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Re
+> st of the top 10 ${`loc'_name}" 4 "Remaining places"
+ 33.         }
+ 34.         if "`loc'" == "country" {
+ 35.             label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Ch
+> ina" 4 "Rest of the top 10 ${`loc'_name}" 5 "Remaining places"
+ 36.         }
+ 37.         label var rank_grp rank_grp
+ 38.         qui gen group = 1 if rank_grp == "first"
+ 39.         qui replace group = 2 if rank_grp == "second"
+ 40.         qui replace group = 3 if rank_grp == "china" & "`loc'" == "country
+> "
+ 41.         local last = 2
+ 42.         if "`loc'" == "country" local last = 3 
+ 43.         qui replace group = `last'+1 if rank_grp == "rest of top 10" 
+ 44.         qui replace group = `last'+2 if rank_grp == "remaining"
+ 45.         qui hashsort `year_var' -group
+ 46.         qui bys `year_var': gen stack_perc = sum(perc)
+ 47.         keep rank_grp `year_var' `loc' perc group stack_perc
+ 48.         local stacklines
+ 49.         qui xtset group `year_var' 
+ 50.         qui levelsof group, local(rank_grps)
+ 51.         local items = `r(r)'
+ 52.         foreach x of local rank_grps {
+ 53.            colorpalette HTML purple, n(`items') nograph
+ 54.            local stacklines `stacklines' area stack_perc `year_var' if gro
 > up == `x', fcolor("`r(p`x')'") lcolor(black) lwidth(*0.2) || 
- 46.         }
- 47.         qui gen labely = . 
- 48.         qui gen rev_group = -group
- 49.         qui bys `year_var' (rev_group): replace labely = perc / 2 if group
->  == 4
- 50.         qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-
-> 1] if group == 3
- 51.         qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-
-> 1] + perc[_n-2] if group == 2
- 52.         qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-
-> 1] + perc[_n-2] + perc[_n-3] if group == 1
- 53.         qui gen labely_lab = "Everywhere else" if group == 4
- 54.         qui replace labely_lab = "Rest of the top 10 ${`loc'_name}" if gro
-> up == 3
- 55.         qui replace labely_lab = ${`loc'_second} if group == 2
- 56.         qui replace labely_lab = ${`loc'_first} if group == 1
- 57.         qui replace labely_lab = subinstr(labely_lab, "United States", "US
+ 55.         }
+ 56.         qui gen labely = . 
+ 57.         qui gen rev_group = -group
+ 58.         if "`loc'"=="country" {
+ 59.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
+> up == 5
+ 60.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] if group == 4
+ 61.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] if group == 3
+ 62.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] + perc[_n-3] if group == 2
+ 63.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] + perc[_n-3] + perc[_n-4] if group == 1
+ 64.         }
+ 65.         if "`loc'"!="country" {
+ 66.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
+> up == 4
+ 67.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] if group == 3
+ 68.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] if group == 2
+ 69.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] + perc[_n-3] if group == 1
+ 70.         }
+ 71.         qui gen labely_lab = "Everywhere else" if group == `last'+2
+ 72.         qui replace labely_lab = "Rest of the top 10 ${`loc'_name}" if gro
+> up == `last'+1
+ 73.         qui replace labely_lab = "China" if group == 3 & "`loc'"=="country
+> "
+ 74.         qui replace labely_lab = ${`loc'_second} if group == 2
+ 75.         qui replace labely_lab = ${`loc'_first} if group == 1
+ 76.         qui replace labely_lab = subinstr(labely_lab, "United States", "US
 > ", .)
- 58.         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "U
+ 77.         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "U
 > K", .)
- 59.         qui sum `year_var'
- 60.         replace `year_var' = 2022 if `year_var' == r(max)
- 61.         graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2
-> 022, ms(smcircle) ///
->           msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabe
-> l(labely_lab)), ///
->           ytitle("Share of Worldwide Fundamental Science Research Output", si
-> ze(small)) xtitle("Year", size(small)) xlabel(`min_year'(2)2022, angle(45) la
-> bsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
->           graphregion(margin(r+25)) plotregion(margin(zero)) ///
->           legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3
->  "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places") ring(1) pos(
-> 6) rows(2))
- 62.         qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf
-> '.pdf , replace 
- 63.         restore
- 64.     }
- 65. end 
+ 78.         qui sum `year_var'
+ 79.         replace `year_var' = 2022 if `year_var' == r(max)
+ 80.         if "`loc'" == "country" {
+ 81.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
+>  ==2022, ms(smcircle) ///
+>               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) m
+> label(labely_lab)), ///
+>               ytitle("Share of Worldwide Fundamental Science Research Output"
+> , size(small)) xtitle("Year", size(small)) xlabel(`min_year'(2)2022, angle(45
+> ) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+>               graphregion(margin(r+25)) plotregion(margin(zero)) ///
+>               legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) lab
+> el(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining 
+> places") ring(1) pos(6) rows(2))
+ 82.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
+> `suf'.pdf , replace 
+ 83.         }
+ 84.         if "`loc'" != "country" {
+ 85.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
+>  ==2022, ms(smcircle) ///
+>               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) m
+> label(labely_lab)), ///
+>               ytitle("Share of Worldwide Fundamental Science Research Output"
+> , size(small)) xtitle("Year", size(small)) xlabel(`min_year'(2)2022, angle(45
+> ) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+>               graphregion(margin(r+25)) plotregion(margin(zero)) ///
+>               legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) lab
+> el(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places") ring(1) 
+> pos(6) rows(2))
+ 86.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
+> `suf'.pdf , replace 
+ 87.         }
+ 88.         restore
+ 89.     }
+ 90. end 
 
 . 
 . program comp_w_fund
@@ -298,8 +340,8 @@ Notes:
  11.                 use ../external/cleaned_samps/cleaned_last5yrs_fund_`samp'
 > , clear
  12.                 gen type = "fund"
- 13.                 append using ../external/cleaned_samps/cleaned_last5yrs_`t
-> rans'_`samp'
+ 13.                 append using ../external/cleaned_samps/cleaned_all_`trans'
+> _`samp'
  14.                 replace type = "trans" if mi(type)
  15.                 gen to_keep = 0
  16.                 foreach i of global top_20 {
@@ -483,67 +525,68 @@ Notes:
 .     
 . program top_mesh_terms
   1.     syntax, data(str) samp(str) samp_type(str)
-  2.     use ../external/`samp_type'_split/mesh_`data'_`samp'.dta, clear
-  3.     qui merge m:1  pmid using ../external/`samp_type'_filtered/all_jrnl_ar
+  2.     use ../external/`samp_type'_split/mesh_`data'_`samp'.dta, clear 
+  3.     cap keep pmid mesh which_mesh cat journal_abbr
+  4.     qui merge m:1  pmid using ../external/`samp_type'_filtered/all_jrnl_ar
 > ticles_`samp', assert(1 2 3) keep(3) nogen
-  4.     qui merge m:1 pmid using ../external/wos/`samp'_appended, assert(1 2 3
+  5.     qui merge m:1 pmid using ../external/wos/`samp'_appended, assert(1 2 3
 > )  // restrict to those that were found in wos 
-  5.     qui drop if _merge == 2
-  6.     tab _merge
-  7.     qui keep if strpos(doc_type, "Article")>0
-  8.     qui drop if strpos(doc_type, "Retracted")>0
-  9.     qui keep if _merge == 3 
- 10.     drop _merge
- 11. *    qui merge m:1 pmid using ../external/cleaned_samps/list_of_pmids_last
+  6.     qui drop if _merge == 2
+  7.     tab _merge
+  8.     qui keep if strpos(doc_type, "Article")>0
+  9.     qui drop if strpos(doc_type, "Retracted")>0
+ 10.     qui keep if _merge == 3 
+ 11.     drop _merge
+ 12. *    qui merge m:1 pmid using ../external/cleaned_samps/list_of_pmids_last
 > 5yrs_`data'_`samp', keep(3) nogen
 .     qui gunique pmid
- 12.     local total_articles = r(unique)
- 13.     qui replace mesh = subinstr(mesh, "=Y>","",.)
- 14.     qui replace mesh = subinstr(mesh, "=N>","",.)
- 15.     qui gen gen_mesh = mesh if strpos(mesh, ",") == 0 & strpos(mesh, ";") 
+ 13.     local total_articles = r(unique)
+ 14.     qui replace mesh = subinstr(mesh, "=Y>","",.)
+ 15.     qui replace mesh = subinstr(mesh, "=N>","",.)
+ 16.     qui gen gen_mesh = mesh if strpos(mesh, ",") == 0 & strpos(mesh, ";") 
 > == 0
- 16.     qui replace gen_mesh = mesh if strpos(mesh, "Models") > 0
- 17.     qui replace gen_mesh = subinstr(gen_mesh, "&; ", "&",.)
- 18.     qui gen rev_mesh = reverse(mesh)
- 19.     qui replace rev_mesh = substr(rev_mesh, strpos(rev_mesh, ",")+1, strle
+ 17.     qui replace gen_mesh = mesh if strpos(mesh, "Models") > 0
+ 18.     qui replace gen_mesh = subinstr(gen_mesh, "&; ", "&",.)
+ 19.     qui gen rev_mesh = reverse(mesh)
+ 20.     qui replace rev_mesh = substr(rev_mesh, strpos(rev_mesh, ",")+1, strle
 > n(rev_mesh)-strpos(rev_mesh, ","))
- 20.     qui replace rev_mesh = reverse(rev_mesh)
- 21.     qui replace gen_mesh = rev_mesh if mi(gen_mesh) 
- 22.     qui drop rev_mesh
- 23.     preserve
- 24.     qui gcontract pmid mesh, nomiss
- 25.     qui save ../temp/contracted_mesh_`data'_`samp', replace
- 26.     restore
- 27.     gcontract pmid gen_mesh, nomiss
- 28.     qui save ../temp/contracted_gen_mesh_`data'_`samp', replace
- 29. 
+ 21.     qui replace rev_mesh = reverse(rev_mesh)
+ 22.     qui replace gen_mesh = rev_mesh if mi(gen_mesh) 
+ 23.     qui drop rev_mesh
+ 24.     preserve
+ 25.     qui contract pmid mesh, nomiss
+ 26.     qui save ../temp/contracted_mesh_`data'_`samp', replace
+ 27.     restore
+ 28.     contract pmid gen_mesh, nomiss
+ 29.     qui save ../temp/contracted_gen_mesh_`data'_`samp', replace
+ 30. 
 .     foreach mesh in mesh gen_mesh {
- 30.         use ../temp/contracted_`mesh'_`data'_`samp', clear
- 31.         qui bys pmid: gen wt = 1/_N
- 32.         qui bys pmid: gen num_`mesh' = _N
- 33.         sum num_`mesh'
- 34.         cap drop _freq
- 35.         gcollapse (sum) article_wt = wt , by(`mesh')
- 36.         qui hashsort -article_wt
- 37.         qui gen perc = article_wt/`total_articles'*100
- 38.         qui gen cum_perc = sum(perc) 
- 39.         qui sum article_wt
- 40.         local total = round(r(sum))
- 41.         qui count
- 42.         local rank_end = min(20,r(N))
- 43.         li in 1/`rank_end'
- 44.         mkmat article_wt perc cum_perc in 1/`rank_end', mat(top_`mesh'_`sa
+ 31.         use ../temp/contracted_`mesh'_`data'_`samp', clear
+ 32.         qui bys pmid: gen wt = 1/_N
+ 33.         qui bys pmid: gen num_`mesh' = _N
+ 34.         sum num_`mesh'
+ 35.         cap drop _freq
+ 36.         collapse (sum) article_wt = wt , by(`mesh')
+ 37.         qui hashsort -article_wt
+ 38.         qui gen perc = article_wt/`total_articles'*100
+ 39.         qui gen cum_perc = sum(perc) 
+ 40.         qui sum article_wt
+ 41.         local total = round(r(sum))
+ 42.         qui count
+ 43.         local rank_end = min(20,r(N))
+ 44.         li in 1/`rank_end'
+ 45.         mkmat article_wt perc cum_perc in 1/`rank_end', mat(top_`mesh'_`sa
 > mp')
- 45.         mat top_`mesh'_`data'_`samp' = top_`mesh'_`samp' \ (.,`total', .)
- 46.         qui levelsof `mesh' in 1/3, local(`mesh'_terms_`data')
- 47.         qui gen rank = _n
- 48.         qui replace rank = 4 if rank > 3
- 49.         qui replace `mesh' = "other" if rank == 4
- 50.         qui gen inst = "total"
- 51.         gcollapse (sum) article_wt perc cum_perc, by(inst `mesh' rank)
- 52.         drop rank
- 53.         qui save ../temp/`mesh'_`data'_`samp', replace
- 54.        /* 
+ 46.         mat top_`mesh'_`data'_`samp' = top_`mesh'_`samp' \ (.,`total', .)
+ 47.         qui levelsof `mesh' in 1/3, local(`mesh'_terms_`data')
+ 48.         qui gen rank = _n
+ 49.         qui replace rank = 4 if rank > 3
+ 50.         qui replace `mesh' = "other" if rank == 4
+ 51.         qui gen inst = "total"
+ 52.         collapse (sum) article_wt perc cum_perc, by(inst `mesh' rank)
+ 53.         drop rank
+ 54.         qui save ../temp/`mesh'_`data'_`samp', replace
+ 55.        /* 
 >         use ../temp/cleaned_last5yrs_`data'_`samp', clear
 >         gcollapse (sum) affl_wt , by(pmid inst)
 >         qui joinby pmid using ../temp/contracted_`mesh'_`data'_`samp'
@@ -565,7 +608,7 @@ Notes:
 >         append using ../temp/`mesh'_`data'_`samp'
 >         qui save ../temp/`mesh'_`data'_`samp', replace*/
 .     }
- 55. end
+ 56. end
 
 . 
 . program output_tables
@@ -583,403 +626,640 @@ Notes:
 OUTPUT START
 
      +-------------------------------+
-     | country   cite_a~t       perc |
+     | country    affl_wt       perc |
      |-------------------------------|
- 25. |           10.72199   .1524742 |
+ 27. |           11.32921   .1239927 |
      +-------------------------------+
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   53.21902 |
-  2. | United Kingdom   9.210701 |
-  3. |          China   7.161477 |
-  4. |        Germany    7.05681 |
-  5. |    Switzerland    2.60135 |
+  1. |  United States   55.69514 |
+  2. | United Kingdom   8.232946 |
+  3. |        Germany   6.947575 |
+  4. |          China   5.881845 |
+  5. |    Switzerland    2.90845 |
      |---------------------------|
-  6. |         France   2.229374 |
-  7. |         Canada   2.039727 |
-  8. |          Japan   1.997191 |
-  9. |      Australia   1.917995 |
- 10. |         Sweden   1.759858 |
+  6. |         France   2.478124 |
+  7. |          Japan   2.326732 |
+  8. |         Canada   2.211867 |
+  9. |      Australia   1.630787 |
+ 10. |    Netherlands   1.495427 |
      |---------------------------|
- 11. |    Netherlands   1.620287 |
- 12. |         Israel   1.278869 |
- 13. |        Austria   .8612521 |
- 14. |        Belgium   .7939941 |
- 15. |    South Korea   .7713806 |
+ 11. |         Israel   1.156745 |
+ 12. |         Sweden   .9943489 |
+ 13. |        Austria   .9226682 |
+ 14. |          Spain   .8912545 |
+ 15. |        Belgium   .8017946 |
      |---------------------------|
- 16. |          Spain   .7573396 |
- 17. |          Italy   .5583606 |
- 18. |        Denmark   .5037805 |
- 19. |      Singapore   .3709109 |
- 20. |   South Africa   .3118772 |
+ 16. |          Italy   .6776815 |
+ 17. |        Denmark   .6153982 |
+ 18. |    South Korea   .4950237 |
+ 19. |      Singapore   .4708357 |
+ 20. |         Brazil   .2666272 |
      +---------------------------+
-Total articles: 7032
+Total articles: 9137
 
       +--------------------------------+
-      | city_f~l   cite_a~t       perc |
+      | city_f~l    affl_wt       perc |
       |--------------------------------|
-  99. |            10.72199   .1524742 |
+ 123. |            11.32921   .1239927 |
       +--------------------------------+
 
      +----------------------------------------------+
      |                         city_full       perc |
      |----------------------------------------------|
-  1. |   Boston-Cambridge, United States   11.19029 |
-  2. |           Bay Area, United States   8.838695 |
-  3. |           New York, United States   4.673433 |
-  4. |            London, United Kingdom    3.48354 |
-  5. |                    Beijing, China   3.403952 |
+  1. |   Boston-Cambridge, United States   9.865611 |
+  2. |           Bay Area, United States   8.203003 |
+  3. |           New York, United States   6.087481 |
+  4. | San Diego-La Jolla, United States   2.833407 |
+  5. |                    Beijing, China   2.809561 |
      |----------------------------------------------|
-  6. | San Diego-La Jolla, United States   2.438442 |
-  7. |            Seattle, United States   2.366712 |
-  8. |         Cambridge, United Kingdom   2.031096 |
-  9. |                   Shanghai, China   1.461873 |
- 10. |            Oxford, United Kingdom   1.317098 |
+  6. |         Cambridge, United Kingdom   2.300956 |
+  7. |            London, United Kingdom   2.059819 |
+  8. |        Bethesda-DC, United States   1.503167 |
+  9. |            Seattle, United States   1.493041 |
+ 10. |          New Haven, United States   1.404232 |
      |----------------------------------------------|
- 11. |        Bethesda-DC, United States   1.182193 |
- 12. |             Dallas, United States   1.158765 |
- 13. |                 Stockholm, Sweden   1.088246 |
- 14. |           Pasadena, United States    1.08188 |
- 15. |          Princeton, United States   1.077354 |
+ 11. |  Research Triangle, United States     1.2747 |
+ 12. |             Dallas, United States   1.210665 |
+ 13. |       Philadelphia, United States   1.188104 |
+ 14. |        Los Angeles, United States   1.181168 |
+ 15. |            Oxford, United Kingdom   1.131376 |
      |----------------------------------------------|
- 16. |          New Haven, United States   1.016232 |
- 17. |  Research Triangle, United States   .9987984 |
- 18. |       Philadelphia, United States   .9331155 |
- 19. |                   Rehovot, Israel   .8893663 |
- 20. |        Los Angeles, United States   .8810939 |
+ 16. |                   Shanghai, China   1.066857 |
+ 17. |          Baltimore, United States   1.024253 |
+ 18. |                     Paris, France   1.017631 |
+ 19. |        Saint Louis, United States   1.011592 |
+ 20. |            Houston, United States   1.007942 |
      +----------------------------------------------+
-Total articles: 7032
+Total articles: 9137
 
-      +----------------------------+
-      | inst   cite_a~t       perc |
-      |----------------------------|
-   3. |        197.7186   2.811698 |
-      +----------------------------+
+       +----------------------------+
+       | inst    affl_wt       perc |
+       |----------------------------|
+    3. |        200.2745   2.191906 |
+       +----------------------------+
 
      +----------------------------------------------------+
      |                                    inst       perc |
      |----------------------------------------------------|
-  1. |                      Harvard University   4.786355 |
-  2. |                     Stanford University   3.791439 |
-  3. |                              Max Planck   2.202622 |
-  4. | University of California, San Francisco   2.129182 |
-  5. |                University of Washington   1.993269 |
+  1. |                      Harvard University   4.505673 |
+  2. |                     Stanford University   3.672624 |
+  3. |                              Max Planck   1.831337 |
+  4. | University of California, San Francisco   1.716066 |
+  5. |                                     NIH   1.481651 |
      |----------------------------------------------------|
-  6. |   Massachusetts Institute of Technology   1.987049 |
-  7. |             Chinese Academy of Sciences   1.974986 |
-  8. |      University of California, Berkeley   1.653126 |
-  9. |                                DeepMind   1.623228 |
- 10. |                    University of Oxford   1.234136 |
+  6. |              The Rockefeller University   1.438038 |
+  7. |   Massachusetts Institute of Technology   1.423416 |
+  8. |                         Yale University   1.374588 |
+  9. |                     Columbia University   1.294676 |
+ 10. |             Chinese Academy of Sciences    1.28281 |
      |----------------------------------------------------|
- 11. |                                   Broad   1.228679 |
- 12. |                                    CNRS   1.166113 |
- 13. |              The Rockefeller University   1.160433 |
- 14. |                                     NIH    1.12322 |
- 15. |             University of Texas, Dallas   1.066125 |
+ 11. |      University of California, Berkeley   1.268383 |
+ 12. |     University of California, San Diego   1.063781 |
+ 13. |                University of Washington   1.061945 |
+ 14. |  Memorial Sloan-Kettering Cancer Center   1.030704 |
+ 15. |             University of Texas, Dallas   1.017005 |
      |----------------------------------------------------|
- 16. |      California Institute of Technology   1.023999 |
- 17. |                         Yale University   1.008502 |
- 18. |                     Columbia University   .9971432 |
- 19. |     University of California, San Diego   .8892629 |
- 20. |           Weizmann Institute of Science   .8885254 |
+ 16. |      Washington University in St. Louis   .9153131 |
+ 17. |                    University of Oxford   .9124413 |
+ 18. |              University of Pennsylvania   .9122183 |
+ 19. |                Johns Hopkins University   .8692806 |
+ 20. |                      Cornell University   .8486159 |
      +----------------------------------------------------+
-Total articles: 7032
-1063 authors of 87372 are broad affiliated or 1.2166369 percent
-1049 US authors of 44152 are broad affiliated or 2.3758833 percent
-(55,499 observations deleted)
-3 stanford authors of 1049 are broad affiliated or .28598665 percent
-510 harvard authors of 1049 are broad affiliated or 48.617731 percent
-(98,147 observations deleted)
-510 harvard authors of 984 are broad affiliated or 51.829268 percent
-323 mit authors of 984 are broad affiliated or 32.825203 percent
-3516 authors of 87372 are hhmi affiliated or 4.0241725 percent
-3510 US authors of 44152 are hhmi affiliated or 7.9498097 percent
-(55,499 observations deleted)
-442 stanford authors of 3510 are hhmi affiliated or 12.592593 percent
-553 harvard authors of 3510 are hhmi affiliated or 15.754986 percent
+Total articles: 9137
+
+     +-------------------------------+
+     | country   cite_a~t       perc |
+     |-------------------------------|
+ 27. |           10.76031   .1177663 |
+     +-------------------------------+
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States   53.82826 |
+  2. | United Kingdom   9.293667 |
+  3. |        Germany   7.295752 |
+  4. |          China   7.175461 |
+  5. |    Switzerland   2.474261 |
+     |---------------------------|
+  6. |         France   2.246117 |
+  7. |         Canada   1.930254 |
+  8. |          Japan   1.835269 |
+  9. |      Australia   1.806091 |
+ 10. |    Netherlands   1.674564 |
+     |---------------------------|
+ 11. |         Sweden   1.641221 |
+ 12. |         Israel   1.186855 |
+ 13. |        Belgium   .8305876 |
+ 14. |          Spain   .7377422 |
+ 15. |        Austria   .7226067 |
+     |---------------------------|
+ 16. |          Italy   .6859131 |
+ 17. |    South Korea   .5822558 |
+ 18. |        Denmark   .4907554 |
+ 19. |   South Africa     .43027 |
+ 20. |      Singapore   .4267896 |
+     +---------------------------+
+Total articles: 9137
+
+      +--------------------------------+
+      | city_f~l   cite_a~t       perc |
+      |--------------------------------|
+ 119. |            10.76031   .1177663 |
+      +--------------------------------+
+
+     +----------------------------------------------+
+     |                         city_full       perc |
+     |----------------------------------------------|
+  1. |   Boston-Cambridge, United States   11.42609 |
+  2. |           Bay Area, United States   7.733003 |
+  3. |           New York, United States   5.732671 |
+  4. |            London, United Kingdom   3.419688 |
+  5. |                    Beijing, China    3.33933 |
+     |----------------------------------------------|
+  6. | San Diego-La Jolla, United States   2.736091 |
+  7. |            Seattle, United States   2.024023 |
+  8. |         Cambridge, United Kingdom   2.004086 |
+  9. |            Oxford, United Kingdom   1.390591 |
+ 10. |        Bethesda-DC, United States   1.345198 |
+     |----------------------------------------------|
+ 11. |                   Shanghai, China   1.253192 |
+ 12. |             Dallas, United States   1.116104 |
+ 13. |       Philadelphia, United States   1.115601 |
+ 14. |          New Haven, United States   1.097001 |
+ 15. |  Research Triangle, United States   1.088645 |
+     |----------------------------------------------|
+ 16. |                     Paris, France   .9986544 |
+ 17. |        Saint Louis, United States   .9959596 |
+ 18. |            Houston, United States   .9613067 |
+ 19. |                 Stockholm, Sweden   .9554303 |
+ 20. |          Baltimore, United States   .9181511 |
+     +----------------------------------------------+
+Total articles: 9137
+
+       +----------------------------+
+       | inst   cite_a~t       perc |
+       |----------------------------|
+    3. |        224.2924   2.454771 |
+       +----------------------------+
+
+     +----------------------------------------------------+
+     |                                    inst       perc |
+     |----------------------------------------------------|
+  1. |                      Harvard University   4.816823 |
+  2. |                     Stanford University   3.276664 |
+  3. |   Massachusetts Institute of Technology   1.673184 |
+  4. |                University of Washington   1.587984 |
+  5. | University of California, San Francisco   1.577833 |
+     |----------------------------------------------------|
+  6. |                              Max Planck   1.502337 |
+  7. |             Chinese Academy of Sciences   1.347796 |
+  8. |                                     NIH   1.276081 |
+  9. |                                DeepMind   1.248418 |
+ 10. |      University of California, Berkeley    1.13126 |
+     |----------------------------------------------------|
+ 11. |                     Columbia University   1.129166 |
+ 12. |              The Rockefeller University    1.09463 |
+ 13. |                         Yale University   1.075538 |
+ 14. |                    University of Oxford   1.033862 |
+ 15. |  Memorial Sloan-Kettering Cancer Center   .9907259 |
+     |----------------------------------------------------|
+ 16. |                                   Broad   .9625707 |
+ 17. |             University of Texas, Dallas   .9348987 |
+ 18. |                      Cornell University   .8853604 |
+ 19. |     University of California, San Diego   .8764126 |
+ 20. |              University of Pennsylvania   .8662395 |
+     +----------------------------------------------------+
+Total articles: 9137
+2603 authors of 140398 are broad affiliated or 1.854015 percent
+2485 US authors of 77587 are broad affiliated or 3.2028561 percent
+(125,548 observations deleted)
+23 stanford authors of 2485 are broad affiliated or .92555332 percent
+1350 harvard authors of 2485 are broad affiliated or 54.325956 percent
+(214,064 observations deleted)
+1350 harvard authors of 2253 are broad affiliated or 59.920107 percent
+568 mit authors of 2253 are broad affiliated or 25.21083 percent
+4062 authors of 140398 are hhmi affiliated or 2.8932036 percent
+4058 US authors of 77587 are hhmi affiliated or 5.2302576 percent
+(125,548 observations deleted)
+464 stanford authors of 4058 are hhmi affiliated or 11.434204 percent
+699 harvard authors of 4058 are hhmi affiliated or 17.225234 percent
 
    Matching result from |
                   merge |      Freq.     Percent        Cum.
 ------------------------+-----------------------------------
-        Master only (1) |      3,301        1.74        1.74
-            Matched (3) |    186,288       98.26      100.00
+        Master only (1) |      4,733        1.97        1.97
+            Matched (3) |    235,339       98.03      100.00
 ------------------------+-----------------------------------
-                  Total |    189,589      100.00
+                  Total |    240,072      100.00
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-    num_mesh |    172,505    5.177908    1.850469          1         14
+    num_mesh |    212,002    5.266347    1.830704          1         14
 
      +-----------------------------------------------------------------------+
      |                                 mesh   articl~t       perc   cum_perc |
      |-----------------------------------------------------------------------|
-  1. |                 Biological Evolution   241.1107   .6212273   .6212273 |
-  2. |                  Signal Transduction   232.6898   .5995306   1.220758 |
-  3. |                            Ecosystem   198.4623   .5113426     1.7321 |
-  4. |                  Neurons, physiology    180.252   .4644233   2.196524 |
-  5. |    Transcription Factors, metabolism   178.1282   .4589513   2.655475 |
+  1. |                  Signal Transduction   262.4148   .5625787   .5625787 |
+  2. |                 Biological Evolution   246.6798    .528845   1.091424 |
+  3. |                            Ecosystem   199.8647   .4284804   1.519904 |
+  4. |    Transcription Factors, metabolism   192.8405   .4134215   1.933326 |
+  5. |                  Neurons, physiology   187.1611   .4012458   2.334571 |
      |-----------------------------------------------------------------------|
-  6. |     DNA-Binding Proteins, metabolism   168.4785   .4340886   3.089564 |
-  7. |               Transcription, Genetic   162.7373   .4192964    3.50886 |
-  8. |                              Fossils   151.0944   .3892983   3.898159 |
-  9. |           Gene Expression Regulation   142.6297   .3674888   4.265647 |
- 10. |   Saccharomyces cerevisiae, genetics   136.0214   .3504622   4.616109 |
+  6. |     DNA-Binding Proteins, metabolism   181.8495   .3898585    2.72443 |
+  7. |               Transcription, Genetic   171.1318   .3668813   3.091311 |
+  8. |           Gene Expression Regulation    156.269   .3350177   3.426329 |
+  9. |                              Fossils   151.9873   .3258384   3.752167 |
+ 10. |   Saccharomyces cerevisiae, genetics   141.2322    .302781   4.054948 |
      |-----------------------------------------------------------------------|
- 11. |        Membrane Proteins, metabolism   118.4534   .3051978   4.921307 |
- 12. |                  Drosophila Proteins   114.6952   .2955148   5.216822 |
- 13. |    Saccharomyces cerevisiae Proteins   109.2205   .2814092   5.498231 |
- 14. |                 Evolution, Molecular   104.7218   .2698182   5.768049 |
- 15. |                 Proteins, metabolism   95.48611   .2460221   6.014071 |
+ 11. |        Membrane Proteins, metabolism   130.1918   .2791121   4.334061 |
+ 12. |                             Mutation   122.5222   .2626696    4.59673 |
+ 13. |                  Drosophila Proteins   118.7456    .254573   4.851303 |
+ 14. |                 Evolution, Molecular    116.256   .2492356   5.100539 |
+ 15. |    Saccharomyces cerevisiae Proteins   111.1606    .238312    5.33885 |
      |-----------------------------------------------------------------------|
- 16. | Saccharomyces cerevisiae, metabolism   95.46236    .245961   6.260032 |
- 17. |                  Calcium, metabolism   90.79448    .233934   6.493967 |
- 18. |         Carrier Proteins, metabolism   87.47616   .2253843   6.719351 |
- 19. |         Nuclear Proteins, metabolism   86.46253   .2227727   6.942123 |
- 20. |            T-Lymphocytes, immunology   86.15754   .2219869    7.16411 |
+ 16. |            T-Lymphocytes, immunology   106.1048    .227473   5.566324 |
+ 17. |                 Proteins, metabolism   105.7687   .2267524   5.793076 |
+ 18. |                   Models, Biological   97.20833   .2084003   6.001476 |
+ 19. | Saccharomyces cerevisiae, metabolism    96.8497   .2076315   6.209108 |
+ 20. |         Nuclear Proteins, metabolism   96.34071   .2065403   6.415648 |
      +-----------------------------------------------------------------------+
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-num_gen_mesh |    161,013    4.824486     1.73228          1         14
+num_gen_mesh |    196,895    4.881084    1.708788          1         14
 
      +--------------------------------------------------------------------+
      |                          gen_mesh   articl~t       perc   cum_perc |
      |--------------------------------------------------------------------|
-  1. |             Transcription Factors   392.6385   1.011642   1.011642 |
-  2. |              DNA-Binding Proteins   352.8333   .9090831   1.920725 |
-  3. |          Saccharomyces cerevisiae   339.4227   .8745302   2.795255 |
-  4. |                           Neurons    335.315   .8639468   3.659202 |
-  5. |        Gene Expression Regulation   313.9168   .8088136   4.468016 |
+  1. |             Transcription Factors    434.058   .9305564   .9305564 |
+  2. |              DNA-Binding Proteins   397.7239   .8526613   1.783218 |
+  3. |                           Neurons    364.175   .7807375   2.563955 |
+  4. |                             Genes   358.1234   .7677637   3.331719 |
+  5. |        Gene Expression Regulation   355.5052   .7621508    4.09387 |
      |--------------------------------------------------------------------|
-  6. |                             Genes   301.5781   .7770229   5.245039 |
-  7. |               Signal Transduction   299.0691   .7705583   6.015597 |
-  8. |                               DNA   257.6111   .6637409   6.679338 |
-  9. |              Biological Evolution   254.4341   .6555553   7.334893 |
- 10. |                 Membrane Proteins   249.7811   .6435666    7.97846 |
+  6. |          Saccharomyces cerevisiae   346.7052   .7432849   4.837154 |
+  7. |               Signal Transduction   336.5254   .7214609   5.558616 |
+  8. |                 Membrane Proteins   287.5077    .616374    6.17499 |
+  9. |                               DNA   269.4861   .5777385   6.752728 |
+ 10. |                          Proteins   263.5805   .5650778   7.317806 |
      |--------------------------------------------------------------------|
- 11. | Saccharomyces cerevisiae Proteins   232.3271   .5985961   8.577056 |
- 12. |                          Proteins   230.6805   .5943536    9.17141 |
- 13. |           Drosophila melanogaster   225.8279   .5818508   9.753261 |
- 14. |                Bacterial Proteins   212.1381   .5465786   10.29984 |
- 15. |               Drosophila Proteins   209.8873   .5407794   10.84062 |
+ 11. |              Biological Evolution   260.3198   .5580873   7.875893 |
+ 12. | Saccharomyces cerevisiae Proteins   236.6141   .5072656   8.383159 |
+ 13. |           Drosophila melanogaster   232.3236   .4980674   8.881227 |
+ 14. |                Bacterial Proteins   218.4766   .4683816   9.349607 |
+ 15. |               Drosophila Proteins   217.6909   .4666972   9.816305 |
      |--------------------------------------------------------------------|
- 16. |                         Ecosystem   203.1131   .5233255   11.36394 |
- 17. |                  Escherichia coli   200.0833   .5155192   11.87946 |
- 18. |                            Genome   183.4905   .4727675   12.35223 |
- 19. |                       Arabidopsis   182.2025   .4694489   12.82168 |
- 20. |                  Nuclear Proteins   178.0567   .4587671   13.28045 |
+ 16. |                  Nuclear Proteins   206.0464   .4417331   10.25804 |
+ 17. |                  Escherichia coli   205.0551    .439608   10.69765 |
+ 18. |                         Ecosystem   204.5393   .4385021   11.13615 |
+ 19. |                            Genome   201.3762   .4317209   11.56787 |
+ 20. |                  Carrier Proteins   192.4269   .4125349    11.9804 |
      +--------------------------------------------------------------------+
 
    Matching result from |
                   merge |      Freq.     Percent        Cum.
 ------------------------+-----------------------------------
-        Master only (1) |        989        2.66        2.66
-            Matched (3) |     36,221       97.34      100.00
+        Master only (1) |      1,420        0.95        0.95
+            Matched (3) |    147,445       99.05      100.00
 ------------------------+-----------------------------------
-                  Total |     37,210      100.00
+                  Total |    148,865      100.00
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-    num_mesh |     31,961    5.669441     1.67736          1         13
+    num_mesh |    141,135    4.350338     1.65259          1         15
 
-     +-------------------------------------------------------------------+
-  1. |                                        mesh | articl~t |     perc |
-     |                                    Mutation | 50.23294 | .8000149 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             .8000149                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  1. |                                                            mesh |
+     |                                                       Mortality |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      113.8821       |       .293988       |       .293988       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
-  2. |                                        mesh | articl~t |     perc |
-     |                         Neoplasms, genetics | 36.54246 |  .581979 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             1.381994                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  2. |                                                            mesh |
+     | Antineoplastic Combined Chemotherapy Protocols, therapeutic use |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      88.27222       |      .2278757       |      .5218638       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
-  3. |                                        mesh | articl~t |     perc |
-     |                         Signal Transduction | 27.82103 | .4430806 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             1.825075                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  3. |                                                            mesh |
+     |                                                 Family Practice |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      83.46905       |      .2154763       |        .73734       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
-  4. |                                        mesh | articl~t |     perc |
-     |             Cell Transformation, Neoplastic | 26.87818 | .4280646 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             2.253139                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  4. |                                                            mesh |
+     |                                    HIV Infections, drug therapy |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      80.74134       |      .2084347       |      .9457747       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
-  5. |                                        mesh | articl~t |     perc |
-     |                          Mutation, genetics | 23.34091 | .3717297 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             2.624869                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  5. |                                                            mesh |
+     |                                               Disease Outbreaks |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |       76.9996       |      .1987753       |       1.14455       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
-  6. |                                        mesh | articl~t |     perc |
-     |                        Neoplasms, pathology | 22.19564 |   .35349 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             2.978359                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  6. |                                                            mesh |
+     |                                                           HIV-1 |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      74.56988       |       .192503       |      1.337053       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
-  7. |                                        mesh | articl~t |     perc |
-     |                                    COVID-19 | 18.22976 | .2903291 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             3.268688                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  7. |                                                            mesh |
+     |                          Anti-Bacterial Agents, therapeutic use |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      68.47222       |      .1767618       |      1.513815       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
-  8. |                                        mesh | articl~t |     perc |
-     |                       Neoplasms, metabolism | 17.98373 | .2864107 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             3.555099                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  8. |                                                            mesh |
+     |                   Hospitalization, statistics &; numerical data |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      63.83333       |      .1647865       |      1.678601       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
-  9. |                                        mesh | articl~t |     perc |
-     |                  Breast Neoplasms, genetics | 16.37302 | .2607583 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             3.815857                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+  9. |                                                            mesh |
+     |                                                   Health Status |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      62.61587       |      .1616436       |      1.840245       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 10. |                                        mesh | articl~t |     perc |
-     |      Gene Expression Regulation, Neoplastic | 15.13254 | .2410024 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             4.056859                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 10. |                                                            mesh |
+     |                                            Developing Countries |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      58.48254       |      .1509733       |      1.991218       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 11. |                                        mesh | articl~t |     perc |
-     |           Genetic Predisposition to Disease | 14.15476 | .2254302 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                              4.28229                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 11. |                                                            mesh |
+     |                         Antibodies, Monoclonal, therapeutic use |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      57.50278       |      .1484441       |      2.139662       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 12. |                                        mesh | articl~t |     perc |
-     |           Transcription Factors, metabolism | 14.13492 | .2251142 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             4.507404                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 12. |                                                            mesh |
+     |                           Cardiovascular Diseases, epidemiology |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      57.48532       |       .148399       |      2.288061       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 13. |                                        mesh | articl~t |     perc |
-     |                       Neoplasms, immunology | 14.13135 | .2250573 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             4.732461                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 13. |                                                            mesh |
+     |                  State Medicine, organization &; administration |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      55.76667       |      .1439623       |      2.432024       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 14. |                                        mesh | articl~t |     perc |
-     |                   T-Lymphocytes, immunology | 13.92662 | .2217968 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             4.954258                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 14. |                                                            mesh |
+     |                                     Physician-Patient Relations |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      55.64762       |       .143655       |      2.575679       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 15. |                                        mesh | articl~t |     perc |
-     |              DNA-Binding Proteins, genetics | 13.83258 |  .220299 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             5.174557                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 15. |                                                            mesh |
+     |                                                        Mutation |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      55.57302       |      .1434624       |      2.719141       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 16. |                                        mesh | articl~t |     perc |
-     |                     Genome, Human, genetics | 13.28929 | .2116465 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             5.386203                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 16. |                                                            mesh |
+     |                                Myocardial Infarction, mortality |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |        54.575       |       .140886       |      2.860027       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 17. |                                        mesh | articl~t |     perc |
-     |            DNA-Binding Proteins, metabolism | 13.06151 | .2080189 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             5.594223                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 17. |                                                            mesh |
+     |                  Cardiovascular Diseases, prevention &; control |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      54.56389       |      .1408573       |      3.000884       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 18. |                                        mesh | articl~t |     perc |
-     |                          Proteins, genetics |  12.9044 | .2055168 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             5.799739                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 18. |                                                            mesh |
+     |                                      Hypertension, drug therapy |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      54.50004       |      .1406925       |      3.141577       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 19. |                                        mesh | articl~t |     perc |
-     |                 Breast Neoplasms, pathology | 12.81627 | .2041132 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             6.003852                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 19. |                                                            mesh |
+     |                                              Hospital Mortality |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      52.05913       |      .1343912       |      3.275968       |
+     +-----------------------------------------------------------------+
 
-     +-------------------------------------------------------------------+
- 20. |                                        mesh | articl~t |     perc |
-     | Genetic Predisposition to Disease, genetics | 12.50238 | .1991142 |
-     |-------------------------------------------------------------------|
-     |                             cum_perc                              |
-     |                             6.202967                              |
-     +-------------------------------------------------------------------+
+     +-----------------------------------------------------------------+
+ 20. |                                                            mesh |
+     |                                    Attitude of Health Personnel |
+     |-----------------------------------------------------------------|
+     |      articl~t       |          perc       |      cum_perc       |
+     |      51.21274       |      .1322062       |      3.408174       |
+     +-----------------------------------------------------------------+
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-num_gen_mesh |     29,036    5.152845    1.573104          1         11
+num_gen_mesh |    137,241    4.215613    1.579799          1         13
 
-     +--------------------------------------------------------------------+
-     |                          gen_mesh   articl~t       perc   cum_perc |
-     |--------------------------------------------------------------------|
-  1. |                         Neoplasms   110.5123    1.76003    1.76003 |
-  2. |                          Mutation      85.95   1.368849   3.128879 |
-  3. |                          COVID-19   47.19087   .7515667   3.880445 |
-  4. |                             Genes   46.79048     .74519   4.625636 |
-  5. |                  Breast Neoplasms    42.9123   .6834257   5.309061 |
-     |--------------------------------------------------------------------|
-  6. |              DNA-Binding Proteins   40.82269   .6501464   5.959208 |
-  7. |             Transcription Factors   37.96476   .6046306   6.563838 |
-  8. |                      Inflammation   36.43929   .5803358   7.144174 |
-  9. |                 Alzheimer Disease   36.00397   .5734029   7.717577 |
- 10. |        Gene Expression Regulation   35.75873   .5694972   8.287074 |
-     |--------------------------------------------------------------------|
- 11. |               Signal Transduction   35.24802   .5613635   8.848437 |
- 12. |                        SARS-CoV-2   32.72738   .5212197   9.369658 |
- 13. |               Cell Transformation   32.42183   .5163533    9.88601 |
- 14. |                 Membrane Proteins   32.35357   .5152663   10.40128 |
- 15. |                    HIV Infections   32.33968   .5150451   10.91632 |
-     |--------------------------------------------------------------------|
- 16. |                          Proteins   29.18214   .4647578   11.38108 |
- 17. |                          Melanoma   28.58968   .4553222    11.8364 |
- 18. | Genetic Predisposition to Disease   27.85238   .4435799   12.27998 |
- 19. |                             HIV-1   27.84087   .4433966   12.72338 |
- 20. |             Nerve Tissue Proteins   25.80325   .4109452   13.13432 |
-     +--------------------------------------------------------------------+
+     +----------------------------------------------------------------------+
+  1. |                                       gen_mesh | articl~t |     perc |
+     |                          Myocardial Infarction | 296.0127 | .7641601 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               .7641601                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+  2. |                                       gen_mesh | articl~t |     perc |
+     |                                 HIV Infections | 295.0953 | .7617919 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               1.525952                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+  3. |                                       gen_mesh | articl~t |     perc |
+     |                               Breast Neoplasms | 258.0663 |  .666201 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               2.192153                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+  4. |                                       gen_mesh | articl~t |     perc |
+     |                                Family Practice | 256.4202 | .6619517 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               2.854105                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+  5. |                                       gen_mesh | articl~t |     perc |
+     |                        Cardiovascular Diseases | 244.3655 | .6308323 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               3.484937                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+  6. |                                       gen_mesh | articl~t |     perc |
+     |                               Coronary Disease |    236.5 | .6105275 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               4.095465                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+  7. |                                       gen_mesh | articl~t |     perc |
+     |                                   Hypertension | 179.8373 | .4642521 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               4.559717                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+  8. |                                       gen_mesh | articl~t |     perc |
+     |                      Diabetes Mellitus, Type 2 | 173.8687 | .4488439 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               5.008561                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+  9. |                                       gen_mesh | articl~t |     perc |
+     |                                      Neoplasms | 158.1687 | .4083141 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               5.416874                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 10. |                                       gen_mesh | articl~t |     perc |
+     |                                         Asthma | 156.0476 | .4028387 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               5.819713                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 11. |                                       gen_mesh | articl~t |     perc |
+     |                                      Mortality | 151.3512 | .3907148 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               6.210428                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 12. |                                       gen_mesh | articl~t |     perc |
+     |                                 Mass Screening | 147.0575 | .3796307 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               6.590059                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 13. |                                       gen_mesh | articl~t |     perc |
+     |             Acquired Immunodeficiency Syndrome | 144.6088 | .3733092 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               6.963368                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 14. |                                       gen_mesh | articl~t |     perc |
+     |                                        Smoking | 142.9004 |  .368899 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               7.332267                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 15. |                                       gen_mesh | articl~t |     perc |
+     |                                        Obesity | 141.7349 | .3658903 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               7.698157                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 16. |                                       gen_mesh | articl~t |     perc |
+     |                                 State Medicine | 127.2524 | .3285035 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               8.026661                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 17. |                                       gen_mesh | articl~t |     perc |
+     |                                  Heart Failure | 121.6175 | .3139569 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               8.340617                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 18. |                                       gen_mesh | articl~t |     perc |
+     | Antineoplastic Combined Chemotherapy Protocols | 118.2246 | .3051981 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               8.645816                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 19. |                                       gen_mesh | articl~t |     perc |
+     |                          Anti-Bacterial Agents | 115.5028 | .2981717 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               8.943987                               |
+     +----------------------------------------------------------------------+
+
+     +----------------------------------------------------------------------+
+ 20. |                                       gen_mesh | articl~t |     perc |
+     |                                         Stroke | 114.8111 | .2963862 |
+     |----------------------------------------------------------------------|
+     |                               cum_perc                               |
+     |                               9.240374                               |
+     +----------------------------------------------------------------------+
 
 . 
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-01-28 09:24:55
+Makelog ended: 2023-03-23 12:40:11
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------
