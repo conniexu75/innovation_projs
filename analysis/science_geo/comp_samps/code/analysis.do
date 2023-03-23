@@ -15,7 +15,7 @@ program main
     global inst_name "institutions"
     foreach samp in cns scisub demsci { 
         local samp_type = cond(strpos("`samp'", "cns")>0 | strpos("`samp'","med")>0, "main", "robust")
-        foreach data in fund nofund {
+        foreach data in newfund {
         di "SAMPLE IS : `samp' `data'"
             foreach var in affl_wt cite_affl_wt {
                 athr_loc, data(`data') samp(`samp') wt_var(`var')
@@ -92,8 +92,9 @@ program comp_samps
      if "`samp2'" == "scisub"  local `samp2'_name "Scientific Sub Journals"
      if "`samp1'" == "demsci"  local `samp1'_name "Democratic Science Journals"
      if "`samp2'" == "demsci"  local `samp2'_name "Democratic Science Journals"
-    foreach cat in fund nofund {
+    foreach cat in newfund {
          if "`cat'" == "fund"  local `cat'_name "Fundamental"
+         if "`cat'" == "newfund"  local `cat'_name "Fundamental"
          if "`cat'" == "dis"  local `cat'_name "Disease"
          if "`cat'" == "thera"  local `cat'_name "Therapeutics"
          if "`cat'" == "nofund"  local `cat'_name "Disease + Therapeutics"
@@ -147,8 +148,8 @@ program comp_samps
                 cap replace lab_share = `loc' if inlist(`loc', "Memorial Sloan", "MIT", "Stanford", "Berlin, Germany", "Daejeon, South Korea", "Baltimore, US", "New York, US") & "`cat'" == "thera"
                 cap replace lab_share = "" if inlist(`loc', "Netherlands", "Switzerland") & "`cat'" == "thera"
                
-                cap replace lab_share = `loc' if inlist(`loc', "UCSF", "JHU", "UCSD", "MIT", "China","London, UK", "Houston, US", "Japan") & "`cat'" == "fund" & "`samp2'" == "scisub"
-                cap replace lab_share = "" if inlist(`loc', "Switzerland", "Canada", "Germany", "Beijing, China", "France") & "`cat'" == "fund" & "`samp2'" == "scisub"
+                cap replace lab_share = `loc' if inlist(`loc', "UCSF", "JHU", "UCSD", "MIT", "China","London, UK", "Houston, US", "Japan") & "`cat'" == "newfund" & "`samp2'" == "scisub"
+                cap replace lab_share = "" if inlist(`loc', "Switzerland", "Canada", "Germany", "Beijing, China", "France") & "`cat'" == "newfund" & "`samp2'" == "scisub"
                 
                 cap replace lab_share = `loc' if inlist(`loc', "Germany", "London, UK", "Houston, US", "Tokyo, Japan", "UCLA") & "`cat'" == "dis"
                 cap replace lab_share = "" if inlist(`loc', "Sweden", "Canada", "Cambridge, UK") & "`cat'" == "dis"
@@ -160,23 +161,23 @@ program comp_samps
 
                 cap replace lab_share = "" if inlist(`loc', "Memorial Sloan", "Seoul National University", "Canada", "Japan", "Shanghai, China", "Bethesda-DC, US" , "Wash U" , "UCSD", "Cambridge, UK") & "`cat'" == "nofund" &  "`samp2'" == "demsci" 
                 cap replace lab_share = "" if inlist(`loc', "France", "Fudan University"") & "`cat'" == "nofund" &  "`samp2'" == "demsci" 
-                cap replace lab_share = "" if inlist(`loc', "Rockefeller Univ.", "United Kingdom", "Canada" , "Switzerland", "Seattle, US", "Cambridge, UK", "Japan", "Univeresity of Washington") & "`cat'" == "fund" & "`samp2'" == "demsci"
+                cap replace lab_share = "" if inlist(`loc', "Rockefeller Univ.", "United Kingdom", "Canada" , "Switzerland", "Seattle, US", "Cambridge, UK", "Japan", "Univeresity of Washington") & "`cat'" == "newfund" & "`samp2'" == "demsci"
                 *cap replace lab_share = "" if inlist(`loc', "Research Triangle, US", "Israel")
                 egen clock = mlabvpos(rank`samp1' rank`samp2')
                 replace clock = 3 if inlist(lab_share, "Spain", "China", "San Diego-La Jolla, US", "Baltimore, US", "Berlin, Germany", "New York, US") & "`cat'"== "thera"
                 replace clock = 12 if inlist(lab_share, "Switzerland") & "`cat'"== "thera"
                 replace clock = 6 if inlist(lab_share, "Bay Area, US", "Stanford") & "`cat'"== "thera"
                
-                replace clock = 12 if inlist(lab_share, "United Kingdom") & "`cat'"== "fund" & "`samp2'" == "scisub"
-                replace clock = 3 if inlist(lab_share, "Germany", "Houston, US", "New York, US", "London, UK" , "UCSF", "UCSD", "San Diego-La Jolla, US") & "`cat'"== "fund" & "`samp2'" == "scisub"
-                replace clock = 3 if inlist(lab_share, "MIT", "JHU", "Japan", "China", "Stanford") & "`cat'" == "fund" & "`samp2'" == "scisub"
-                replace clock = 6 if inlist(lab_share, "Boston-Cambridge, US") & "`cat'" == "fund" & "`samp2'" == "scisub" & "`suf'" == ""
-                replace clock = 11 if inlist(lab_share, "Bay Area, US") & "`cat'" == "fund"  & "`suf'" == ""
-                replace clock = 6 if inlist(lab_share, "University of Washington") & "`cat'" == "fund" & "`samp2'" == "scisub"
+                replace clock = 12 if inlist(lab_share, "United Kingdom") & "`cat'"== "newfund" & "`samp2'" == "scisub"
+                replace clock = 3 if inlist(lab_share, "Germany", "Houston, US", "New York, US", "London, UK" , "UCSF", "UCSD", "San Diego-La Jolla, US") & "`cat'"== "newfund" & "`samp2'" == "scisub"
+                replace clock = 3 if inlist(lab_share, "MIT", "JHU", "Japan", "China", "Stanford") & "`cat'" == "newfund" & "`samp2'" == "scisub"
+                replace clock = 6 if inlist(lab_share, "Boston-Cambridge, US") & "`cat'" == "newfund" & "`samp2'" == "scisub" & "`suf'" == ""
+                replace clock = 11 if inlist(lab_share, "Bay Area, US") & "`cat'" == "newfund"  & "`suf'" == ""
+                replace clock = 6 if inlist(lab_share, "University of Washington") & "`cat'" == "newfund" & "`samp2'" == "scisub"
                
                replace clock = 3 if inlist(lab_share, "China", "United Kingdom", "Boston-Cambridge, US", "New York, US" , "Bay Area, US", "London, UK", "Seoul, South Korea", "Beijing, China") & "`samp2'" == "demsci" & "`cat'" == "nofund"
-               replace clock = 3  if inlist(lab_share, "Boston-Cambridge, US", "New York, US", "San Diego-La Jolla, US", "Tokyo, Japan", "UC Berkeley", "Stanford", "Max Planck") & "`samp2'" == "demsci" & "`cat'" == "fund"
-               replace clock = 3 if inlist(lab_share, "Harvard", "CAS", "CNRS") & "`samp2'" == "demsci" & "`cat'" == "fund"
+               replace clock = 3  if inlist(lab_share, "Boston-Cambridge, US", "New York, US", "San Diego-La Jolla, US", "Tokyo, Japan", "UC Berkeley", "Stanford", "Max Planck") & "`samp2'" == "demsci" & "`cat'" == "newfund"
+               replace clock = 3 if inlist(lab_share, "Harvard", "CAS", "CNRS") & "`samp2'" == "demsci" & "`cat'" == "newfund"
                 replace clock = 3 if inlist(lab_share, "Tokyo, Japan","Houston, US", "China", "UCLA") & "`cat'"== "dis"
                 replace clock = 6 if inlist(lab_share, "Germany") & "`cat'"== "dis"
                 
@@ -207,7 +208,7 @@ program comp_samps
                 di `max'
                 corr share`samp1' share`samp2'  if  (share`samp1'<=`max') & (share`samp2'<=`max')
                 local corr :  di %3.2f r(rho)
-                if "`cat'" == "fund" {
+                if "`cat'" == "newfund" {
                     mat corr_`samp2'`suf' = nullmat(corr_`samp2'`suf') , r(rho)
                 }
                 tw scatter share`samp1' share`samp2' if (share`samp1'<=`max') & (share`samp2'<=`max'), ///  //if  (inrange(rank`samp1' , 1,`rank_lmt') |  inrange(rank`samp2' , 1,`rank_lmt')) & (share`samp1'<=`max') & (share`samp2'<=`max'), ///
