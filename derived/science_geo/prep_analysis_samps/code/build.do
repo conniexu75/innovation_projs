@@ -21,7 +21,7 @@ program main
             di "SAMPLE IS `samp' `data':" 
             prep_data, data(`data') samp(`samp') samp_type(`samp_type')
         }
-        foreach type in cleaned_all cleaned_last5yrs list_of_pmids_last5yrs {
+        foreach type in cleaned_all cleaned_last5yrs list_of_pmids list_of_pmids_last5yrs {
             clear 
             append using ../output/`type'_fund_`samp'
             append using ../output/`type'_dis_`samp'
@@ -112,6 +112,8 @@ program prep_data
 
     replace institution = subinstr(institution, "Univ", "University", .) if strpos(institution, "Univer")==0 & strpos(institution, "Univ")>0
     replace institution = subinstr(institution, "Hosp", "Hospital", .) if strpos(institution, "Hospital")==0 & strpos(institution, "Hosp")>0
+    replace institution = subinstr(institution, "Canc", "Cancer", .) if strpos(institution, "Cancer")==0
+    replace institution = subinstr(institution, "Ctr", "Center",.) if strpos(institution, "Center")==0
     replace institution = "NIH" if inlist(institution, "NIAID", "NIA", "NINDS", "NIMH", "NIAMSD" , "NIDA", "NIDDKD", "NIEHS", "NINR" ) & country == "United States"
 
     replace institution = "University at Buffalo" if strpos(affiliation, "University") > 0 & strpos(affiliation, "at Buffalo")>0
@@ -184,6 +186,62 @@ program prep_data
         replace institution = "California Institute of Technology" if strpos(strlower(affiliation), "caltech")>0
         replace institution = "Max Planck" if strpos(affiliation, "Max Planck")>0 & country == "Germany"
         replace institution = "University of College London" if strpos(affiliation, "UCL")>0 & strpos(affiliation , "London")>0
+        replace institution = "Medical Research Council" if strpos(institution, "MRC") >0 & country == "United Kingdom"
+        replace institution = "CNRS" if (strpos(institution, "CNRS")>0 | strpos(strlower(affiliation), "centre national de la recherche scientifique"))>0 & country == "France"
+        replace institution = "Memorial Sloan-Kettering Cancer Center" if strpos(affiliation, "Kettering") > 0 & strpos(affiliation, "Univ")==0
+        replace institution = "MD Anderson" if strpos(affiliation, "MD Anderson")>0
+        replace institution = "Brigham and Women's Hospital" if institution == "Brigham & Womens Hospital"
+        replace institution = subinstr(institution, "&", "and",.)
+        replace institution = subinstr(institution, "Sci", "Science", .) if strpos(institution, "Science")==0
+        replace institution = subinstr(institution, "Inst", "Institute", .) if strpos(institution, "Institute")==0
+        replace institution = subinstr(institution, "Hosp", "Hospital", .) if strpos(institution, "Hospital")==0
+        replace institution = subinstr(institution, "Technol", "Technology", .) if strpos(institution, "Technology")==0
+        replace institution = subinstr(institution, "Therapeut", "Therapeutics", .) if strpos(institution, "Therapeutics")==0
+        replace institution = subinstr(institution, "Pharmaceut", "Pharmaceuticals", .) if strpos(institution, "Pharmaceuticals")==0
+        replace institution = subinstr(institution, "Syst", "System", .) if strpos(institution, "System")==0
+        replace institution = subinstr(institution, "Phys", "Physics", .) if strpos(institution, "Physics")==0
+        replace institution = subinstr(institution, "Infirm", "Infirmary", .) if strpos(institution, "Infirmary")==0
+        replace institution = subinstr(institution, "Mil ", "Military ", .) if strpos(institution, "Military")==0
+        replace institution = subinstr(institution, "Psychiat", "Psychiarty", .) if strpos(institution, "Pyschiatry")==0
+        replace institution = subinstr(institution, "Technical", "Tech", .) if strpos(institution, "Technical")>0
+        replace institution = subinstr(institution, "Technology", "Tech", .) if strpos(institution, "Technology")>0
+        replace institution = subinstr(institution, "Agr", "Agriculture", .) if strpos(institution, "Agriculture")==0
+        replace institution = subinstr(institution, "Hlth", "Health", .) if strpos(institution, "Health")==0
+        replace institution = subinstr(institution, "Dis ", "Disease", .) if strpos(institution, "Disease")==0
+        replace institution = subinstr(institution, "Clin", "Clinic", .) if strpos(institution, "Clinic")==0
+        replace institution = subinstr(institution, "Mol Biol", "Molecular Biology", .) 
+        replace institution = subinstr(institution, "Biol", "Biology", .) if strpos(institution, "Biology")==0
+        replace institution = subinstr(institution, "Natl", "National", .) if strpos(institution, "National")==0
+        replace institution = subinstr(institution, "Res", "Research", .) if strpos(institution, "Research")==0
+        replace institution = subinstr(institution, "Fed", "Federal", .) if strpos(institution, "Federal")==0
+        replace institution = subinstr(institution, "Sch", "School", .) if strpos(institution, "School")==0 
+        replace institution = subinstr(institution, "Agcy", "Agency", .) if strpos(institution, "Agency")==0 
+        replace institution = subinstr(institution, "Publ", "Public", .) if strpos(institution, "Public")==0 
+        replace institution = subinstr(institution, "Fdn", "Foundation", .) if strpos(institution, "Foundation")==0 
+        replace institution = subinstr(institution, "Dist", "District", .) if strpos(institution, "District")==0 
+        replace institution = subinstr(institution, "Govt", "Government", .) if strpos(institution, "Government")==0
+        replace institution = subinstr(institution, "Collaborat", "Collaborative", .) if strpos(institution, "Collaborative")==0
+        replace institution = subinstr(institution, "Vet Clinic", "Veterinary Clinic", .) 
+        replace institution = subinstr(institution, "St. ", "St ", .) 
+        replace institution = subinstr(institution, "Centre ", "Center", .) 
+        replace institution = subinstr(institution, "Acad", "Academy of", .) if strpos(institution, "Academy")==0 & strpos(strreverse(institution), "dacA")!=1
+        replace institution = subinstr(institution, "Acad", "Academy", .) if strpos(institution, "Academy")==0 
+        replace institution = subinstr(institution, "Assoc", "Associates", .) if strpos(institution, "Associates")==0 
+        replace institution = subinstr(institution, "Oncol", "Oncology", .) if strpos(institution, "Oncology")==0 
+        replace institution = "Weizmann Institute of Science" if institution == "Weizmann Institute Science"
+        replace institution = subinstr(institution, "Sciences", "Science",.)
+        replace institution = "RAS" if strpos(institution, "Russian Academy of Science")>0 & country == "Russia"
+        replace institution = "Cornell University" if strpos(institution, "Weill Cornell")>0
+        replace institution = subinstr(institution, "Medicine",  "Med", .)
+        replace institution = subinstr(institution, "Medical",  "Med", .)
+        replace institution = subinstr(institution, "Laboratories", "Labs",.)
+        replace institution = subinstr(institution, "Coll ", "University",.) if strpos(institution, "University")==0 
+        replace institution = subinstr(institution, " Coll", "University",.) if strpos(institution, "University")==0 
+        replace institution = subinstr(institution, "College", "University",.) if strpos(institution, "University")==0 & strpos(institution, "College")>0
+        replace institution = subinstr(institution, "Universityege", "University",.)
+        replace institution = "Duke-NUS" if strpos(affiliation, "Duke")>0 & strpos(affiliation, "Singapore")>0
+        replace institution = "Duke-NUS" if strpos(affiliation, "Duke")>0 & strpos(affiliation, "NUS")>0
+        replace institution = "PSL" if strpos(affiliation, "Paris")>0 & strpos(affiliation, "Science")>0 & strpos(affiliation, "Lett")>0
 
     merge m:1 pmid using ../external/`samp_type'_filtered/all_jrnl_articles_`samp'Q1, assert(1 2 3) keep(3) nogen 
     if "`data'"!="thera" & "`data'" != "clin" {
@@ -321,7 +379,94 @@ program prep_data
     rename city_country city_full
     
     qui bys pmid: gen pmid_counter = _n == 1
-    qui rename institution inst
+    *qui rename institution inst
+    gen inst = strlower(institution)
+    replace inst = subinword(inst, "of", "",.)
+    replace inst = subinword(inst, "a ofa", "",.)
+    replace inst = subinword(inst, "de", "",.)
+    replace inst = subinword(inst, "do", "",.)
+    replace inst = subinword(inst, "fur", "",.)
+    replace inst = subinword(inst, "for", "",.)
+    replace inst = subinword(inst, "der", "",.)
+    replace inst = subinword(inst, "in", "",.)
+    replace inst = subinword(inst, "at", "",.)
+    replace inst = subinword(inst, "foundation", "",.)
+    replace inst = subinword(inst, "co", "",.)
+    replace inst = subinstr(inst, " ltd", "",.)
+    replace inst = subinstr(inst, " llc", "",.)
+    replace inst = subinstr(inst, "  ", " ",.)
+    replace inst = subinstr(inst, "-", "",.)
+    replace inst = subinstr(inst, "+", "",.)
+    replace inst = subinstr(inst, "'", "",.)
+    replace inst = subinstr(inst, ",", "",.)
+    replace inst = subinstr(inst, ".", "",.)
+    replace inst = subinstr(inst, "xi an", "xian",.)
+    replace inst = subinstr(inst, "universities", "university", .) 
+    replace inst = subinstr(inst, "universitat", "university", .) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "universiteit", "university", .) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "universite", "university", .) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "universita", "university", .) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "universidade", "university", .) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "universidad", "university", .) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "universiti", "university", .) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "univeristy", "university",.) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "universisty", "university",.) if strpos(inst, "university") == 0
+    replace inst = subinstr(inst, "hospitals", "hospital",.) 
+    replace inst = subinstr(inst, "institutes", "institute",.) 
+    replace inst = subinword(inst, "zentrum" , "center", .)
+    replace inst = subinword(inst, "centre" , "center", .)
+    replace inst = subinword(inst, "centro" , "center", .)
+    gen uni = 1 if strpos(inst, "university") > 0
+    replace inst = "university " + strtrim(subinstr(subinstr(inst, "university","",.), "  ", " ", .))  if uni == 1 
+    replace inst = "chinese academy science" if inst == "university chinese academy science"
+    replace inst = "eth zurich" if strpos(inst, "eth zurich")>0 
+    replace inst = "eth zurich" if inst == "eth"
+    replace inst = "ecole polytech federal lausanne" if (strpos(inst, "ecole polytech")> 0 & strpos(inst, "federal lausanne")>0) | inst == "epfl"
+    replace inst = "european molecular biology lab" if inst == "embl"
+    replace inst = "erasmus med center" if inst == "erasmus mc"
+    replace inst = "fmi" if strpos(inst, "friedrich miescher institute biomed")>0
+    replace inst = "genentech" if strpos(inst, "genentech")>0
+    replace inst = "basel university" if strpos(inst, "univer")>0  & strpos(inst, "basel")>0
+    replace inst = "zurich university" if (strpos(inst, "univer")>0  & strpos(inst, "zurich")>0) | strpos(inst, "uzh")>0 & country == "Switzerland"
+    replace inst = "baylor university" if strpos(inst, "baylor")> 0 & strpos(inst, "university")>0
+    replace inst = "university heidelberg" if strpos(inst, "heidelberg")> 0 & strpos(inst, "university")>0
+    replace inst = "university heinrich heine" if strpos(inst, "heinrich heine")> 0 & strpos(inst, "university")>0
+    replace inst = "university center hamburg" if strpos(inst, "center hamburg")> 0 & strpos(inst, "university")>0
+    replace inst = "robert koch institute" if strpos(inst, "robert koch institute")>0 | strpos(inst, "kochinstitute")>0
+    replace inst = "university munich" if inlist(inst, "university ludwig maximilians munchen") | (strpos(inst, "ludwig")>0&strpos(inst, "maxi")>0&strpos(inst, "university")>0)
+    replace inst = "university tech munich" if inlist(inst, "university technische munchen")
+    replace inst = "mt sinai" if strpos(inst, "sinai")>0 & (strpos(inst, "mount")>0|strpos(inst, "mt")>0)
+    replace inst = "illumina" if strpos(inst, "illumina")>0 
+    replace inst = "japan science and tech agency" if strpos(inst, "japan science and tech agency")>0 
+    replace inst = "la jolla institute immunology" if strpos(inst, "la jolla institute immun")>0 
+    replace inst = "massachusetts general hospital" if inlist(inst, "massachusetts gen hospital") 
+    replace inst = "beth israel" if strpos(inst, "beth israel")>0 
+    replace inst = "walter and eliza hall" if strpos(inst, "walter")>0 & strpos(inst, "eliza")>0 & country == "Australia"
+    replace inst = subinword(inst, "munchen", "munich", .)
+    replace inst = strtrim(subinstr(subinstr(inst, "hospital", "",.), "  ", " ", .)) if uni == 1 & strpos(inst, "hospital")>0
+    replace inst = strtrim(subinstr(subinstr(inst, "med", "",.), "school","",.)) + " university" if strpos(inst, "med")>0 & strpos(inst, "school")>0 & strpos(inst, "university")==0
+    replace inst = strtrim(subinstr(subinstr(inst, "med", "",.), "school","",.))  if strpos(inst, "med")>0 & strpos(inst, "school")>0 & strpos(inst, "university")>0
+    replace inst = strtrim(subinstr(inst, "med", "",.))  if strpos(inst, "med")>0 & strpos(inst, "university")>0
+    replace inst = "university washington st louis" if strpos(inst, "st louis") > 0 & strpos(inst, "university")>0
+    replace inst = "10x genomics" if strpos(inst, "10x") > 0 & strpos(inst, "genom")>0
+    replace inst = "23andme" if strpos(inst, "23andme")>0
+    replace inst = "nasa" if strpos(inst, "nasa")> 0
+    replace inst = "roche" if strpos(inst, "roche")> 0
+    replace inst = "sanofi" if strpos(inst, "sanofi")> 0
+    replace inst = "genetics" if strpos(inst, "genet")>0 & strpos(inst, "genetics")==0
+    replace inst = "nih" if inlist(inst, "nci", "nhgri", "nhlbi")>0
+    replace inst = "conicet" if strpos(inst, "conicet")>0 & country == "Argentina"
+    replace inst = subinword(inst, "neurosci", "neuroscience",.) if strpos(inst, "neuroscience")==0
+    replace inst = subinword(inst, "pathol", "pathology",.) if strpos(inst, "pathology")==0
+    replace inst = subinword(inst, "department", "dept",.) 
+    replace inst = subinword(inst, "anatomical", "anat",.) 
+*    replace inst = subinstr(inst, substr(inst, strpos(inst, "hospital")+8, strlen(inst)),"",.) if strpos(inst, "hospital")>0
+*    replace inst = subinstr(inst, substr(inst, strpos(inst, "university")+10, strlen(inst)),"",.) if strpos(inst, "university")>0 & strpos(inst, "university")!=1
+    replace inst = subinstr(inst, substr(inst, strpos(inst, "lab")+3, strlen(inst)),"",.) if strpos(inst, "lab")>0
+    replace inst = subinstr(inst, "university", " university",.) if strpos(inst, " university") ==0& strpos(inst, "university")!=1
+    replace inst = subinstr(inst, "university", "university ",.) if strpos(inst, "university ") ==0& strpos(inst, "university")==1
+    replace inst = subinstr(inst, "  ", " ",.)
+    replace inst = strtrim(inst)
     cap drop _merge
     qui gen years_since_pub = 2022-year+1
     qui gen avg_cite_yr = cite_count/years_since_pub
