@@ -441,6 +441,10 @@ program prep_data
     replace inst = "la jolla institute immunology" if strpos(inst, "la jolla institute immun")>0 
     replace inst = "massachusetts general hospital" if inlist(inst, "massachusetts gen hospital") 
     replace inst = "beth israel" if strpos(inst, "beth israel")>0 
+    replace inst = "jinyintan hospital" if strpos(inst, "jin")>0 & strpos(inst, "yin")>0 & strpos(inst, "tan")>0 & strpos(inst, "hospital")>0
+    replace inst = "cdc" if inlist(inst, "center disease control and prevention") & country == "United States"
+    replace inst = "china cdc" if inlist( inst, "chinese center diseasecontrol and prevent", "chinese center disease control and prevention")
+    replace inst = "mrc" if inlist(inst, "med research council") & country == "United Kingdom"
     replace inst = "walter and eliza hall" if strpos(inst, "walter")>0 & strpos(inst, "eliza")>0 & country == "Australia"
     replace inst = subinword(inst, "munchen", "munich", .)
     replace inst = strtrim(subinstr(subinstr(inst, "hospital", "",.), "  ", " ", .)) if uni == 1 & strpos(inst, "hospital")>0
