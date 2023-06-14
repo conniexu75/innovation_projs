@@ -99,6 +99,13 @@ program prep_data
     replace inst = "Stanford University" if strpos(inst, "Stanford")
     replace city = "Bethesda" if inst == "NIH" & mi(city)
     replace city = "Foster City" if inst == "Gilead Sciences"
+    replace city = "Durham" if (strpos(affiliation, "National Institute of Environmental Health Science")>0 | strpos(affiliation, "NIEHS")>0) & us_state=="NC"
+    replace city = "Durham" if (strpos(affiliation, "Glaxo")>0| strpos(affiliation, "GSK")>0) & strpos(affiliation, "Triangle")>0 & us_state == "NC"
+    replace city = "Durham" if strpos(affiliation, "Triangle")>0 & strpos(affiliation, "ViiV")>0 & us_state == "NC"
+    replace city = "Lexington" if strpos(affiliation, "Lexington, USA")>0
+    replace city = "Durham" if us_state == "NC" & (strpos(affiliation, "27709")>0 | strpos(affiliation, "Burroughs Wellcome Company")>0 | strpos(affiliation, "Family H")>0)
+    replace inst = "RTI International" if  strpos(affiliation, "Triangle")>0 & (strpos(affiliation, "RTI")>0| strpos(affiliation, "Research Triangle International")>0) & us_state == "NC"
+    replace city = "Durham" if inst == "RTI International" & us_state == "NC"
     replace country = strtrim(strproper(country))
     replace country = "United States" if country == "Usa"
     replace country = "United Kingdom" if inlist(country, "England", "Scotland", "Wales", "Ireland", "Uk")
@@ -126,7 +133,7 @@ program prep_data
     replace institution = "Chinese Academy of Sciences" if strpos(affiliation, "CAS") > 0 & country == "China"
     replace institution = "Ragon Institute" if strpos(affiliation, "Ragon Institute")>0
     replace institution = "" if institution == "IRCCS"
-    foreach i in "Humanitas" "Candiolo Cancer Institute" "European Institute of Oncology" "Istituto Nazionale dei Tumori" "Istituto di Ricerche Farmacologiche Mario Negri" "Burlo Garofolo" "San Raffaele Sci Inst" "Associaz Oasi Maria Santissima" "Regina Elena National Cancer Institute"{
+    foreach i in "Humanitas" "Candiolo Cancer Institute" "European Institute of Oncology" "Istituto Nazionale dei Tumori" "Istituto di Ricerche Farmacologiche Mario Negri" "Burlo Garofolo" "San Raffaele Sci Inst" "Associaz Oasi Maria Santissima" "Regina Elena National Cancer Institute" "Viiv Healthcare" {
         replace institution = "`i'" if strpos(affiliation, "`i'")>0 
         }
     replace affiliation = subinstr(affiliation, "A¹", "u", .)
@@ -471,6 +478,55 @@ program prep_data
     replace inst = subinstr(inst, "university", "university ",.) if strpos(inst, "university ") ==0& strpos(inst, "university")==1
     replace inst = subinstr(inst, "  ", " ",.)
     replace inst = strtrim(inst)
+    
+    // fill in msas
+    replace country = "Denmark" if city == "Aarhus"
+    replace us_state = "" if country != "United States"
+    replace us_state = "DC" if city == "DC"
+    replace city = "DC" if city == "Washington" & strpos(affiliation, "DC")>0
+    replace city = subinstr(city, " Pk" , " Park", .) if country == "United States"
+    replace city = subinstr(city, "Saint " , "St ", .) if country == "United States"
+    replace city = subinstr(city, "St " , "St. ", .) if country == "United States"
+    replace city = subinstr(city, "St. ", "Saint ",. ) if country == "United States"
+    replace city = "North Chicago" if city == "N Chicago"
+    replace city = "East Hanover" if city == "E Hanover"
+    replace city = "Pittsburgh" if city == "Piitsburgh"
+    replace city = "San Antonio" if city == "Anton" & us_state == "TX" 
+    replace us_state = "MA" if inlist(city, "Boston", "Brookline", "Cambridge", "Newton", "Framingham", "West Roxbury", "Medford") & mi(us_state)
+    replace us_state = "IL" if inlist(city, "Chicago", "Maywood") & mi(us_state)
+    replace us_state = "NE" if inlist(city, "Omaha") & mi(us_state)
+    replace us_state = "SC" if inlist(city, "Charlestown") & mi(us_state)
+    replace us_state = "CO" if inlist(city, "Denver") & mi(us_state)
+    replace us_state = "WA" if inlist(city, "Seattle") & mi(us_state)
+    replace us_state = "MI" if inlist(city, "Detroit") & mi(us_state)
+    replace us_state = "FL" if inlist(city, "Miami") & mi(us_state)
+    replace us_state = "UT" if inlist(city, "Murray") & mi(us_state)
+    replace us_state = "MO" if inlist(city, "Saint Louis") 
+    replace us_state = "MI" if inlist(city, "Ann Arbor") 
+    replace us_state = "MN" if inlist(city, "Minneapolis") & mi(us_state)
+    replace us_state = "OH" if inlist(city, "Cincinnati", "Cleveland") & mi(us_state)
+    replace us_state = "TX" if inlist(city, "Houston") & mi(us_state)
+    replace us_state = "TN" if inlist(city, "Nashville") & mi(us_state)
+    replace us_state = "AZ" if inlist(city, "Phoenix") & mi(us_state)
+    replace us_state = "CT" if inlist(city, "New Haven") & mi(us_state)
+    replace us_state = "NY" if inlist(city, "Rochester", "New York","Bronx", "Calverton") & mi(us_state)
+    replace us_state = "CA" if inlist(city, "Los Angeles", "Loma Linda", "Stanford", "San Francisco", "San Diego", "Palo Alto", "Menlo Park", "La Jolla", "Oakland") & mi(us_state)
+    replace us_state = "GA" if city == "Atlanta" & mi(us_state)
+    replace us_state = "PA" if inlist(city, "Pittsburgh", "Philadelphia") & mi(us_state)
+    replace us_state = "NC" if inlist(city, "Winston Salem", "Durham") & mi(us_state)
+    replace us_state = "MD" if inlist(city, "Frederick","Hyattsville", "Bethesda", "Baltimore", "Silver Spring") & country == "United States"
+    replace city = strtrim(city)
+    replace us_state = strtrim(us_state)
+    merge m:1 city us_state using ../external/geo/city_msa, assert(1 2 3) keep (1 3) nogen
+    replace msatitle = "San Francisco-Oakland-Haywerd, CA" if city == "Foster City" & us_state == "CA"
+    replace msatitle = "Washington-Arlington-Alexandria, DC-VA-MD-WV"  if us_state == "DC" | city == "DC" | city == "North Bethesda"
+    *replace msatitle = "Research Triangle Park, NC" if msatitle == "Durham-Chapel Hill, NC" | msatitle == "Raleigh, NC" | city == "Res Triangle Pk" | city == "Research Triangle Park" | city == "Res Triangle Park"
+    *replace msatitle = "Bay Area, CA" if inlist(msatitle, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
+    replace msatitle = "" if country != "United States"
+    gen msa_comb = msatitle
+    replace msa_comb = "Research Triangle Park, NC" if msa_comb == "Durham-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | city == "Research Triangle Park" | city == "Res Triangle Park"
+    replace msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
+
     cap drop _merge
     qui gen years_since_pub = 2022-year+1
     qui gen avg_cite_yr = cite_count/years_since_pub
@@ -488,6 +544,7 @@ program prep_data
     qui save ../output/list_of_pmids_`data'_`samp', replace
     restore
 
+    // the following are the last steps
     qui keep if inrange(date, td(01jan2015), td(31mar2022)) & year >=2015
     drop cite_wt 
     qui sum avg_cite_yr

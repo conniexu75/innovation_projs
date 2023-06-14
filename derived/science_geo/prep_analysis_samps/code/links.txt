@@ -14,3 +14,4 @@
 ./fill_mi_insts/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fill_mi_insts/output
 ./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output
 ./wos_affils/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/wos_affils/output
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
