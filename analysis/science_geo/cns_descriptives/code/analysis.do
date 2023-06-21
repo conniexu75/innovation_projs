@@ -41,7 +41,7 @@ program athr_loc
     replace msa_world = city if country != "United States"
     gen msa_comb_world = msa_comb
     replace msa_comb_world = city if country != "United States"
-    foreach loc in country city_full inst msatitle msa_comb msa_world msa_comb_world {
+    foreach loc in country msa_comb_world inst {
         qui gunique pmid 
         local articles = r(unique)
         qui sum `wt_var'
@@ -143,7 +143,7 @@ program trends
     replace msa_comb_world = city if country != "United States"
     qui bys pmid year: gen counter = _n == 1
     qui bys year: egen tot_in_yr = total(counter)
-    foreach loc in country city_full inst msatitle msa_comb msa_world msa_comb_world {
+    foreach loc in country  msa_comb_world inst {
         preserve
         replace `loc' = "harvard university" if `loc' == "university harvard"
         replace `loc' = "stanford university" if `loc' == "university stanford"
@@ -235,12 +235,12 @@ program trends
             graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2022, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
               ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2022, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
-              graphregion(margin(r+36)) plotregion(margin(zero)) ///
+              graphregion(margin(r+32)) plotregion(margin(zero)) ///
               legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining places") ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
         }
-        local w = 36 
-        if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_comb_world" | "`loc'" == "msa_comb") local w = 36
+        local w = 32 
+        if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_comb_world" | "`loc'" == "msa_comb") local w = 32
         if "`loc'" != "country" {
             graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2022, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
@@ -309,9 +309,7 @@ end
 
 program output_tables
     syntax, data(str) samp(str)
-    mat us_msa_newfund_cns = top_msatitle_newfund_cns , top_msa_comb_newfund_cns
-    mat msa_newfund_cns = top_msa_world_newfund_cns , top_msa_comb_world_newfund_cns
-    foreach file in top_country top_city_full top_inst top_gen_mesh us_msa msa top_msa_world top_msa_comb_world top_msatitle top_msa_comb {
+    foreach file in top_country top_msa_comb_world top_inst top_gen_mesh { 
         qui matrix_to_txt, saving("../output/tables/`file'_`data'_`samp'.txt") matrix(`file'_`data'_`samp') ///
            title(<tab:`file'_`data'_`samp'>) format(%20.4f) replace
          }
