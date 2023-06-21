@@ -12,6 +12,9 @@ program main
     global us_state_name "US states"
     global area_name "US cities"
     global city_full_name "world cities"
+    global msatitle_name "MSAs"
+    global msa_world_name "metropolitan areas"
+    global msa_c_world_name "metropolitan areas"
     global inst_name "institutions"
     foreach var in affl_wt cite_affl_wt {
         athr_loc, data(clin) samp(med) wt_var(`var')
@@ -22,7 +25,6 @@ program main
         di "SAMPLE IS : `samp' `data'"
             foreach var in affl_wt cite_affl_wt {
                 athr_loc, data(`data') samp(`samp') wt_var(`var')
-                *qui trends, data(`data') samp(`samp') wt_var(`var')
             }
             qui output_tables, data(`data') samp(`samp') 
         }
@@ -41,8 +43,15 @@ program athr_loc
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/cleaned_samps/cleaned_last5yrs_`data'_`samp', clear
-    foreach loc in country  city_full inst {
+    gen msa_world = substr(msatitle, 1, strpos(msatitle, ",")) + " US"
+    replace msa_world = city_full if country != "United States"
+
+    gen msa_c_world = substr(msa_comb, 1, strpos(msa_comb, ",")) + " US"
+    replace msa_c_world = city_full if country != "United States"
+    foreach loc in country msa_c_world inst {
         qui gunique pmid //which_athr //if !mi(affiliation)
+        replace `loc' = "harvard university" if "`loc'" == "university harvard"
+        replace `loc' = "stanford university" if "`loc'" == "university stanford"
         local articles = r(unique)
         qui sum `wt_var'
         local total = round(r(sum))
@@ -50,7 +59,7 @@ program athr_loc
         qui sum `wt_var' if !mi(`loc') 
         local denom = r(sum) 
         preserve
-        if inlist("`loc'", "us_state", "area") {
+        if inlist("`loc'", "us_state", "area", "msatitle") {
             qui keep if country == "United States"
         }
         gcollapse (sum) `wt_var', by(`loc')
@@ -67,7 +76,7 @@ program athr_loc
         mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , (top_`loc'_`samp'`suf')
         qui levelsof `loc' in 1/2
         global top2_`loc'_`data'_`samp' "`r(levels)'"
-        if inlist("`loc'", "inst", "city_full") {
+        if inlist("`loc'", "inst", "city_full", "msatitle", "msa_world", "msa_c_world") {
             qui levelsof `loc' in 1/`rank_end'
             global `loc'_`data'_`samp' "`r(levels)'"
         }
@@ -75,7 +84,7 @@ program athr_loc
         qui levelsof `loc' if _n == 1
         global `loc'_first_`data'_`samp' "`r(levels)'"
         qui levelsof `loc' if _n == 2
-        global `loc'_second_`data'_`samp' "`r(levels)'"
+        global `loc'_2_`data'_`samp' "`r(levels)'"
         qui replace rank_grp = "second" if _n == 2
         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10)
         qui replace rank_grp = "remaining" if mi(rank_grp)
@@ -89,9 +98,14 @@ program trends
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/cleaned_samps/cleaned_all_`data'_`samp', clear
+    gen msa_world = substr(msatitle, 1, strpos(msatitle, ",")) + " US"
+    replace msa_world = city_full if country != "United States"
+
+    gen msa_c_world = substr(msa_comb, 1, strpos(msa_comb, ",")) + " US"
+    replace msa_c_world = city_full if country != "United States"
     qui bys pmid year: gen counter = _n == 1
     qui bys year: egen tot_in_yr = total(counter)
-    foreach loc in country city_full inst {
+    foreach loc in country msa_c_world inst {
         preserve
         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp'`suf', assert(1 3) keep(1 3) nogen
         qui sum year
@@ -115,7 +129,7 @@ program trends
         qui replace tot = round(tot)
         assert tot==100
         qui drop tot
-        label define rank_grp 1 ${`loc'_first_`data'_`samp'} 2 ${`loc'_second_`data'_`samp'} 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places"
+        label define rank_grp 1 ${`loc'_first_`data'_`samp'} 2 ${`loc'_2_`data'_`samp'} 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places"
         label var rank_grp rank_grp
         qui gen group = 1 if rank_grp == "first"
         qui replace group = 2 if rank_grp == "second"
@@ -140,7 +154,7 @@ program trends
         qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] if group == 1
         qui gen labely_lab = "Everywhere else" if group == 4
         qui replace labely_lab = "Rest of the top 10 ${`loc'_name}" if group == 3
-        qui replace labely_lab = ${`loc'_second_`data'_`samp'} if group == 2
+        qui replace labely_lab = ${`loc'_2_`data'_`samp'} if group == 2
         qui replace labely_lab = ${`loc'_first_`data'_`samp'} if group == 1
         qui replace labely_lab = subinstr(labely_lab, "United States", "US", .)
         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "UK", .)
@@ -150,14 +164,14 @@ program trends
           msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
           ytitle("Percent of Published Papers", size(small)) xtitle("Year", size(small)) xlabel(`min_year'(2)2022, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
           graphregion(margin(r+25)) plotregion(margin(zero)) ///
-          legend(off label(1 ${`loc'_first_`data'_`samp'}) label(2 ${`loc'_second_`data'_`samp'}) label(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places") ring(1) pos(6) rows(2))
+          legend(off label(1 ${`loc'_first_`data'_`samp'}) label(2 ${`loc'_2_`data'_`samp'}) label(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places") ring(1) pos(6) rows(2))
         qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf, replace
         restore
     }
 end 
 program corr_wt 
     syntax, samp(str) 
-    foreach loc in country city_full inst {
+    foreach loc in country  msa_c_world inst {
         use ../temp/`loc'_rank_newfund_`samp',clear
         gen cat = "unwt"
         append using ../temp/`loc'_rank_newfund_`samp'_wt
@@ -180,12 +194,17 @@ program comp_w_fund
          if "`trans'" == "clin"  local `trans'_name "Clinical"
          if "`trans'" == "thera"  local `trans'_name "Therapeutics"
          if "`trans'" == "nofund"  local `trans'_name "Translational Science"
-         foreach type in city_full inst {
+         foreach type in  msa_c_world inst {
             qui {
                 global top_20 : list global(`type'_newfund_`samp') | global(`type'_`trans'_`samp')
                 use ../external/cleaned_samps/cleaned_last5yrs_newfund_`samp', clear
                 gen type = "fund"
                 append using ../external/cleaned_samps/cleaned_last5yrs_`trans'_med
+                gen msa_world = substr(msatitle, 1, strpos(msatitle, ",")) + " US"
+                replace msa_world = city_full if country != "United States"
+
+                gen msa_c_world = substr(msa_comb, 1, strpos(msa_comb, ",")) + " US"
+                replace msa_c_world = city_full if country != "United States"
                 replace type = "trans" if mi(type)
                 gen to_keep = 0
                 foreach i of global top_20 {
@@ -208,67 +227,64 @@ program comp_w_fund
                 gen zerofund = onefund-1
                 gen zerotrans = onetrans-1
                 // inst labels
-                cap replace inst = "Caltech" if inst == "California Institute of Technology"
-                cap replace inst = "CDC" if inst == "Centers for Disease Control and Prevention"
-                cap replace inst = "Columbia" if inst == "Columbia University"
-                cap replace inst = "Cornell" if inst == "Cornell University"
-                cap replace inst = "Duke" if inst == "Duke University"
-                cap replace inst = "Harvard" if inst == "Harvard University"
-                cap replace inst = "JHU" if inst == "Johns Hopkins University"
-                cap replace inst = "Rockefeller Univ." if inst == "The Rockefeller University"
-                cap replace inst = "MIT" if inst == "Massachusetts Institute of Technology"
-                cap replace inst = "Memorial Sloan" if inst == "Memorial Sloan-Kettering Cancer Center"
-                cap replace inst = "NYU" if inst == "New York University"
-                cap replace inst = "Stanford" if inst == "Stanford University"
-                cap replace inst = "UCL" if inst == "University College London"
-                cap replace inst = "UC Berkeley" if inst == "University of California, Berkeley"
-                cap replace inst = "UCLA" if inst == "University of California, Los Angeles"
-                cap replace inst = "UCSD" if inst == "University of California, San Diego"
-                cap replace inst = "UCSF" if inst == "University of California, San Francisco"
-                cap replace inst = "UChicago" if inst == "University of Chicago"
-                cap replace inst = "UMich" if inst == "University of Michigan"
-                cap replace inst = "UPenn" if inst == "University of Pennsylvania"
-                cap replace inst = "Yale" if inst == "Yale University"
-                cap replace inst = "Wash U" if inst == "Washington University in St. Louis"
-                cap replace inst = "Univ. of Washington" if inst == "University of Washington"
-                cap replace inst = "CAS" if inst == "Chinese Academy of Sciences"
-                cap replace inst = "Oxford" if inst == "University of Oxford"
-                cap replace inst = "Cambridge" if inst == "University of Cambridge"
-                cap replace inst = "UT Dallas" if inst == "University of Texas, Dallas"
-                cap replace inst = "UMich" if inst == "University of Michigan, Ann Arbor"
-                cap replace inst = "Dana Farber" if inst == "Dana Farber Cancer Institute"
+                cap replace inst = "Caltech" if inst == "california institute tech"
+                cap replace inst = "CDC" if inst == "cdc"
+                cap replace inst = "Columbia" if inst == "columbia university"
+                cap replace inst = "Cornell" if inst == "cornell university"
+                cap replace inst = "Duke" if inst == "duke university"
+                cap replace inst = "Harvard" if inst == "harvard university"
+                cap replace inst = "JHU" if inst == "johns hopkins university"
+                cap replace inst = "Rockefeller Univ." if inst == "university the rockefeller"
+                cap replace inst = "MIT" if inst == "massachusetts institute tech"
+                cap replace inst = "Memorial Sloan" if inst == "memorial sloan-kettering cancer center"
+                cap replace inst = "MGH" if inst == "massachusetts general hospital"
+                cap replace inst = "NYU" if inst == "new York university"
+                cap replace inst = "Stanford" if inst == "stanford university"
+                cap replace inst = "UCL" if inst == "university college london"
+                cap replace inst = "Berkeley" if inst == "university california berkeley"
+                cap replace inst = "UCLA" if inst == "university california los angeles"
+                cap replace inst = "UCSD" if inst == "university california san diego"
+                cap replace inst = "UCSF" if inst == "university california san francisco"
+                cap replace inst = "UChicago" if inst == "university chicago"
+                cap replace inst = "UMich" if inst == "university michigan"
+                cap replace inst = "UPenn" if inst == "university pennsylvania"
+                cap replace inst = "Yale" if inst == "university yale"
+                cap replace inst = "Harvard" if inst == "university harvard"
+                cap replace inst = "Stanford" if inst == "university stanford"
+                cap replace inst = "CAS" if inst == "chinese academy sciences"
+                cap replace inst = "Oxford" if inst == "university oxford"
+                cap replace inst = "Cambridge" if inst == "university cambridge"
+                cap replace inst = "UT Dallas" if inst == "university texas dallas"
+                cap replace inst = "UMich" if inst == "university michigan ann arbor"
+                cap replace inst = "Dana Farber" if inst == "dana farber cancer institute"
+                cap replace inst = "Max Planck" if inst == "max planck"
+                cap replace inst = "NIH" if inst == "nih"
+                cap replace inst = "DeepMind" if inst == "deepmind"
+                cap replace inst = "Brigham and Women's" if inst == "brigham and womens hospital"
+                cap replace inst = "Chinese Academy of Medical Sciences" if inst == "chinese academy med science"
+                cap replace inst = "Chinese CDC" if inst == "china cdc"
+                cap replace inst = "Jinyintan Hospital" if inst == "jinyintan hospital"
 
-                // cities
-                cap replace city_full = subinstr(city_full, "United States", "US",.)
-                cap replace city_full = subinstr(city_full, "United Kingdom", "UK",.)
-                local lmt = 20
-                gen lab = `type' if rankfund <= `lmt' | ranktrans<= `lmt'
-                gen lab_share = `type' 
-                cap replace lab_share = "" if !(inlist(rankfund, 1, 2, 3,4, 5, 8) | inlist(ranktrans, 1, 2, 3,4, 5))
-                cap replace lab_share = "" if inlist(`type', "Oxford, UK", "Baltimore, US", "Seattle, US", "Cambridge, UK", "University of Washington", "Universidade de Sao Paulo") & "`trans'" == "thera"
-                cap replace lab_share = "" if inlist(`type', "Chinese Academy of Medical Sciences" ) & "`trans'" == "dis"
-                cap replace lab_share = "" if inlist(`type', "London, UK" , "UCSF", "Max Planck") & "`trans'" == "nofund" & "`suf'" == "_wt" 
-                cap replace lab_share = `type' if inlist(`type', "Houston, US", "Rockefeller Univ.", "MD Anderson", "Oxford", "Caltech" ) & "`trans'" == "nofund"
+                // shorter us uk cor cities msa
+                foreach i in  msa_c_world {
+                    cap replace `i' = subinstr(`i', "United States", "US",.)
+                    cap replace `i'= subinstr(`i', "United Kingdom", "UK",.)
+                }
+                // labeling 
+                gen lab_share = "" 
+                replace lab_share = substr(lab_share, 1, strpos(lab_share, ",")-1) if strpos("`loc'", "msa")>0
+                replace lab_share = `type' if (inlist(rankfund, 1, 2, 3,4, 8, 10) | inlist(ranktrans, 1, 2, 3,4, 5, 7) | inlist(`type', "DeepMind", "Jinyintan Hospital", "CDC", "Philadelphia-Camden-Wilmington, US", "Seattle-Tacoma-Bellevue, US", "Houston-The Woodlands-Sugar Land, US", "San Jose-Sunnyvale-Santa Clara, US") | inlist(`type', "San Diego-Carlsbad, US", "Oxford, UK", "Washington-Arlington-Alexandria, US"))
+                replace lab_share = "" if inlist(lab_share, "chinese center diseasecontrol and prevent","university washington", "San Diego-La Jolla, US", "Max Planck" , "Yale", "Cambridge, UK", "Philadelphia-Camden-Wilmington, US", "Cambridge, UK") | inlist(lab_share,"Seattle-Tacoma-Bellevue, US", "Houston-The Woodlands-Sugar Land, US", "Los Angeles-Long Beach-Anaheim, US")
+                replace lab_share = strproper(lab_share) if inlist(lab_share, "pfizer", "DeepMind", "Jinyintan Hospital")
                 egen clock = mlabvpos(rankfund ranktrans)
-                cap replace clock = 3 if inlist(lab_share,"San Diego-La Jolla, US", "Stanford") & "`trans'" == "thera"
-                cap replace clock = 3 if inlist(lab_share,"San Diego-La Jolla, US", "Memorial Sloan", "Houston, US", "London, UK", "MD Anderson", "UC Berkeley") & "`trans'" == "nofund"
-                cap replace clock = 9 if inlist(lab_share,"Caltech") & "`trans'" == "nofund"
-                cap replace clock = 12 if inlist(lab_share,"Oxford") & "`trans'" == "nofund"
-                cap replace clock = 12 if inlist(lab_share,"Univ. of Washington") & "`trans'" == "nofund"
-                cap replace clock = 2 if inlist(lab_share,"Beijing, China") & "`trans'" == "thera"
-                cap replace clock = 12 if inlist(lab_share,"Pfizer" , "UC Berkeley") & "`cat'" == "thera"
-                cap replace clock = 6 if inlist(lab_share,"London, UK", "Bay Area, US") & "`trans'" == "thera"
-                cap replace clock = 9 if inlist(lab_share,"Rockefeller Univ.") & "`trans'" == "nofund"
-                cap replace clock = 6 if inlist(lab_share,"Max Planck", "University of Washington", "Brigham and Women's Hospital" ) & "`trans'" == "dis"
-                cap replace clock = 3 if inlist(lab_share,"UCSF", "MIT", "Memorial Sloan", "Peking University" ) & "`trans'" == "dis"
-                cap replace clock = 12 if inlist(lab_share,"UC Berkeley" ) & "`trans'" == "dis"
-                local rank_lmt = 20
-                tw scatter rankfund ranktrans if inrange(rankfund , 1,`rank_lmt') & inrange(ranktrans ,1,`rank_lmt'), ///
-                  mlabel(lab) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) || ///
-                  (line onefund onetrans if onefund <= `rank_lmt', lpattern(dash) lcolor(lavender)), ///
-                  xtitle("``trans'_name' Research Output Rank", size(small)) ytitle("`fund_name' Research Output Rank", size(small)) ///
-                  xlabel(1(1)`rank_lmt', labsize(vsmall)) ylabel(1(1)`rank_lmt', labsize(vsmall)) xsc(reverse) ysc(reverse) legend(off)
-                *graph export ../output/figures/bt_`type'_`trans'_`samp'`suf'_scatter.pdf, replace
+                cap replace clock = 2 if inlist(lab_share, "Oxford, UK", "San Jose-Sunnyvale-Santa Clara, US")
+                cap replace clock = 12 if inlist(lab_share, "Seattle, US")
+                cap replace clock = 6 if inlist(lab_share, "London, UK")
+                cap replace clock = 9 if inlist(lab_share, "New York-Newark-Jersey City, US")
+                cap replace clock = 3 if inlist(lab_share,"Chinese Academy of Medical Sciences", "Beijing, China", "Boston-Cambridge-Newton, US", "Bethesda-DC, US", "Oxford, UK", "Brigham and Women's", "UCSF", "Berkeley") 
+                cap replace clock = 3 if inlist(lab_share,"Pfizer", "DeepMind", "Beijing, China", "New York-Newark-Jersey City", "San Diego-Carlsbad, US", "San Francisco-Oakland-Hayward, US") 
+                cap replace clock = 4 if inlist(lab_share,"MIT", "CDC", "Jinyintan Hospital", "Chinese CDC", "Bethesda-DC, US", "Washington-Arlington-Alexandria, US") 
+               
                 local skip = 1 
                 if "`type'" == "inst" local lim = 5
                 if "`type'" == "inst" local skip = 1 
