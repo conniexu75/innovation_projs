@@ -13,6 +13,7 @@ program main
     global area_name "US cities"
     global city_full_name "world cities"
     global inst_name "institutions"
+    global temp "/export/scratch/cxu_sci_geo/prep_analysis_samps"
     prep_data, data(clin) samp(med) samp_type(clinical)
     foreach samp in cns scisub demsci {
         di "OUTPUT START"
@@ -23,12 +24,23 @@ program main
         }
         foreach type in cleaned_all cleaned_last5yrs list_of_pmids list_of_pmids_last5yrs {
             clear 
-            append using ../output/`type'_fund_`samp'
-            append using ../output/`type'_dis_`samp'
-            append using ../output/`type'_thera_`samp'
+            append using ${temp}/`type'_fund_`samp'
+            append using ${temp}/`type'_dis_`samp'
+            append using ${temp}/`type'_thera_`samp'
             save ../output/`type'_newfund_`samp', replace
         }
     }
+    clear
+    foreach samp in cns scisub demsci {
+        append using ../output/cleaned_all_newfund_`samp'
+    }
+    save ../output/cleaned_all_newfund_jrnls, replace
+    clear
+    foreach samp in cns scisub demsci {
+        append using ../output/cleaned_last5yrs_newfund_`samp'
+    }
+    save ../output/cleaned_last5yrs_newfund_jrnls, replace
+    
 end
 
 program prep_data
@@ -68,10 +80,10 @@ program prep_data
     rename (which_affil which_author) (which_affiliation which_athr)
     drop _freq
     gen filled = 1
-    save ../temp/fill_`data'_`samp', replace
+    save ${temp}/fill_`data'_`samp', replace
     restore
     drop if need_to_fill == 1
-    append using ../temp/fill_`data'_`samp'
+    append using ${temp}/fill_`data'_`samp'
     replace affiliation = institution +", " + city+ ", " + country if mi(affiliation) & filled == 1
     replace affiliation = "" if strpos(affiliation, "@")> 0
 *    drop if strpos(affiliation, "From ")==1 | (strpos(affiliation, "(")>0 & strpos(affiliation, ")")>0)
@@ -526,6 +538,8 @@ program prep_data
     gen msa_comb = msatitle
     replace msa_comb = "Research Triangle Park, NC" if msa_comb == "Durham-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | city == "Research Triangle Park" | city == "Res Triangle Park"
     replace msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
+    gen msa_c_world = msa_comb
+    replace msa_c_world = city_full if country != "United States"
 
     cap drop _merge
     qui gen years_since_pub = 2022-year+1
@@ -537,11 +551,17 @@ program prep_data
     qui replace cite_wt = cite_wt * r(unique)
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     qui gen cite_affl_wt = affl_wt * cite_wt
-    qui save ../output/cleaned_all_`data'_`samp', replace
+    qui save ${temp}/cleaned_all_`data'_`samp', replace
+    if "`data'" == "clin" & "`samp'" == "med" {
+        save ../output/cleaned_all_`data'_`samp', replace
+    }
     preserve
     qui gcontract pmid 
     drop _freq
-    qui save ../output/list_of_pmids_`data'_`samp', replace
+    qui save ${temp}/list_of_pmids_`data'_`samp', replace
+    if "`data'" == "clin" & "`samp'" == "med" {
+        save ../output/list_of_pmids_`data'_`samp', replace
+    }
     restore
 
     // the following are the last steps
@@ -556,12 +576,18 @@ program prep_data
     gunique pmid
     gunique pmid which_athr
     gunique pmid which_athr which_affiliation if !mi(affiliation)
-    qui save ../output/cleaned_last5yrs_`data'_`samp', replace
+    qui save ${temp}/cleaned_last5yrs_`data'_`samp', replace
+    if "`data'" == "clin" & "`samp'" == "med" {
+        save ../output/cleaned_last5yrs_`data'_`samp', replace
+    }
   
     preserve
     qui gcontract pmid year
     drop _freq
-    qui save ../output/list_of_pmids_last5yrs_`data'_`samp', replace
+    qui save ${temp}/list_of_pmids_last5yrs_`data'_`samp', replace
+    if "`data'" == "clin" & "`samp'" == "med" {
+        save ../output/list_of_pmids_last5yrs_`data'_`samp', replace
+    }
     restore
 end
 ** 
