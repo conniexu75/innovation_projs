@@ -39,7 +39,11 @@ program athr_loc
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/cleaned_samps/cleaned_last5yrs_`data'_`samp', clear
     drop if journal_abbr == "PLoS One"
-    foreach loc in country city_full inst msatitle {
+    gen msa_world = substr(msatitle, 1, strpos(msatitle, ",")) + " US" 
+    replace msa_world = city_full if country != "United States"
+    gen msa_c_world = substr(msa_comb, 1, strpos(msa_comb, ",")) + " US"
+    replace msa_c_world = city_full if country != "United States"
+    foreach loc in country msa_c_world inst { 
         qui gunique pmid //which_athr //if !mi(affiliation)
         local articles = r(unique)
         qui sum `wt_var'
@@ -65,7 +69,7 @@ program athr_loc
         mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , (top_`loc'_`samp'`suf')
         qui levelsof `loc' in 1/2
         global top2_`loc'_`data'_`samp' "`r(levels)'"
-        if inlist("`loc'", "country", "inst", "city_full", "msatitle") {
+        if inlist("`loc'", "country", "inst", "city_full", "msatitle", "msa_world", "msa_c_world") {
             qui levelsof `loc' in 1/`rank_end'
             global `loc'_`data'_`samp' "`r(levels)'"
         }
@@ -99,7 +103,7 @@ program comp_samps
          if "`cat'" == "dis"  local `cat'_name "Disease"
          if "`cat'" == "thera"  local `cat'_name "Therapeutics"
          if "`cat'" == "nofund"  local `cat'_name "Disease + Therapeutics"
-         foreach loc in country city_full inst msatitle {
+         foreach loc in country msa_c_world inst {
              use ../temp/`loc'_rank_`cat'_`samp1'`suf', clear
              gen samp = "`samp1'"
              append using ../temp/`loc'_rank_`cat'_`samp2'`suf'
@@ -114,7 +118,7 @@ program comp_samps
                 cap replace inst = "CDC" if inst == "centers disease control and prevention"
                 cap replace inst = "Columbia" if inst == "columbia University"
                 cap replace inst = "Cornell" if inst == "cornell University"
-                cap replace inst = "Duke" if inst == "duke University"
+                cap replace inst = "Duke" if inst == "duke university"
                 cap replace inst = "Harvard" if inst == "university harvard"
                 cap replace inst = "JHU" if inst == "johns hopkins university"
                 cap replace inst = "Rockefeller Univ." if inst == "the rockefeller university"
@@ -128,7 +132,7 @@ program comp_samps
                 cap replace inst = "UC Berkeley" if inst == "university california berkeley"
                 cap replace inst = "UCLA" if inst == "university california los angeles"
                 cap replace inst = "UCSD" if inst == "university california san diego"
-                cap replace inst = "UCSF" if inst == "university california san francisco"
+                cap replace inst = "UCSF" if inst == "ucsf"
                 cap replace inst = "UChicago" if inst == "university chicago"
                 cap replace inst = "UMich" if inst == "university michigan"
                 cap replace inst = "UPenn" if inst == "university pennsylvania"
@@ -142,10 +146,13 @@ program comp_samps
                 cap replace inst = "Dana Farber" if inst == "dana farber cancer institute"
 
                 // cities
-                cap replace city_full = subinstr(city_full, "United States", "US",.)
-                cap replace city_full = subinstr(city_full, "United Kingdom", "UK",.)
+                foreach i in  msa_c_world {
+                    cap replace `i' = subinstr(`i', "United States", "US",.)
+                    cap replace `i' = subinstr(`i', "United Kingdom", "UK",.)
+                }
                 local lmt = 20
-                gen lab_share = strproper(`loc')
+                gen lab_share = `loc'
+                replace lab_share = strproper(lab_share) if "`loc'" != "msatitle"
                 cap replace lab_share = subinstr(lab_share, "United States", "US",.)
                 cap replace lab_share = subinstr(lab_share, "United Kingdom", "UK",.)
                 cap replace lab_share = "" if !(inlist(rank`samp1', 1, 2, 3, 5, 8) | inlist(rank`samp2', 1, 2, 3))
