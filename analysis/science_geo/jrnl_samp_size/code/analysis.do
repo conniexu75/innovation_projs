@@ -29,11 +29,12 @@ program main
             mat N_`samp' = nullmat(N_`samp') \ N_`data'_`samp'
         }
         mat N_samp = nullmat(N_samp) \ N_`samp'
+        mat top_jrnls_`samp' =  nullmat(top_jrnls_`samp') , top_jrnls_`samp'_N
         if "`samp'" != "med" {
-            mat top_jrnls_`samp' =  nullmat(top_jrnls_`samp') , top_jrnls_`samp'_N
             mat top_jrnls =  nullmat(top_jrnls) \ top_jrnls_`samp'
         }
     }
+    top_jrnls, data(newfund) samp(med)
     foreach file in top_jrnls N_samp top_jrnls_med {
         qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`file') ///
            title(<tab:`file'>) format(%20.4f) replace
@@ -49,11 +50,12 @@ program get_total_articles
     drop if inlist(pmid, 34587383, 34260849, 34937145, 34914868, 33332779, 36286256, 28657871, 35353979, 33631066, 27959715)
     drop if inlist(pmid, 29045205, 27376580, 29800062)
     cap drop _merge
-    merge 1:1 pmid using ../external/wos/`samp'_appended, assert(1 2 3) // need to pull in all pmids from wos // to do after i scrape all wos
+    merge 1:1 pmid using ../external/wos/`samp'_appended, assert(1 2 3) 
     qui drop if _merge == 2
     tab _merge
-    keep if strpos(doc_type, "Article")>0
-    drop if strpos(doc_type, "Retracted")>0
+    keep if doc_type == "Article"
+*    keep if strpos(doc_type, "Article")>0
+   * drop if strpos(doc_type, "Retracted")>0
     qui keep if _merge == 3
     drop _merge
     if "`samp'" == "med" local samp_type "main"
@@ -64,27 +66,48 @@ program get_total_articles
     drop if journal_abbr == "annals"
     save ../temp/`samp'_counts, replace
     restore 
-    /*merge 1:m pmid using ../external/cleaned_samps/cleaned_all_fund_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
-    merge 1:m pmid using ../external/cleaned_samps/cleaned_all_dis_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
-    merge 1:m pmid using ../external/cleaned_samps/cleaned_all_thera_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
-    keep pmid year journal_abbr
-    save ../output/`samp'_unmatched, replace*/
+/*    if "`samp'"!= "med" {
+        merge 1:m pmid using ../external/cleaned_samps/cleaned_all_fund_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
+        merge 1:m pmid using ../external/cleaned_samps/cleaned_all_dis_`samp', assert(1 3) keep(1) nogen keepusing(pmid)
+        merge 1:m pmid using ../external/thera/contracted_pmids_thera, assert(1 2 3) keep(1) nogen keepusing(pmid)
+        keep pmid year journal_abbr
+        save ../output/`samp'_unmatched, replace
+    }*/
+    if "`samp'" == "med" {
+        preserve
+        merge 1:m pmid using ../external/cleaned_samps/cleaned_all_clin_med, assert(1 2 3) keep(1) nogen keepusing(pmid)
+        save ../output/`samp'_unmatched, replace
+        restore
+        merge 1:m pmid using ../external/`samp_type'_filtered/pmids_category_xwalk, assert(1 2 3) keepusing(pmid cat)
+        drop if _merge == 2
+        drop if _merge == 3 & !inlist(cat, "fundamental", "diseases")
+        drop _merge
+        merge 1:m pmid using ../external/thera/contracted_pmids_thera, assert(1 2 3) keepusing(pmid)
+        keep if _merge == 3 | !mi(cat) 
+        save ../temp/cleaned_all_newfund_med, replace
+    }
 end
 program top_jrnls
     syntax, data(str) samp(str) 
-    use ../external/cleaned_samps/cleaned_all_`data'_`samp', clear
+    if "`data'" == "newfund" & "`samp'" == "med" {
+        use ../temp/cleaned_all_`data'_`samp', clear
+        bys pmid: gen pmid_counter = _n == 1
+    }
+    else {
+        use ../external/cleaned_samps/cleaned_all_`data'_`samp', clear
+    }
     preserve
     gcollapse (sum) pmid_counter, by(journal_abbr year)
     qui merge 1:1 journal_abbr year using ../temp/`samp'_counts, assert(1 2 3) keep(2 3) nogen
-    gen percent_of_tot = pmid_counter/num_articles
-    gcollapse (mean) avg_articles = pmid_counter avg_perc = percent_of_tot num_articles, by(journal_abbr)
+    *gen percent_of_tot = pmid_counter/num_articles
+    gcollapse (sum) num_fund = pmid_counter tot_articles = num_articles, by(journal_abbr)
+    gen percent_of_tot = num_fund/tot_articles * 100
     gen order = 0
     replace order = 1 if inlist(journal_abbr, "science","nature","cell")
-    qui hashsort -order -num_articles
-    qui replace avg_perc = avg_perc * 100
+    qui hashsort -order -tot_articles
     li 
-    mkmat num_articles,  mat(top_jrnls_`samp'_N)
-    mkmat avg_perc ,  mat(top_jrnls_`data'_`samp')
+    mkmat num_fund,  mat(top_jrnls_`samp'_N)
+    mkmat percent_of_tot,  mat(top_jrnls_`data'_`samp')
     mat top_jrnls_`samp' = nullmat(top_jrnls_`samp'), top_jrnls_`data'_`samp'
     restore
 end 
