@@ -39,10 +39,6 @@ program athr_loc
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/cleaned_samps/cleaned_last5yrs_`data'_`samp', clear
     drop if journal_abbr == "PLoS One"
-    gen msa_world = substr(msatitle, 1, strpos(msatitle, ",")) + " US" 
-    replace msa_world = city_full if country != "United States"
-    gen msa_c_world = substr(msa_comb, 1, strpos(msa_comb, ",")) + " US"
-    replace msa_c_world = city_full if country != "United States"
     foreach loc in country msa_c_world inst { 
         qui gunique pmid //which_athr //if !mi(affiliation)
         local articles = r(unique)

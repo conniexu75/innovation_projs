@@ -16,7 +16,7 @@ program main
     global msatitle_name "MSAs"
     global msa_comb_name "MSAs"
     global msa_world_name "metropolitan areas"
-    global msa_comb_world_name "metropolitan areas"
+    global msa_c_world_name "metropolitan areas"
     foreach samp in cns {
         di "OUTPUT START"
         local samp_type = cond("`samp'" == "cns", "main", "robust")
@@ -37,11 +37,7 @@ program athr_loc
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/cleaned_samps/cleaned_last5yrs_`data'_`samp', clear
-    gen msa_world = msatitle 
-    replace msa_world = city if country != "United States"
-    gen msa_comb_world = msa_comb
-    replace msa_comb_world = city if country != "United States"
-    foreach loc in country msa_comb_world inst {
+    foreach loc in country msa_c_world inst {
         qui gunique pmid 
         local articles = r(unique)
         qui sum `wt_var'
@@ -67,7 +63,7 @@ program athr_loc
         mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , (top_`loc'_`samp'`suf')
         qui levelsof `loc' in 1/2
         global top2_`loc'_`data' "`r(levels)'"
-        if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "msaworld", "msa_comb_world") {
+        if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "msaworld", "msa_c_world") {
             qui levelsof `loc' in 1/`rank_end'
             global `loc'_`data' "`r(levels)'"
         }
@@ -139,11 +135,9 @@ program trends
 
     gen msa_world = msatitle
     replace msa_world = city if country != "United States"
-    gen msa_comb_world = msa_comb
-    replace msa_comb_world = city if country != "United States"
     qui bys pmid year: gen counter = _n == 1
     qui bys year: egen tot_in_yr = total(counter)
-    foreach loc in country  msa_comb_world inst {
+    foreach loc in country  msa_c_world inst {
         preserve
         replace `loc' = "harvard university" if `loc' == "university harvard"
         replace `loc' = "stanford university" if `loc' == "university stanford"
@@ -172,7 +166,7 @@ program trends
         qui replace tot = round(tot)
         assert tot==100
         qui drop tot
-        if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "msa_world" |  "`loc'" == "msa_comb_world" | "`loc'" == "msa_comb" {
+        if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "msa_world" |  "`loc'" == "msa_c_world" | "`loc'" == "msa_comb" {
             label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places"
         }
         if "`loc'" == "inst" {
@@ -240,7 +234,7 @@ program trends
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
         }
         local w = 32 
-        if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_comb_world" | "`loc'" == "msa_comb") local w = 32
+        if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_c_world" | "`loc'" == "msa_comb") local w = 32
         if "`loc'" != "country" {
             graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2022, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
@@ -309,7 +303,7 @@ end
 
 program output_tables
     syntax, data(str) samp(str)
-    foreach file in top_country top_msa_comb_world top_inst top_gen_mesh { 
+    foreach file in top_country top_msa_c_world top_inst top_gen_mesh { 
         qui matrix_to_txt, saving("../output/tables/`file'_`data'_`samp'.txt") matrix(`file'_`data'_`samp') ///
            title(<tab:`file'_`data'_`samp'>) format(%20.4f) replace
          }

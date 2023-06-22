@@ -43,11 +43,6 @@ program athr_loc
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/cleaned_samps/cleaned_last5yrs_`data'_`samp', clear
-    gen msa_world = substr(msatitle, 1, strpos(msatitle, ",")) + " US"
-    replace msa_world = city_full if country != "United States"
-
-    gen msa_c_world = substr(msa_comb, 1, strpos(msa_comb, ",")) + " US"
-    replace msa_c_world = city_full if country != "United States"
     foreach loc in country msa_c_world inst {
         qui gunique pmid //which_athr //if !mi(affiliation)
         replace `loc' = "harvard university" if "`loc'" == "university harvard"
@@ -98,11 +93,6 @@ program trends
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/cleaned_samps/cleaned_all_`data'_`samp', clear
-    gen msa_world = substr(msatitle, 1, strpos(msatitle, ",")) + " US"
-    replace msa_world = city_full if country != "United States"
-
-    gen msa_c_world = substr(msa_comb, 1, strpos(msa_comb, ",")) + " US"
-    replace msa_c_world = city_full if country != "United States"
     qui bys pmid year: gen counter = _n == 1
     qui bys year: egen tot_in_yr = total(counter)
     foreach loc in country msa_c_world inst {
@@ -200,11 +190,6 @@ program comp_w_fund
                 use ../external/cleaned_samps/cleaned_last5yrs_newfund_`samp', clear
                 gen type = "fund"
                 append using ../external/cleaned_samps/cleaned_last5yrs_`trans'_med
-                gen msa_world = substr(msatitle, 1, strpos(msatitle, ",")) + " US"
-                replace msa_world = city_full if country != "United States"
-
-                gen msa_c_world = substr(msa_comb, 1, strpos(msa_comb, ",")) + " US"
-                replace msa_c_world = city_full if country != "United States"
                 replace type = "trans" if mi(type)
                 gen to_keep = 0
                 foreach i of global top_20 {
