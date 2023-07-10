@@ -11,11 +11,12 @@ program main
     global pubmed_name "PubMed"
     global acs_name "ACS Life Science"
     global bio_name "ACS Bio/Medicine"
+    cluster_desc
     output_tables
 end
 
 program cluster_desc
-    use ../external/pubmed/athr_panel, clear
+    use ../external/pubmed/athr_panel_full, clear
     rename (cluster_shr cite_affl_wt msa_comb) (pubmed_cluster article_cnt msatitle)
 /*    merge m:1 msatitle year using ../external/acs/acs_clusters, assert(1 2 3) keep(1 3) nogen 
     rename cluster_shr acs_cluster
