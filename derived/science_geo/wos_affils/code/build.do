@@ -1,4 +1,4 @@
-set more off
+ set more off
 clear all
 capture log close
 program drop _all
@@ -10,22 +10,25 @@ set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/wos_affils"
 
 program main
-    foreach samp in med cns thera scisub demsci {
+    foreach samp in  demsci // {med cns thera scisub { //demsci {
         create_xwalks, samp(`samp')
-        clean_affil, samp(`samp')
+ *       get_orcid, samp(`samp')
+*        clean_affil, samp(`samp')
 *       combine_insts, samp(`samp') 
     }
     clear
-    foreach samp in med cns thera scisub demsci {
-        append using ${temp}/`samp'_insts
-    }
-    gcollapse (sum) _freq, by(institution)
+ /*   foreach samp in med cns thera scisub { //demsci {
+        append using ../output/linked_orcid_`samp'
+        }
+        save ../output/linked_orcid_all_jrnls*/
+/*    gcollapse (sum) _freq, by(institution)
     drop if mi(institution)
-    save ${temp}/all_insts, replace
+    save ${temp}/all_insts, replace*/
 end
+
 program create_xwalks
     syntax, samp(str)
-    use ../external/samp/`samp'_appended, clear
+    use  ../external/samp/`samp'_appended, clear
     keep if doc_type == "Article"
     rename author raw_author
     gen author = raw_author
@@ -35,14 +38,56 @@ program create_xwalks
     keep author* pmid
     greshape long author, i(pmid) j(which_athr) 
     drop if mi(author)
+    gduplicates drop pmid author, force
+    bys pmid (which_athr): replace which_athr = _n 
     split author, p(", ")
     drop author3
     replace author1 = strtrim(author1)
     replace author2 = strtrim(author2)
     rename (author1 author2) (last_name first_name)
+    replace last_name = strproper(last_name) 
+    replace first_name = strproper(first_name) 
+    gduplicates tag pmid last_name, gen(mult_last_name)
     save ${temp}/author_names_`samp', replace
-
+    
+    // get orcid
     use ../external/samp/`samp'_appended, clear
+    keep if doc_type == "Article"
+    drop if mi(orcid)
+    keep pmid orcid
+    split orcid, p("; ")
+    drop orcid
+    sreshape long orcid, i (pmid) j(which_athr) missing(drop)
+    split orcid, p("/")
+    drop orcid 
+    rename (orcid1 orcid2) (name orcid)
+    split name, p(", ")
+    rename name1 last_name
+    rename name2 list_first_name
+    drop which_athr
+    gduplicates drop pmid name, force
+    save ${temp}/orcid_`samp', replace
+    
+    // get researcherid
+    use ../external/samp/`samp'_appended, clear
+    keep if doc_type == "Article"
+    drop if mi(researcher_id)
+    keep pmid researcher_id 
+    split researcher_id, p("; ")
+    drop researcher_id
+    sreshape long researcher_id, i (pmid) j(which_athr) missing(drop)
+    split researcher_id, p("/")
+    drop researcher_id 
+    rename (researcher_id1 researcher_id2) (name researcher_id)
+    split name, p(", ")
+    rename name1 last_name
+    rename name2 list_first_name
+    drop which_athr
+    gduplicates drop pmid name, force
+    save ${temp}/researcher_id_`samp', replace
+
+
+/*    use if inrange(pub_year, 2013, 2015) using ../external/samp/`samp'_appended, clear
     keep if doc_type == "Article"
     rename affil raw_affil 
     gen affil = raw_affil
@@ -61,9 +106,29 @@ program create_xwalks
     rename affiliation group_affiliation 
     sreshape long affiliation, i(pmid which_affil_grp authors*) j(which_affil) missing(drop)
     replace affiliation = strtrim(affiliation)
-    save ${temp}/author_affiliations_`samp', replace 
+    save ${temp}/author_affiliations_`samp', replace */
 end     
 
+program get_orcid
+    syntax, samp(str)
+    use ${temp}/author_names_`samp',clear
+    joinby pmid last_name using ${temp}/orcid_`samp', unmatched(master)
+    keep if mult_last_name == 0 | (mult_last_name > 0 & substr(list_first_name, 1,1) == substr(first_name, 1,1))
+    gduplicates tag pmid last_name, gen(still_mult)
+    drop if still_mult > 0 & substr(list_first_name, strpos(list_first_name, " ")+1,1) == strupper(substr(first_name, 2,1)) & strpos(list_first_name, " ") > 0
+*    gduplicates drop pmid last_name orcid, force
+    keep pmid which_athr author last_name first_name name orcid list_first_name
+    replace last_name = strlower(last_name)
+    gunique pmid author
+    local tot = r(N)
+    gunique pmid author if !mi(orcid)
+    di "% we have orcid = " r(N)/`tot'*100
+    keep if !mi(orcid)
+    count
+    save ../output/linked_orcid_`samp', replace
+    
+
+end
 program clean_affil
     syntax, samp(str)
     qui {
