@@ -1,0 +1,105 @@
+--------------------------------------------------------------------------------
+Makelog started: 2023-07-19 18:03:38
+Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_openalex/code
+--------------------------------------------------------------------------------
+External links successfully created!
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core, expiring 17 Nov 2023
+Serial number: 501709306977
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_openalex
+> /code/build.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_openalex/code/
+
+. set maxvar 120000
+
+
+. global temp "/export/scratch/cxu_sci_geo/openalex"
+
+. 
+. program main
+  1.     append_pmids
+  2.     get_doi
+  3. end
+
+. program append_pmids
+  1.     clear
+  2.     foreach samp in cns scisub demsci {
+  3.         append using ../external/pmids/list_of_pmids_newfund_`samp'
+  4.     }
+  5.     save ../output/list_of_pmids_newfund_jrnls, replace 
+  6. end
+
+. 
+. program get_doi
+  1.     clear
+  2.     foreach samp in cns scisub demsci {
+  3.         append using ../external/wos/`samp'_appended
+  4.     }
+  5.     merge 1:1 pmid using ../output/list_of_pmids_newfund_jrnls, assert(1 3
+> ) keep(3) nogen
+  6.     keep pmid doi
+  7.     save ../output/list_of_doi_newfund_jrnls, replace
+  8. end
+
+. main
+(file ../output/list_of_pmids_newfund_jrnls.dta not found)
+file ../output/list_of_pmids_newfund_jrnls.dta saved
+(variable doc_type was str49, now str50 to accommodate using data's values)
+(variable pmid was long, now double to accommodate using data's values)
+(variable journal_abbr was str7, now str14 to accommodate using data's
+       values)
+(variable doc_type was str50, now strL to accommodate using data's values)
+(variable pub_mnth was str7, now str38 to accommodate using data's values)
+(variable doi was str52, now strL to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           363,735  
+    -----------------------------------------
+(file ../output/list_of_doi_newfund_jrnls.dta not found)
+file ../output/list_of_doi_newfund_jrnls.dta saved
+
+. 
+end of do-file
+
+--------------------------------------------------------------------------------
+Makelog ended: 2023-07-19 18:04:16
+Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_openalex/code
+--------------------------------------------------------------------------------
