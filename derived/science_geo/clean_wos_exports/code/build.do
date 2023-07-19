@@ -22,6 +22,7 @@ program main
     foreach j in scijrnls natsub {
         append using  ../output/`j'_appended
     }
+    merge 1:1 pmid using ../external/robust_jrnls/scisub_all_pmids,  assert(1 2 3) keep (3) nogen
     save ../output/scisub_appended, replace
     clear 
     foreach j in cns med {
@@ -32,6 +33,7 @@ program main
 
     use ../output/demsci_appended, clear
     merge 1:1 pmid using ../external/robust_jrnls/demsci_all_pmids, assert(1 2 3) keep(3) nogen
+    save ../output/demsci_appended, replace
     drop if journal_abbr == "plos"
     save ../output/noplos_appended, replace
     drop if journal_abbr == "jbc"
@@ -45,10 +47,13 @@ program append_wos
         local counter = 1
         foreach file of local filelist`i' {
             import delimited "../external/wos/`samp'`i'/`file'",  clear delim("\t") varn(1) 
-            keep pm tc fu fx pd py dt ti id af c1
-            rename (pm tc fu fx pd py dt ti id af c1) (pmid cite_count funding_agency funding_txt pub_mnth pub_year doc_type title keywords author affil)
+            keep pm tc fu fx pd py dt ti id af c1 ri oi di 
+            rename (pm tc fu fx pd py dt ti id af c1 ri oi di) (pmid cite_count funding_agency funding_txt pub_mnth pub_year doc_type title keywords author affil researcher_id orcid doi)
             tostring pmid, replace
+            tostring doi, replace force
             tostring keywords, replace
+            tostring researcher_id , replace
+            tostring orcid , replace
             drop if inlist(pmid, "NA","")
             drop if substr(pmid,1,3) == "WOS"
             destring pmid, replace force
