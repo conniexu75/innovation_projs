@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-07-19 18:03:38
+Makelog started: 2023-07-19 18:22:48
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_openalex/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -100,6 +100,6 @@ file ../output/list_of_doi_newfund_jrnls.dta saved
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-07-19 18:04:16
+Makelog ended: 2023-07-19 18:23:28
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_openalex/code
 --------------------------------------------------------------------------------
