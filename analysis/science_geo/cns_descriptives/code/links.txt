@@ -9,4 +9,5 @@
 ./cleaned_samps/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_analysis_samps/output
 ./clinical_split/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_clinical_metadata/output
 ./clinical_filtered/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/create_clinical/output
+./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/analyze_openalex/output
 ./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output
