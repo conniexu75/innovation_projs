@@ -1,0 +1,6 @@
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
+./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_openalex/output/
+./pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_analysis_samps/output/
+./jrnls/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/output/
+./robust_jrnls/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/append_pmids/output/
+./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output/
