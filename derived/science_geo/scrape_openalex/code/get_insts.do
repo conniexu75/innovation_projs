@@ -18,10 +18,31 @@ program append_files
     foreach file in `filelist' {
         append using ../output/`file'
     }
+    destring pmid, replace
     gduplicates drop  pmid which_athr which_affl inst_id , force
     gduplicates drop  pmid which_athr inst_id , force
-    destring pmid, replace
-    bys pmid which_athr (which_affl): replace which_affl = _n
+    gduplicates tag pmid which_athr which_affl, gen(dup)
+    drop if dup == 1 & mi(inst)
+    drop dup 
+    gsort pmid athr_id which_athr
+    gduplicates drop pmid athr_id inst_id, force
+    bys pmid athr_id which_athr : gen which_athr_counter = _n == 1
+    bys pmid athr_id: egen num_which_athr = sum(which_athr_counter)
+    gen mi_inst = mi(inst)
+    bys pmid athr_id: egen has_nonmi_inst = min(mi_inst)  
+    replace has_nonmi_inst = has_nonmi_inst == 0
+    drop if mi(inst) & num_which_athr > 1 & has_nonmi_inst
+    drop which_athr_counter num_which_athr
+    bys pmid athr_id which_athr : gen which_athr_counter = _n == 1
+    bys pmid athr_id: egen num_which_athr = sum(which_athr_counter)
+    bys pmid athr_id: egen min_which_athr = min(which_athr)
+    replace which_athr = min_which_athr if num_which_athr > 1
+    gduplicates drop pmid which_athr inst_id, force
+    bys pmid which_athr: gen author_id = _n == 1
+    bys pmid: gen which_athr2 = sum(author_id)
+    replace which_athr = which_athr2
+    drop which_athr2
+    bys pmid which_athr (which_affl) : replace which_affl = _n 
     gisid pmid which_athr which_affl
     save ../output/openalex_merged, replace
 

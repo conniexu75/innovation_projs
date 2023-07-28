@@ -16,7 +16,7 @@ insts <- read_dta('../output/list_of_insts.dta')
 nr <- nrow(insts)
 split_insts <- split(insts, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 num_file <- length(split_insts)
-for (q in 1:num_file) {
+for (q in 5:num_file) {
   insts <- oa_fetch(
     entity = "institutions",
     mailto = "xuconni@gmail.com",
