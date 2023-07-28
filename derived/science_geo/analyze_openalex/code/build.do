@@ -71,17 +71,15 @@ program merge_files
     replace  msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
     gen msa_c_world = msa_comb
     replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")-1) + ", US" if country == "United States" & !mi(msa_c_world)
-    replace msa_c_world = city + ", " + country_code if country_code != "US"
+    replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)
 
     //  we don't want to count broad and HHMI if they are affiliated with other institutions.
-    cap drop athr_id
-    bys pmid (which_athr): replace which_athr = _n
-    bys pmid which_athr: gen athr_id = _n == 1
-    bys pmid (which_athr): gen which_athr2 = sum(athr_id)
-    cap drop which_athr athr_id
-    rename which_athr2 which_athr
+    cap drop author_id which_athr_counter num_which_athr min_which_athr which_athr2 
+    bys pmid athr_id (which_athr which_affl): gen author_id = _n ==1
+    bys pmid (which_athr which_affl): gen which_athr2 = sum(author_id)
+    replace which_athr = which_athr2
+    drop which_athr2
     bys pmid which_athr: gen num_affls = _N
-    bys pmid which_athr: gen author_counter = _n == 1
     gen broad_affl = inst == "Broad Institute"
     gen hhmi_affl = inst == "Howard Hughes Medical Institute"
     gen only_broad = num_affls == 1 & broad_affl == 1
@@ -90,14 +88,13 @@ program merge_files
     drop if inst == "Broad Institute" & only_broad == 0
     drop if num_affls > 1 & hhmi_affl == 1 & mi(inst)
     bys pmid which_athr: egen has_hhmi_affl = max(hhmi_affl)
+    drop if num_affls > 1 & hhmi_affl == 1 
     qui hashsort pmid which_athr which_affl
-    cap drop which_athr athr_id
-    bys pmid which_athr: gen athr_id = _n == 1
-    bys pmid (which_athr): gen which_athr2 = sum(athr_id)
-    drop which_athr athr_id
-    rename which_athr2 which_athr
-
-    bys pmid (which_athr): replace which_athr = _n
+    cap drop author_id
+    bys pmid athr_id (which_athr which_affl): gen author_id = _n ==1
+    bys pmid (which_athr which_affl): gen which_athr2 = sum(author_id)
+    replace which_athr = which_athr2
+    drop which_athr2
     bys pmid which_athr: replace num_affls = _N
     bys pmid: egen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs
