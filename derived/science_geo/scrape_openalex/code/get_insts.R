@@ -16,7 +16,7 @@ insts <- read_dta('../output/list_of_insts.dta')
 nr <- nrow(insts)
 split_insts <- split(insts, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 num_file <- length(split_insts)
-for (q in 5:num_file) {
+for (q in 4:4) {
   insts <- oa_fetch(
     entity = "institutions",
     mailto = "xuconni@gmail.com",
@@ -29,9 +29,6 @@ for (q in 5:num_file) {
   inst_geo <- lapply(1:N_insts, function(i) {
     if (length(insts[[i]][["id"]])!=0) {
       inst_id <- insts[[i]][["id"]] %>% data.frame
-    }
-    else {
-      inst_id <- c("")%>% data.frame
     }
     if (length(insts[[i]][["display_name"]])!=0) {
       inst <-  insts[[i]][["display_name"]] %>% data.frame
