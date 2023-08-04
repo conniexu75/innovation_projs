@@ -11,6 +11,7 @@ global temp "/export/scratch/cxu_sci_geo/analyze_openalex"
 
 program main
     merge_files
+    clean_mesh
     split_sample
 end
 program merge_files 
@@ -36,13 +37,24 @@ program merge_files
     save ${temp}/wos_appended, replace
 
     clear
-    forval i = 1/6 {
+    forval i = 1/7 {
         append using ../external/openalex/inst_geo_chars`i'
     }
+    bys inst_id: egen has_parent = max(associated_rel == "parent")
+    keep if has_parent == 0 | (has_parent == 1 & associated_rel == "parent")
+    ds associated* 
+    foreach var in `r(varlist)' {
+        replace `var' = "" if has_parent == 0
+    }
+    gduplicates drop inst_id associated, force
+    replace inst = associated if inlist(associated, "National Institutes of Health", "Chinese Academy of Sciences", "Institut des Sciences Biologiques", "Inserm", " Spanish National Research Council", "National Research Council", "Max Planck Society")  
+    replace inst = "Max Planck Society" if strpos(inst, "Max Planck")>0
+    replace associated = "" if !inlist(associated, "National Institutes of Health", "Chinese Academy of Sciences", "Institut des Sciences Biologiques", "Inserm", " Spanish National Research Council", "National Research Council", "Max Planck Society")
     gduplicates drop inst_id, force
-    replace inst_id= subinstr(inst_id,  "https://openalex.org/", "", .)
+    drop if mi(inst_id)
+    rename inst new_inst
+    cap drop associated* has_parent which* 
     save ../output/all_inst_geo_chars, replace
-    
     foreach samp in newfund_jrnls clin_med {
         use ${temp}/openalex_`samp'_panel, clear
         merge m:1 pmid using ${temp}/wos_appended, assert(1 2 3) keep(1 3) nogen keepusing(cite_count pub_mnth pub_year)
@@ -52,8 +64,18 @@ program merge_files
         format pub_date %td
         drop date
         rename pub_date date
+       /* gunique pmid
+        local pmids = r(unique)
+        gduplicates drop pmid which_athr inst, force
+        joinby inst_id using ../output/all_inst_geo_chars, unmatched(master)
+        gunique pmid
+        assert r(unique) == `pmids'
+        hashsort pmid which_athr which_affl which_assoc
+        replace inst = associated if inlist(associated, "National Institutes of Health") 
+        replace inst_id = associated_id if !mi(associated_id)
+        bys pmid which_athr (which_affl which_assoc): replace which_affl = _n*/
         merge m:1 inst_id using ../output/all_inst_geo_chars, assert(1 2 3) keep(1 3) nogen 
-        replace inst = "NIH" if inlist(inst, "Eunice Kennedy Shriver National Institute of Child Health and Human Development", "National Cancer Institute", "National Eye Institute", "National Heart Lung and Blood Institute", "National Human Genome Research Institute", "National Institute on Aging", "National Institute on Alcohol Abuse and Alcoholism", "National Institute of Allergy and Infectious Diseases") | inlist(inst, "National Institute of Arthritis and Musculoskeletal and Skin Diseases", "National Institute of Biomedical Imaging and Bioengineering", "National Institute on Deafness and Other Communication Disorders", "National Institute of Dental and Craniofacial Research", "National Institute of Diabetes and Digestive and Kidney Diseases", "National Institute on Drug Abuse", "National Institute of Environmental Health Sciences") | inlist(inst, "National Institute of General Medical Sciences", "National Institute of Mental Health", "National Institute on Minority Health and Health Disparities", "National Institute of Neurological Disorders and Stroke", "National Institute of Nursing Research", "National Library of Medicine")> 0 
+        replace inst = new_inst if !mi(new_inst)
         save ${temp}/cleaned_all_`samp', replace
         
         import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
@@ -118,6 +140,11 @@ program merge_files
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         qui gen cite_affl_wt = affl_wt * cite_wt
         save ../output/cleaned_all_`samp', replace
+        preserve
+        gcontract id pmid
+        drop _freq
+        save ${temp}/pmid_id_xwalk_`samp', replace
+        restore
 
         keep if inrange(date, td(01jan2015), td(31mar2022)) & year >=2015
         drop cite_wt cite_affl_wt
@@ -131,6 +158,46 @@ program merge_files
         save ../output/cleaned_last5yrs_`samp', replace
     }
 
+end
+
+program clean_mesh
+    clear
+    forval i = 1/73 {
+        append using ../external/openalex/mesh_terms`i'
+    }
+    gduplicates drop id term, force
+    keep if is_major_topic == 1
+    gen gen_mesh = term if strpos(term, ",") == 0 & strpos(term, ";") == 0
+    replace gen_mesh = term if strpos(term, "Models")>0
+    replace gen_mesh = subinstr(gen_mesh, "&; ", "&",.)
+    gen rev_mesh = reverse(term)
+    replace rev_mesh = substr(rev_mesh, strpos(rev_mesh, ",")+1, strlen(rev_mesh)-strpos(rev_mesh, ","))
+    replace rev_mesh = reverse(rev_mesh)
+    replace gen_mesh = rev_mesh if mi(gen_mesh)
+    drop rev_mesh
+    contract id gen_mesh, nomiss
+    save ${temp}/contracted_gen_mesh_newfund_jrnls, replace
+    merge m:1 id using ${temp}/pmid_id_xwalk_newfund_jrnls, assert(1 2 3) keep(3) nogen 
+    save ../output/contracted_gen_mesh_newfund_jrnls, replace
+
+    clear
+    forval i = 1/7 {
+        append using ../external/openalex/mesh_terms_clin`i'
+    }
+    gduplicates drop id term, force
+    keep if is_major_topic == 1
+    gen gen_mesh = term if strpos(term, ",") == 0 & strpos(term, ";") == 0
+    replace gen_mesh = term if strpos(term, "Models")>0
+    replace gen_mesh = subinstr(gen_mesh, "&; ", "&",.)
+    gen rev_mesh = reverse(term)
+    replace rev_mesh = substr(rev_mesh, strpos(rev_mesh, ",")+1, strlen(rev_mesh)-strpos(rev_mesh, ","))
+    replace rev_mesh = reverse(rev_mesh)
+    replace gen_mesh = rev_mesh if mi(gen_mesh)
+    drop rev_mesh
+    contract pmid gen_mesh, nomiss
+    save ${temp}/contracted_gen_mesh_clin_med, replace
+    merge m:1 id using ${temp}/pmid_id_xwalk_clin_med, assert(1 2 3) keep(3) nogen 
+    save ../output/contracted_gen_mesh_clin_med, replace
 end
 program split_sample
     foreach samp in all last5yrs {
