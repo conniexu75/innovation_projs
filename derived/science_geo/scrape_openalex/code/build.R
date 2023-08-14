@@ -16,11 +16,11 @@ set.seed(8975)
 #nr <- nrow(pmid_file)
 #split_pmid <- split(pmid_file, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 #num_file <- length(split_pmid)
-#for (q in 29:30) {
+#for (q in 54:60) {
 #    ## pull open alex data from pmids
 #    works_from_pmids <- oa_fetch(
 #      entity = "works",
-#      mailto = "conniexu75@gmail.com",
+#      mailto = "conniexu0@gmail.com",
 #      ids.pmid  = split_pmid[[q]] %>%  mutate(pmid = as.character(pmid)) %>% pull(pmid),
 #      verbose = TRUE,
 #      output = "list"
@@ -236,31 +236,31 @@ set.seed(8975)
 #}
 
 # get total articles
-science = "S3880285" 
-nature = "S137773608" 
-cell = "S110447773" 
-onco = "S4306525036"
-jbc = "S140251998"
-neuron = "S45757444"
-nat_genet = "S137905309"
-faseb = "S25293849"
-nat_med = "S203256638"
-nat_biotech = "S106963461"
-nat_neuro = "S2298632"
-nat_cell_bio = "S151741590"
-nat_chem_bio = "S51309854"
-plos = "S202381698"
-cell_stem_cell = "S128124174"
-jrnls <- c(onco)
-for(j in jrnls) {
-  j_articles <- oa_fetch(
-      entity = "works",
-      primary_location.source.id = j,
-      type = "article",
-      type_crossref = "journal-article",
-      verbose = TRUE, 
-      output = "dataframe"
-      )
-   j_articles <- j_articles %>% select(id, display_name, publication_date, publication_year, so) 
-   write_dta(j_articles, paste0("../output/",j , "_all.dta"))
-}
+#science = "S3880285" 
+#nature = "S137773608" 
+#cell = "S110447773" 
+#onco = "S4306525036"
+#jbc = "S140251998"
+#neuron = "S45757444"
+#nat_genet = "S137905309"
+#faseb = "S25293849"
+#nat_med = "S203256638"
+#nat_biotech = "S106963461"
+#nat_neuro = "S2298632"
+#nat_cell_bio = "S151741590"
+#nat_chem_bio = "S51309854"
+#plos = "S202381698"
+#cell_stem_cell = "S128124174"
+#jrnls <- c(onco)
+#for(j in jrnls) {
+#  j_articles <- oa_fetch(
+#      entity = "works",
+#      primary_location.source.id = j,
+#      type = "article",
+#      type_crossref = "journal-article",
+#      verbose = TRUE, 
+#      output = "dataframe"
+#      )
+#   j_articles <- j_articles %>% select(id, display_name, publication_date, publication_year, so) 
+#   write_dta(j_articles, paste0("../output/",j , "_all.dta"))
+#}
