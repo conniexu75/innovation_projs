@@ -1,0 +1,2 @@
+./main/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_metadata/output
+./robust/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/prep_metadata/output

@@ -1,0 +1,4 @@
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
+./wos/ | /export/home/dor/cxu/innovation_projs/raw/wos_extracts/
+./jrnls/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/output/
+./robust_jrnls/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/append_pmids/output/
