@@ -47,9 +47,14 @@ program merge_files
         replace `var' = "" if has_parent == 0
     }
     gduplicates drop inst_id associated, force
-    replace inst = associated if inlist(associated, "National Institutes of Health", "Chinese Academy of Sciences", "Institut des Sciences Biologiques", "Inserm", " Spanish National Research Council", "National Research Council", "Max Planck Society")  
+    replace inst = associated if inlist(associated, "National Institutes of Health", "Chinese Academy of Sciences", "Institut des Sciences Biologiques", "Inserm", " Spanish National Research Council", "National Research Council", "Max Planck Society", "Institut de Chimie")  
+    replace inst = associated if inlist(associated, "National Research Institute for Agriculture, Food and Environment", "Indian Council of Agricultural Research", "Sorbonne University", "Leibniz Association", "Université Paris Cité", "National Hospital Organization")  
     replace inst = "Max Planck Society" if strpos(inst, "Max Planck")>0
-    replace associated = "" if !inlist(associated, "National Institutes of Health", "Chinese Academy of Sciences", "Institut des Sciences Biologiques", "Inserm", " Spanish National Research Council", "National Research Council", "Max Planck Society")
+    replace inst = "Stanford University" if inlist(inst, "Stanford Medicine", "Stanford Health Care")
+    replace inst = subinstr(inst, " Health System", "", .) if strpos(inst, " Health System")>0 & (strpos(inst, "University")>0 | strpos(inst, "UC")>0)
+    replace inst = subinstr(inst, " Medical System", "", .) if strpos(inst, " Medical System")>0 & (strpos(inst, "University")>0 | strpos(inst, "UC")>0)
+    replace associated = "" if !inlist(associated, "National Institutes of Health", "Chinese Academy of Sciences", "Institut des Sciences Biologiques", "Inserm", " Spanish National Research Council", "National Research Council", "Max Planck Society", "Institut de Chimie")
+    replace associated = "" if !inlist(associated, "National Research Institute for Agriculture, Food and Environment", "Indian Council of Agricultural Research", "Sorbonne University", "Leibniz Association", "Université Paris Cité", "National Hospital Organization")  
     gduplicates drop inst_id, force
     drop if mi(inst_id)
     rename inst new_inst
@@ -113,6 +118,7 @@ program merge_files
         bys pmid which_athr: gen num_affls = _N
         gen broad_affl = inst == "Broad Institute"
         gen hhmi_affl = inst == "Howard Hughes Medical Institute"
+        gen funder = (strpos(inst, "Trust")> 0 | strpos(inst, "Foundation")>0 | strpos(inst, "Fund")>0) & !inlist(type, "education", "facility", "healthcare")
         gen only_broad = num_affls == 1 & broad_affl == 1
         bys pmid which_athr: egen has_broad_affl = max(broad_affl)
         replace has_broad_affl = 0 if only_broad == 1
@@ -120,6 +126,7 @@ program merge_files
         drop if num_affls > 1 & hhmi_affl == 1 & mi(inst)
         bys pmid which_athr: egen has_hhmi_affl = max(hhmi_affl)
         drop if num_affls > 1 & hhmi_affl == 1 
+        drop if num_affls > 1 & funder == 1
         qui hashsort pmid which_athr which_affl
         cap drop author_id
         bys pmid athr_id (which_athr which_affl): gen author_id = _n ==1
@@ -178,10 +185,11 @@ program clean_mesh
     contract id gen_mesh, nomiss
     save ${temp}/contracted_gen_mesh_newfund_jrnls, replace
     merge m:1 id using ${temp}/pmid_id_xwalk_newfund_jrnls, assert(1 2 3) keep(3) nogen 
+    cap drop _freq
     save ../output/contracted_gen_mesh_newfund_jrnls, replace
 
     clear
-    forval i = 1/7 {
+    forval i = 1/5 {
         append using ../external/openalex/mesh_terms_clin`i'
     }
     gduplicates drop id term, force
@@ -194,9 +202,10 @@ program clean_mesh
     replace rev_mesh = reverse(rev_mesh)
     replace gen_mesh = rev_mesh if mi(gen_mesh)
     drop rev_mesh
-    contract pmid gen_mesh, nomiss
+    contract id gen_mesh, nomiss
     save ${temp}/contracted_gen_mesh_clin_med, replace
     merge m:1 id using ${temp}/pmid_id_xwalk_clin_med, assert(1 2 3) keep(3) nogen 
+    cap drop _freq
     save ../output/contracted_gen_mesh_clin_med, replace
 end
 program split_sample
@@ -220,7 +229,7 @@ program split_sample
 
         preserve
         use ../output/cleaned_`samp'_newfund_jrnls, clear
-        keep if inlist(journal_abbr, "cell_stem_cell", "nat_biotech", "nat_cell_bio", "nat_genet", "nat_med", "nat_med", "nat_neuro", "neuron")
+        keep if inlist(journal_abbr, "cell_stem_cell", "nat_biotech", "nat_cell_bio", "nat_genet", "nat_med", "nat_med", "nat_neuro", "neuron", "nat_chem_bio")
         drop cite_wt cite_affl_wt
         qui sum avg_cite_yr
         gen cite_wt = avg_cite_yr/r(sum)
@@ -257,6 +266,14 @@ program split_sample
         gcontract pmid
         drop _freq
         save ../output/list_of_pmids_`samp'_clin_med,  replace
+        restore
+    } 
+    // split mesh terms
+    use ../output/contracted_gen_mesh_newfund_jrnls, clear
+    foreach samp in cns scisub demsci {
+        preserve
+        merge m:1 pmid using ../output/list_of_pmids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
+        save ../output/contracted_gen_mesh_newfund_`samp', replace
         restore
     }
 end
