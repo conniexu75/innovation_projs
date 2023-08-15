@@ -1,0 +1,7 @@
+./xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_metadata/output
+./jrnls/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/output
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_metadata/output
+./thera/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fix_thera_def/clean_metadata/output
+./thera_xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fix_thera_def/append_pmids/output
+./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output
+./inst_xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/fill_mi_insts/output

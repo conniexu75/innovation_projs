@@ -1,0 +1,3 @@
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_metadata/output/metadata
+./med/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/output
+./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output

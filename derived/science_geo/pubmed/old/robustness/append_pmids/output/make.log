@@ -1,0 +1,26 @@
+--------------------------------------------------------------------------------
+Makelog started: 2023-08-15 13:52:55
+Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/old/robustness/append_pmids/code
+--------------------------------------------------------------------------------
+*********************************************************************************
+* An error was encountered with `link_externals`. Traceback can be found below. *
+*********************************************************************************
+
+Traceback (most recent call last):
+  File "/export/home/dor/cxu/.local/lib/python3.9/site-packages/gslab_make/move_sources.py", line 351, in link_externals
+    source_map = _create_links(paths, file_list)
+  File "/export/home/dor/cxu/.local/lib/python3.9/site-packages/gslab_make/move_sources.py", line 53, in _create_links
+    move_list = MoveList(file_list, move_dir, paths)
+  File "/export/home/dor/cxu/.local/lib/python3.9/site-packages/gslab_make/private/movedirective.py", line 328, in __init__
+    self.get_move_directive_list()
+  File "/export/home/dor/cxu/.local/lib/python3.9/site-packages/gslab_make/private/movedirective.py", line 379, in get_move_directive_list
+    self.move_directive_list = [MoveDirective(file, raw_line, line, self.move_dir) for (file, raw_line, line) in lines]
+  File "/export/home/dor/cxu/.local/lib/python3.9/site-packages/gslab_make/private/movedirective.py", line 379, in <listcomp>
+    self.move_directive_list = [MoveDirective(file, raw_line, line, self.move_dir) for (file, raw_line, line) in lines]
+  File "/export/home/dor/cxu/.local/lib/python3.9/site-packages/gslab_make/private/movedirective.py", line 68, in __init__
+    self.check_paths()
+  File "/export/home/dor/cxu/.local/lib/python3.9/site-packages/gslab_make/private/movedirective.py", line 119, in check_paths
+    raise CritError(messages.crit_error_no_path % self.source)
+gslab_make.private.exceptionclasses.CritError: 
+ERROR! Path `/export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/create_jrnl_samps/output` cannot be found.
+
