@@ -9,7 +9,7 @@ from gslab_make.write_logs import *
 #****************************************************
 # MAKE.PY STARTS
 clear_dir(['../output/', '../temp/', '../output_local/'])
-os.mkdir('../output/BTC/')
+#os.mkdir('../output/BTC/')
 remove_dir(['../external/'])
 paths = {'makelog' : '../output/make.log', 'external_dir' : '../external/'}
 start_makelog(paths)
