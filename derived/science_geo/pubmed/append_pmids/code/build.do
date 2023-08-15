@@ -51,6 +51,13 @@ program append_indicies
     gen fund = cat == "fundamental"
     bys pmid: egen tot_fund = max(fund)
     drop if dup > 0 & tot_fund == 1 & fund != 1
+    
+    drop dup 
+    duplicates tag pmid cat, gen(dup)
+    gen dis = cat == "diseases"
+    bys pmid: egen tot_dis = max(dis)
+    drop if dup > 0 & tot_dis == 1 &  dis != 1
+    gduplicates drop 
 	gisid pmid
 	replace pmid = pmid/10000 if inlist(cat, "fundamental", "diseases", "therapeutics")
     drop dup fund tot_fund
