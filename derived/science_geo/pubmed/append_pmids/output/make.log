@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-08-14 22:24:24
+Makelog started: 2023-08-15 13:59:40
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/append_pmids/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -56,7 +56,7 @@ Notes:
 . 
 . program append_indicies
   1.     foreach samp in fundamental therapeutics diseases {
-  2.         forval y = 1998/2022 {
+  2.         forval y = 1988/2022 {
   3.             import delimited using "../external/samp/`samp'_`y'", clear varn(1)
   4.             tostring pmid, replace
   5.             tostring query_name, replace
@@ -93,11 +93,18 @@ Notes:
  34.     gen fund = cat == "fundamental"
  35.     bys pmid: egen tot_fund = max(fund)
  36.     drop if dup > 0 & tot_fund == 1 & fund != 1
- 37.         gisid pmid
- 38.         replace pmid = pmid/10000 if inlist(cat, "fundamental", "diseases", "therapeutics")
- 39.     drop dup fund tot_fund
- 40.         save "../output/newfund_pmids.dta", replace
- 41. end
+ 37.     
+.     drop dup fund tot_fund
+ 38.     gduplicates drop 
+ 39.     duplicates tag pmid, gen(dup)
+ 40.     gen dis = cat == "diseases"
+ 41.     bys pmid: egen tot_dis = max(dis)
+ 42.     drop if dup > 0 & tot_dis == 1 &  dis != 1
+ 43.         gisid pmid
+ 44.         replace pmid = pmid/10000 if inlist(cat, "fundamental", "diseases", "therapeutics")
+ 45.     drop dup dis tot_dis 
+ 46.         save "../output/newfund_pmids.dta", replace
+ 47. end
 
 . 
 . program append_jrnls 
@@ -138,6 +145,176 @@ Notes:
  34. end
 
 . main
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,397 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1988.dta not found)
+file ../temp/fundamental_1988.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1988.dta not found)
+file ../temp/plos_fundamental_1988.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 4,870 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1989.dta not found)
+file ../temp/fundamental_1989.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1989.dta not found)
+file ../temp/plos_fundamental_1989.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,105 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1990.dta not found)
+file ../temp/fundamental_1990.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1990.dta not found)
+file ../temp/plos_fundamental_1990.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,325 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1991.dta not found)
+file ../temp/fundamental_1991.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1991.dta not found)
+file ../temp/plos_fundamental_1991.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,617 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1992.dta not found)
+file ../temp/fundamental_1992.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1992.dta not found)
+file ../temp/plos_fundamental_1992.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 5,795 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1993.dta not found)
+file ../temp/fundamental_1993.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1993.dta not found)
+file ../temp/plos_fundamental_1993.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 6,794 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1994.dta not found)
+file ../temp/fundamental_1994.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1994.dta not found)
+file ../temp/plos_fundamental_1994.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 6,840 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1995.dta not found)
+file ../temp/fundamental_1995.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1995.dta not found)
+file ../temp/plos_fundamental_1995.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 7,161 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1996.dta not found)
+file ../temp/fundamental_1996.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1996.dta not found)
+file ../temp/plos_fundamental_1996.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 6,913 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/fundamental_1997.dta not found)
+file ../temp/fundamental_1997.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_fundamental_1997.dta not found)
+file ../temp/plos_fundamental_1997.dta saved
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 7,186 obs)
 pmid was long now str8
@@ -547,7 +724,177 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_fundamental_2022.dta not found)
 file ../temp/plos_fundamental_2022.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 100 obs)
+(2 vars, 201 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1988.dta not found)
+file ../temp/therapeutics_1988.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1988.dta not found)
+file ../temp/plos_therapeutics_1988.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 199 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1989.dta not found)
+file ../temp/therapeutics_1989.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1989.dta not found)
+file ../temp/plos_therapeutics_1989.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 221 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1990.dta not found)
+file ../temp/therapeutics_1990.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1990.dta not found)
+file ../temp/plos_therapeutics_1990.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 213 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1991.dta not found)
+file ../temp/therapeutics_1991.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1991.dta not found)
+file ../temp/plos_therapeutics_1991.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 194 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1992.dta not found)
+file ../temp/therapeutics_1992.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1992.dta not found)
+file ../temp/plos_therapeutics_1992.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 211 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1993.dta not found)
+file ../temp/therapeutics_1993.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1993.dta not found)
+file ../temp/plos_therapeutics_1993.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 198 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1994.dta not found)
+file ../temp/therapeutics_1994.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1994.dta not found)
+file ../temp/plos_therapeutics_1994.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 221 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1995.dta not found)
+file ../temp/therapeutics_1995.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1995.dta not found)
+file ../temp/plos_therapeutics_1995.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 225 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1996.dta not found)
+file ../temp/therapeutics_1996.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1996.dta not found)
+file ../temp/plos_therapeutics_1996.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 256 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/therapeutics_1997.dta not found)
+file ../temp/therapeutics_1997.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_therapeutics_1997.dta not found)
+file ../temp/plos_therapeutics_1997.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 226 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -564,7 +911,7 @@ pmid: all characters numeric; replaced as double
 (file ../temp/plos_therapeutics_1998.dta not found)
 file ../temp/plos_therapeutics_1998.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 133 obs)
+(2 vars, 270 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -581,7 +928,7 @@ pmid: all characters numeric; replaced as double
 (file ../temp/plos_therapeutics_1999.dta not found)
 file ../temp/plos_therapeutics_1999.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 139 obs)
+(2 vars, 273 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -598,7 +945,7 @@ pmid: all characters numeric; replaced as double
 (file ../temp/plos_therapeutics_2000.dta not found)
 file ../temp/plos_therapeutics_2000.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 89 obs)
+(2 vars, 251 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -615,7 +962,7 @@ pmid: all characters numeric; replaced as double
 (file ../temp/plos_therapeutics_2001.dta not found)
 file ../temp/plos_therapeutics_2001.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 104 obs)
+(2 vars, 291 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -632,7 +979,7 @@ pmid: all characters numeric; replaced as double
 (file ../temp/plos_therapeutics_2002.dta not found)
 file ../temp/plos_therapeutics_2002.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 133 obs)
+(2 vars, 302 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -649,7 +996,7 @@ pmid: all characters numeric; replaced as double
 (file ../temp/plos_therapeutics_2003.dta not found)
 file ../temp/plos_therapeutics_2003.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 121 obs)
+(2 vars, 316 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -666,7 +1013,7 @@ pmid: all characters numeric; replaced as double
 (file ../temp/plos_therapeutics_2004.dta not found)
 file ../temp/plos_therapeutics_2004.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 118 obs)
+(2 vars, 281 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -683,7 +1030,7 @@ pmid: all characters numeric; replaced as double
 (file ../temp/plos_therapeutics_2005.dta not found)
 file ../temp/plos_therapeutics_2005.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 74 obs)
+(2 vars, 236 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -691,7 +1038,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2006.dta not found)
 file ../temp/therapeutics_2006.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 1 obs)
+(2 vars, 4 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -699,7 +1046,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2006.dta not found)
 file ../temp/plos_therapeutics_2006.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 94 obs)
+(2 vars, 239 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -707,7 +1054,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2007.dta not found)
 file ../temp/therapeutics_2007.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 6 obs)
+(2 vars, 19 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -715,7 +1062,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2007.dta not found)
 file ../temp/plos_therapeutics_2007.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 94 obs)
+(2 vars, 229 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -723,7 +1070,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2008.dta not found)
 file ../temp/therapeutics_2008.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 26 obs)
+(2 vars, 49 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -731,7 +1078,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2008.dta not found)
 file ../temp/plos_therapeutics_2008.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 95 obs)
+(2 vars, 246 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -739,7 +1086,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2009.dta not found)
 file ../temp/therapeutics_2009.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 35 obs)
+(2 vars, 70 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -747,7 +1094,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2009.dta not found)
 file ../temp/plos_therapeutics_2009.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 95 obs)
+(2 vars, 250 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -755,7 +1102,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2010.dta not found)
 file ../temp/therapeutics_2010.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 41 obs)
+(2 vars, 95 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -763,7 +1110,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2010.dta not found)
 file ../temp/plos_therapeutics_2010.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 123 obs)
+(2 vars, 309 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -771,7 +1118,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2011.dta not found)
 file ../temp/therapeutics_2011.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 107 obs)
+(2 vars, 255 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -779,7 +1126,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2011.dta not found)
 file ../temp/plos_therapeutics_2011.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 153 obs)
+(2 vars, 336 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -787,7 +1134,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2012.dta not found)
 file ../temp/therapeutics_2012.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 213 obs)
+(2 vars, 502 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -795,7 +1142,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2012.dta not found)
 file ../temp/plos_therapeutics_2012.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 179 obs)
+(2 vars, 374 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -803,7 +1150,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2013.dta not found)
 file ../temp/therapeutics_2013.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 349 obs)
+(2 vars, 876 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -811,7 +1158,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2013.dta not found)
 file ../temp/plos_therapeutics_2013.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 129 obs)
+(2 vars, 364 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -819,7 +1166,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2014.dta not found)
 file ../temp/therapeutics_2014.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 403 obs)
+(2 vars, 998 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -827,7 +1174,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2014.dta not found)
 file ../temp/plos_therapeutics_2014.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 183 obs)
+(2 vars, 447 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -835,7 +1182,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2015.dta not found)
 file ../temp/therapeutics_2015.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 386 obs)
+(2 vars, 991 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -843,7 +1190,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2015.dta not found)
 file ../temp/plos_therapeutics_2015.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 182 obs)
+(2 vars, 459 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -851,7 +1198,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2016.dta not found)
 file ../temp/therapeutics_2016.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 335 obs)
+(2 vars, 836 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -859,7 +1206,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2016.dta not found)
 file ../temp/plos_therapeutics_2016.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 180 obs)
+(2 vars, 423 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -867,7 +1214,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2017.dta not found)
 file ../temp/therapeutics_2017.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 325 obs)
+(2 vars, 799 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -875,7 +1222,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2017.dta not found)
 file ../temp/plos_therapeutics_2017.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 132 obs)
+(2 vars, 357 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -883,7 +1230,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2018.dta not found)
 file ../temp/therapeutics_2018.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 344 obs)
+(2 vars, 800 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -891,7 +1238,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2018.dta not found)
 file ../temp/plos_therapeutics_2018.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 152 obs)
+(2 vars, 379 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -899,7 +1246,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2019.dta not found)
 file ../temp/therapeutics_2019.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 339 obs)
+(2 vars, 778 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -907,7 +1254,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2019.dta not found)
 file ../temp/plos_therapeutics_2019.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 121 obs)
+(2 vars, 400 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -915,7 +1262,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2020.dta not found)
 file ../temp/therapeutics_2020.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 370 obs)
+(2 vars, 848 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -923,7 +1270,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2020.dta not found)
 file ../temp/plos_therapeutics_2020.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 130 obs)
+(2 vars, 393 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -931,7 +1278,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2021.dta not found)
 file ../temp/therapeutics_2021.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 372 obs)
+(2 vars, 883 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -939,7 +1286,7 @@ pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2021.dta not found)
 file ../temp/plos_therapeutics_2021.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 165 obs)
+(2 vars, 375 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
@@ -947,13 +1294,183 @@ pmid: all characters numeric; replaced as long
 (file ../temp/therapeutics_2022.dta not found)
 file ../temp/therapeutics_2022.dta saved
 (encoding automatically selected: ISO-8859-1)
-(2 vars, 332 obs)
+(2 vars, 679 obs)
 pmid was long now str8
 query_name already string; no replace
 (0 observations deleted)
 pmid: all characters numeric; replaced as long
 (file ../temp/plos_therapeutics_2022.dta not found)
 file ../temp/plos_therapeutics_2022.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 2,130 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1988.dta not found)
+file ../temp/diseases_1988.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1988.dta not found)
+file ../temp/plos_diseases_1988.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,944 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1989.dta not found)
+file ../temp/diseases_1989.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1989.dta not found)
+file ../temp/plos_diseases_1989.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,864 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1990.dta not found)
+file ../temp/diseases_1990.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1990.dta not found)
+file ../temp/plos_diseases_1990.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,636 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1991.dta not found)
+file ../temp/diseases_1991.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1991.dta not found)
+file ../temp/plos_diseases_1991.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,752 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1992.dta not found)
+file ../temp/diseases_1992.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1992.dta not found)
+file ../temp/plos_diseases_1992.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,915 obs)
+pmid was long now str7
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1993.dta not found)
+file ../temp/diseases_1993.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1993.dta not found)
+file ../temp/plos_diseases_1993.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,862 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1994.dta not found)
+file ../temp/diseases_1994.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1994.dta not found)
+file ../temp/plos_diseases_1994.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,797 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1995.dta not found)
+file ../temp/diseases_1995.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1995.dta not found)
+file ../temp/plos_diseases_1995.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,879 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1996.dta not found)
+file ../temp/diseases_1996.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1996.dta not found)
+file ../temp/plos_diseases_1996.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 1,844 obs)
+pmid was long now str8
+query_name already string; no replace
+(0 observations deleted)
+pmid: all characters numeric; replaced as long
+(file ../temp/diseases_1997.dta not found)
+file ../temp/diseases_1997.dta saved
+(encoding automatically selected: ISO-8859-1)
+(2 vars, 0 obs)
+pmid was byte now str1
+query_name was byte now str1
+(0 observations deleted)
+pmid: all characters numeric; replaced as double
+(dataset contains 0 observations)
+(file ../temp/plos_diseases_1997.dta not found)
+file ../temp/plos_diseases_1997.dta saved
 (encoding automatically selected: ISO-8859-1)
 (2 vars, 1,851 obs)
 pmid was long now str8
@@ -1369,14 +1886,21 @@ file ../temp/newfund_pmids.dta saved
 variables created as string: 
 query_name1  query_name2
 year: all characters numeric; replaced as int
-(465,862 real changes made)
+(555,747 real changes made)
 
 Duplicates in terms of pmid cat
-(14,891 observations deleted)
+(15,012 observations deleted)
 
 Duplicates in terms of pmid
-(2,263 observations deleted)
-(448,708 real changes made)
+(2,289 observations deleted)
+
+Duplicates in terms of all variables
+
+(0 observations are duplicates)
+
+Duplicates in terms of pmid
+(8,548 observations deleted)
+(529,898 real changes made)
 (file ../output/newfund_pmids.dta not found)
 file ../output/newfund_pmids.dta saved
 (encoding automatically selected: ISO-8859-9)
@@ -6468,6 +6992,6 @@ file ../output/all_jrnls_all_pmids.dta saved
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-08-14 22:24:58
+Makelog ended: 2023-08-15 14:00:16
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/append_pmids/code
 --------------------------------------------------------------------------------
