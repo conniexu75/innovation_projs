@@ -97,28 +97,28 @@ query_names = paste0(query_names, '_', years)
 #}
 
 ### Select Med Journals and Basic Science Journals (all articles) ========================================
-#jrnls = c("nejm", "jama", "lancet", "bmj", "annals", "science", "nature", "cell", "onco", "neuron", "nat_neuro", "nat_med", "nat_genet", "nat_chem_bio", "nat_cell_bio", "nat_biotech", "cell_stem_cell", "faseb", "jbc")
-jrnls = c("onco", "neuron", "nat_neuro", "nat_med", "nat_genet", "nat_chem_bio", "nat_cell_bio", "nat_biotech", "cell_stem_cell", "faseb", "jbc")
-years = as.character(1988:2022)
-year_queries = paste0('(', years, '/01/01[PDAT] : ', years, '/12/31[PDAT])')
-for (j in jrnls) {
-  queries_sub = read_tsv(file = paste0('../external/queries/',j,'.txt'))
-  queries = rep(queries_sub$Query, each=length(year_queries))
-  queries = paste0(year_queries, ' AND ', queries)
-  query_names = paste0(years)
-  for (counter in 1:35) {
-    PMIDs =  sapply(X = queries[counter], FUN = pull_pmids) %>%
-      unname()
-    PMIDs = as.numeric(PMIDs)
-    PMIDdf = data.frame(pmid=PMIDs) %>% 
-      mutate(year = years[counter])
-    write_csv(PMIDdf,paste0('../output/',j,
-                            years[counter],
-                            '.csv'))
-  }
-}
-
- pull plos separately because it's weird
+jrnls = c("nejm", "jama", "lancet", "bmj", "annals", "science", "nature", "cell", "onco", "neuron", "nat_neuro", "nat_med", "nat_genet", "nat_chem_bio", "nat_cell_bio", "nat_biotech", "cell_stem_cell", "faseb", "jbc")
+#jrnls = c("onco", "neuron", "nat_neuro", "nat_med", "nat_genet", "nat_chem_bio", "nat_cell_bio", "nat_biotech", "cell_stem_cell", "faseb", "jbc")
+#years = as.character(1988:2022)
+#year_queries = paste0('(', years, '/01/01[PDAT] : ', years, '/12/31[PDAT])')
+#for (j in jrnls) {
+#  queries_sub = read_tsv(file = paste0('../external/queries/',j,'.txt'))
+#  queries = rep(queries_sub$Query, each=length(year_queries))
+#  queries = paste0(year_queries, ' AND ', queries)
+#  query_names = paste0(years)
+#  for (counter in 1:35) {
+#    PMIDs =  sapply(X = queries[counter], FUN = pull_pmids) %>%
+#      unname()
+#    PMIDs = as.numeric(PMIDs)
+#    PMIDdf = data.frame(pmid=PMIDs) %>% 
+#      mutate(year = years[counter])
+#    write_csv(PMIDdf,paste0('../output/',j,
+#                            years[counter],
+#                            '.csv'))
+#  }
+#}
+#
+## pull plos separately because it's weird
 jrnls = c("plos")
 years = as.character(1988:2022)
 year_queries = paste0('(', years, '/01/01[edat] : ', years, '/03/31[edat])')
