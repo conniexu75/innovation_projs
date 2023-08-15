@@ -119,49 +119,49 @@ jrnls = c("nejm", "jama", "lancet", "bmj", "annals", "science", "nature", "cell"
 #}
 #
 ## pull plos separately because it's weird
-jrnls = c("plos")
-years = as.character(1988:2022)
-year_queries = paste0('(', years, '/01/01[edat] : ', years, '/03/31[edat])')
-year_queries2 = paste0('(', years, '/04/01[edat] : ', years, '/07/31[edat])')
-year_queries3 = paste0('(', years, '/08/01[edat] : ', years, '/12/31[edat])')
-for (j in jrnls) {
-  j3 = substr(j,1,4)
-  queries_sub = read_tsv(file = paste0('../external/queries/search_terms_newfund_',j,'.txt'))
-  queries = rep(queries_sub$Query, each=length(year_queries))
-  query_names = rep(queries_sub$Query_Name, each=length(year_queries))
-  queries1 = paste0(year_queries, ' AND ', queries)
-  queries2 = paste0(year_queries2, ' AND ', queries)
-  queries3 = paste0(year_queries3, ' AND ', queries)
-  query_names = paste0(query_names, '_', years)
-  #Run through scraping function to pull out PMIDs
-  # 5 is the number of queries we're using in the .txt file
-  # 35 is the number of years between 1988 and 2022
-  for (counter in 1:5) {
-    start <- (counter-1)*35+1
-    end <- counter*35
-    PMIDs =  sapply(X = queries1[start:end], FUN = pull_pmids) %>%
-      unname()
-    PMIDs2 =  sapply(X = queries2[start:end], FUN = pull_pmids) %>%
-      unname()
-    PMIDs3 = sapply(X = queries3[start:end], FUN = pull_pmids) %>%
-      unname()
-    for (i in 1:35) {
-      j = i + (counter-1)*35
-      outfile = paste0('../output/',j3,'_',
-                       query_names[j],
-                       '.csv')
-      subset = data.frame(unlist(PMIDs[i]), rep(query_names[j], length(unlist(PMIDs[i])))) 
-      colnames(subset)<-c('pmid','query_name')
-      subset2 = data.frame(unlist(PMIDs2[i]), rep(query_names[j], length(unlist(PMIDs2[i])))) 
-      colnames(subset2)<-c('pmid','query_name')
-      subset3 = data.frame(unlist(PMIDs3[i]), rep(query_names[j], length(unlist(PMIDs3[i])))) 
-      colnames(subset3)<-c('pmid','query_name')
-      combined = rbind(subset,subset2,subset3)
-      colnames(combined)<-c('pmid','query_name')
-      write_csv(combined, outfile)
-    }
-  }
-}
+#jrnls = c("plos")
+#years = as.character(1988:2022)
+#year_queries = paste0('(', years, '/01/01[edat] : ', years, '/03/31[edat])')
+#year_queries2 = paste0('(', years, '/04/01[edat] : ', years, '/07/31[edat])')
+#year_queries3 = paste0('(', years, '/08/01[edat] : ', years, '/12/31[edat])')
+#for (j in jrnls) {
+#  j3 = substr(j,1,4)
+#  queries_sub = read_tsv(file = paste0('../external/queries/search_terms_newfund_',j,'.txt'))
+#  queries = rep(queries_sub$Query, each=length(year_queries))
+#  query_names = rep(queries_sub$Query_Name, each=length(year_queries))
+#  queries1 = paste0(year_queries, ' AND ', queries)
+#  queries2 = paste0(year_queries2, ' AND ', queries)
+#  queries3 = paste0(year_queries3, ' AND ', queries)
+#  query_names = paste0(query_names, '_', years)
+#  #Run through scraping function to pull out PMIDs
+#  # 5 is the number of queries we're using in the .txt file
+#  # 35 is the number of years between 1988 and 2022
+#  for (counter in 1:5) {
+#    start <- (counter-1)*35+1
+#    end <- counter*35
+#    PMIDs =  sapply(X = queries1[start:end], FUN = pull_pmids) %>%
+#      unname()
+#    PMIDs2 =  sapply(X = queries2[start:end], FUN = pull_pmids) %>%
+#      unname()
+#    PMIDs3 = sapply(X = queries3[start:end], FUN = pull_pmids) %>%
+#      unname()
+#    for (i in 1:35) {
+#      j = i + (counter-1)*35
+#      outfile = paste0('../output/',j3,'_',
+#                       query_names[j],
+#                       '.csv')
+#      subset = data.frame(unlist(PMIDs[i]), rep(query_names[j], length(unlist(PMIDs[i])))) 
+#      colnames(subset)<-c('pmid','query_name')
+#      subset2 = data.frame(unlist(PMIDs2[i]), rep(query_names[j], length(unlist(PMIDs2[i])))) 
+#      colnames(subset2)<-c('pmid','query_name')
+#      subset3 = data.frame(unlist(PMIDs3[i]), rep(query_names[j], length(unlist(PMIDs3[i])))) 
+#      colnames(subset3)<-c('pmid','query_name')
+#      combined = rbind(subset,subset2,subset3)
+#      colnames(combined)<-c('pmid','query_name')
+#      write_csv(combined, outfile)
+#    }
+#  }
+#}
 
 ## pull plos separately
 jrnls = c("plos")
