@@ -1,1 +1,1 @@
-./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_pmids/output
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/scrape_pmids/output
