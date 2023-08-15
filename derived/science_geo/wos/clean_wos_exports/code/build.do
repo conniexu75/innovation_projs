@@ -15,29 +15,31 @@ program main
     global scijrnls_num 1
     global natsub_num 1
     global thera_num 1
-    foreach samp in scijrnls natsub cns_med demsci thera {
+    foreach samp in scijrnls natsub cns_med demsci {
         append_wos, samp(`samp')  num_fols(${`samp'_num})
     }
     clear
     foreach j in scijrnls natsub {
-        append using  ../output/`j'_appended
+        append using  ../temp/`j'_appended
     }
-    merge 1:1 pmid using ../external/robust_jrnls/scisub_all_pmids,  assert(1 2 3) keep (3) nogen
+    merge 1:1 pmid using ../external/samp/scisub_all_pmids,  assert(1 2 3) keep (3) nogen
     save ../output/scisub_appended, replace
     clear 
     foreach j in cns med {
-        use ../output/cns_med_appended, clear
-        merge 1:1 pmid using ../external/jrnls/`j'_all_pmids, assert(1 2 3) keep (3) nogen
+        use ../temp/cns_med_appended, clear
+        merge 1:1 pmid using ../external/samp/`j'_all_pmids, assert(1 2 3) keep (3) nogen
         save ../output/`j'_appended, replace
     }
 
-    use ../output/demsci_appended, clear
-    merge 1:1 pmid using ../external/robust_jrnls/demsci_all_pmids, assert(1 2 3) keep(3) nogen
+    use ../temp/demsci_appended, clear
+    merge 1:1 pmid using ../external/samp/demsci_all_pmids, assert(1 2 3) keep(3) nogen
     save ../output/demsci_appended, replace
-    drop if journal_abbr == "plos"
-    save ../output/noplos_appended, replace
-    drop if journal_abbr == "jbc"
-    save ../output/noopen_appended, replace
+    
+    clear
+    append using ../output/scisub_appended
+    append using ../output/cns_appended 
+    append using ../output/demsci_appended
+    save ../output/all_jrnls_appended, replace
 end
 
 program append_wos
@@ -68,6 +70,7 @@ program append_wos
             gen fol=`i'
             gen counter = `counter'
             drop mi_affil has_affil dup
+            keep if doc_type == "Article"
             save ${temp}/`samp'`i'_`counter', replace
             local counter = `counter' + 1
         }
@@ -83,7 +86,7 @@ program append_wos
         append using ${temp}/appended_`samp'`i'
     }
     gduplicates drop pmid, force
-    save ../output/`samp'_appended, replace
+    save ../temp/`samp'_appended, replace
 end
 
 main
