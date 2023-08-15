@@ -14,7 +14,7 @@ end
 
 program append_indicies
     foreach samp in fundamental therapeutics diseases {
-        forval y = 1998/2022 {
+        forval y = 1988/2022 {
             import delimited using "../external/samp/`samp'_`y'", clear varn(1)
             tostring pmid, replace
             tostring query_name, replace
@@ -52,15 +52,15 @@ program append_indicies
     bys pmid: egen tot_fund = max(fund)
     drop if dup > 0 & tot_fund == 1 & fund != 1
     
-    drop dup 
-    duplicates tag pmid cat, gen(dup)
+    drop dup fund tot_fund
+    gduplicates drop 
+    duplicates tag pmid, gen(dup)
     gen dis = cat == "diseases"
     bys pmid: egen tot_dis = max(dis)
     drop if dup > 0 & tot_dis == 1 &  dis != 1
-    gduplicates drop 
 	gisid pmid
 	replace pmid = pmid/10000 if inlist(cat, "fundamental", "diseases", "therapeutics")
-    drop dup fund tot_fund
+    drop dup dis tot_dis 
 	save "../output/newfund_pmids.dta", replace
 end
 
