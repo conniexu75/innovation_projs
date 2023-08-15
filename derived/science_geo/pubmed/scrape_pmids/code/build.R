@@ -165,7 +165,7 @@ jrnls = c("nejm", "jama", "lancet", "bmj", "annals", "science", "nature", "cell"
 
 ## pull plos separately
 jrnls = c("plos")
-years = as.character(1998:2022)
+years = as.character(1988:1997)
 year_queries = paste0('(', years, '/01/01[edat] : ', years, '/03/31[edat])')
 year_queries2 = paste0('(', years, '/04/01[edat] : ', years, '/06/30[edat])')
 year_queries3 = paste0('(', years, '/07/01[edat] : ', years, '/09/30[edat])')
