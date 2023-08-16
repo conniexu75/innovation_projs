@@ -16,10 +16,10 @@ insts <- read_dta('../output/list_of_insts.dta')
 nr <- nrow(insts)
 split_insts <- split(insts, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 num_file <- length(split_insts)
-for (q in 7:num_file) {
+for (q in 7:7) {
   insts <- oa_fetch(
     entity = "institutions",
-    mailto = "conniexu0@gmail.com",
+    mailto = "xuconni@gmail.com",
     id  = split_insts[[q]] %>%  mutate(inst_id = as.character(inst_id)) %>% pull(inst_id),
     verbose = TRUE,
     output = "list"
@@ -131,13 +131,11 @@ for (q in 7:num_file) {
   associated_type <- associated_type %>% data.frame %>% t()
   associated_rel <- associated_rel %>% data.frame %>% t()
   
-  inst_chars <- cbind(inst_geo, associated, associated_id, associated_country, associated_type, associated_rel) %>% 
-    filter(associated_rel == "parent") %>% 
+  inst_chars <- cbind(inst_geo, associated, associated_id, associated_country, associated_type, associated_rel) %>%
     group_by(inst_id, which_inst) %>% 
     mutate(which_assoc = 1:n(),
            inst_id = str_replace(inst_id, "https://openalex.org/",""),
-           associated_id = str_replace(associated_id, "https://openalex.org/","")) %>% 
-    select(-associated_rel)
+           associated_id = str_replace(associated_id, "https://openalex.org/","")) 
   
   
   write_dta(inst_chars, paste0("../output/inst_geo_chars", as.character(q), ".dta"))
