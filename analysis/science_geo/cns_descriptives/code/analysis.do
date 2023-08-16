@@ -19,24 +19,23 @@ program main
     global msa_c_world_name "metropolitan areas"
     foreach samp in cns {
         di "OUTPUT START"
-        local samp_type = cond("`samp'" == "cns", "main", "robust")
         foreach data in newfund { 
-            foreach var in cite_affl_wt {
+            foreach var in affl_wt cite_affl_wt {
                 athr_loc, data(`data') samp(`samp') wt_var(`var')
                 qui trends, data(`data') samp(`samp') wt_var(`var')
             }
             calc_broad_hhmi, data(`data') samp(`samp') 
-            top_mesh_terms, data(`data') samp(`samp') samp_type(`samp_type')
+            top_mesh_terms, data(`data') samp(`samp') 
             qui output_tables, data(`data') samp(`samp') 
         }
     } 
-    top_mesh_terms, data(clin) samp(med) samp_type(clinical)
+    top_mesh_terms, data(clin) samp(med) 
 end
 
 program athr_loc
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
-    use ../external/cleaned_samps/cleaned_last5yrs_`data'_`samp', clear
+    use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
     foreach loc in country msa_c_world inst {
         qui gunique pmid 
         local articles = r(unique)
@@ -73,6 +72,7 @@ program athr_loc
         qui levelsof `loc' if _n == 1 
         global `loc'_first "`r(levels)'"
         qui levelsof `loc' if _n == 2
+
         global `loc'_second "`r(levels)'"
         qui replace rank_grp = "second" if _n == 2
         qui replace rank_grp = "china" if `loc' == "China"
@@ -86,7 +86,7 @@ end
 
 program calc_broad_hhmi
    syntax, data(str) samp(str) 
-   use ../external/cleaned_samps/cleaned_last5yrs_`data'_`samp', clear
+   use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
    qui gunique pmid which_athr
    local num_athrs = r(unique)
    qui gunique pmid which_athr if country == "United States"
@@ -130,7 +130,7 @@ end
 program trends
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
-    use ../external/cleaned_samps/cleaned_all_`data'_`samp', clear
+    use ../external/openalex/cleaned_all_`data'_`samp', clear
     cap drop counter
 
     gen msa_world = msatitle
@@ -248,33 +248,11 @@ program trends
 end 
     
 program top_mesh_terms
-    syntax, data(str) samp(str) samp_type(str)
-    use ../external/`samp_type'_split/mesh_`data'_`samp'.dta, clear 
-    cap keep pmid mesh which_mesh cat journal_abbr
-    qui merge m:1 pmid using ../external/cleaned_samps/list_of_pmids_`data'_`samp', assert(1 2 3) keep(3) nogen
-    gunique pmid
-    cap drop _merge
-    qui gunique pmid
-    local total_articles = r(unique)
-    qui replace mesh = subinstr(mesh, "=Y>","",.)
-    qui replace mesh = subinstr(mesh, "=N>","",.)
-    qui gen gen_mesh = mesh if strpos(mesh, ",") == 0 & strpos(mesh, ";") == 0
-    qui replace gen_mesh = mesh if strpos(mesh, "Models") > 0
-    qui replace gen_mesh = subinstr(gen_mesh, "&; ", "&",.)
-    qui gen rev_mesh = reverse(mesh)
-    qui replace rev_mesh = substr(rev_mesh, strpos(rev_mesh, ",")+1, strlen(rev_mesh)-strpos(rev_mesh, ","))
-    qui replace rev_mesh = reverse(rev_mesh)
-    qui replace gen_mesh = rev_mesh if mi(gen_mesh) 
-    qui drop rev_mesh
-    preserve
-    qui contract pmid mesh, nomiss
-    qui save ../temp/contracted_mesh_`data'_`samp', replace
-    restore
-    contract pmid gen_mesh, nomiss
-    qui save ../temp/contracted_gen_mesh_`data'_`samp', replace
-
+    syntax, data(str) samp(str) 
     foreach mesh in gen_mesh {
-        use ../temp/contracted_`mesh'_`data'_`samp', clear
+        use ../external/openalex/contracted_`mesh'_`data'_`samp', clear
+        gunique pmid
+        local total_articles = r(unique)
         qui bys pmid: gen wt = 1/_N
         qui bys pmid: gen num_`mesh' = _N
         sum num_`mesh'
@@ -303,9 +281,13 @@ end
 
 program output_tables
     syntax, data(str) samp(str)
-    foreach file in top_country top_msa_c_world top_inst top_gen_mesh { 
+    foreach file in top_country top_msa_c_world top_inst {
         qui matrix_to_txt, saving("../output/tables/`file'_`data'_`samp'.txt") matrix(`file'_`data'_`samp') ///
            title(<tab:`file'_`data'_`samp'>) format(%20.4f) replace
+        qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.txt") matrix(`file'_`samp'_wt) ///
+           title(<tab:`file'_`samp'_wt>) format(%20.4f) replace
+        qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
+           title(<tab:`file'_`samp'>) format(%20.4f) replace
          }
  end
 ** 
