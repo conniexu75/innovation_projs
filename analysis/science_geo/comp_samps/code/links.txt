@@ -1,10 +1,1 @@
-./main_split/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/split_metadata_by_type/output
-./main_total/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/output
-./main_filtered/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_metadata/output
-./main_full_samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_metadata/output
-./robust_filtered/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/prep_metadata/output
-./robust_total/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/append_pmids/output
-./robust_split/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/split_metadata_by_type/output
-./robust_full_samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/robustness/clean_metadata/output
-./cleaned_samps/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_analysis_samps/output
-./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output
+./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/analyze_openalex/output
