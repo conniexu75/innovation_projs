@@ -16,21 +16,22 @@ program main
 end
 program merge_files 
     use ../external/openalex/openalex_newfund_jrnls_merged, clear
-    merge m:1 pmid using ../external/jrnls/cns_all_pmids.dta, assert(1 2 3) keep(1 3) nogen
-    merge m:1 pmid using ../external/robust_jrnls/scisub_all_pmids.dta, assert(1 2 3 4) keep(1 3 4)  update
-    merge m:1 pmid using ../external/robust_jrnls/demsci_all_pmids.dta, assert(1 2 3 4) keep(1 3 4) nogen update
+    // after we get journal info from open alex we can delete the following 
+    merge m:1 pmid using ../external/pmids/cns_all_pmids.dta, assert(1 2 3) keep(1 3) nogen
+    merge m:1 pmid using ../external/pmids/scisub_all_pmids.dta, assert(1 2 3 4) keep(1 3 4)  update
+    merge m:1 pmid using ../external/pmids/demsci_all_pmids.dta, assert(1 2 3 4) keep(1 3 4) nogen update
     cap drop _merge author_id
     save ${temp}/openalex_newfund_jrnls_panel, replace
 
     use ../external/openalex/openalex_clin_med_merged, clear
-    merge m:1 pmid using ../external/jrnls/med_all_pmids.dta, assert(1 2 3) keep(1 3) nogen
+    merge m:1 pmid using ../external/pmids/med_all_pmids.dta, assert(1 2 3) keep(1 3) nogen
     cap drop author_id
     cap drop _merge
     save ${temp}/openalex_clin_med_panel, replace
 
     // merge in wos 
     clear
-    foreach samp in thera cns_med scisub demsci {
+    foreach samp in cns med scisub demsci {
         append using ../external/wos/`samp'_appended
     }
     gduplicates drop pmid, force
@@ -153,7 +154,7 @@ program merge_files
         save ${temp}/pmid_id_xwalk_`samp', replace
         restore
 
-        keep if inrange(date, td(01jan2015), td(31mar2022)) & year >=2015
+        keep if inrange(date, td(01jan2015), td(31dec2022)) & year >=2015
         drop cite_wt cite_affl_wt
         qui sum avg_cite_yr
         gen cite_wt = avg_cite_yr/r(sum)
