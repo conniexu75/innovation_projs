@@ -15,7 +15,7 @@ program main
 end
 program get_newfund_pmids
     use ../external/pmids/cleaned_all_jrnl_base, clear
-    merge 1:1 pmid using ../external/wos/all_jrnls_appended.dta, assert(1 2 3) keep(3) nogen 
+    *merge 1:1 pmid using ../external/wos/all_jrnls_appended.dta, assert(1 2 3) keep(3) nogen 
     merge 1:1 pmid using ../external/xwalk/newfund_pmids, assert(1 2 3) keep(3) nogen
     gen lower_title = strlower(title)
     drop if strpos(lower_title, "economic")>0
@@ -52,7 +52,7 @@ end
 
 program get_clin_pmids
     use ../external/pmids/cleaned_clin_med_base, clear
-    merge 1:1 pmid using ../external/wos/med_appended.dta, assert(1 2 3) keep(3) nogen 
+    *merge 1:1 pmid using ../external/wos/med_appended.dta, assert(1 2 3) keep(3) nogen 
     merge 1:1 pmid using ../external/xwalk/med_all_pmids, assert(1 2 3) keep(3) nogen
     gen lower_title = strlower(title)
     drop if strpos(lower_title, "economic")>0
