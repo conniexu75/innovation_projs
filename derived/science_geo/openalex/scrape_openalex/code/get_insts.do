@@ -14,7 +14,7 @@ program main
 end
 program append_files
     clear
-    forval i = 1/76 {
+    forval i = 1/100 {
         append using ../output/openalex_authors`i'
     }
     destring pmid, replace
@@ -47,7 +47,7 @@ program append_files
 
     // repeat for clin med
     clear
-    forval i = 1/5 {
+    forval i = 1/50 {
         append using ../output/openalex_authors_clin`i'
     }
     destring pmid, replace
