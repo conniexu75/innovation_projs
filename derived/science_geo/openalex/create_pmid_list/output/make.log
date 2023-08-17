@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-08-15 14:24:46
+Makelog started: 2023-08-16 23:56:31
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/create_pmid_list/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -60,166 +60,101 @@ Notes:
 
 . program get_newfund_pmids
   1.     use ../external/pmids/cleaned_all_jrnl_base, clear
-  2.     merge 1:1 pmid using ../external/wos/all_jrnls_appended.dta, assert(1 
-> 2 3) keep(3) nogen 
-  3.     merge 1:1 pmid using ../external/xwalk/newfund_pmids, assert(1 2 3) ke
-> ep(3) nogen
-  4.     gen lower_title = strlower(title)
-  5.     drop if strpos(lower_title, "economic")>0
-  6.     drop if strpos(lower_title, "economy")>0
-  7.     drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACO
-> s")>0
-  8.     drop if strpos(lower_title, "health care")>0
-  9.     drop if strpos(lower_title, "health-care")>0
- 10.     drop if strpos(lower_title, "public health")>0
- 11.     drop if strpos(lower_title, "government")>0
- 12.     drop if strpos(lower_title, "reform")>0
- 13.     drop if strpos(lower_title , "quality")>0
- 14.     drop if strpos(lower_title , "equity")>0
- 15.     drop if strpos(lower_title , "payment")>0
- 16.     drop if strpos(lower_title , "politics")>0
- 17.     drop if strpos(lower_title , "policy")>0
- 18.     drop if strpos(lower_title , "comment")>0
- 19.     drop if strpos(lower_title , "guideline")>0
- 20.     drop if strpos(lower_title , "professionals")>0
- 21.     drop if strpos(lower_title , "physician")>0
- 22.     drop if strpos(lower_title , "workforce")>0
- 23.     drop if strpos(lower_title , "medical-education")>0
- 24.     drop if strpos(lower_title , "medical education")>0
- 25.     drop if strpos(lower_title , "funding")>0
- 26.     drop if strpos(lower_title , "conference")>0
- 27.     drop if strpos(lower_title , "insurance")>0
- 28.     drop if strpos(lower_title , "fellowship")>0
- 29.     drop if strpos(lower_title , "ethics")>0
- 30.     drop if strpos(lower_title , "legislation")>0
- 31.     drop if strpos(lower_title , " regulation")>0
- 32.     gcontract pmid
- 33.     drop _freq
- 34.     save ../output/list_of_pmids_newfund_jrnls, replace 
- 35. end
+  2.     *merge 1:1 pmid using ../external/wos/all_jrnls_appended.dta, assert(1
+>  2 3) keep(3) nogen 
+.     merge 1:1 pmid using ../external/xwalk/newfund_pmids, assert(1 2 3) keep(
+> 3) nogen
+  3. /*    gen lower_title = strlower(title)
+>     drop if strpos(lower_title, "economic")>0
+>     drop if strpos(lower_title, "economy")>0
+>     drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACOs")
+> >0
+>     drop if strpos(lower_title, "health care")>0
+>     drop if strpos(lower_title, "health-care")>0
+>     drop if strpos(lower_title, "public health")>0
+>     drop if strpos(lower_title, "government")>0
+>     drop if strpos(lower_title, "reform")>0
+>     drop if strpos(lower_title , "quality")>0
+>     drop if strpos(lower_title , "equity")>0
+>     drop if strpos(lower_title , "payment")>0
+>     drop if strpos(lower_title , "politics")>0
+>     drop if strpos(lower_title , "policy")>0
+>     drop if strpos(lower_title , "comment")>0
+>     drop if strpos(lower_title , "guideline")>0
+>     drop if strpos(lower_title , "professionals")>0
+>     drop if strpos(lower_title , "physician")>0
+>     drop if strpos(lower_title , "workforce")>0
+>     drop if strpos(lower_title , "medical-education")>0
+>     drop if strpos(lower_title , "medical education")>0
+>     drop if strpos(lower_title , "funding")>0
+>     drop if strpos(lower_title , "conference")>0
+>     drop if strpos(lower_title , "insurance")>0
+>     drop if strpos(lower_title , "fellowship")>0
+>     drop if strpos(lower_title , "ethics")>0
+>     drop if strpos(lower_title , "legislation")>0
+>     drop if strpos(lower_title , " regulation")>0*/
+.     gcontract pmid
+  4.     drop _freq
+  5.     save ../output/list_of_pmids_newfund_jrnls, replace 
+  6. end
 
 . 
 . program get_clin_pmids
   1.     use ../external/pmids/cleaned_clin_med_base, clear
-  2.     merge 1:1 pmid using ../external/wos/med_appended.dta, assert(1 2 3) k
-> eep(3) nogen 
-  3.     merge 1:1 pmid using ../external/xwalk/med_all_pmids, assert(1 2 3) ke
-> ep(3) nogen
-  4.     gen lower_title = strlower(title)
-  5.     drop if strpos(lower_title, "economic")>0
-  6.     drop if strpos(lower_title, "economy")>0
-  7.     drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACO
-> s")>0
-  8.     drop if strpos(lower_title, "health care")>0
-  9.     drop if strpos(lower_title, "health-care")>0
- 10.     drop if strpos(lower_title, "public health")>0
- 11.     drop if strpos(lower_title, "government")>0
- 12.     drop if strpos(lower_title, "reform")>0
- 13.     drop if strpos(lower_title , "quality")>0
- 14.     drop if strpos(lower_title , "equity")>0
- 15.     drop if strpos(lower_title , "payment")>0
- 16.     drop if strpos(lower_title , "politics")>0
- 17.     drop if strpos(lower_title , "policy")>0
- 18.     drop if strpos(lower_title , "comment")>0
- 19.     drop if strpos(lower_title , "guideline")>0
- 20.     drop if strpos(lower_title , "professionals")>0
- 21.     drop if strpos(lower_title , "physician")>0
- 22.     drop if strpos(lower_title , "workforce")>0
- 23.     drop if strpos(lower_title , "medical-education")>0
- 24.     drop if strpos(lower_title , "medical education")>0
- 25.     drop if strpos(lower_title , "funding")>0
- 26.     drop if strpos(lower_title , "conference")>0
- 27.     drop if strpos(lower_title , "insurance")>0
- 28.     drop if strpos(lower_title , "fellowship")>0
- 29.     drop if strpos(lower_title , "ethics")>0
- 30.     drop if strpos(lower_title , "legislation")>0
- 31.     drop if strpos(lower_title , " regulation")>0
- 32.     gcontract pmid
- 33.     drop _freq
- 34.     save ../output/list_of_pmids_clin_med, replace 
- 35. end
+  2.     *merge 1:1 pmid using ../external/wos/med_appended.dta, assert(1 2 3) 
+> keep(3) nogen 
+.     merge 1:1 pmid using ../external/xwalk/med_all_pmids, assert(1 2 3) keep(
+> 3) nogen
+  3. /*    gen lower_title = strlower(title)
+>     drop if strpos(lower_title, "economic")>0
+>     drop if strpos(lower_title, "economy")>0
+>     drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACOs")
+> >0
+>     drop if strpos(lower_title, "health care")>0
+>     drop if strpos(lower_title, "health-care")>0
+>     drop if strpos(lower_title, "public health")>0
+>     drop if strpos(lower_title, "government")>0
+>     drop if strpos(lower_title, "reform")>0
+>     drop if strpos(lower_title , "quality")>0
+>     drop if strpos(lower_title , "equity")>0
+>     drop if strpos(lower_title , "payment")>0
+>     drop if strpos(lower_title , "politics")>0
+>     drop if strpos(lower_title , "policy")>0
+>     drop if strpos(lower_title , "comment")>0
+>     drop if strpos(lower_title , "guideline")>0
+>     drop if strpos(lower_title , "professionals")>0
+>     drop if strpos(lower_title , "physician")>0
+>     drop if strpos(lower_title , "workforce")>0
+>     drop if strpos(lower_title , "medical-education")>0
+>     drop if strpos(lower_title , "medical education")>0
+>     drop if strpos(lower_title , "funding")>0
+>     drop if strpos(lower_title , "conference")>0
+>     drop if strpos(lower_title , "insurance")>0
+>     drop if strpos(lower_title , "fellowship")>0
+>     drop if strpos(lower_title , "ethics")>0
+>     drop if strpos(lower_title , "legislation")>0
+>     drop if strpos(lower_title , " regulation")>0*/
+.     gcontract pmid
+  4.     drop _freq
+  5.     save ../output/list_of_pmids_clin_med, replace 
+  6. end
 
 . main
+(variable pmid was long, now double to accommodate using data's values)
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                           469,971  
+    Matched                           504,835  
     -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                           387,636  
-    -----------------------------------------
-(810 observations deleted)
-(34 observations deleted)
-(1 observation deleted)
-(265 observations deleted)
-(8 observations deleted)
-(213 observations deleted)
-(74 observations deleted)
-(51 observations deleted)
-(1,818 observations deleted)
-(23 observations deleted)
-(30 observations deleted)
-(7 observations deleted)
-(161 observations deleted)
-(25 observations deleted)
-(147 observations deleted)
-(91 observations deleted)
-(161 observations deleted)
-(9 observations deleted)
-(0 observations deleted)
-(5 observations deleted)
-(10 observations deleted)
-(8 observations deleted)
-(91 observations deleted)
-(2 observations deleted)
-(7 observations deleted)
-(8 observations deleted)
-(7,395 observations deleted)
 (file ../output/list_of_pmids_newfund_jrnls.dta not found)
 file ../output/list_of_pmids_newfund_jrnls.dta saved
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                            26,401  
+    Matched                           246,124  
     -----------------------------------------
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                            26,401  
-    -----------------------------------------
-(236 observations deleted)
-(7 observations deleted)
-(4 observations deleted)
-(268 observations deleted)
-(171 observations deleted)
-(66 observations deleted)
-(27 observations deleted)
-(92 observations deleted)
-(377 observations deleted)
-(30 observations deleted)
-(57 observations deleted)
-(6 observations deleted)
-(120 observations deleted)
-(13 observations deleted)
-(154 observations deleted)
-(23 observations deleted)
-(414 observations deleted)
-(13 observations deleted)
-(38 observations deleted)
-(43 observations deleted)
-(26 observations deleted)
-(10 observations deleted)
-(58 observations deleted)
-(7 observations deleted)
-(56 observations deleted)
-(17 observations deleted)
-(35 observations deleted)
 (file ../output/list_of_pmids_clin_med.dta not found)
 file ../output/list_of_pmids_clin_med.dta saved
 
@@ -227,6 +162,6 @@ file ../output/list_of_pmids_clin_med.dta saved
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-08-15 14:25:14
+Makelog ended: 2023-08-16 23:56:31
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/create_pmid_list/code
 --------------------------------------------------------------------------------
