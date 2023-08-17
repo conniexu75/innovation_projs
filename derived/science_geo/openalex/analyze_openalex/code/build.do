@@ -16,26 +16,79 @@ program main
 end
 program merge_files 
     use ../external/openalex/openalex_newfund_jrnls_merged, clear
+    gen date = date(pub_date, "YMD")
+    format %td date
+    drop pub_date
+    merge m:1 pmid using ../external/pmids_jrnl/all_jrnls_all_pmids.dta, assert(2 3) keep(3) nogen keepusing(journal_abbr)
     // after we get journal info from open alex we can delete the following 
-    merge m:1 pmid using ../external/pmids/cns_all_pmids.dta, assert(1 2 3) keep(1 3) nogen
-    merge m:1 pmid using ../external/pmids/scisub_all_pmids.dta, assert(1 2 3 4) keep(1 3 4)  update
-    merge m:1 pmid using ../external/pmids/demsci_all_pmids.dta, assert(1 2 3 4) keep(1 3 4) nogen update
     cap drop _merge author_id
+    gen lower_title = strlower(title)
+    drop if strpos(lower_title, "economic")>0
+    drop if strpos(lower_title, "economy")>0
+    drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACOs")>0
+    drop if strpos(lower_title, "health care")>0
+    drop if strpos(lower_title, "health-care")>0
+    drop if strpos(lower_title, "public health")>0
+    drop if strpos(lower_title, "government")>0
+    drop if strpos(lower_title, "reform")>0
+    drop if strpos(lower_title , "quality")>0
+    drop if strpos(lower_title , "equity")>0
+    drop if strpos(lower_title , "payment")>0
+    drop if strpos(lower_title , "politics")>0
+    drop if strpos(lower_title , "policy")>0
+    drop if strpos(lower_title , "comment")>0
+    drop if strpos(lower_title , "guideline")>0
+    drop if strpos(lower_title , "professionals")>0
+    drop if strpos(lower_title , "physician")>0
+    drop if strpos(lower_title , "workforce")>0
+    drop if strpos(lower_title , "medical-education")>0
+    drop if strpos(lower_title , "medical education")>0
+    drop if strpos(lower_title , "funding")>0
+    drop if strpos(lower_title , "conference")>0
+    drop if strpos(lower_title , "insurance")>0
+    drop if strpos(lower_title , "fellowship")>0
+    drop if strpos(lower_title , "ethics")>0
+    drop if strpos(lower_title , "legislation")>0
+    drop if strpos(lower_title , " regulation")>0
+
     save ${temp}/openalex_newfund_jrnls_panel, replace
 
     use ../external/openalex/openalex_clin_med_merged, clear
-    merge m:1 pmid using ../external/pmids/med_all_pmids.dta, assert(1 2 3) keep(1 3) nogen
+    gen date = date(pub_date, "YMD")
+    format %td date
+    drop pub_date
+    merge m:1 pmid using ../external/pmids_jrnl/med_all_pmids.dta, assert(2 3) keep(3) nogen keepusing(journal_abbr)
     cap drop author_id
     cap drop _merge
+    gen lower_title = strlower(title)
+    drop if strpos(lower_title, "economic")>0
+    drop if strpos(lower_title, "economy")>0
+    drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACOs")>0
+    drop if strpos(lower_title, "health care")>0
+    drop if strpos(lower_title, "health-care")>0
+    drop if strpos(lower_title, "public health")>0
+    drop if strpos(lower_title, "government")>0
+    drop if strpos(lower_title, "reform")>0
+    drop if strpos(lower_title , "quality")>0
+    drop if strpos(lower_title , "equity")>0
+    drop if strpos(lower_title , "payment")>0
+    drop if strpos(lower_title , "politics")>0
+    drop if strpos(lower_title , "policy")>0
+    drop if strpos(lower_title , "comment")>0
+    drop if strpos(lower_title , "guideline")>0
+    drop if strpos(lower_title , "professionals")>0
+    drop if strpos(lower_title , "physician")>0
+    drop if strpos(lower_title , "workforce")>0
+    drop if strpos(lower_title , "medical-education")>0
+    drop if strpos(lower_title , "medical education")>0
+    drop if strpos(lower_title , "funding")>0
+    drop if strpos(lower_title , "conference")>0
+    drop if strpos(lower_title , "insurance")>0
+    drop if strpos(lower_title , "fellowship")>0
+    drop if strpos(lower_title , "ethics")>0
+    drop if strpos(lower_title , "legislation")>0
+    drop if strpos(lower_title , " regulation")>0
     save ${temp}/openalex_clin_med_panel, replace
-
-    // merge in wos 
-    clear
-    foreach samp in cns med scisub demsci {
-        append using ../external/wos/`samp'_appended
-    }
-    gduplicates drop pmid, force
-    save ${temp}/wos_appended, replace
 
     clear
     forval i = 1/7 {
@@ -63,23 +116,9 @@ program merge_files
     save ../output/all_inst_geo_chars, replace
     foreach samp in newfund_jrnls clin_med {
         use ${temp}/openalex_`samp'_panel, clear
-        merge m:1 pmid using ${temp}/wos_appended, assert(1 2 3) keep(1 3) nogen keepusing(cite_count pub_mnth pub_year)
-        tostring pub_year, replace
-        gen date = subinstr(strlower(pub_mnth) + pub_year, " " , "",. )
-        gen pub_date = date(date, "MDY")
-        format pub_date %td
-        drop date
-        rename pub_date date
-       /* gunique pmid
-        local pmids = r(unique)
-        gduplicates drop pmid which_athr inst, force
-        joinby inst_id using ../output/all_inst_geo_chars, unmatched(master)
-        gunique pmid
-        assert r(unique) == `pmids'
-        hashsort pmid which_athr which_affl which_assoc
-        replace inst = associated if inlist(associated, "National Institutes of Health") 
-        replace inst_id = associated_id if !mi(associated_id)
-        bys pmid which_athr (which_affl which_assoc): replace which_affl = _n*/
+        rename date pub_date
+        gen pub_mnth = month(pub_date)
+        gen year = year(pub_date)
         merge m:1 inst_id using ../output/all_inst_geo_chars, assert(1 2 3) keep(1 3) nogen 
         replace inst = new_inst if !mi(new_inst)
         save ${temp}/cleaned_all_`samp', replace
@@ -111,7 +150,8 @@ program merge_files
         replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)
 
         //  we don't want to count broad and HHMI if they are affiliated with other institutions.
-        cap drop author_id which_athr_counter num_which_athr min_which_athr which_athr2 
+        cap drop author_id 
+        cap drop which_athr_counter num_which_athr min_which_athr which_athr2 
         bys pmid athr_id (which_athr which_affl): gen author_id = _n ==1
         bys pmid (which_athr which_affl): gen which_athr2 = sum(author_id)
         replace which_athr = which_athr2
@@ -154,7 +194,7 @@ program merge_files
         save ${temp}/pmid_id_xwalk_`samp', replace
         restore
 
-        keep if inrange(date, td(01jan2015), td(31dec2022)) & year >=2015
+        keep if inrange(pub_date, td(01jan2015), td(31dec2022)) & year >=2015
         drop cite_wt cite_affl_wt
         qui sum avg_cite_yr
         gen cite_wt = avg_cite_yr/r(sum)
@@ -170,8 +210,8 @@ end
 
 program clean_mesh
     clear
-    forval i = 1/73 {
-        append using ../external/openalex/mesh_terms`i'
+    forval i = 1/101 {
+        cap append using ../external/openalex/mesh_terms`i'
     }
     gduplicates drop id term, force
     keep if is_major_topic == 1
@@ -190,8 +230,8 @@ program clean_mesh
     save ../output/contracted_gen_mesh_newfund_jrnls, replace
 
     clear
-    forval i = 1/5 {
-        append using ../external/openalex/mesh_terms_clin`i'
+    forval i = 1/50 {
+        cap append using ../external/openalex/mesh_terms_clin`i'
     }
     gduplicates drop id term, force
     keep if is_major_topic == 1
