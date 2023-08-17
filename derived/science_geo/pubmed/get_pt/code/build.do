@@ -14,21 +14,9 @@ program main
     clean_pubtype
 end
 program append_metadata
-    local filelist1: dir "../external/cns_med/" files "*.csv"
-    local filelist2: dir "../external/other/" files "*.csv"
+    local filelist1: dir "../output/" files "*.csv"
     foreach file in `filelist1' {
-        import delimited "../external/cns_med/`file'", clear varn(1)
-        keep pmid pt
-        tostring pmid, replace
-        drop if inlist(pmid, "pmid", "v1", "NA")
-        destring pmid, replace
-        local name = subinstr("`file'",".csv","",.)
-        local namelist `namelist' `name'
-        compress, nocoalesce 
-        save ${temp}/`name', replace
-    }
-    foreach file in `filelist2' {
-        import delimited "../external/other/`file'", clear varn(1)
+        import delimited "../output/`file'", clear varn(1)
         keep pmid pt
         tostring pmid, replace
         drop if inlist(pmid, "pmid", "v1", "NA")
@@ -126,6 +114,8 @@ program clean_pubtype
        replace pub_type = pt`i' if mi(pub_type)
     }
 	drop if to_drop == 1
+    gcontract pmid
+    drop _freq
     save ../output/cleaned_clin_med_base, replace
 end
 ** 
