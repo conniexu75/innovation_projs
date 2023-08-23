@@ -37,7 +37,7 @@ end
 program athr_loc
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
-    use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
+    use ../external/openalex/cleaned_all_`data'_`samp', clear
     drop if journal_abbr == "PLoS One"
     foreach loc in country msa_c_world inst { 
         qui gunique pmid //which_athr //if !mi(affiliation)
