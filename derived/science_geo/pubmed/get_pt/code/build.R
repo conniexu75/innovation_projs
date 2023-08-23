@@ -9,10 +9,12 @@ setwd(here())
 set.seed(8975)
 #--------------------------------------------------------------------------------
 # Pull Publication Type
-# apis: 2f42bf6944745e7c722c4cbf5ac9f3d3ff09
 # apis:ae06e6619c472ede6b6d4ac4b5eadecdb209 
+# apis: 2f42bf6944745e7c722c4cbf5ac9f3d3ff09
 #apis: 3c5c4af6c47a9f9e478bc7e7e8c30a794d09
 #70e87a4b501324ec5eab0eca260b1fddf909
+#a19b7fe2b8cd919fe5ed98599fae27bcb109
+#ae3517c852d168be6f84fb447d9d7981de08
 pull_pt = function(id) {
   id_equals = paste0('id=', id)
   if (id_equals != "id=NA") {
@@ -21,7 +23,7 @@ pull_pt = function(id) {
     url = paste0('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=',
                  id,
                  '&retmode=xml',
-                 '&api_key=3c5c4af6c47a9f9e478bc7e7e8c30a794d09')
+                 '&api_key=ae06e6619c472ede6b6d4ac4b5eadecdb209')
     # Query PubMed and save result
     xml = read_xml(url)
     pt = xml %>%
@@ -29,7 +31,7 @@ pull_pt = function(id) {
     pt = as.character(pt)
     pt = gsub("\n", "", pt)
     output = c(pt)
-    Sys.sleep(runif(1,0.3,0.5))
+    Sys.sleep(runif(1,0.5,1))
   }
   else {
     output = c("NA")
@@ -42,7 +44,7 @@ pull_pt = function(id) {
 #pmid <- queries$pmid
 #len <- length(pmid)
 #n <- ceiling(len/500)
-#for (i in 451:500) {
+#for (i in 451:n) {
 #  while(TRUE) {
 #      print(i)
 #      start <- (i-1)*500+1
@@ -51,15 +53,15 @@ pull_pt = function(id) {
 #      if(!is(test, 'try-error')) break
 #  }
 #  info = test
-#  master = data.frame(pmid = pmid[start:end], pt = info[1])
+#  master = data.frame(pmid = pmid[start:end], pt = info)
 #  file_name = paste("../output/","cns_",start,"_", end,".csv", sep="")
-#  write_csv(master, file = file_name)
+#  write_csv(master, path = file_name)
 #}
 #queries <- read_dta(file = '../external/pmid/med_all_pmids.dta')
 #pmid <- queries$pmid
 #len <- length(pmid)
 #n <- ceiling(len/500)
-#for (i in 480:500) {
+#for (i in 624:624) {
 #  while(TRUE) {
 #      print(i)
 #      start <- (i-1)*500+1
@@ -68,15 +70,15 @@ pull_pt = function(id) {
 #      if(!is(test, 'try-error')) break
 #  }
 #  info = test
-#  master = data.frame(pmid = pmid[start:end], pt = info[1])
+#  master = data.frame(pmid = pmid[start:end], pt = info)
 #  file_name = paste("../output/","med_",start,"_", end,".csv", sep="")
-#  write_csv(master, file = file_name)
+#  write_csv(master, path = file_name)
 #}
 #queries <- read_dta(file = '../external/pmid/scisub_all_pmids.dta')
 #pmid <- queries$pmid
 #len <- length(pmid)
 #n <- ceiling(len/1000)
-#for (i in 11:20) {
+#for (i in 41:n) {
 #  while(TRUE) {
 #      print(i)
 #      start <- (i-1)*1000+1
@@ -85,15 +87,15 @@ pull_pt = function(id) {
 #      if(!is(test, 'try-error')) break
 #  }
 #  info = test
-#  master = data.frame(pmid = pmid[start:end], pt = info[1])
+#  master = data.frame(pmid = pmid[start:end], pt = info)
 #  file_name = paste("../output/","scisub_",start,"_", end,".csv", sep="")
-#  write_csv(master, file = file_name)
+#  write_csv(master, path = file_name)
 #}
 queries <- read_dta(file = '../external/pmid/demsci_all_pmids.dta')
 pmid <- queries$pmid
 len <- length(pmid)
 n <- ceiling(len/1000)
-for (i in 60:60){
+for (i in 70:70){
   while(TRUE) {
       print(i)
       start <- (i-1)*1000+1
@@ -102,7 +104,7 @@ for (i in 60:60){
       if(!is(test, 'try-error')) break
   }
   info = test
-  master = data.frame(pmid = pmid[start:end], pt = info[1])
+  master = data.frame(pmid = pmid[start:end], pt = info)
   file_name = paste("../output/","demsci_",start,"_", end,".csv", sep="")
-  write_csv(master, file = file_name)
+  write_csv(master, path = file_name)
 }
