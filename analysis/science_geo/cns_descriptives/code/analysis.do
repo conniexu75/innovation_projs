@@ -244,11 +244,11 @@ program trends
         qui replace labely_lab = subinstr(labely_lab, "CA", "US", .) if strpos("`loc'" , "world")>0
         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "UK", .)
         qui sum `year_var'
-        replace `year_var' = 2022 if `year_var' == r(max)
+        replace `year_var' = 2023 if `year_var' == r(max)
         if "`loc'" == "country" {
-            graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2022, ms(smcircle) ///
+            graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2023, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
-              ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2022, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+              ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
               graphregion(margin(r+32)) plotregion(margin(zero)) ///
               legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining places") label(6 "Missing Info") ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
@@ -256,9 +256,9 @@ program trends
         local w = 32 
         if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_c_world" | "`loc'" == "msa_comb") local w = 32
         if "`loc'" != "country" {
-            graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2022, ms(smcircle) ///
+            graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2023, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
-              ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2022, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+              ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
               graphregion(margin(r+`w')) plotregion(margin(zero)) ///
               legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places") label(5 "Missing Info") ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
