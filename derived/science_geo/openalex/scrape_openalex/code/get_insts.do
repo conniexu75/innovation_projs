@@ -13,11 +13,21 @@ program main
     append_files
 end
 program append_files
-    clear
-    forval i = 1/100 {
-        append using ../output/openalex_authors`i'
+    qui {
+        forval i = 1/142 {
+            import delimited using ../output/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict)
+            gen n = `i'
+            save ../temp/openalex_authors`i', replace
+        }
+        clear
+        forval i = 1/142 {
+            append using ../temp/openalex_authors`i'
+        }
     }
     destring pmid, replace
+    destring which_athr, replace
+    destring which_affl, replace
+    destring cite_count, replace
     gduplicates drop  pmid which_athr which_affl inst_id , force
     gduplicates drop  pmid which_athr inst_id , force
     gduplicates tag pmid which_athr which_affl, gen(dup)
@@ -34,6 +44,7 @@ program append_files
     drop which_athr_counter num_which_athr
     bys pmid athr_id which_athr : gen which_athr_counter = _n == 1
     bys pmid athr_id: egen num_which_athr = sum(which_athr_counter)
+    cap destring which_athr, replace
     bys pmid athr_id: egen min_which_athr = min(which_athr)
     replace which_athr = min_which_athr if num_which_athr > 1
     gduplicates drop pmid which_athr inst_id, force
@@ -43,14 +54,22 @@ program append_files
     drop which_athr2
     bys pmid which_athr (which_affl) : replace which_affl = _n 
     gisid pmid which_athr which_affl
-    save ../output/openalex_newfund_jrnls_merged, replace
+    save ../output/openalex_all_jrnls_merged, replace
 
     // repeat for clin med
-    clear
-    forval i = 1/50 {
-        append using ../output/openalex_authors_clin`i'
+    qui {
+        forval i = 1/51 {
+            import delimited ../output/openalex_authors_clin`i', stringcols(_all) clear bindquotes(strict)
+            save ../temp/openalex_authors_clin`i', replace
+        }
+        clear
+        forval i = 1/51 {
+            append using ../temp/openalex_authors_clin`i'
+        }
     }
     destring pmid, replace
+    destring which*, replace
+    destring cite_count, replace
     gduplicates drop  pmid which_athr which_affl inst_id , force
     gduplicates drop  pmid which_athr inst_id , force
     gduplicates tag pmid which_athr which_affl, gen(dup)
@@ -67,6 +86,7 @@ program append_files
     drop which_athr_counter num_which_athr
     bys pmid athr_id which_athr : gen which_athr_counter = _n == 1
     bys pmid athr_id: egen num_which_athr = sum(which_athr_counter)
+    cap destring which_athr, replace
     bys pmid athr_id: egen min_which_athr = min(which_athr)
     replace which_athr = min_which_athr if num_which_athr > 1
     gduplicates drop pmid which_athr inst_id, force
@@ -84,5 +104,4 @@ program append_files
     drop if mi(inst_id)
     save ../output/list_of_insts, replace
 end
-
 main

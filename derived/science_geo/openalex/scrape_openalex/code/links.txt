@@ -1,3 +1,3 @@
 ./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
 ./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/wos/clean_wos_exports/output/
-./pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/create_pmid_list/output/
+./pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/get_pt/output/
