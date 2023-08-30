@@ -14,13 +14,13 @@ program main
 end
 program append_files
     qui {
-        forval i = 1/142 {
+        forval i = 1/143 {
             import delimited using ../output/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict)
             gen n = `i'
             save ../temp/openalex_authors`i', replace
         }
         clear
-        forval i = 1/142 {
+        forval i = 1/143 {
             append using ../temp/openalex_authors`i'
         }
     }
@@ -54,7 +54,7 @@ program append_files
     drop which_athr2
     bys pmid which_athr (which_affl) : replace which_affl = _n 
     gisid pmid which_athr which_affl
-    save ../temp/openalex_all_jrnls_merged, replace
+    save ../output/openalex_all_jrnls_merged, replace
 
     // repeat for clin med
     qui {
@@ -96,12 +96,12 @@ program append_files
     drop which_athr2
     bys pmid which_athr (which_affl) : replace which_affl = _n 
     gisid pmid which_athr which_affl
-    save ../temp/openalex_clin_med_merged, replace
+    save ../output/openalex_clin_med_merged, replace
 
-/*    append using ../output/openalex_newfund_jrnls_merged
+    append using ../output/openalex_all_jrnls_merged
     gcontract inst_id
     drop _freq
     drop if mi(inst_id)
-    save ../output/list_of_insts, replace*/
+    save ../output/list_of_insts, replace
 end
 main
