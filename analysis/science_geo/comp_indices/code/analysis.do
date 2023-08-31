@@ -18,22 +18,22 @@ program main
     global inst_name "institutions"
     foreach samp in cns scisub demsci { 
         local samp_type = cond(strpos("`samp'", "cns")>0 | strpos("`samp'","med")>0, "main", "robust")
-        foreach data in newfund {
+/*        foreach data in newfund {
         di "SAMPLE IS : `samp' `data'"
             foreach var in affl_wt cite_affl_wt {
                 athr_loc, data(`data') samp(`samp') wt_var(`var')
             }
             qui output_tables, data(`data') samp(`samp') 
         }
-        corr_wt, samp(`samp')
+        corr_wt, samp(`samp')*/
         foreach var in affl_wt cite_affl_wt {
             qui comp_w_fund, samp(`samp')  wt_var(`var')
         }
     }
-    foreach file in corr_wt {
+/*    foreach file in corr_wt {
         qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`file') ///
            title(<tab:`file'>) format(%20.4f) replace
-         }
+         }*/
 end
 
 program athr_loc
@@ -114,7 +114,7 @@ program comp_w_fund
          if "`trans'" == "nofund"  local `trans'_name "Translational Science"
          foreach type in  msa_c_world inst {
             qui {
-                global top_20 : list global(`type'_newfund_`samp') | global(`type'_`trans'_`samp')
+                *global top_20 : list global(`type'_newfund_`samp') | global(`type'_`trans'_`samp')
                 use ../external/cleaned_samps/cleaned_last5yrs_newfund_`samp', clear
                 cap drop type
                 gen s_type = "fund"
@@ -123,10 +123,10 @@ program comp_w_fund
                 rename s_type type
                 drop if journal_abbr == "annals"
                 replace type = "trans" if mi(type)
-                gen to_keep = 0
-                foreach i of global top_20 {
+                gen to_keep = 1
+                /*foreach i of global top_20 {
                     replace to_keep = 1 if `type' == "`i'" 
-                }
+                }*/
                 gcollapse (sum) `wt_var' (mean) to_keep, by(`type' type)
                 qui sum `wt_var' if type == "fund"
                 gen share = `wt_var'/round(r(sum))*100 if type == "fund"
@@ -143,6 +143,7 @@ program comp_w_fund
                 gen onetrans = _n 
                 gen zerofund = onefund-1
                 gen zerotrans = onetrans-1
+                save ../temp/`type'`suf', replace
                 // inst labels
                 cap replace inst = "Caltech" if inst == "california institute tech"
                 cap replace inst = "CDC" if inst == "cdc"
