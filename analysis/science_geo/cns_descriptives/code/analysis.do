@@ -48,12 +48,15 @@ program athr_loc
         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
             qui keep if country == "United States"
         }
-        gcollapse (sum) `wt_var', by(`loc')
+        collapse (sum) `wt_var', by(`loc')
         qui hashsort -`wt_var' 
         qui gen perc = `wt_var' / `total' * 100
         li if mi(`loc')
         qui drop if mi(`loc')
         qui gen cum_perc = sum(perc) 
+        gen rank = _n 
+        save ../temp/rankings_`loc'`suf', replace
+        drop rank
         qui count
         local rank_end = min(r(N),20) 
         li `loc' perc in 1/`rank_end'
@@ -148,17 +151,17 @@ program trends
         qui sum year
         local min_year = max(1945,r(min))
         qui egen year_bin  = cut(year), at(1945(2)2023) 
-*        keep if !mi(`loc')
+        keep if !mi(`loc')
 *        keep if which_athr == 1
-        /*cap drop author_id 
+        cap drop author_id 
         qui bys pmid athr_id (which_athr which_affl) :  gen author_id = _n ==1
          bys pmid (which_athr which_affl): gen which_athr2 = sum(author_id)
          replace which_athr = which_athr2
          cap drop num_athrs
          bys pmid: egen num_athrs = max(which_athr) 
          drop which_athr2
-         bys pmid which_athr: replace num_affls = _N*/
-*        replace affl_wt = 1/num_affls * 1/num_athrs
+         bys pmid which_athr: replace num_affls = _N
+        replace affl_wt = 1/num_affls * 1/num_athrs
 *j        qui replace affl_wt = 1/num_affls
         local year_var year_bin
         qui bys pmid `year_var': replace counter = _n == 1
@@ -169,24 +172,24 @@ program trends
         replace cite_wt = cite_count/ tot_cites_in_`year_var' * tot_in_`year_var'
         hashsort pmid cite_wt
         qui by pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
-        replace cite_affl_wt = affl_wt * cite_wt
-        replace rank_grp = "missing" if mi(`loc')
-        collapse (sum) `wt_var' (mean) tot_in_`year_var' (firstnm) `loc' , by(rank_grp `year_var')
+        replace cite_affl_wt = affl_wt * cite_wt 
+        collapse (sum) `wt_var' (mean) tot_in_`year_var' (firstnm) `loc'  , by(rank_grp `year_var')
         qui gen perc = `wt_var'/tot_in_`year_var' * 100
         qui bys `year_var': egen tot = sum(perc)
+        save ../temp/trends_`loc'`suf', replace
         qui replace tot = round(tot)
         assert tot==100
         qui drop tot
         if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "msa_world" |  "`loc'" == "msa_c_world" | "`loc'" == "msa_comb" {
-            label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places" 5 "Missing"
+            label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places" 
         }
         if "`loc'" == "inst" {
             local proper_1 = strproper(${`loc'_first})
             local proper_2 = strproper(${`loc'_second})
-            label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places" 5 "Missing"
+            label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places" 
         }
         if "`loc'" == "country" {
-            label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "China" 4 "Rest of the top 10 ${`loc'_name}" 5 "Remaining places" 6 "Missing"
+            label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "China" 4 "Rest of the top 10 ${`loc'_name}" 5 "Remaining places" 
         }
         label var rank_grp rank_grp
         qui gen group = 1 if rank_grp == "first"
@@ -196,7 +199,7 @@ program trends
         if "`loc'" == "country" local last = 3 
         qui replace group = `last'+1 if rank_grp == "rest of top 10" 
         qui replace group = `last'+2 if rank_grp == "remaining"
-        qui replace group = `last'+3 if rank_grp == "missing"
+        *qui replace group = `last'+3 if rank_grp == "missing"
         qui hashsort `year_var' -group
         qui bys `year_var': gen stack_perc = sum(perc)
         keep rank_grp `year_var' `loc' perc group stack_perc
@@ -207,31 +210,29 @@ program trends
         qui levelsof group, local(rank_grps)
         local items = `r(r)'
         foreach x of local rank_grps {
-           colorpalette HTML purple, n(`items') nograph
+           colorpalette carto PurpOr, intensify(0.75)  n(`items') nograph
            local stacklines `stacklines' area stack_perc `year_var' if group == `x', fcolor("`r(p`x')'") lcolor(black) lwidth(*0.2) || 
-           if `x' == `max_grp' {
+/*           if `x' == `max_grp' {
                local stacklines `stacklines' area stack_perc `year_var' if group == `x', fcolor("dimgray") lcolor(black) lwidth(*0.2) || 
-           }
+           }*/
         }
         qui gen labely = . 
         qui gen rev_group = -group
         if "`loc'"=="country" {
-            qui bys `year_var' (rev_group): replace labely = perc/2 if group == 6
-            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] if group == 5
-            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] if group == 4
-            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] if group == 3
-            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] + perc[_n-4] if group == 2
-            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] + perc[_n-4] + perc[_n-5] if group == 1
-        }
-        if "`loc'"!="country" {
             qui bys `year_var' (rev_group): replace labely = perc/2 if group == 5
             qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] if group == 4
             qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] if group == 3
             qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] if group == 2
-            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] +perc[_n-4] if group == 1
+            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] + perc[_n-4] if group == 1
         }
-        qui gen labely_lab = "Missing Info" if group == `last'+3
-        qui replace labely_lab = "Everywhere else" if group == `last'+2
+        if "`loc'"!="country" {
+            qui bys `year_var' (rev_group): replace labely = perc/2 if group == 4
+            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] if group == 3
+            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] if group == 2
+            qui bys `year_var' (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] if group == 1
+        }
+*        qui gen labely_lab = "Missing Info" if group == `last'+3
+        qui gen labely_lab = "Everywhere else" if group == `last'+2
         qui replace labely_lab = "Rest of the top 10 ${`loc'_name}" if group == `last'+1
         qui replace labely_lab = "China" if group == 3 & "`loc'"=="country"
         qui replace labely_lab = ${`loc'_second} if group == 2
@@ -250,7 +251,7 @@ program trends
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
               ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
               graphregion(margin(r+32)) plotregion(margin(zero)) ///
-              legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining places") label(6 "Missing Info") ring(1) pos(6) rows(2))
+              legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining places")  ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
         }
         local w = 32 
@@ -260,7 +261,7 @@ program trends
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
               ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
               graphregion(margin(r+`w')) plotregion(margin(zero)) ///
-              legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places") label(5 "Missing Info") ring(1) pos(6) rows(2))
+              legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places")  ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
         }
         restore
