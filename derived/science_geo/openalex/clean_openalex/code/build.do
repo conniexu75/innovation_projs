@@ -22,18 +22,27 @@ program main
 end
 
 program aggregate_insts
-    clear
-    forval i = 1/7 {
-        append using ../external/openalex/inst_geo_chars`i'
+    qui {
+        forval i = 1/8 {
+            cap import delimited using ../external/openalex/inst_geo_chars`i', clear varn(1) bindquotes(strict)
+            save ${temp}/inst_geo_chars`i', replace
+        }
+        clear 
+        forval i = 1/8 {
+            cap append using ${temp}/inst_geo_chars`i'
+        }
     }
     bys inst_id: egen has_parent = max(associated_rel == "parent")
-    keep if has_parent == 0 | (has_parent == 1 & associated_rel == "parent")
+    bys inst_id: gen num = _N 
+    keep if has_parent == 0  | (has_parent == 1 & associated_rel == "parent" ) | num == 1
     ds associated* 
     foreach var in `r(varlist)' {
         replace `var' = "" if has_parent == 0
+        replace `var' = "" if (strpos(associated, "University")>0 & strpos(associated, "System")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | inlist(associated, "University of London", "National Institutes of Health" , "Wellcome Trust") | (strpos(associated, "Health")>0 & strpos(associated, "System")>0 & associated_type == "healthcare" & (type == "education" | type == "healthcare")) | (strpos(associated, "Higher")>0 & strpos(associated, "Education")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | strpos(associated, "Ministry of") > 0 | strpos(associated, "Board of")>0 | strpos(associated, "Government of")>0 | (strpos(associated, "Department of")>0 & country != "Russia")
+        replace `var' = "" if country_code != associated_country
     }
     gduplicates drop inst_id associated_id, force
-    replace inst = associated if strpos(associated, "University")>0 & strpos(associated, "System")>0 & associated_type == "education" & type != "education"
+    replace inst = associated if strpos(associated, "University")>0 & strpos(associated, "System")>0 & associated_type == "education" & (type != "education" & type != "healthcare")
     replace inst = associated if inlist(associated, "Chinese Academy of Sciences", "Spanish National Research Council", "Max Planck Society", "National Research Council", "National Institutes of Health", "Harvard University")
     replace inst = associated if inlist(associated, "Leibniz Association", "Aix-Marseille University", "Indian Council of Agricultural Research", "Inserm", "Polish Academy of Sciences", "National Research Institute for Agriculture, Food and Environment") 
     replace inst = associated if inlist(associated, "Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions")
@@ -57,22 +66,30 @@ program aggregate_insts
     replace inst = associated if inlist(associated, "Russian Academy")
     replace inst = associated if strpos(associated, "Agricultural Research Service -")>0
     // merge national institutions together
-    replace inst = "French National Centre for Scientific Research" if inlist(inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions") | inlist(inst,"Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
-    replace associated_id = "I1294671590" if inst=="French National Centre for Scientific Research"
-    replace inst = "Russian Academy" if inlist(inst, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") | inlist(inst, "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences")
-    replace associated_id = "I1313323035" if inst == "Russian Academy"
-    replace inst = "Agricultural Research Service" if strpos(inst, "Agricultural Research Service - ")>0
+    replace associated = "French National Centre for Scientific Research" if inlist(inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions") | inlist(inst,"Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
+    replace associated_id = "I1294671590" if associated =="French National Centre for Scientific Research"
+    replace associated = "Russian Academy" if inlist(inst, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") | inlist(inst, "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences")
+    replace associated_id = "I1313323035" if associated == "Russian Academy"
+    replace associated  = "Agricultural Research Service" if strpos(inst, "Agricultural Research Service - ")>0
     replace associated_id = "I1312222531" if inst == "Agricultural Research Service"
-    replace inst = "Max Planck Society" if strpos(inst, "Max Planck")>0
+    replace associated  = "Max Planck Society" if strpos(inst, "Max Planck")>0
+    replace associated = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
+    replace associated_id = "I4210166203" if associated == "Max Planck Society"
     replace inst = "Johns Hopkins University" if strpos(inst, "Johns Hopkins")>0
+    replace associated = "Johns Hopkins University" if strpos(associated, "Johns Hopkins")>0
+    replace associated_id = "I145311948" if associated == "Johns Hopkins University"
     replace inst = "Stanford University" if inlist(inst, "Stanford Medicine", "Stanford Health Care")
+    replace associated = "Stanford University" if inlist(associated, "Stanford Medicine", "Stanford Health Care")
+    replace inst = "Northwestern University" if inlist(inst, "Northwestern Medicine")
+    replace associated = "Northwestern University" if inlist(inst, "Northwestern Medicine")
+    replace associated = "Harvard University" if inlist(inst, "Harvard Global Health Institute", "Harvard Pilgrim Health Care", "Harvard Affiliated Emergency Medicine Residency", "Harvard NeuroDiscovery Center")
     replace inst = subinstr(inst, " Health System", "", .) if strpos(inst, " Health System")>0 & (strpos(inst, "University")>0 | strpos(inst, "UC")>0)
     replace inst = subinstr(inst, " Medical System", "", .) if strpos(inst, " Medical System")>0 & (strpos(inst, "University")>0 | strpos(inst, "UC")>0)
     gduplicates drop inst_id, force
-    rename inst new_inst
+    rename associated new_inst
     rename associated_id new_id
-    keep inst_id new_inst new_id region city country country_code type
-    drop if mi(inst_id) | mi(new_id)
+    keep inst_id new_inst new_id region city country country_code type inst
+    drop if mi(inst_id) 
     save ../output/all_inst_geo_chars, replace
 end
 
@@ -91,93 +108,36 @@ program clean_titles
     if "`samp'" == "clin_med" {
         merge 1:1 pmid using ../external/pmids_jrnl/med_all_pmids, keep(3) nogen keepusing(pmid journal_abbr)
     }
-    gen lower_title = strlower(title)
     drop if mi(title)
-    drop if strpos(lower_title, "economic")>0
-    drop if strpos(lower_title, "economy")>0
+    gen lower_title = stritrim(subinstr(subinstr(subinstr(subinstr(strlower(title), `"""', "", .), ".", "",.)), " :", ":",.), "'", "", .)
     drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACOs")>0
-    drop if strpos(lower_title, "public health")>0
-    drop if strpos(lower_title, "hallmarks")>0
-    drop if strpos(lower_title, "government")>0
-    drop if strpos(lower_title, "reform")>0
-    *drop if strpos(lower_title , "quality")>0
-    drop if strpos(lower_title , "equity")>0
-    drop if strpos(lower_title , "payment")>0
-    drop if strpos(lower_title , "politics")>0
-    drop if strpos(lower_title , "policy")>0
-    drop if strpos(lower_title , "comment")>0
-    drop if strpos(lower_title , "guideline")>0
-    drop if strpos(lower_title , "professionals")>0
-    drop if strpos(lower_title , "physician")>0
-    drop if strpos(lower_title , "workforce")>0
-    drop if strpos(lower_title , "medical-education")>0
-    drop if strpos(lower_title , "medical education")>0
-    drop if strpos(lower_title , "funding")>0
-    drop if strpos(lower_title , "conference")>0
-    drop if strpos(lower_title , "insurance")>0
-    drop if strpos(lower_title , "fellowship")>0
-    drop if strpos(lower_title , "ethics")>0
-    drop if strpos(lower_title , "legislation")>0
-    *drop if strpos(lower_title , " regulation")>0
-    drop if strpos(lower_title , "the editor")>0
-    drop if strpos(lower_title , "response : ")>0
-    drop if strpos(lower_title , "letters")>0
     drop if lower_title == "response"
-    drop if strpos(lower_title , "this week")>0
-    drop if strpos(lower_title , "notes")>0
-    drop if strpos(lower_title , "news ")>0
-    drop if strpos(lower_title , "a note")>0
-    drop if strpos(lower_title , "obituary")>0
-    drop if strpos(lower_title , "review")>0
-    *jdrop if strpos(lower_title , "women")>0
-    drop if strpos(lower_title , "perspectives")>0
-    drop if strpos(lower_title , "scientists")>0
-    drop if strpos(lower_title , "books")>0
-    drop if strpos(lower_title , "institution")>0
-    drop if strpos(lower_title , "meeting")>0
-    drop if strpos(lower_title , "university")>0
-    drop if strpos(lower_title , "universities")>0
-    drop if strpos(lower_title , "journals")>0
-    drop if strpos(lower_title , "publication")>0
-    drop if strpos(lower_title , "recent ")>0
-    drop if strpos(lower_title , "costs")>0
-    drop if strpos(lower_title , "challenges")>0
-    drop if strpos(lower_title , "researchers")>0
-    *drop if strpos(lower_title , "research")>0
-    drop if strpos(lower_title , "perspective")>0
-    drop if strpos(lower_title , "reply")>0
-    drop if strpos(lower_title , " war")>0
-    drop if strpos(lower_title , " news")>0
-    drop if strpos(lower_title , "a correction")>0
-    drop if strpos(lower_title , "academia")>0
-    drop if strpos(lower_title , "society")>0
-    drop if strpos(lower_title , "academy of")>0
-    drop if strpos(lower_title , "nomenclature")>0
-    drop if strpos(lower_title , "teaching")>0
-    drop if strpos(lower_title , "education")>0
-    drop if strpos(lower_title , "college")>0
-    drop if strpos(lower_title , "academics")>0
-    drop if strpos(lower_title , "political")>0
-    drop if strpos(lower_title , "association for")>0
-    drop if strpos(lower_title , "association of")>0
     drop if strpos(lower_title , "nuts")>0 & strpos(lower_title, "bolts")>0
-    drop if strpos(lower_title , "response by")>0
-    drop if strpos(lower_title , "societies")>0
-    drop if strpos(lower_title, "health care")>0
-    drop if strpos(lower_title, "health-care")>0
-    drop if strpos(lower_title , "abstracts")>0
-    drop if strpos(lower_title , "journal club")>0
-    drop if strpos(lower_title , "curriculum")>0
-/*    preserve
+    foreach s in "economic" "economy" "public health" "hallmarks" "government" "reform" "equity" "payment" "politics" "policy" "policies" "comment" "guideline" "profession's" "interview" "debate" "profesor" "themes:"  "professionals" "physician" "workforce" "medical-education"  "medical education" "funding" "conference" "insurance" "fellowship" "ethics" "legislation" "the editor" "response : " "letters" "this week" "notes" "news " "a note" "obituary"  "review" "perspectives" "scientists" "book" "institution" "meeting" "university" "universities" "journals" "publication" "recent " "costs" "challenges" "researchers" "perspective" "reply" " war" " news" "a correction" "academia" "society" "academy of" "nomenclature" "teaching" "education" "college" "academics"  "political" "association for" "association of" "response by" "societies" "health care" "health-care"  "abstracts" "journal club" "curriculum" "women in science" "report:" "letter:" "editorial:" "lesson" "awards" "doctor" "nurse" "health workers" " story"  "case report" "a brief history" "lecture " "career" "finance" "criticism" "critique" "discussion" "world health" "workload" "compensation" "educators" "war" "announces" "training programmes" "nhs" "nih" "national institutes of health" "address" "public sector" "private sector" "government" "price" "reflections" "health care" "healthcare" "health-care" " law" "report" "note on" "insurer" "health service research" "error" "quality of life" {
+        drop if strpos(lower_title, "`s'")>0
+    }
+    gen strp = substr(lower_title, 1, strpos(lower_title, ": ")) if strpos(lower_title, ": ") > 0
+    bys strp journal_abbr : gen tot_strp = _N
+    foreach s in "letter:" "covid-19:" "snapshot:" "editorial:" "david oliver:" "offline:" "helen salisbury:" "margaret mccartney:" "book:" "response:" "letter from chicago:" "a memorable patient:" "<i>response</i> :" "reading for pleasure:" "partha kar" "venus:" "matt morgan:" "bad medicine:" "nota bene:" "cohort profile:" "size matters:" "usa:" "cell of the month:" "living on the edge:" "enhanced snapshot:" "world view:" "science careers:" "clare gerada:" "rammya mathew:" "endpiece:" "role model:" "quick uptakes:" "webiste of the week:" "tv:" "press:" "brief communication:" "essay:" "clinical update:" "assisted dying:" "controversies in management:" "health agencies update:" "the bmj awards 2020:" "lesson of the week:" "ebola:" "media:" "management for doctors:" "monkeypox:" "profile:" "the bmj awards 2017:" "the world in medicine:" "the bmj awards 2021:" "when i use a word . . .:" "personal paper:"  "clinical decision making:" "how to do it:" "10-minute consultation:" "frontline:" "when i use a word:" "medicine as a science:" "personal papers:" "miscellanea:" "the lancet technology:" {
+        drop if strpos(lower_title, "`s'") == 1 & tot_strp > 1
+    }
+    drop if inlist(lower_title, "random samples", "sciencescope", "through the glass lightly", "equipment", "women in science",  "correction", "the metric system")
+    drop if inlist(lower_title, "convocation week","the new format", "second-quarter biotech job picture", "gmo roundup")
+    drop if strpos(lower_title, "annals ")==1
+    drop if strpos(lower_title, "a fatal case of")==1
+    drop if strpos(lower_title, "a case of ")==1
+    drop if strpos(lower_title, "case ")==1
+    drop if strpos(lower_title, "a day ")==1
+    drop if strpos(lower_title,"?")>0
+    preserve
     contract lower_title journal_abbr  pmid
     gduplicates tag lower_title journal_abbr, gen(dup)
-    keep if dup> 1
-    drop _freq dup
-    contract lower_title
-    drop _freq
-    save ../temp/possible_non_articles, replace
+    keep if dup> 0 & journal_abbr != "jbc"
+    keep pmid
+    gduplicates drop
+    save ../temp/possible_non_articles_`samp', replace
     restore
-    merge m:1 lower_title using ../temp/possible_non_articles, assert(1 3) keep(1) nogen*/
+    merge m:1 pmid using ../temp/possible_non_articles_`samp', assert(1 3) keep(1) nogen
     save ${temp}/openalex_`samp'_clean_titles, replace
 end
 
@@ -195,11 +155,30 @@ program clean_samps
     rename date pub_date
     gen pub_mnth = month(pub_date)
     gen year = year(pub_date)
+    replace inst = "Johns Hopkins University" if strpos(raw_affl , "Bloomberg School of Public Health")>0 & inst == "Bloomberg (United States)"
     merge m:1 inst_id using ../output/all_inst_geo_chars, assert(1 2 3) keep(1 3) nogen 
     replace inst = new_inst if !mi(new_inst)
     replace inst_id = new_id if !mi(new_inst)
+    replace inst = "Johns Hopkins University" if  strpos(inst, "Johns Hopkins")>0
+    replace inst_id = "I145311948" if inst == "Johns Hopkins University"
+    replace inst = "Stanford University" if inlist(inst, "Stanford Medicine", "Stanford Health Care")
+    replace inst = "Northwestern University" if inlist(inst, "Northwestern Medicine")
+
+    // extras
+    gen is_lancet = strpos(raw_affl, "The Lancet")>0
+    gen is_london = raw_affl == "London, UK." |  raw_affl == "London."
+    gen is_bmj = (strpos(raw_affl, "BMJ")>0 | strpos(raw_affl, "British Medical Journal")>0)
+    gen is_jama = strpos(raw_affl, " JAMA")>0 & mi(inst)
+    gen is_editor = strpos(raw_affl, " Editor")>0 | strpos(raw_affl, "Editor ")>0
+    bys pmid: gegen has_lancet = max(is_lancet)
+    bys pmid: gegen has_london = max(is_london)
+    bys pmid: gegen has_bmj = max(is_bmj)
+    bys pmid: gegen has_jama = max(is_jama)
+    bys pmid: gegen has_editor = max(is_jama)
+    drop if has_lancet == 1 | has_london == 1 | has_bmj == 1 | has_jama == 1 | has_editor == 1
+    drop is_lancet is_london is_bmj is_jama is_editor has_lancet has_london has_bmj has_jama has_editor
     save ${temp}/cleaned_all_`samp', replace
-    
+
     import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
     gcontract stateshort statefull
     drop _freq
@@ -265,6 +244,10 @@ program clean_samps
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     qui gen cite_affl_wt = affl_wt * cite_wt
     compress, nocoalesce
+    gen len = length(inst)
+    qui sum len
+    local n = r(max)
+    recast str`n' inst, force
     save ../output/cleaned_all_`samp', replace
     preserve
     gcontract id pmid
