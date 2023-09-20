@@ -17,6 +17,7 @@ program main
         clean_titles, samp(`samp')
         clean_samps, samp(`samp')
         clean_mesh, samp(`samp')
+        clean_concepts, samp(`samp')
     }
     split_sample
 end
@@ -38,7 +39,7 @@ program aggregate_insts
     ds associated* 
     foreach var in `r(varlist)' {
         replace `var' = "" if has_parent == 0
-        replace `var' = "" if (strpos(associated, "University")>0 & strpos(associated, "System")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | inlist(associated, "University of London", "National Institutes of Health" , "Wellcome Trust") | (strpos(associated, "Health")>0 & strpos(associated, "System")>0 & associated_type == "healthcare" & (type == "education" | type == "healthcare")) | (strpos(associated, "Higher")>0 & strpos(associated, "Education")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | strpos(associated, "Ministry of") > 0 | strpos(associated, "Board of")>0 | strpos(associated, "Government of")>0 | (strpos(associated, "Department of")>0 & country != "Russia")
+        replace `var' = "" if (strpos(associated, "University")>0 & strpos(associated, "System")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | inlist(associated, "University of London", "Wellcome Trust") | (strpos(associated, "Health")>0 & strpos(associated, "System")>0 & associated_type == "healthcare" & (type == "education" | type == "healthcare")) | (strpos(associated, "Higher")>0 & strpos(associated, "Education")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | strpos(associated, "Ministry of") > 0 | strpos(associated, "Board of")>0 | strpos(associated, "Government of")>0 | (strpos(associated, "Department of")>0 & country != "Russia")
         replace `var' = "" if country_code != associated_country
     }
     gduplicates drop inst_id associated_id, force
@@ -163,7 +164,11 @@ program clean_samps
     replace inst_id = "I145311948" if inst == "Johns Hopkins University"
     replace inst = "Stanford University" if inlist(inst, "Stanford Medicine", "Stanford Health Care")
     replace inst = "Northwestern University" if inlist(inst, "Northwestern Medicine")
-
+    replace inst = "National Institutes of Health" if  inlist(inst, "National Cancer Institute", "National Eye Institute", "National Heart, Lung, and Blood Institute", "National Human Genome Research Institute") | ///
+              inlist(inst, "National Institute on Aging", "National Institute on Alcohol Abuse and Alcoholism", "National Institute of Allergy and Infectious Diseases", "National Institute of Arthritis and Musculoskeletal and Skin Diseases") | ///
+                        inlist(inst, "National Institute of Biomedical Imaging and Bioengineering", "National Institute of Child Health and Human Development", "National Institue of Dental and Craniofacial Research") | ///
+                                  inlist(inst, "National Institute of Diabetes and Digestive and Kidney Diseases", "National Institute on Drug Abuse", "National Institute of Environmental Health Sciences", "National Institute of General Medical Sciences", "National Institute of Mental Health", "National Institute on Minority Health and Health Disparities") | ///
+                                            inlist(inst, "National Institute of Neurological Disorders and Stroke", "National Institute of Nursing Research", "National Library of Medicine", "National Heart Lung and Blood Institute", "National Institutes of Health")
     // extras
     gen is_lancet = strpos(raw_affl, "The Lancet")>0
     gen is_london = raw_affl == "London, UK." |  raw_affl == "London."
@@ -270,7 +275,7 @@ end
 
 program clean_mesh  
     syntax, samp(str)
-    local end = cond("`samp'" == "all_jrnls", 142, 51)
+    local end = cond("`samp'" == "all_jrnls", 143, 51)
     local suf = cond("`samp'" == "all_jrnls", "" ,"_clin")
     qui {
         forval i = 1/`end' {
@@ -300,6 +305,36 @@ program clean_mesh
         merge m:1 pmid using ../external/pmids_jrnl/newfund_pmids, keep(3) nogen keepusing(pmid)
     }
     save ../output/contracted_gen_mesh_`samp', replace
+end
+
+program clean_concepts
+    syntax, samp(str)
+    local end = cond("`samp'" == "all_jrnls", 143, 51)
+    local suf = cond("`samp'" == "all_jrnls", "" ,"_clin")
+    qui {
+        forval i = 1/`end' {
+            cap import delimited using ../external/openalex/concepts`suf'`i', clear varn(1) bindquotes(strict)
+            save ${temp}/concepts`suf'`i', replace
+        }
+        clear 
+        forval i = 1/`end' {
+            cap append using ${temp}/concepts`suf'`i'
+        }
+    }
+    gunique id
+    bys id: egen min_level = min(level)
+    bys id level: egen max_score = max(score)
+    keep if min_level == level & max_score == score
+    gunique id
+    gduplicates drop id term, force
+    keep id term
+    save ${temp}/concepts_`samp', replace
+    merge m:1 id using ${temp}/pmid_id_xwalk_`samp', assert(1 2 3) keep(3) nogen 
+    cap drop _freq
+    if "`samp'" == "all_jrnls" {
+        merge m:1 pmid using ../external/pmids_jrnl/newfund_pmids, keep(3) nogen keepusing(pmid)
+    }
+    save ../output/concepts_`samp', replace
 end
 
 program split_sample
@@ -368,6 +403,14 @@ program split_sample
         preserve
         merge m:1 pmid using ../output/list_of_pmids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
         save ../output/contracted_gen_mesh_newfund_`samp', replace
+        restore
+    }
+   // split concepts 
+    use ../output/concepts_all_jrnls, clear
+    foreach samp in cns scisub demsci {
+        preserve
+        merge m:1 pmid using ../output/list_of_pmids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
+        save ../output/concepts_newfund_`samp', replace
         restore
     }
 end
