@@ -1703,26 +1703,6 @@ W2274208933,14,Receptor Protein-Tyrosine Kinases,FALSE
 W2274208933,15,Recombinant Proteins,FALSE
 W2274208933,16,Recombinant Proteins,FALSE
 W2274208933,17,Structure-Activity Relationship,FALSE
-W2465847143,1,DNA,TRUE
-W2465847143,2,DNA-Binding Proteins,TRUE
-W2465847143,3,"Leukemia, Myeloid",TRUE
-W2465847143,4,Oncogenes,TRUE
-W2465847143,5,Proto-Oncogenes,TRUE
-W2465847143,6,Transcription Factors,TRUE
-W2465847143,7,Zinc Fingers,TRUE
-W2465847143,8,Animals,FALSE
-W2465847143,9,Base Sequence,FALSE
-W2465847143,10,Binding Sites,FALSE
-W2465847143,11,DNA,FALSE
-W2465847143,12,DNA-Binding Proteins,FALSE
-W2465847143,13,DNA-Binding Proteins,FALSE
-W2465847143,14,DNA-Binding Proteins,FALSE
-W2465847143,15,"Leukemia, Myeloid",FALSE
-W2465847143,16,MDS1 and EVI1 Complex Locus Protein,FALSE
-W2465847143,17,Mice,FALSE
-W2465847143,18,Molecular Sequence Data,FALSE
-W2465847143,19,Mutation,FALSE
-W2465847143,20,Structure-Activity Relationship,FALSE
 W2264540399,1,Chromosome Mapping,TRUE
 W2264540399,2,Protein Tyrosine Phosphatases,TRUE
 W2264540399,3,Animals,FALSE
@@ -1743,6 +1723,26 @@ W2264540399,17,"Receptors, Platelet-Derived Growth Factor",FALSE
 W2264540399,18,"Receptors, Platelet-Derived Growth Factor",FALSE
 W2264540399,19,SH2 Domain-Containing Protein Tyrosine Phosphatases,FALSE
 W2264540399,20,Sensitivity and Specificity,FALSE
+W2465847143,1,DNA,TRUE
+W2465847143,2,DNA-Binding Proteins,TRUE
+W2465847143,3,"Leukemia, Myeloid",TRUE
+W2465847143,4,Oncogenes,TRUE
+W2465847143,5,Proto-Oncogenes,TRUE
+W2465847143,6,Transcription Factors,TRUE
+W2465847143,7,Zinc Fingers,TRUE
+W2465847143,8,Animals,FALSE
+W2465847143,9,Base Sequence,FALSE
+W2465847143,10,Binding Sites,FALSE
+W2465847143,11,DNA,FALSE
+W2465847143,12,DNA-Binding Proteins,FALSE
+W2465847143,13,DNA-Binding Proteins,FALSE
+W2465847143,14,DNA-Binding Proteins,FALSE
+W2465847143,15,"Leukemia, Myeloid",FALSE
+W2465847143,16,MDS1 and EVI1 Complex Locus Protein,FALSE
+W2465847143,17,Mice,FALSE
+W2465847143,18,Molecular Sequence Data,FALSE
+W2465847143,19,Mutation,FALSE
+W2465847143,20,Structure-Activity Relationship,FALSE
 W2415465184,1,Extremities,TRUE
 W2415465184,2,Gastrula,TRUE
 W2415465184,3,Membrane Proteins,TRUE
@@ -6894,6 +6894,20 @@ W1980725176,12,Saccharomyces cerevisiae,FALSE
 W1980725176,13,Saccharomyces cerevisiae,FALSE
 W1980725176,14,Saccharomyces cerevisiae Proteins,FALSE
 W1980725176,15,Telomere,FALSE
+W2074991560,1,Apoproteins,TRUE
+W2074991560,2,Myoglobin,TRUE
+W2074991560,3,Protein Conformation,TRUE
+W2074991560,4,Protein Folding,TRUE
+W2074991560,5,Apoproteins,FALSE
+W2074991560,6,Circular Dichroism,FALSE
+W2074991560,7,Hydrogen,FALSE
+W2074991560,8,Hydrogen,FALSE
+W2074991560,9,Hydrogen Bonding,FALSE
+W2074991560,10,Kinetics,FALSE
+W2074991560,11,Magnetic Resonance Spectroscopy,FALSE
+W2074991560,12,"Models, Molecular",FALSE
+W2074991560,13,Myoglobin,FALSE
+W2074991560,14,"Protein Structure, Secondary",FALSE
 W2082340361,1,Adenosine Diphosphate Ribose,TRUE
 W2082340361,2,"Antigens, CD",TRUE
 W2082340361,3,"Antigens, Differentiation",TRUE
@@ -6922,20 +6936,6 @@ W2082340361,25,"NAD",FALSE
 W2082340361,26,"NAD",FALSE
 W2082340361,27,Recombinant Proteins,FALSE
 W2082340361,28,Recombinant Proteins,FALSE
-W2074991560,1,Apoproteins,TRUE
-W2074991560,2,Myoglobin,TRUE
-W2074991560,3,Protein Conformation,TRUE
-W2074991560,4,Protein Folding,TRUE
-W2074991560,5,Apoproteins,FALSE
-W2074991560,6,Circular Dichroism,FALSE
-W2074991560,7,Hydrogen,FALSE
-W2074991560,8,Hydrogen,FALSE
-W2074991560,9,Hydrogen Bonding,FALSE
-W2074991560,10,Kinetics,FALSE
-W2074991560,11,Magnetic Resonance Spectroscopy,FALSE
-W2074991560,12,"Models, Molecular",FALSE
-W2074991560,13,Myoglobin,FALSE
-W2074991560,14,"Protein Structure, Secondary",FALSE
 W2095129531,1,Astrocytes,TRUE
 W2095129531,2,Brain,TRUE
 W2095129531,3,Epidermal Growth Factor,TRUE
@@ -14813,21 +14813,6 @@ W1495890871,22,"RNA, Messenger",FALSE
 W1495890871,23,"RNA, Messenger",FALSE
 W1495890871,24,Rats,FALSE
 W1495890871,25,"Rats, Sprague-Dawley",FALSE
-W2413445169,1,"Genes, p53",TRUE
-W2413445169,2,Papillomaviridae,TRUE
-W2413445169,3,Uterine Cervical Neoplasms,TRUE
-W2413445169,4,Base Sequence,FALSE
-W2413445169,5,"DNA, Viral",FALSE
-W2413445169,6,"DNA, Viral",FALSE
-W2413445169,7,Female,FALSE
-W2413445169,8,Humans,FALSE
-W2413445169,9,Molecular Sequence Data,FALSE
-W2413445169,10,Mutation,FALSE
-W2413445169,11,Papillomaviridae,FALSE
-W2413445169,12,Polymerase Chain Reaction,FALSE
-W2413445169,13,Uterine Cervical Neoplasms,FALSE
-W2413445169,14,Uterine Cervical Neoplasms,FALSE
-W2413445169,15,Uterine Cervical Neoplasms,FALSE
 W2272408415,1,"Carcinoma, Hepatocellular",TRUE
 W2272408415,2,Codon,TRUE
 W2272408415,3,"Genes, p53",TRUE
@@ -14854,6 +14839,21 @@ W2272408415,23,Male,FALSE
 W2272408415,24,Middle Aged,FALSE
 W2272408415,25,Molecular Sequence Data,FALSE
 W2272408415,26,Tumor Suppressor Protein p53,FALSE
+W2413445169,1,"Genes, p53",TRUE
+W2413445169,2,Papillomaviridae,TRUE
+W2413445169,3,Uterine Cervical Neoplasms,TRUE
+W2413445169,4,Base Sequence,FALSE
+W2413445169,5,"DNA, Viral",FALSE
+W2413445169,6,"DNA, Viral",FALSE
+W2413445169,7,Female,FALSE
+W2413445169,8,Humans,FALSE
+W2413445169,9,Molecular Sequence Data,FALSE
+W2413445169,10,Mutation,FALSE
+W2413445169,11,Papillomaviridae,FALSE
+W2413445169,12,Polymerase Chain Reaction,FALSE
+W2413445169,13,Uterine Cervical Neoplasms,FALSE
+W2413445169,14,Uterine Cervical Neoplasms,FALSE
+W2413445169,15,Uterine Cervical Neoplasms,FALSE
 W115804255,1,"Adaptor Proteins, Signal Transducing",TRUE
 W115804255,2,"Genes, src",TRUE
 W115804255,3,Proto-Oncogene Proteins,TRUE
@@ -17763,26 +17763,6 @@ W2046202438,9,Humans,FALSE
 W2046202438,10,Molecular Sequence Data,FALSE
 W2046202438,11,Peptides,FALSE
 W2046202438,12,Sequence Alignment,FALSE
-W2029761376,1,Alleles,TRUE
-W2029761376,2,Cell Cycle,TRUE
-W2029761376,3,DNA Replication,TRUE
-W2029761376,4,Genome,TRUE
-W2029761376,5,Animals,FALSE
-W2029761376,6,Base Sequence,FALSE
-W2029761376,7,Cell Cycle,FALSE
-W2029761376,8,Cell Line,FALSE
-W2029761376,9,"Crosses, Genetic",FALSE
-W2029761376,10,DNA Replication,FALSE
-W2029761376,11,Female,FALSE
-W2029761376,12,Humans,FALSE
-W2029761376,13,"In Situ Hybridization, Fluorescence",FALSE
-W2029761376,14,Male,FALSE
-W2029761376,15,Mice,FALSE
-W2029761376,16,Molecular Sequence Data,FALSE
-W2029761376,17,Muridae,FALSE
-W2029761376,18,Time Factors,FALSE
-W2029761376,19,"Transcription, Genetic",FALSE
-W2029761376,20,"Transcription, Genetic",FALSE
 W2044336492,1,Lymphocyte Activation,TRUE
 W2044336492,2,Protein-Tyrosine Kinases,TRUE
 W2044336492,3,Receptor Aggregation,TRUE
@@ -17806,6 +17786,26 @@ W2044336492,20,Recombinant Fusion Proteins,FALSE
 W2044336492,21,"Sequence Homology, Amino Acid",FALSE
 W2044336492,22,Swine,FALSE
 W2044336492,23,T-Lymphocytes,FALSE
+W2029761376,1,Alleles,TRUE
+W2029761376,2,Cell Cycle,TRUE
+W2029761376,3,DNA Replication,TRUE
+W2029761376,4,Genome,TRUE
+W2029761376,5,Animals,FALSE
+W2029761376,6,Base Sequence,FALSE
+W2029761376,7,Cell Cycle,FALSE
+W2029761376,8,Cell Line,FALSE
+W2029761376,9,"Crosses, Genetic",FALSE
+W2029761376,10,DNA Replication,FALSE
+W2029761376,11,Female,FALSE
+W2029761376,12,Humans,FALSE
+W2029761376,13,"In Situ Hybridization, Fluorescence",FALSE
+W2029761376,14,Male,FALSE
+W2029761376,15,Mice,FALSE
+W2029761376,16,Molecular Sequence Data,FALSE
+W2029761376,17,Muridae,FALSE
+W2029761376,18,Time Factors,FALSE
+W2029761376,19,"Transcription, Genetic",FALSE
+W2029761376,20,"Transcription, Genetic",FALSE
 W2034200840,1,DNA-Binding Proteins,TRUE
 W2034200840,2,Nuclear Proteins,TRUE
 W2034200840,3,Saccharomyces cerevisiae Proteins,TRUE
@@ -17838,6 +17838,27 @@ W2034200840,29,Transcription Factors,FALSE
 W2034200840,30,Transcription Factors,FALSE
 W2034200840,31,Transfection,FALSE
 W2034200840,32,"Tumor Cells, Cultured",FALSE
+W1974976899,1,Apolipoprotein A-II,TRUE
+W1974976899,2,Arteriosclerosis,TRUE
+W1974976899,3,Animals,FALSE
+W1974976899,4,Apolipoprotein A-I,FALSE
+W1974976899,5,Apolipoprotein A-I,FALSE
+W1974976899,6,Apolipoprotein A-II,FALSE
+W1974976899,7,Apolipoprotein A-II,FALSE
+W1974976899,8,Arteriosclerosis,FALSE
+W1974976899,9,Arteriosclerosis,FALSE
+W1974976899,10,Cholesterol,FALSE
+W1974976899,11,Cholesterol,FALSE
+W1974976899,12,"Crosses, Genetic",FALSE
+W1974976899,13,Female,FALSE
+W1974976899,14,"Lipoproteins, HDL",FALSE
+W1974976899,15,"Lipoproteins, HDL",FALSE
+W1974976899,16,"Lipoproteins, HDL",FALSE
+W1974976899,17,Male,FALSE
+W1974976899,18,Mice,FALSE
+W1974976899,19,"Mice, Inbred C57BL",FALSE
+W1974976899,20,"Mice, Inbred DBA",FALSE
+W1974976899,21,"Mice, Transgenic",FALSE
 W2087797124,1,Macrophages,TRUE
 W2087797124,2,Membrane Proteins,TRUE
 W2087797124,3,"Receptors, Immunologic",TRUE
@@ -17871,27 +17892,6 @@ W2087797124,30,"Receptors, Immunologic",FALSE
 W2087797124,31,"Receptors, Immunologic",FALSE
 W2087797124,32,"Receptors, Scavenger",FALSE
 W2087797124,33,"Scavenger Receptors, Class B",FALSE
-W1974976899,1,Apolipoprotein A-II,TRUE
-W1974976899,2,Arteriosclerosis,TRUE
-W1974976899,3,Animals,FALSE
-W1974976899,4,Apolipoprotein A-I,FALSE
-W1974976899,5,Apolipoprotein A-I,FALSE
-W1974976899,6,Apolipoprotein A-II,FALSE
-W1974976899,7,Apolipoprotein A-II,FALSE
-W1974976899,8,Arteriosclerosis,FALSE
-W1974976899,9,Arteriosclerosis,FALSE
-W1974976899,10,Cholesterol,FALSE
-W1974976899,11,Cholesterol,FALSE
-W1974976899,12,"Crosses, Genetic",FALSE
-W1974976899,13,Female,FALSE
-W1974976899,14,"Lipoproteins, HDL",FALSE
-W1974976899,15,"Lipoproteins, HDL",FALSE
-W1974976899,16,"Lipoproteins, HDL",FALSE
-W1974976899,17,Male,FALSE
-W1974976899,18,Mice,FALSE
-W1974976899,19,"Mice, Inbred C57BL",FALSE
-W1974976899,20,"Mice, Inbred DBA",FALSE
-W1974976899,21,"Mice, Transgenic",FALSE
 W2076606225,1,Actins,TRUE
 W2076606225,2,"Adaptor Proteins, Signal Transducing",TRUE
 W2076606225,3,Cytoskeleton,TRUE
@@ -19782,6 +19782,32 @@ W2025497083,16,Nucleic Acid Denaturation,FALSE
 W2025497083,17,Nucleic Acid Hybridization,FALSE
 W2025497083,18,Pedigree,FALSE
 W2025497083,19,"Templates, Genetic",FALSE
+W1984094934,1,Actins,TRUE
+W1984094934,2,Arachidonate 5-Lipoxygenase,TRUE
+W1984094934,3,Arachidonic Acid,TRUE
+W1984094934,4,Epidermal Growth Factor,TRUE
+W1984094934,5,Prostaglandin-Endoperoxide Synthases,TRUE
+W1984094934,6,Actins,FALSE
+W1984094934,7,Actins,FALSE
+W1984094934,8,Animals,FALSE
+W1984094934,9,Arachidonate 5-Lipoxygenase,FALSE
+W1984094934,10,Arachidonic Acid,FALSE
+W1984094934,11,Cell Line,FALSE
+W1984094934,12,Epidermal Growth Factor,FALSE
+W1984094934,13,ErbB Receptors,FALSE
+W1984094934,14,ErbB Receptors,FALSE
+W1984094934,15,HeLa Cells,FALSE
+W1984094934,16,Humans,FALSE
+W1984094934,17,Kinetics,FALSE
+W1984094934,18,Leukotrienes,FALSE
+W1984094934,19,Leukotrienes,FALSE
+W1984094934,20,Macromolecular Substances,FALSE
+W1984094934,21,Prostaglandin-Endoperoxide Synthases,FALSE
+W1984094934,22,Prostaglandins,FALSE
+W1984094934,23,Prostaglandins,FALSE
+W1984094934,24,Rats,FALSE
+W1984094934,25,Signal Transduction,FALSE
+W1984094934,26,"Tumor Cells, Cultured",FALSE
 W2022257681,1,Fragile X Syndrome,TRUE
 W2022257681,2,Gene Amplification,TRUE
 W2022257681,3,"Models, Genetic",TRUE
@@ -19835,32 +19861,6 @@ W2081981294,26,Tyrosine-tRNA Ligase,FALSE
 W2081981294,27,beta-Galactosidase,FALSE
 W2081981294,28,beta-Galactosidase,FALSE
 W2081981294,29,beta-Galactosidase,FALSE
-W1984094934,1,Actins,TRUE
-W1984094934,2,Arachidonate 5-Lipoxygenase,TRUE
-W1984094934,3,Arachidonic Acid,TRUE
-W1984094934,4,Epidermal Growth Factor,TRUE
-W1984094934,5,Prostaglandin-Endoperoxide Synthases,TRUE
-W1984094934,6,Actins,FALSE
-W1984094934,7,Actins,FALSE
-W1984094934,8,Animals,FALSE
-W1984094934,9,Arachidonate 5-Lipoxygenase,FALSE
-W1984094934,10,Arachidonic Acid,FALSE
-W1984094934,11,Cell Line,FALSE
-W1984094934,12,Epidermal Growth Factor,FALSE
-W1984094934,13,ErbB Receptors,FALSE
-W1984094934,14,ErbB Receptors,FALSE
-W1984094934,15,HeLa Cells,FALSE
-W1984094934,16,Humans,FALSE
-W1984094934,17,Kinetics,FALSE
-W1984094934,18,Leukotrienes,FALSE
-W1984094934,19,Leukotrienes,FALSE
-W1984094934,20,Macromolecular Substances,FALSE
-W1984094934,21,Prostaglandin-Endoperoxide Synthases,FALSE
-W1984094934,22,Prostaglandins,FALSE
-W1984094934,23,Prostaglandins,FALSE
-W1984094934,24,Rats,FALSE
-W1984094934,25,Signal Transduction,FALSE
-W1984094934,26,"Tumor Cells, Cultured",FALSE
 W2011273569,1,Protein Conformation,TRUE
 W2011273569,2,Proteins,TRUE
 W2011273569,3,Zinc,TRUE
@@ -20937,22 +20937,6 @@ W2041885357,16,Molecular Sequence Data,FALSE
 W2041885357,17,Myoglobinuria,FALSE
 W2041885357,18,Point Mutation,FALSE
 W2041885357,19,Recurrence,FALSE
-W2024321813,1,"Cardiomyopathy, Hypertrophic",TRUE
-W2024321813,2,"Chromosomes, Human, Pair 11",TRUE
-W2024321813,3,"Cardiomyopathy, Hypertrophic",FALSE
-W2024321813,4,Chromosome Mapping,FALSE
-W2024321813,5,"DNA, Satellite",FALSE
-W2024321813,6,"DNA, Satellite",FALSE
-W2024321813,7,Female,FALSE
-W2024321813,8,Genetic Linkage,FALSE
-W2024321813,9,Genetic Markers,FALSE
-W2024321813,10,Humans,FALSE
-W2024321813,11,Male,FALSE
-W2024321813,12,Oligodeoxyribonucleotides,FALSE
-W2024321813,13,Oligodeoxyribonucleotides,FALSE
-W2024321813,14,Pedigree,FALSE
-W2024321813,15,"Polymorphism, Genetic",FALSE
-W2024321813,16,"Repetitive Sequences, Nucleic Acid",FALSE
 W2022257067,1,Classical Swine Fever Virus,TRUE
 W2022257067,2,Ribonucleases,TRUE
 W2022257067,3,Viral Structural Proteins,TRUE
@@ -20979,6 +20963,22 @@ W2022257067,23,Uridine,FALSE
 W2022257067,24,Viral Structural Proteins,FALSE
 W2022257067,25,Viral Structural Proteins,FALSE
 W2022257067,26,Viral Structural Proteins,FALSE
+W2024321813,1,"Cardiomyopathy, Hypertrophic",TRUE
+W2024321813,2,"Chromosomes, Human, Pair 11",TRUE
+W2024321813,3,"Cardiomyopathy, Hypertrophic",FALSE
+W2024321813,4,Chromosome Mapping,FALSE
+W2024321813,5,"DNA, Satellite",FALSE
+W2024321813,6,"DNA, Satellite",FALSE
+W2024321813,7,Female,FALSE
+W2024321813,8,Genetic Linkage,FALSE
+W2024321813,9,Genetic Markers,FALSE
+W2024321813,10,Humans,FALSE
+W2024321813,11,Male,FALSE
+W2024321813,12,Oligodeoxyribonucleotides,FALSE
+W2024321813,13,Oligodeoxyribonucleotides,FALSE
+W2024321813,14,Pedigree,FALSE
+W2024321813,15,"Polymorphism, Genetic",FALSE
+W2024321813,16,"Repetitive Sequences, Nucleic Acid",FALSE
 W2094995712,1,Collagen,TRUE
 W2094995712,2,Dental Cementum,TRUE
 W2094995712,3,Diet,TRUE
@@ -22076,6 +22076,29 @@ W1973724691,14,Metalloporphyrins,FALSE
 W1973724691,15,Molecular Structure,FALSE
 W1973724691,16,Oxidation-Reduction,FALSE
 W1973724691,17,Stereoisomerism,FALSE
+W2008532096,1,Hematopoietic Stem Cells,TRUE
+W2008532096,2,Insulin,TRUE
+W2008532096,3,Interleukin-4,TRUE
+W2008532096,4,Phosphoproteins,TRUE
+W2008532096,5,Animals,FALSE
+W2008532096,6,Cell Division,FALSE
+W2008532096,7,Cell Division,FALSE
+W2008532096,8,Cell Line,FALSE
+W2008532096,9,Hematopoietic Stem Cells,FALSE
+W2008532096,10,Hematopoietic Stem Cells,FALSE
+W2008532096,11,Insulin,FALSE
+W2008532096,12,Insulin Receptor Substrate Proteins,FALSE
+W2008532096,13,Interleukin-4,FALSE
+W2008532096,14,Phosphoproteins,FALSE
+W2008532096,15,Phosphorylation,FALSE
+W2008532096,16,"Receptor, Insulin",FALSE
+W2008532096,17,"Receptor, Insulin",FALSE
+W2008532096,18,"Receptors, Interleukin-4",FALSE
+W2008532096,19,"Receptors, Mitogen",FALSE
+W2008532096,20,"Receptors, Mitogen",FALSE
+W2008532096,21,Transfection,FALSE
+W2008532096,22,Tyrosine,FALSE
+W2008532096,23,Tyrosine,FALSE
 W2063374921,1,B-Lymphocytes,TRUE
 W2063374921,2,Proto-Oncogene Proteins,TRUE
 W2063374921,3,T-Lymphocytes,TRUE
@@ -22108,29 +22131,6 @@ W2063374921,29,"Receptors, Antigen, T-Cell",FALSE
 W2063374921,30,"Receptors, Antigen, T-Cell",FALSE
 W2063374921,31,T-Lymphocytes,FALSE
 W2063374921,32,T-Lymphocytes,FALSE
-W2008532096,1,Hematopoietic Stem Cells,TRUE
-W2008532096,2,Insulin,TRUE
-W2008532096,3,Interleukin-4,TRUE
-W2008532096,4,Phosphoproteins,TRUE
-W2008532096,5,Animals,FALSE
-W2008532096,6,Cell Division,FALSE
-W2008532096,7,Cell Division,FALSE
-W2008532096,8,Cell Line,FALSE
-W2008532096,9,Hematopoietic Stem Cells,FALSE
-W2008532096,10,Hematopoietic Stem Cells,FALSE
-W2008532096,11,Insulin,FALSE
-W2008532096,12,Insulin Receptor Substrate Proteins,FALSE
-W2008532096,13,Interleukin-4,FALSE
-W2008532096,14,Phosphoproteins,FALSE
-W2008532096,15,Phosphorylation,FALSE
-W2008532096,16,"Receptor, Insulin",FALSE
-W2008532096,17,"Receptor, Insulin",FALSE
-W2008532096,18,"Receptors, Interleukin-4",FALSE
-W2008532096,19,"Receptors, Mitogen",FALSE
-W2008532096,20,"Receptors, Mitogen",FALSE
-W2008532096,21,Transfection,FALSE
-W2008532096,22,Tyrosine,FALSE
-W2008532096,23,Tyrosine,FALSE
 W2094923559,1,Fungal Proteins,TRUE
 W2094923559,2,G1 Phase,TRUE
 W2094923559,3,S Phase,TRUE
@@ -29484,24 +29484,6 @@ W108593966,18,"RNA, Neoplasm",FALSE
 W108593966,19,"RNA, Neoplasm",FALSE
 W108593966,20,Transcription Factors,FALSE
 W108593966,21,Transfection,FALSE
-W2244046725,1,Adenomatous Polyposis Coli,TRUE
-W2244046725,2,"Chromosomes, Human, Pair 8",TRUE
-W2244046725,3,Colorectal Neoplasms,TRUE
-W2244046725,4,"Genes, APC",TRUE
-W2244046725,5,"Genes, p53",TRUE
-W2244046725,6,"Genes, ras",TRUE
-W2244046725,7,Adenomatous Polyposis Coli,FALSE
-W2244046725,8,Base Sequence,FALSE
-W2244046725,9,Chromosome Deletion,FALSE
-W2244046725,10,"Chromosomes, Human, Pair 5",FALSE
-W2244046725,11,Colorectal Neoplasms,FALSE
-W2244046725,12,Humans,FALSE
-W2244046725,13,Molecular Sequence Data,FALSE
-W2244046725,14,Mutation,FALSE
-W2244046725,15,Oligodeoxyribonucleotides,FALSE
-W2244046725,16,Oligodeoxyribonucleotides,FALSE
-W2244046725,17,Proto-Oncogene Proteins p21(ras),FALSE
-W2244046725,18,Proto-Oncogene Proteins p21(ras),FALSE
 W124095406,1,"Carcinoma, Non-Small-Cell Lung",TRUE
 W124095406,2,"Genes, ras",TRUE
 W124095406,3,Lung Neoplasms,TRUE
@@ -29522,6 +29504,24 @@ W124095406,17,Point Mutation,FALSE
 W124095406,18,Prognosis,FALSE
 W124095406,19,Proto-Oncogene Proteins p21(ras),FALSE
 W124095406,20,Survival Analysis,FALSE
+W2244046725,1,Adenomatous Polyposis Coli,TRUE
+W2244046725,2,"Chromosomes, Human, Pair 8",TRUE
+W2244046725,3,Colorectal Neoplasms,TRUE
+W2244046725,4,"Genes, APC",TRUE
+W2244046725,5,"Genes, p53",TRUE
+W2244046725,6,"Genes, ras",TRUE
+W2244046725,7,Adenomatous Polyposis Coli,FALSE
+W2244046725,8,Base Sequence,FALSE
+W2244046725,9,Chromosome Deletion,FALSE
+W2244046725,10,"Chromosomes, Human, Pair 5",FALSE
+W2244046725,11,Colorectal Neoplasms,FALSE
+W2244046725,12,Humans,FALSE
+W2244046725,13,Molecular Sequence Data,FALSE
+W2244046725,14,Mutation,FALSE
+W2244046725,15,Oligodeoxyribonucleotides,FALSE
+W2244046725,16,Oligodeoxyribonucleotides,FALSE
+W2244046725,17,Proto-Oncogene Proteins p21(ras),FALSE
+W2244046725,18,Proto-Oncogene Proteins p21(ras),FALSE
 W2399621249,1,4-Butyrolactone,TRUE
 W2399621249,2,CDC2 Protein Kinase,TRUE
 W2399621249,3,CDC2-CDC28 Kinases,TRUE
@@ -34262,6 +34262,16 @@ W2036594454,10,Polymerase Chain Reaction,FALSE
 W2036594454,11,Polymerase Chain Reaction,FALSE
 W2036594454,12,Probability,FALSE
 W2036594454,13,Whales,FALSE
+W2048922695,1,Antibodies,TRUE
+W2048922695,2,Heterocyclic Compounds,TRUE
+W2048922695,3,Antibodies,FALSE
+W2048922695,4,Catalysis,FALSE
+W2048922695,5,Enzymes,FALSE
+W2048922695,6,Enzymes,FALSE
+W2048922695,7,Heterocyclic Compounds,FALSE
+W2048922695,8,Indicators and Reagents,FALSE
+W2048922695,9,Isomerism,FALSE
+W2048922695,10,Kinetics,FALSE
 W2018120875,1,"Adenoviruses, Human",TRUE
 W2018120875,2,Coenzymes,TRUE
 W2018120875,3,"DNA, Viral",TRUE
@@ -34285,16 +34295,6 @@ W2018120875,20,Recombinant Proteins,FALSE
 W2018120875,21,Viral Proteins,FALSE
 W2018120875,22,Viral Proteins,FALSE
 W2018120875,23,Virion,FALSE
-W2048922695,1,Antibodies,TRUE
-W2048922695,2,Heterocyclic Compounds,TRUE
-W2048922695,3,Antibodies,FALSE
-W2048922695,4,Catalysis,FALSE
-W2048922695,5,Enzymes,FALSE
-W2048922695,6,Enzymes,FALSE
-W2048922695,7,Heterocyclic Compounds,FALSE
-W2048922695,8,Indicators and Reagents,FALSE
-W2048922695,9,Isomerism,FALSE
-W2048922695,10,Kinetics,FALSE
 W2009892305,1,"Adenoviruses, Human",TRUE
 W2009892305,2,Cysteine Endopeptidases,TRUE
 W2009892305,3,Disulfides,TRUE
@@ -36718,6 +36718,22 @@ W2054643844,32,Recombinant Fusion Proteins,FALSE
 W2054643844,33,Synaptic Vesicles,FALSE
 W2054643844,34,Synaptic Vesicles,FALSE
 W2054643844,35,Synaptotagmins,FALSE
+W2013747720,1,Fungal Proteins,TRUE
+W2013747720,2,"Gene Expression Regulation, Fungal",TRUE
+W2013747720,3,Repressor Proteins,TRUE
+W2013747720,4,Saccharomyces cerevisiae Proteins,TRUE
+W2013747720,5,Transcription Factors,TRUE
+W2013747720,6,Amino Acid Sequence,FALSE
+W2013747720,7,Anions,FALSE
+W2013747720,8,DNA-Binding Proteins,FALSE
+W2013747720,9,DNA-Binding Proteins,FALSE
+W2013747720,10,Fungal Proteins,FALSE
+W2013747720,11,Fungal Proteins,FALSE
+W2013747720,12,Molecular Sequence Data,FALSE
+W2013747720,13,"Mutagenesis, Site-Directed",FALSE
+W2013747720,14,"Protein Structure, Secondary",FALSE
+W2013747720,15,Structure-Activity Relationship,FALSE
+W2013747720,16,Transcription Factors,FALSE
 W2164941141,1,DNA-Binding Proteins,TRUE
 W2164941141,2,Fungal Proteins,TRUE
 W2164941141,3,Protein Kinases,TRUE
@@ -36746,22 +36762,6 @@ W2164941141,25,Saccharomyces cerevisiae,FALSE
 W2164941141,26,Saccharomyces cerevisiae,FALSE
 W2164941141,27,Transcription Factors,FALSE
 W2164941141,28,Transcription Factors,FALSE
-W2013747720,1,Fungal Proteins,TRUE
-W2013747720,2,"Gene Expression Regulation, Fungal",TRUE
-W2013747720,3,Repressor Proteins,TRUE
-W2013747720,4,Saccharomyces cerevisiae Proteins,TRUE
-W2013747720,5,Transcription Factors,TRUE
-W2013747720,6,Amino Acid Sequence,FALSE
-W2013747720,7,Anions,FALSE
-W2013747720,8,DNA-Binding Proteins,FALSE
-W2013747720,9,DNA-Binding Proteins,FALSE
-W2013747720,10,Fungal Proteins,FALSE
-W2013747720,11,Fungal Proteins,FALSE
-W2013747720,12,Molecular Sequence Data,FALSE
-W2013747720,13,"Mutagenesis, Site-Directed",FALSE
-W2013747720,14,"Protein Structure, Secondary",FALSE
-W2013747720,15,Structure-Activity Relationship,FALSE
-W2013747720,16,Transcription Factors,FALSE
 W2038665174,1,Cytoplasmic Granules,TRUE
 W2038665174,2,Mast Cells,TRUE
 W2038665174,3,Polymers,TRUE
@@ -36935,20 +36935,6 @@ W2418295025,10,Proto-Oncogene Proteins c-fos,FALSE
 W2418295025,11,Proto-Oncogene Proteins c-jun,FALSE
 W2418295025,12,Proto-Oncogene Proteins c-jun,FALSE
 W2418295025,13,Structure-Activity Relationship,FALSE
-W24886319,1,Carcinoma,TRUE
-W24886319,2,Chromosome Deletion,TRUE
-W24886319,3,"Chromosomes, Human, Pair 14",TRUE
-W24886319,4,Colorectal Neoplasms,TRUE
-W24886319,5,Adenocarcinoma,FALSE
-W24886319,6,Adenocarcinoma,FALSE
-W24886319,7,Adenoma,FALSE
-W24886319,8,Adenoma,FALSE
-W24886319,9,Carcinoma,FALSE
-W24886319,10,Colorectal Neoplasms,FALSE
-W24886319,11,Heterozygote,FALSE
-W24886319,12,Humans,FALSE
-W24886319,13,Mutation,FALSE
-W24886319,14,Proto-Oncogene Mas,FALSE
 W2462390863,1,DNA-Binding Proteins,TRUE
 W2462390863,2,"Leukemia, Erythroblastic, Acute",TRUE
 W2462390863,3,"Leukemia-Lymphoma, Adult T-Cell",TRUE
@@ -36973,6 +36959,20 @@ W2462390863,21,Proto-Oncogene Proteins,FALSE
 W2462390863,22,Serine,FALSE
 W2462390863,23,T-Cell Acute Lymphocytic Leukemia Protein 1,FALSE
 W2462390863,24,"Tumor Cells, Cultured",FALSE
+W24886319,1,Carcinoma,TRUE
+W24886319,2,Chromosome Deletion,TRUE
+W24886319,3,"Chromosomes, Human, Pair 14",TRUE
+W24886319,4,Colorectal Neoplasms,TRUE
+W24886319,5,Adenocarcinoma,FALSE
+W24886319,6,Adenocarcinoma,FALSE
+W24886319,7,Adenoma,FALSE
+W24886319,8,Adenoma,FALSE
+W24886319,9,Carcinoma,FALSE
+W24886319,10,Colorectal Neoplasms,FALSE
+W24886319,11,Heterozygote,FALSE
+W24886319,12,Humans,FALSE
+W24886319,13,Mutation,FALSE
+W24886319,14,Proto-Oncogene Mas,FALSE
 W2463321210,1,Carcinoma,TRUE
 W2463321210,2,"Genes, Retinoblastoma",TRUE
 W2463321210,3,Nasopharyngeal Neoplasms,TRUE
@@ -38898,24 +38898,6 @@ W2402797047,27,T-Lymphocytes,FALSE
 W2402797047,28,Tetradecanoylphorbol Acetate,FALSE
 W2402797047,29,Tetradecanoylphorbol Acetate,FALSE
 W2402797047,30,Transfection,FALSE
-W2400568818,1,Protein Serine-Threonine Kinases,TRUE
-W2400568818,2,Proto-Oncogene Proteins,TRUE
-W2400568818,3,Proto-Oncogenes,TRUE
-W2400568818,4,Testis,TRUE
-W2400568818,5,Age Factors,FALSE
-W2400568818,6,Animals,FALSE
-W2400568818,7,"Blotting, Northern",FALSE
-W2400568818,8,Gene Expression,FALSE
-W2400568818,9,In Situ Hybridization,FALSE
-W2400568818,10,Male,FALSE
-W2400568818,11,Mice,FALSE
-W2400568818,12,Protein Serine-Threonine Kinases,FALSE
-W2400568818,13,Proto-Oncogene Proteins,FALSE
-W2400568818,14,Proto-Oncogene Proteins c-raf,FALSE
-W2400568818,15,"RNA, Messenger",FALSE
-W2400568818,16,"RNA, Messenger",FALSE
-W2400568818,17,Testis,FALSE
-W2400568818,18,Testis,FALSE
 W2473621237,1,Calcium,TRUE
 W2473621237,2,"Cell Transformation, Viral",TRUE
 W2473621237,3,"Genes, ras",TRUE
@@ -38939,6 +38921,24 @@ W2473621237,20,Melitten,FALSE
 W2473621237,21,Mice,FALSE
 W2473621237,22,Phospholipases A,FALSE
 W2473621237,23,Phospholipases A2,FALSE
+W2400568818,1,Protein Serine-Threonine Kinases,TRUE
+W2400568818,2,Proto-Oncogene Proteins,TRUE
+W2400568818,3,Proto-Oncogenes,TRUE
+W2400568818,4,Testis,TRUE
+W2400568818,5,Age Factors,FALSE
+W2400568818,6,Animals,FALSE
+W2400568818,7,"Blotting, Northern",FALSE
+W2400568818,8,Gene Expression,FALSE
+W2400568818,9,In Situ Hybridization,FALSE
+W2400568818,10,Male,FALSE
+W2400568818,11,Mice,FALSE
+W2400568818,12,Protein Serine-Threonine Kinases,FALSE
+W2400568818,13,Proto-Oncogene Proteins,FALSE
+W2400568818,14,Proto-Oncogene Proteins c-raf,FALSE
+W2400568818,15,"RNA, Messenger",FALSE
+W2400568818,16,"RNA, Messenger",FALSE
+W2400568818,17,Testis,FALSE
+W2400568818,18,Testis,FALSE
 W2396996096,1,Neurons,TRUE
 W2396996096,2,Protein-Tyrosine Kinases,TRUE
 W2396996096,3,Proto-Oncogene Proteins,TRUE
@@ -39647,37 +39647,6 @@ W2076349092,23,Synapses,FALSE
 W2076349092,24,Tissue Distribution,FALSE
 W2076349092,25,Torpedo,FALSE
 W2076349092,26,"Transcription, Genetic",FALSE
-W2012831549,1,Hippocampus,TRUE
-W2012831549,2,Platelet Activating Factor,TRUE
-W2012831549,3,Action Potentials,FALSE
-W2012831549,4,Action Potentials,FALSE
-W2012831549,5,Animals,FALSE
-W2012831549,6,"Dose-Response Relationship, Drug",FALSE
-W2012831549,7,Electric Stimulation,FALSE
-W2012831549,8,Electrophysiology,FALSE
-W2012831549,9,ErbB Receptors,FALSE
-W2012831549,10,ErbB Receptors,FALSE
-W2012831549,11,Hippocampus,FALSE
-W2012831549,12,Hippocampus,FALSE
-W2012831549,13,In Vitro Techniques,FALSE
-W2012831549,14,Mice,FALSE
-W2012831549,15,"Mice, Inbred C57BL",FALSE
-W2012831549,16,Osmolar Concentration,FALSE
-W2012831549,17,Platelet Activating Factor,FALSE
-W2012831549,18,"Receptors, N-Methyl-D-Aspartate",FALSE
-W2012831549,19,"Receptors, N-Methyl-D-Aspartate",FALSE
-W2012831549,20,Synapses,FALSE
-W2012831549,21,Synapses,FALSE
-W2012831549,22,Synapses,FALSE
-W2139164174,1,Chromosome Mapping,TRUE
-W2139164174,2,"Chromosomes, Fungal",TRUE
-W2139164174,3,Schizosaccharomyces,TRUE
-W2139164174,4,Cosmids,FALSE
-W2139164174,5,"Deoxyribonucleases, Type II Site-Specific",FALSE
-W2139164174,6,Genomic Library,FALSE
-W2139164174,7,Restriction Mapping,FALSE
-W2139164174,8,Schizosaccharomyces,FALSE
-W2139164174,9,Sequence Tagged Sites,FALSE
 W1993969806,1,"Chromosomes, Fungal",TRUE
 W1993969806,2,DNA,TRUE
 W1993969806,3,Hypoxanthine Phosphoribosyltransferase,TRUE
@@ -39714,6 +39683,37 @@ W1993969806,33,Spheroplasts,FALSE
 W1993969806,34,Stem Cells,FALSE
 W1993969806,35,Stem Cells,FALSE
 W1993969806,36,Stem Cells,FALSE
+W2139164174,1,Chromosome Mapping,TRUE
+W2139164174,2,"Chromosomes, Fungal",TRUE
+W2139164174,3,Schizosaccharomyces,TRUE
+W2139164174,4,Cosmids,FALSE
+W2139164174,5,"Deoxyribonucleases, Type II Site-Specific",FALSE
+W2139164174,6,Genomic Library,FALSE
+W2139164174,7,Restriction Mapping,FALSE
+W2139164174,8,Schizosaccharomyces,FALSE
+W2139164174,9,Sequence Tagged Sites,FALSE
+W2012831549,1,Hippocampus,TRUE
+W2012831549,2,Platelet Activating Factor,TRUE
+W2012831549,3,Action Potentials,FALSE
+W2012831549,4,Action Potentials,FALSE
+W2012831549,5,Animals,FALSE
+W2012831549,6,"Dose-Response Relationship, Drug",FALSE
+W2012831549,7,Electric Stimulation,FALSE
+W2012831549,8,Electrophysiology,FALSE
+W2012831549,9,ErbB Receptors,FALSE
+W2012831549,10,ErbB Receptors,FALSE
+W2012831549,11,Hippocampus,FALSE
+W2012831549,12,Hippocampus,FALSE
+W2012831549,13,In Vitro Techniques,FALSE
+W2012831549,14,Mice,FALSE
+W2012831549,15,"Mice, Inbred C57BL",FALSE
+W2012831549,16,Osmolar Concentration,FALSE
+W2012831549,17,Platelet Activating Factor,FALSE
+W2012831549,18,"Receptors, N-Methyl-D-Aspartate",FALSE
+W2012831549,19,"Receptors, N-Methyl-D-Aspartate",FALSE
+W2012831549,20,Synapses,FALSE
+W2012831549,21,Synapses,FALSE
+W2012831549,22,Synapses,FALSE
 W2026939082,1,Endoplasmic Reticulum,TRUE
 W2026939082,2,Gene Expression Regulation,TRUE
 W2026939082,3,Glutens,TRUE

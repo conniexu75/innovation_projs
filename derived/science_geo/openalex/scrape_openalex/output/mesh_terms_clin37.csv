@@ -219,13 +219,13 @@ W4300719475,3,Female,FALSE
 W4300719475,4,Humans,FALSE
 W4302810730,1,Microfilming,TRUE
 W4302810730,2,Humans,FALSE
+W1525982793,1,"Colitis, Ulcerative",TRUE
+W1525982793,2,Liver Cirrhosis,TRUE
+W1525982793,3,Humans,FALSE
 W1993039496,1,Pulmonary Embolism,TRUE
 W1993039496,2,Thrombosis,TRUE
 W1993039496,3,Venous Thrombosis,TRUE
 W1993039496,4,Humans,FALSE
-W1525982793,1,"Colitis, Ulcerative",TRUE
-W1525982793,2,Liver Cirrhosis,TRUE
-W1525982793,3,Humans,FALSE
 W2068269250,1,Esophageal Neoplasms,TRUE
 W2068269250,2,Esophagus,TRUE
 W2068269250,3,Leiomyoma,TRUE
@@ -1205,6 +1205,12 @@ W2139976604,23,Middle Aged,FALSE
 W2139976604,24,Nephrology,FALSE
 W2139976604,25,Referral and Consultation,FALSE
 W2139976604,26,Sex Factors,FALSE
+W2089022147,1,Decision Making,TRUE
+W2089022147,2,Informed Consent,TRUE
+W2089022147,3,Patient-Centered Care,TRUE
+W2089022147,4,Evidence-Based Medicine,FALSE
+W2089022147,5,Humans,FALSE
+W2089022147,6,Precision Medicine,FALSE
 W2140119907,1,Cystic Fibrosis,TRUE
 W2140119907,2,Adolescent,FALSE
 W2140119907,3,Adult,FALSE
@@ -1221,12 +1227,6 @@ W2140119907,13,Infant,FALSE
 W2140119907,14,Middle Aged,FALSE
 W2140119907,15,Registries,FALSE
 W2140119907,16,Young Adult,FALSE
-W2089022147,1,Decision Making,TRUE
-W2089022147,2,Informed Consent,TRUE
-W2089022147,3,Patient-Centered Care,TRUE
-W2089022147,4,Evidence-Based Medicine,FALSE
-W2089022147,5,Humans,FALSE
-W2089022147,6,Precision Medicine,FALSE
 W2083691255,1,Consumer Health Information,TRUE
 W2083691255,2,Internet,TRUE
 W2083691255,3,Directories as Topic,FALSE
@@ -1412,6 +1412,11 @@ W2062321645,15,Medicare,FALSE
 W2062321645,16,Politics,FALSE
 W2062321645,17,State Government,FALSE
 W2062321645,18,United States,FALSE
+W2322217285,1,Hyperthyroidism,TRUE
+W2322217285,2,Neoplasms,TRUE
+W2322217285,3,Thiouracil,TRUE
+W2322217285,4,Thyroid Gland,TRUE
+W2322217285,5,Thyrotoxicosis,TRUE
 W1975913955,1,Health Care Reform,TRUE
 W1975913955,2,Insurance Coverage,TRUE
 W1975913955,3,"Insurance, Health",TRUE
@@ -1431,11 +1436,6 @@ W1975913955,16,Medicare,FALSE
 W1975913955,17,Medicare,FALSE
 W1975913955,18,"Societies, Medical",FALSE
 W1975913955,19,United States,FALSE
-W2322217285,1,Hyperthyroidism,TRUE
-W2322217285,2,Neoplasms,TRUE
-W2322217285,3,Thiouracil,TRUE
-W2322217285,4,Thyroid Gland,TRUE
-W2322217285,5,Thyrotoxicosis,TRUE
 W2318399871,1,Endocarditis,TRUE
 W2318399871,2,"Endocarditis, Bacterial",TRUE
 W2318399871,3,Penicillins,TRUE
@@ -2773,8 +2773,6 @@ W2043858151,3,Hypertrichosis,TRUE
 W2043858151,4,Malnutrition,TRUE
 W2043858151,5,Nutrition Disorders,TRUE
 W2043858151,6,Humans,FALSE
-W2154811248,1,Color,TRUE
-W2154811248,2,Humans,FALSE
 W1986449606,1,Adrenal Glands,TRUE
 W1986449606,2,Cardiovascular System,TRUE
 W1986449606,3,Epinephrine,TRUE
@@ -2807,6 +2805,8 @@ W2141724476,2,"Pregnancy, Ectopic",TRUE
 W2141724476,3,Female,FALSE
 W2141724476,4,Humans,FALSE
 W2141724476,5,Pregnancy,FALSE
+W2154811248,1,Color,TRUE
+W2154811248,2,Humans,FALSE
 W2984006486,1,Hyperoxia,TRUE
 W2984006486,2,Oxygen,TRUE
 W2984006486,3,Humans,FALSE
@@ -2954,17 +2954,17 @@ W2412798637,1,"Hypertension, Portal",TRUE
 W2412798637,2,Humans,FALSE
 W2409323004,1,Hematologic Diseases,TRUE
 W2409323004,2,Humans,FALSE
+W2060170571,1,Endophthalmitis,TRUE
+W2060170571,2,Ophthalmia Neonatorum,TRUE
+W2060170571,3,Endophthalmitis,FALSE
+W2060170571,4,Humans,FALSE
+W2060170571,5,"Infant, Newborn",FALSE
 W2398867802,1,"Adjuvants, Immunologic",TRUE
 W2398867802,2,Anesthesia,TRUE
 W2398867802,3,Anesthesiology,TRUE
 W2398867802,4,Tubocurarine,TRUE
 W2398867802,5,Aged,FALSE
 W2398867802,6,Humans,FALSE
-W2060170571,1,Endophthalmitis,TRUE
-W2060170571,2,Ophthalmia Neonatorum,TRUE
-W2060170571,3,Endophthalmitis,FALSE
-W2060170571,4,Humans,FALSE
-W2060170571,5,"Infant, Newborn",FALSE
 W2014011317,1,Feeding and Eating Disorders,TRUE
 W2014011317,2,Malnutrition,TRUE
 W2014011317,3,Tuberculosis,TRUE
@@ -2973,10 +2973,10 @@ W2398111775,1,Digestive System Surgical Procedures,TRUE
 W2398111775,2,Proteins,TRUE
 W2398111775,3,Stomach,TRUE
 W2398111775,4,Proteins,FALSE
-W2415465490,1,Vascular Diseases,TRUE
-W2415465490,2,Vasodilation,TRUE
-W2415465490,3,Humans,FALSE
 W2984277968,1,Neurotic Disorders,TRUE
+W4213221766,1,Agaricales,TRUE
+W4213221766,2,Mushroom Poisoning,TRUE
+W4213221766,3,Agaricales,FALSE
 W2011835984,1,Digestive System,TRUE
 W2011835984,2,Food,TRUE
 W2011835984,3,Foreign Bodies,TRUE
@@ -3005,15 +3005,15 @@ W2399665272,2,Cardiovascular System,TRUE
 W2399665272,3,Vascular Surgical Procedures,TRUE
 W2399665272,4,Arteries,FALSE
 W2399665272,5,Humans,FALSE
+W2415465490,1,Vascular Diseases,TRUE
+W2415465490,2,Vasodilation,TRUE
+W2415465490,3,Humans,FALSE
 W3150464672,1,Arthritis,TRUE
 W3150464672,2,"Arthritis, Rheumatoid",TRUE
 W3150464672,3,Humans,FALSE
 W4212795896,1,"Porphyria, Acute Intermittent",TRUE
 W4212795896,2,Porphyrias,TRUE
 W4212795896,3,Humans,FALSE
-W4213221766,1,Agaricales,TRUE
-W4213221766,2,Mushroom Poisoning,TRUE
-W4213221766,3,Agaricales,FALSE
 W1975218070,1,Brain,TRUE
 W1975218070,2,Humans,FALSE
 W1994119580,1,Digestive System,TRUE
@@ -3359,6 +3359,17 @@ W2030509385,13,Neoplasms,FALSE
 W2030509385,14,Probability,FALSE
 W2030509385,15,Risk Factors,FALSE
 W2030509385,16,Sensitivity and Specificity,FALSE
+W2084587729,1,Attention Deficit Disorder with Hyperactivity,TRUE
+W2084587729,2,Adult,FALSE
+W2084587729,3,Attention Deficit Disorder with Hyperactivity,FALSE
+W2084587729,4,Attention Deficit Disorder with Hyperactivity,FALSE
+W2084587729,5,Central Nervous System Stimulants,FALSE
+W2084587729,6,Central Nervous System Stimulants,FALSE
+W2084587729,7,Humans,FALSE
+W2084587729,8,Practice Guidelines as Topic,FALSE
+W2084587729,9,Psychotherapy,FALSE
+W2084587729,10,Psychotherapy,FALSE
+W2084587729,11,Reproducibility of Results,FALSE
 W2087079440,1,Obesity,TRUE
 W2087079440,2,"Quality Indicators, Health Care",TRUE
 W2087079440,3,Quality of Health Care,TRUE
@@ -3383,17 +3394,6 @@ W2087079440,21,"Quality Indicators, Health Care",FALSE
 W2087079440,22,United States,FALSE
 W2087079440,23,Vaccines,FALSE
 W2087079440,24,Vaccines,FALSE
-W2084587729,1,Attention Deficit Disorder with Hyperactivity,TRUE
-W2084587729,2,Adult,FALSE
-W2084587729,3,Attention Deficit Disorder with Hyperactivity,FALSE
-W2084587729,4,Attention Deficit Disorder with Hyperactivity,FALSE
-W2084587729,5,Central Nervous System Stimulants,FALSE
-W2084587729,6,Central Nervous System Stimulants,FALSE
-W2084587729,7,Humans,FALSE
-W2084587729,8,Practice Guidelines as Topic,FALSE
-W2084587729,9,Psychotherapy,FALSE
-W2084587729,10,Psychotherapy,FALSE
-W2084587729,11,Reproducibility of Results,FALSE
 W2146677263,1,"Education, Medical, Undergraduate",TRUE
 W2146677263,2,"Education, Medical, Undergraduate",TRUE
 W2146677263,3,China,FALSE
@@ -3980,18 +3980,6 @@ W1487514708,12,Hospital Bed Capacity,FALSE
 W1487514708,13,Humans,FALSE
 W1487514708,14,United States,FALSE
 W1487514708,15,United States,FALSE
-W2031106111,1,Patient-Centered Care,TRUE
-W2031106111,2,Primary Health Care,TRUE
-W2031106111,3,Specialization,TRUE
-W2031106111,4,Humans,FALSE
-W2031106111,5,Patient-Centered Care,FALSE
-W2031106111,6,Patient-Centered Care,FALSE
-W2031106111,7,Physician-Patient Relations,FALSE
-W2031106111,8,Primary Health Care,FALSE
-W2031106111,9,Primary Health Care,FALSE
-W2031106111,10,Specialization,FALSE
-W2031106111,11,Specialization,FALSE
-W2031106111,12,United States,FALSE
 W1980996442,1,"Accidents, Traffic",TRUE
 W1980996442,2,Attention,TRUE
 W1980996442,3,Automobile Driving,TRUE
@@ -4004,6 +3992,18 @@ W1980996442,9,Industry,FALSE
 W1980996442,10,Risk,FALSE
 W1980996442,11,United States,FALSE
 W1980996442,12,United States,FALSE
+W2031106111,1,Patient-Centered Care,TRUE
+W2031106111,2,Primary Health Care,TRUE
+W2031106111,3,Specialization,TRUE
+W2031106111,4,Humans,FALSE
+W2031106111,5,Patient-Centered Care,FALSE
+W2031106111,6,Patient-Centered Care,FALSE
+W2031106111,7,Physician-Patient Relations,FALSE
+W2031106111,8,Primary Health Care,FALSE
+W2031106111,9,Primary Health Care,FALSE
+W2031106111,10,Specialization,FALSE
+W2031106111,11,Specialization,FALSE
+W2031106111,12,United States,FALSE
 W2070566733,1,Energy Intake,TRUE
 W2070566733,2,Food Labeling,TRUE
 W2070566733,3,Restaurants,TRUE
@@ -5286,6 +5286,17 @@ W1999150823,5,Developed Countries,FALSE
 W1999150823,6,Humans,FALSE
 W1999150823,7,Personnel Selection,FALSE
 W1999150823,8,World Health Organization,FALSE
+W2052407077,1,Costs and Cost Analysis,TRUE
+W2052407077,2,Health Care Costs,TRUE
+W2052407077,3,"Insurance, Health",TRUE
+W2052407077,4,Physicians,TRUE
+W2052407077,5,Costs and Cost Analysis,FALSE
+W2052407077,6,Humans,FALSE
+W2052407077,7,Insurance Claim Review,FALSE
+W2052407077,8,Insurance Claim Review,FALSE
+W2052407077,9,"Insurance, Health",FALSE
+W2052407077,10,Massachusetts,FALSE
+W2052407077,11,Physicians,FALSE
 W1977461162,1,Chromosome Deletion,TRUE
 W1977461162,2,"Chromosomes, Human, Pair 9",TRUE
 W1977461162,3,Coronary Artery Disease,TRUE
@@ -5301,17 +5312,6 @@ W1977461162,12,Humans,FALSE
 W1977461162,13,Mice,FALSE
 W1977461162,14,"Mice, Knockout",FALSE
 W1977461162,15,Risk Factors,FALSE
-W2052407077,1,Costs and Cost Analysis,TRUE
-W2052407077,2,Health Care Costs,TRUE
-W2052407077,3,"Insurance, Health",TRUE
-W2052407077,4,Physicians,TRUE
-W2052407077,5,Costs and Cost Analysis,FALSE
-W2052407077,6,Humans,FALSE
-W2052407077,7,Insurance Claim Review,FALSE
-W2052407077,8,Insurance Claim Review,FALSE
-W2052407077,9,"Insurance, Health",FALSE
-W2052407077,10,Massachusetts,FALSE
-W2052407077,11,Physicians,FALSE
 W2023956002,1,Alendronate,TRUE
 W2023956002,2,Androgen Antagonists,TRUE
 W2023956002,3,Antineoplastic Agents,TRUE
@@ -5901,18 +5901,6 @@ W1982892827,13,United States,FALSE
 W1982892827,14,United States,FALSE
 W1982892827,15,Vaccination,FALSE
 W1982892827,16,Vaccination,FALSE
-W2063437472,1,Mental Disorders,TRUE
-W2063437472,2,Mental Disorders,TRUE
-W2063437472,3,Brain,FALSE
-W2063437472,4,Brain,FALSE
-W2063437472,5,"Epigenesis, Genetic",FALSE
-W2063437472,6,Genetic Predisposition to Disease,FALSE
-W2063437472,7,Humans,FALSE
-W2063437472,8,Mental Disorders,FALSE
-W2063437472,9,Mental Disorders,FALSE
-W2063437472,10,Neurosciences,FALSE
-W2063437472,11,Neurosciences,FALSE
-W2063437472,12,Twin Studies as Topic,FALSE
 W2125592779,1,Income,TRUE
 W2125592779,2,"Indians, North American",TRUE
 W2125592779,3,Mental Disorders,TRUE
@@ -5938,6 +5926,18 @@ W2125592779,22,Substance-Related Disorders,FALSE
 W2125592779,23,Substance-Related Disorders,FALSE
 W2125592779,24,Substance-Related Disorders,FALSE
 W2125592779,25,Young Adult,FALSE
+W2063437472,1,Mental Disorders,TRUE
+W2063437472,2,Mental Disorders,TRUE
+W2063437472,3,Brain,FALSE
+W2063437472,4,Brain,FALSE
+W2063437472,5,"Epigenesis, Genetic",FALSE
+W2063437472,6,Genetic Predisposition to Disease,FALSE
+W2063437472,7,Humans,FALSE
+W2063437472,8,Mental Disorders,FALSE
+W2063437472,9,Mental Disorders,FALSE
+W2063437472,10,Neurosciences,FALSE
+W2063437472,11,Neurosciences,FALSE
+W2063437472,12,Twin Studies as Topic,FALSE
 W2121117340,1,Ambulatory Care,TRUE
 W2121117340,2,"Diabetes Mellitus, Type 2",TRUE
 W2121117340,3,"Diabetes Mellitus, Type 2",TRUE
@@ -8821,21 +8821,6 @@ W2131879341,24,Severity of Illness Index,FALSE
 W2131879341,25,Terminal Care,FALSE
 W2131879341,26,United States,FALSE
 W2131879341,27,United States,FALSE
-W2009744308,1,Health Status Disparities,TRUE
-W2009744308,2,Healthcare Disparities,TRUE
-W2009744308,3,Intellectual Disability,TRUE
-W2009744308,4,Vulnerable Populations,TRUE
-W2009744308,5,Aged,FALSE
-W2009744308,6,Aging,FALSE
-W2009744308,7,Comorbidity,FALSE
-W2009744308,8,Delivery of Health Care,FALSE
-W2009744308,9,Health Services Needs and Demand,FALSE
-W2009744308,10,Humans,FALSE
-W2009744308,11,Life Expectancy,FALSE
-W2009744308,12,Middle Aged,FALSE
-W2009744308,13,Population Dynamics,FALSE
-W2009744308,14,United States,FALSE
-W2009744308,15,United States,FALSE
 W2068506562,1,Betapapillomavirus,TRUE
 W2068506562,2,"Carcinoma, Basal Cell",TRUE
 W2068506562,3,"Carcinoma, Squamous Cell",TRUE
@@ -8867,6 +8852,21 @@ W2068506562,28,Risk Factors,FALSE
 W2068506562,29,Skin Neoplasms,FALSE
 W2068506562,30,Skin Neoplasms,FALSE
 W2068506562,31,Skin Neoplasms,FALSE
+W2009744308,1,Health Status Disparities,TRUE
+W2009744308,2,Healthcare Disparities,TRUE
+W2009744308,3,Intellectual Disability,TRUE
+W2009744308,4,Vulnerable Populations,TRUE
+W2009744308,5,Aged,FALSE
+W2009744308,6,Aging,FALSE
+W2009744308,7,Comorbidity,FALSE
+W2009744308,8,Delivery of Health Care,FALSE
+W2009744308,9,Health Services Needs and Demand,FALSE
+W2009744308,10,Humans,FALSE
+W2009744308,11,Life Expectancy,FALSE
+W2009744308,12,Middle Aged,FALSE
+W2009744308,13,Population Dynamics,FALSE
+W2009744308,14,United States,FALSE
+W2009744308,15,United States,FALSE
 W2157214914,1,"Diabetes Mellitus, Type 2",TRUE
 W2157214914,2,Neoplasms,TRUE
 W2157214914,3,Consensus Development Conferences as Topic,FALSE
@@ -9604,6 +9604,24 @@ W2151980713,16,Testis,FALSE
 W2151980713,17,Testis,FALSE
 W2151980713,18,Uterus,FALSE
 W2151980713,19,Uterus,FALSE
+W2138751822,1,Alopecia Areata,TRUE
+W2138751822,2,"Adjuvants, Immunologic",FALSE
+W2138751822,3,"Adjuvants, Immunologic",FALSE
+W2138751822,4,"Administration, Topical",FALSE
+W2138751822,5,Adrenal Cortex Hormones,FALSE
+W2138751822,6,Adrenal Cortex Hormones,FALSE
+W2138751822,7,Alopecia Areata,FALSE
+W2138751822,8,Alopecia Areata,FALSE
+W2138751822,9,Alopecia Areata,FALSE
+W2138751822,10,Dermatologic Agents,FALSE
+W2138751822,11,Dermatologic Agents,FALSE
+W2138751822,12,"Diagnosis, Differential",FALSE
+W2138751822,13,Humans,FALSE
+W2138751822,14,Immunotherapy,FALSE
+W2138751822,15,Immunotherapy,FALSE
+W2138751822,16,Off-Label Use,FALSE
+W2138751822,17,Prognosis,FALSE
+W2138751822,18,Randomized Controlled Trials as Topic,FALSE
 W2066679639,1,HIV Infections,TRUE
 W2066679639,2,HIV Infections,TRUE
 W2066679639,3,Health Policy,TRUE
@@ -9626,24 +9644,6 @@ W2066679639,19,Spouse Abuse,FALSE
 W2066679639,20,Stereotyping,FALSE
 W2066679639,21,Substance-Related Disorders,FALSE
 W2066679639,22,Unemployment,FALSE
-W2138751822,1,Alopecia Areata,TRUE
-W2138751822,2,"Adjuvants, Immunologic",FALSE
-W2138751822,3,"Adjuvants, Immunologic",FALSE
-W2138751822,4,"Administration, Topical",FALSE
-W2138751822,5,Adrenal Cortex Hormones,FALSE
-W2138751822,6,Adrenal Cortex Hormones,FALSE
-W2138751822,7,Alopecia Areata,FALSE
-W2138751822,8,Alopecia Areata,FALSE
-W2138751822,9,Alopecia Areata,FALSE
-W2138751822,10,Dermatologic Agents,FALSE
-W2138751822,11,Dermatologic Agents,FALSE
-W2138751822,12,"Diagnosis, Differential",FALSE
-W2138751822,13,Humans,FALSE
-W2138751822,14,Immunotherapy,FALSE
-W2138751822,15,Immunotherapy,FALSE
-W2138751822,16,Off-Label Use,FALSE
-W2138751822,17,Prognosis,FALSE
-W2138751822,18,Randomized Controlled Trials as Topic,FALSE
 W2084921375,1,Anti-HIV Agents,TRUE
 W2084921375,2,HIV Infections,TRUE
 W2084921375,3,HIV Infections,TRUE

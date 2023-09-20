@@ -446,6 +446,12 @@ W2069755451,1,Prisoners,TRUE
 W2069755451,2,Prisoners of War,TRUE
 W2069755451,3,Warfare,TRUE
 W2069755451,4,Humans,FALSE
+W1992420239,1,Hematemesis,TRUE
+W1992420239,2,Peptic Ulcer Hemorrhage,TRUE
+W1992420239,3,Ulcer,TRUE
+W1992420239,4,Hematemesis,FALSE
+W1992420239,5,Humans,FALSE
+W1992420239,6,Incidence,FALSE
 W2225713908,1,Gold,TRUE
 W2225713908,2,Neuritis,TRUE
 W2225713908,3,Gold,FALSE
@@ -505,12 +511,6 @@ W1977488486,3,Cardiology,FALSE
 W1977488486,4,Cardiovascular Diseases,FALSE
 W1977488486,5,"Confounding Factors, Epidemiologic",FALSE
 W1977488486,6,Humans,FALSE
-W1992420239,1,Hematemesis,TRUE
-W1992420239,2,Peptic Ulcer Hemorrhage,TRUE
-W1992420239,3,Ulcer,TRUE
-W1992420239,4,Hematemesis,FALSE
-W1992420239,5,Humans,FALSE
-W1992420239,6,Incidence,FALSE
 W2150725799,1,Drug Industry,TRUE
 W2150725799,2,Immunosuppressive Agents,TRUE
 W2150725799,3,Periodicals as Topic,TRUE
@@ -2274,20 +2274,6 @@ W2069948489,9,Humans,FALSE
 W2069948489,10,Mentors,FALSE
 W2069948489,11,Physician-Patient Relations,FALSE
 W2069948489,12,Trust,FALSE
-W2004321434,1,Antipsychotic Agents,TRUE
-W2004321434,2,Paranoid Disorders,TRUE
-W2004321434,3,Antipsychotic Agents,FALSE
-W2004321434,4,Antipsychotic Agents,FALSE
-W2004321434,5,Antipsychotic Agents,FALSE
-W2004321434,6,Cost-Benefit Analysis,FALSE
-W2004321434,7,Drug Costs,FALSE
-W2004321434,8,Humans,FALSE
-W2004321434,9,Male,FALSE
-W2004321434,10,Paranoid Disorders,FALSE
-W2004321434,11,Practice Guidelines as Topic,FALSE
-W2004321434,12,Schizophrenia,FALSE
-W2004321434,13,Schizophrenia,FALSE
-W2004321434,14,Young Adult,FALSE
 W2070934362,1,Eligibility Determination,TRUE
 W2070934362,2,Health Services Accessibility,TRUE
 W2070934362,3,Hospice Care,TRUE
@@ -2305,6 +2291,20 @@ W2070934362,14,Prognosis,FALSE
 W2070934362,15,Program Evaluation,FALSE
 W2070934362,16,Survival Analysis,FALSE
 W2070934362,17,United States,FALSE
+W2004321434,1,Antipsychotic Agents,TRUE
+W2004321434,2,Paranoid Disorders,TRUE
+W2004321434,3,Antipsychotic Agents,FALSE
+W2004321434,4,Antipsychotic Agents,FALSE
+W2004321434,5,Antipsychotic Agents,FALSE
+W2004321434,6,Cost-Benefit Analysis,FALSE
+W2004321434,7,Drug Costs,FALSE
+W2004321434,8,Humans,FALSE
+W2004321434,9,Male,FALSE
+W2004321434,10,Paranoid Disorders,FALSE
+W2004321434,11,Practice Guidelines as Topic,FALSE
+W2004321434,12,Schizophrenia,FALSE
+W2004321434,13,Schizophrenia,FALSE
+W2004321434,14,Young Adult,FALSE
 W2419401627,1,Cross Infection,TRUE
 W2419401627,2,Health Personnel,TRUE
 W2419401627,3,Immunization Programs,TRUE
@@ -5096,6 +5096,13 @@ W2080772222,14,Hydroxymethylglutaryl-CoA Reductase Inhibitors,FALSE
 W2080772222,15,Hypertension,FALSE
 W2080772222,16,Patient Care,FALSE
 W2080772222,17,Practice Guidelines as Topic,FALSE
+W2041477141,1,Stillbirth,TRUE
+W2041477141,2,Female,FALSE
+W2041477141,3,Humans,FALSE
+W2041477141,4,Perinatal Care,FALSE
+W2041477141,5,Pregnancy,FALSE
+W2041477141,6,Prenatal Care,FALSE
+W2041477141,7,Stillbirth,FALSE
 W2116888597,1,AIDS-Related Opportunistic Infections,TRUE
 W2116888597,2,Ambulatory Care,TRUE
 W2116888597,3,Health Personnel,TRUE
@@ -5120,13 +5127,6 @@ W2116888597,21,South Africa,FALSE
 W2116888597,22,"Trimethoprim, Sulfamethoxazole Drug Combination",FALSE
 W2116888597,23,"Trimethoprim, Sulfamethoxazole Drug Combination",FALSE
 W2116888597,24,Tuberculosis,FALSE
-W2041477141,1,Stillbirth,TRUE
-W2041477141,2,Female,FALSE
-W2041477141,3,Humans,FALSE
-W2041477141,4,Perinatal Care,FALSE
-W2041477141,5,Pregnancy,FALSE
-W2041477141,6,Prenatal Care,FALSE
-W2041477141,7,Stillbirth,FALSE
 W1967487204,1,Amputees,TRUE
 W1967487204,2,Ankle Joint,TRUE
 W1967487204,3,Artificial Limbs,TRUE
@@ -6262,33 +6262,6 @@ W2063194984,13,Safety Management,FALSE
 W2063194984,14,Safety Management,FALSE
 W2063194984,15,United States,FALSE
 W2063194984,16,United States Agency for Healthcare Research and Quality,FALSE
-W2078656599,1,Adrenergic beta-Antagonists,TRUE
-W2078656599,2,Angina Pectoris,TRUE
-W2078656599,3,Coronary Artery Disease,TRUE
-W2078656599,4,Hydroxymethylglutaryl-CoA Reductase Inhibitors,TRUE
-W2078656599,5,Platelet Aggregation Inhibitors,TRUE
-W2078656599,6,"Practice Patterns, Physicians'",TRUE
-W2078656599,7,Adrenergic beta-Antagonists,FALSE
-W2078656599,8,Aged,FALSE
-W2078656599,9,Angina Pectoris,FALSE
-W2078656599,10,Angina Pectoris,FALSE
-W2078656599,11,"Angioplasty, Balloon, Coronary",FALSE
-W2078656599,12,Cardiac Catheterization,FALSE
-W2078656599,13,Clinical Trials as Topic,FALSE
-W2078656599,14,Coronary Artery Disease,FALSE
-W2078656599,15,Coronary Artery Disease,FALSE
-W2078656599,16,Female,FALSE
-W2078656599,17,Humans,FALSE
-W2078656599,18,Hydroxymethylglutaryl-CoA Reductase Inhibitors,FALSE
-W2078656599,19,Male,FALSE
-W2078656599,20,Middle Aged,FALSE
-W2078656599,21,Patient Discharge,FALSE
-W2078656599,22,Platelet Aggregation Inhibitors,FALSE
-W2078656599,23,"Practice Patterns, Physicians'",FALSE
-W2078656599,24,Quality of Life,FALSE
-W2078656599,25,Registries,FALSE
-W2078656599,26,Stents,FALSE
-W2078656599,27,United States,FALSE
 W2139269547,1,Economic Competition,TRUE
 W2139269547,2,"Emergency Service, Hospital",TRUE
 W2139269547,3,Health Facility Closure,TRUE
@@ -6316,6 +6289,33 @@ W2139269547,24,Ownership,FALSE
 W2139269547,25,Uncompensated Care,FALSE
 W2139269547,26,Uncompensated Care,FALSE
 W2139269547,27,United States,FALSE
+W2078656599,1,Adrenergic beta-Antagonists,TRUE
+W2078656599,2,Angina Pectoris,TRUE
+W2078656599,3,Coronary Artery Disease,TRUE
+W2078656599,4,Hydroxymethylglutaryl-CoA Reductase Inhibitors,TRUE
+W2078656599,5,Platelet Aggregation Inhibitors,TRUE
+W2078656599,6,"Practice Patterns, Physicians'",TRUE
+W2078656599,7,Adrenergic beta-Antagonists,FALSE
+W2078656599,8,Aged,FALSE
+W2078656599,9,Angina Pectoris,FALSE
+W2078656599,10,Angina Pectoris,FALSE
+W2078656599,11,"Angioplasty, Balloon, Coronary",FALSE
+W2078656599,12,Cardiac Catheterization,FALSE
+W2078656599,13,Clinical Trials as Topic,FALSE
+W2078656599,14,Coronary Artery Disease,FALSE
+W2078656599,15,Coronary Artery Disease,FALSE
+W2078656599,16,Female,FALSE
+W2078656599,17,Humans,FALSE
+W2078656599,18,Hydroxymethylglutaryl-CoA Reductase Inhibitors,FALSE
+W2078656599,19,Male,FALSE
+W2078656599,20,Middle Aged,FALSE
+W2078656599,21,Patient Discharge,FALSE
+W2078656599,22,Platelet Aggregation Inhibitors,FALSE
+W2078656599,23,"Practice Patterns, Physicians'",FALSE
+W2078656599,24,Quality of Life,FALSE
+W2078656599,25,Registries,FALSE
+W2078656599,26,Stents,FALSE
+W2078656599,27,United States,FALSE
 W2022444659,1,Hip Prosthesis,TRUE
 W2022444659,2,Medical Device Recalls,TRUE
 W2022444659,3,Hip Prosthesis,FALSE
@@ -7000,23 +7000,6 @@ W2110533836,14,HIV Infections,FALSE
 W2110533836,15,HIV Infections,FALSE
 W2110533836,16,Humans,FALSE
 W2110533836,17,Pandemics,FALSE
-W2130765755,1,Antioxidants,TRUE
-W2130765755,2,Arginine,TRUE
-W2130765755,3,Dietary Supplements,TRUE
-W2130765755,4,Pre-Eclampsia,TRUE
-W2130765755,5,Vitamins,TRUE
-W2130765755,6,Adult,FALSE
-W2130765755,7,Antioxidants,FALSE
-W2130765755,8,Arginine,FALSE
-W2130765755,9,Female,FALSE
-W2130765755,10,Food,FALSE
-W2130765755,11,Humans,FALSE
-W2130765755,12,Pre-Eclampsia,FALSE
-W2130765755,13,Pregnancy,FALSE
-W2130765755,14,Pregnancy Outcome,FALSE
-W2130765755,15,"Pregnancy, High-Risk",FALSE
-W2130765755,16,Prenatal Care,FALSE
-W2130765755,17,Vitamins,FALSE
 W4239292067,1,"Glomerulonephritis, Membranous",TRUE
 W4239292067,2,Immunoglobulin G,TRUE
 W4239292067,3,"Serum Albumin, Bovine",TRUE
@@ -7037,6 +7020,23 @@ W4239292067,17,Milk,FALSE
 W4239292067,18,"Serum Albumin, Bovine",FALSE
 W4239292067,19,"Serum Albumin, Bovine",FALSE
 W4239292067,20,"Serum Albumin, Bovine",FALSE
+W2130765755,1,Antioxidants,TRUE
+W2130765755,2,Arginine,TRUE
+W2130765755,3,Dietary Supplements,TRUE
+W2130765755,4,Pre-Eclampsia,TRUE
+W2130765755,5,Vitamins,TRUE
+W2130765755,6,Adult,FALSE
+W2130765755,7,Antioxidants,FALSE
+W2130765755,8,Arginine,FALSE
+W2130765755,9,Female,FALSE
+W2130765755,10,Food,FALSE
+W2130765755,11,Humans,FALSE
+W2130765755,12,Pre-Eclampsia,FALSE
+W2130765755,13,Pregnancy,FALSE
+W2130765755,14,Pregnancy Outcome,FALSE
+W2130765755,15,"Pregnancy, High-Risk",FALSE
+W2130765755,16,Prenatal Care,FALSE
+W2130765755,17,Vitamins,FALSE
 W1975626559,1,Ambulatory Care,TRUE
 W1975626559,2,Health Status,TRUE
 W1975626559,3,Hospitalization,TRUE
@@ -7408,6 +7408,8 @@ W2077187567,1,Health Care Reform,TRUE
 W2077187567,2,State Medicine,TRUE
 W2077187567,3,England,FALSE
 W2077187567,4,State Medicine,FALSE
+W4237921372,1,Physicians,TRUE
+W4237921372,2,Stereotyping,TRUE
 W1990078271,1,Heart,TRUE
 W1990078271,2,"Tomography, X-Ray Computed",TRUE
 W1990078271,3,Heart,FALSE
@@ -7432,8 +7434,6 @@ W2076960839,3,Cost Control,FALSE
 W2076960839,4,State Medicine,FALSE
 W2076960839,5,State Medicine,FALSE
 W2076960839,6,United Kingdom,FALSE
-W4237921372,1,Physicians,TRUE
-W4237921372,2,Stereotyping,TRUE
 W4252729716,1,Cerebrospinal Fluid Otorrhea,TRUE
 W4252729716,2,Cerebrospinal Fluid Otorrhea,FALSE
 W4252729716,3,Earache,FALSE
@@ -8942,6 +8942,13 @@ W2112509042,22,Middle Aged,FALSE
 W2112509042,23,Odds Ratio,FALSE
 W2112509042,24,Prevalence,FALSE
 W2112509042,25,Time Factors,FALSE
+W2141725152,1,"Financing, Government",TRUE
+W2141725152,2,General Practice,TRUE
+W2141725152,3,Motivation,TRUE
+W2141725152,4,"Outcome Assessment, Health Care",TRUE
+W2141725152,5,Quality of Health Care,TRUE
+W2141725152,6,General Practice,FALSE
+W2141725152,7,United Kingdom,FALSE
 W2002395040,1,Cardiovascular Diseases,TRUE
 W2002395040,2,Prostatic Neoplasms,TRUE
 W2002395040,3,Smoking,TRUE
@@ -8962,13 +8969,6 @@ W2002395040,17,Smoking,FALSE
 W2002395040,18,Survival Analysis,FALSE
 W2002395040,19,United States,FALSE
 W2002395040,20,United States,FALSE
-W2141725152,1,"Financing, Government",TRUE
-W2141725152,2,General Practice,TRUE
-W2141725152,3,Motivation,TRUE
-W2141725152,4,"Outcome Assessment, Health Care",TRUE
-W2141725152,5,Quality of Health Care,TRUE
-W2141725152,6,General Practice,FALSE
-W2141725152,7,United Kingdom,FALSE
 W2134259348,1,"Diabetes Mellitus, Type 1",TRUE
 W2134259348,2,Diabetic Angiopathies,TRUE
 W2134259348,3,Heart Failure,TRUE
@@ -9123,6 +9123,9 @@ W1980883166,19,Retrospective Studies,FALSE
 W1980883166,20,Sensitivity and Specificity,FALSE
 W1980883166,21,"Tomography, X-Ray Computed",FALSE
 W1980883166,22,Young Adult,FALSE
+W2043253806,1,Health Care Reform,TRUE
+W2043253806,2,Safety Management,FALSE
+W2043253806,3,Safety Management,FALSE
 W2043112285,1,Cardiovascular Diseases,TRUE
 W2043112285,2,"Diabetes Mellitus, Type 2",TRUE
 W2043112285,3,Evidence-Based Medicine,TRUE
@@ -9145,9 +9148,6 @@ W2043112285,19,Vitamin D,FALSE
 W2043112285,20,Vitamin D,FALSE
 W2043112285,21,Vitamin D Deficiency,FALSE
 W2043112285,22,Vitamin D Deficiency,FALSE
-W2043253806,1,Health Care Reform,TRUE
-W2043253806,2,Safety Management,FALSE
-W2043253806,3,Safety Management,FALSE
 W1964000410,1,Food Industry,TRUE
 W1964000410,2,Food Labeling,TRUE
 W1964000410,3,Nutritive Value,TRUE
@@ -13539,11 +13539,6 @@ W2115338165,16,Male,FALSE
 W2115338165,17,Middle Aged,FALSE
 W2115338165,18,Retrospective Studies,FALSE
 W2115338165,19,Young Adult,FALSE
-W2061378966,1,Electronic Health Records,TRUE
-W2061378966,2,Medical Informatics,TRUE
-W2061378966,3,Electronic Health Records,FALSE
-W2061378966,4,Medical Informatics,FALSE
-W2061378966,5,United States,FALSE
 W2165993348,1,Breast Neoplasms,TRUE
 W2165993348,2,Drainage,TRUE
 W2165993348,3,Exercise Therapy,TRUE
@@ -13567,6 +13562,11 @@ W2165993348,20,Lymphedema,FALSE
 W2165993348,21,Middle Aged,FALSE
 W2165993348,22,Practice Guidelines as Topic,FALSE
 W2165993348,23,Single-Blind Method,FALSE
+W2061378966,1,Electronic Health Records,TRUE
+W2061378966,2,Medical Informatics,TRUE
+W2061378966,3,Electronic Health Records,FALSE
+W2061378966,4,Medical Informatics,FALSE
+W2061378966,5,United States,FALSE
 W2089574797,1,Cathepsins,TRUE
 W2089574797,2,Mortality,TRUE
 W2089574797,3,Aged,FALSE
@@ -13676,6 +13676,19 @@ W2130579734,10,Military Personnel,FALSE
 W2130579734,11,Military Science,FALSE
 W2130579734,12,United States,FALSE
 W2130579734,13,Warfare,FALSE
+W2040044240,1,"Death, Sudden, Cardiac",TRUE
+W2040044240,2,Disaster Planning,TRUE
+W2040044240,3,Disasters,TRUE
+W2040044240,4,Earthquakes,TRUE
+W2040044240,5,Myocardial Infarction,TRUE
+W2040044240,6,Preventive Health Services,TRUE
+W2040044240,7,Stroke,TRUE
+W2040044240,8,Tsunamis,TRUE
+W2040044240,9,"Death, Sudden, Cardiac",FALSE
+W2040044240,10,Humans,FALSE
+W2040044240,11,Japan,FALSE
+W2040044240,12,Myocardial Infarction,FALSE
+W2040044240,13,Stroke,FALSE
 W2022275113,1,Health Priorities,TRUE
 W2022275113,2,Health Promotion,TRUE
 W2022275113,3,Suicide,TRUE
@@ -13691,19 +13704,6 @@ W2022275113,12,Suicide,FALSE
 W2022275113,13,Unemployment,FALSE
 W2022275113,14,Unemployment,FALSE
 W2022275113,15,Unemployment,FALSE
-W2040044240,1,"Death, Sudden, Cardiac",TRUE
-W2040044240,2,Disaster Planning,TRUE
-W2040044240,3,Disasters,TRUE
-W2040044240,4,Earthquakes,TRUE
-W2040044240,5,Myocardial Infarction,TRUE
-W2040044240,6,Preventive Health Services,TRUE
-W2040044240,7,Stroke,TRUE
-W2040044240,8,Tsunamis,TRUE
-W2040044240,9,"Death, Sudden, Cardiac",FALSE
-W2040044240,10,Humans,FALSE
-W2040044240,11,Japan,FALSE
-W2040044240,12,Myocardial Infarction,FALSE
-W2040044240,13,Stroke,FALSE
 W1980180303,1,"Headache Disorders, Primary",TRUE
 W1980180303,2,Adult,FALSE
 W1980180303,3,Age of Onset,FALSE
@@ -15185,15 +15185,6 @@ W2064910453,21,Ribavirin,FALSE
 W2064910453,22,Risk Factors,FALSE
 W2064910453,23,Time Factors,FALSE
 W2064910453,24,Viral Load,FALSE
-W2332149508,1,Cost Savings,TRUE
-W2332149508,2,Group Practice,TRUE
-W2332149508,3,Medicare,TRUE
-W2332149508,4,"Centers for Medicare and Medicaid Services, U.S.",FALSE
-W2332149508,5,Fee-for-Service Plans,FALSE
-W2332149508,6,Group Practice,FALSE
-W2332149508,7,Medicare,FALSE
-W2332149508,8,Medicare,FALSE
-W2332149508,9,United States,FALSE
 W2147064789,1,"Angioplasty, Balloon, Coronary",TRUE
 W2147064789,2,Hospitals,TRUE
 W2147064789,3,Myocardial Infarction,TRUE
@@ -15211,6 +15202,15 @@ W2147064789,14,Referral and Consultation,FALSE
 W2147064789,15,Thrombolytic Therapy,FALSE
 W2147064789,16,Time Factors,FALSE
 W2147064789,17,United States,FALSE
+W2332149508,1,Cost Savings,TRUE
+W2332149508,2,Group Practice,TRUE
+W2332149508,3,Medicare,TRUE
+W2332149508,4,"Centers for Medicare and Medicaid Services, U.S.",FALSE
+W2332149508,5,Fee-for-Service Plans,FALSE
+W2332149508,6,Group Practice,FALSE
+W2332149508,7,Medicare,FALSE
+W2332149508,8,Medicare,FALSE
+W2332149508,9,United States,FALSE
 W2032320791,1,Carrier State,TRUE
 W2032320791,2,Hepatitis B,TRUE
 W2032320791,3,Prejudice,TRUE
@@ -16955,20 +16955,6 @@ W2144892629,11,Phenotype,FALSE
 W2144892629,12,Phosphoproteins,FALSE
 W2144892629,13,RNA Splicing Factors,FALSE
 W2144892629,14,"Ribonucleoprotein, U2 Small Nuclear",FALSE
-W2126727507,1,"Epilepsies, Partial",TRUE
-W2126727507,2,Adolescent,FALSE
-W2126727507,3,Adult,FALSE
-W2126727507,4,Cohort Studies,FALSE
-W2126727507,5,"Epilepsies, Partial",FALSE
-W2126727507,6,Female,FALSE
-W2126727507,7,Humans,FALSE
-W2126727507,8,Male,FALSE
-W2126727507,9,Middle Aged,FALSE
-W2126727507,10,Recurrence,FALSE
-W2126727507,11,Seizures,FALSE
-W2126727507,12,Seizures,FALSE
-W2126727507,13,Survival Analysis,FALSE
-W2126727507,14,Young Adult,FALSE
 W1979885312,1,Developing Countries,TRUE
 W1979885312,2,Global Health,TRUE
 W1979885312,3,Health Services Needs and Demand,TRUE
@@ -16989,6 +16975,20 @@ W1979885312,17,Psychiatry,FALSE
 W1979885312,18,Psychiatry,FALSE
 W1979885312,19,Social Support,FALSE
 W1979885312,20,Workforce,FALSE
+W2126727507,1,"Epilepsies, Partial",TRUE
+W2126727507,2,Adolescent,FALSE
+W2126727507,3,Adult,FALSE
+W2126727507,4,Cohort Studies,FALSE
+W2126727507,5,"Epilepsies, Partial",FALSE
+W2126727507,6,Female,FALSE
+W2126727507,7,Humans,FALSE
+W2126727507,8,Male,FALSE
+W2126727507,9,Middle Aged,FALSE
+W2126727507,10,Recurrence,FALSE
+W2126727507,11,Seizures,FALSE
+W2126727507,12,Seizures,FALSE
+W2126727507,13,Survival Analysis,FALSE
+W2126727507,14,Young Adult,FALSE
 W1973380773,1,Heart Failure,TRUE
 W1973380773,2,Heart Failure,TRUE
 W1973380773,3,Hospitalization,TRUE
@@ -17205,28 +17205,42 @@ W2142755785,29,Socioeconomic Factors,FALSE
 W2142755785,30,Sweden,FALSE
 W2142755785,31,Sweden,FALSE
 W2142755785,32,Young Adult,FALSE
-W2116766425,1,"Abnormalities, Drug-Induced",TRUE
-W2116766425,2,Angiotensin-Converting Enzyme Inhibitors,TRUE
-W2116766425,3,"Abnormalities, Drug-Induced",FALSE
-W2116766425,4,Angiotensin-Converting Enzyme Inhibitors,FALSE
-W2116766425,5,Antihypertensive Agents,FALSE
-W2116766425,6,Antihypertensive Agents,FALSE
-W2116766425,7,Cohort Studies,FALSE
-W2116766425,8,Databases as Topic,FALSE
-W2116766425,9,"Diabetes, Gestational",FALSE
-W2116766425,10,Female,FALSE
-W2116766425,11,"Heart Defects, Congenital",FALSE
-W2116766425,12,"Heart Defects, Congenital",FALSE
-W2116766425,13,Humans,FALSE
-W2116766425,14,"Hypertension, Pregnancy-Induced",FALSE
-W2116766425,15,"Hypertension, Pregnancy-Induced",FALSE
-W2116766425,16,Maternal-Fetal Exchange,FALSE
-W2116766425,17,Obesity,FALSE
-W2116766425,18,Odds Ratio,FALSE
-W2116766425,19,Pregnancy,FALSE
-W2116766425,20,Pregnancy Complications,FALSE
-W2116766425,21,"Pregnancy Trimester, First",FALSE
-W2116766425,22,Retrospective Studies,FALSE
+W2141878071,1,Adiposity,TRUE
+W2141878071,2,Health Promotion,TRUE
+W2141878071,3,Life Style,TRUE
+W2141878071,4,Obesity,TRUE
+W2141878071,5,Physical Education and Training,TRUE
+W2141878071,6,Physical Fitness,TRUE
+W2141878071,7,Adiposity,FALSE
+W2141878071,8,Age Factors,FALSE
+W2141878071,9,Body Mass Index,FALSE
+W2141878071,10,Child,FALSE
+W2141878071,11,"Child, Preschool",FALSE
+W2141878071,12,Cluster Analysis,FALSE
+W2141878071,13,Computers,FALSE
+W2141878071,14,Computers,FALSE
+W2141878071,15,Diet,FALSE
+W2141878071,16,Emigrants and Immigrants,FALSE
+W2141878071,17,Health Behavior,FALSE
+W2141878071,18,Health Promotion,FALSE
+W2141878071,19,Health Status Disparities,FALSE
+W2141878071,20,Humans,FALSE
+W2141878071,21,Interior Design and Furnishings,FALSE
+W2141878071,22,Obesity,FALSE
+W2141878071,23,Obesity,FALSE
+W2141878071,24,"Outcome and Process Assessment, Health Care",FALSE
+W2141878071,25,"Outcome and Process Assessment, Health Care",FALSE
+W2141878071,26,Parents,FALSE
+W2141878071,27,Parents,FALSE
+W2141878071,28,Physical Education and Training,FALSE
+W2141878071,29,Physical Fitness,FALSE
+W2141878071,30,Skinfold Thickness,FALSE
+W2141878071,31,Sleep,FALSE
+W2141878071,32,Switzerland,FALSE
+W2141878071,33,Switzerland,FALSE
+W2141878071,34,Television,FALSE
+W2141878071,35,Television,FALSE
+W2141878071,36,Waist Circumference,FALSE
 W2019143651,1,"Adjuvants, Immunologic",TRUE
 W2019143651,2,"Influenza A Virus, H1N1 Subtype",TRUE
 W2019143651,3,Influenza Vaccines,TRUE
@@ -17271,42 +17285,28 @@ W2019143651,41,Sweden,FALSE
 W2019143651,42,Sweden,FALSE
 W2019143651,43,Vaccination,FALSE
 W2019143651,44,Young Adult,FALSE
-W2141878071,1,Adiposity,TRUE
-W2141878071,2,Health Promotion,TRUE
-W2141878071,3,Life Style,TRUE
-W2141878071,4,Obesity,TRUE
-W2141878071,5,Physical Education and Training,TRUE
-W2141878071,6,Physical Fitness,TRUE
-W2141878071,7,Adiposity,FALSE
-W2141878071,8,Age Factors,FALSE
-W2141878071,9,Body Mass Index,FALSE
-W2141878071,10,Child,FALSE
-W2141878071,11,"Child, Preschool",FALSE
-W2141878071,12,Cluster Analysis,FALSE
-W2141878071,13,Computers,FALSE
-W2141878071,14,Computers,FALSE
-W2141878071,15,Diet,FALSE
-W2141878071,16,Emigrants and Immigrants,FALSE
-W2141878071,17,Health Behavior,FALSE
-W2141878071,18,Health Promotion,FALSE
-W2141878071,19,Health Status Disparities,FALSE
-W2141878071,20,Humans,FALSE
-W2141878071,21,Interior Design and Furnishings,FALSE
-W2141878071,22,Obesity,FALSE
-W2141878071,23,Obesity,FALSE
-W2141878071,24,"Outcome and Process Assessment, Health Care",FALSE
-W2141878071,25,"Outcome and Process Assessment, Health Care",FALSE
-W2141878071,26,Parents,FALSE
-W2141878071,27,Parents,FALSE
-W2141878071,28,Physical Education and Training,FALSE
-W2141878071,29,Physical Fitness,FALSE
-W2141878071,30,Skinfold Thickness,FALSE
-W2141878071,31,Sleep,FALSE
-W2141878071,32,Switzerland,FALSE
-W2141878071,33,Switzerland,FALSE
-W2141878071,34,Television,FALSE
-W2141878071,35,Television,FALSE
-W2141878071,36,Waist Circumference,FALSE
+W2116766425,1,"Abnormalities, Drug-Induced",TRUE
+W2116766425,2,Angiotensin-Converting Enzyme Inhibitors,TRUE
+W2116766425,3,"Abnormalities, Drug-Induced",FALSE
+W2116766425,4,Angiotensin-Converting Enzyme Inhibitors,FALSE
+W2116766425,5,Antihypertensive Agents,FALSE
+W2116766425,6,Antihypertensive Agents,FALSE
+W2116766425,7,Cohort Studies,FALSE
+W2116766425,8,Databases as Topic,FALSE
+W2116766425,9,"Diabetes, Gestational",FALSE
+W2116766425,10,Female,FALSE
+W2116766425,11,"Heart Defects, Congenital",FALSE
+W2116766425,12,"Heart Defects, Congenital",FALSE
+W2116766425,13,Humans,FALSE
+W2116766425,14,"Hypertension, Pregnancy-Induced",FALSE
+W2116766425,15,"Hypertension, Pregnancy-Induced",FALSE
+W2116766425,16,Maternal-Fetal Exchange,FALSE
+W2116766425,17,Obesity,FALSE
+W2116766425,18,Odds Ratio,FALSE
+W2116766425,19,Pregnancy,FALSE
+W2116766425,20,Pregnancy Complications,FALSE
+W2116766425,21,"Pregnancy Trimester, First",FALSE
+W2116766425,22,Retrospective Studies,FALSE
 W2069268796,1,Global Health,TRUE
 W2069268796,2,Mental Health Services,TRUE
 W2069268796,3,Adolescent,FALSE
@@ -18040,6 +18040,16 @@ W2010390855,15,Prostate-Specific Antigen,FALSE
 W2010390855,16,Prostatic Neoplasms,FALSE
 W2010390855,17,Prostatic Neoplasms,FALSE
 W2010390855,18,United States,FALSE
+W2041362722,1,Clinical Trials as Topic,TRUE
+W2041362722,2,Patient Selection,TRUE
+W2041362722,3,Clinical Trials as Topic,FALSE
+W2041362722,4,"Health Knowledge, Attitudes, Practice",FALSE
+W2041362722,5,Health Personnel,FALSE
+W2041362722,6,Humans,FALSE
+W2041362722,7,Organizational Policy,FALSE
+W2041362722,8,Patient Dropouts,FALSE
+W2041362722,9,Professional Role,FALSE
+W2041362722,10,United States,FALSE
 W2011547310,1,"Education, Medical, Undergraduate",TRUE
 W2011547310,2,Global Health,TRUE
 W2011547310,3,Clinical Competence,FALSE
@@ -18051,16 +18061,6 @@ W2011547310,8,Global Health,FALSE
 W2011547310,9,Humans,FALSE
 W2011547310,10,Internationality,FALSE
 W2011547310,11,United Kingdom,FALSE
-W2041362722,1,Clinical Trials as Topic,TRUE
-W2041362722,2,Patient Selection,TRUE
-W2041362722,3,Clinical Trials as Topic,FALSE
-W2041362722,4,"Health Knowledge, Attitudes, Practice",FALSE
-W2041362722,5,Health Personnel,FALSE
-W2041362722,6,Humans,FALSE
-W2041362722,7,Organizational Policy,FALSE
-W2041362722,8,Patient Dropouts,FALSE
-W2041362722,9,Professional Role,FALSE
-W2041362722,10,United States,FALSE
 W1988754534,1,Mass Screening,TRUE
 W1988754534,2,Practice Guidelines as Topic,TRUE
 W1988754534,3,Prostate-Specific Antigen,TRUE
@@ -21754,24 +21754,6 @@ W1975244979,21,United States,FALSE
 W1975244979,22,United States Dept. of Health and Human Services,FALSE
 W1975244979,23,United States Food and Drug Administration,FALSE
 W1975244979,24,Unsafe Sex,FALSE
-W2069612295,1,"Cardiology Service, Hospital",TRUE
-W2069612295,2,Episode of Care,TRUE
-W2069612295,3,"Medical Staff, Hospital",TRUE
-W2069612295,4,"Outpatient Clinics, Hospital",TRUE
-W2069612295,5,Referral and Consultation,TRUE
-W2069612295,6,"Cardiology Service, Hospital",FALSE
-W2069612295,7,Consultants,FALSE
-W2069612295,8,Health Care Costs,FALSE
-W2069612295,9,Humans,FALSE
-W2069612295,10,Medical Audit,FALSE
-W2069612295,11,"Medical Staff, Hospital",FALSE
-W2069612295,12,"Medical Staff, Hospital",FALSE
-W2069612295,13,"Outpatient Clinics, Hospital",FALSE
-W2069612295,14,Referral and Consultation,FALSE
-W2069612295,15,State Medicine,FALSE
-W2069612295,16,State Medicine,FALSE
-W2069612295,17,United Kingdom,FALSE
-W2069612295,18,Workforce,FALSE
 W2121035773,1,Global Health,TRUE
 W2121035773,2,Health Promotion,TRUE
 W2121035773,3,International Cooperation,TRUE
@@ -21805,6 +21787,24 @@ W2044446280,5,Hypoxia,FALSE
 W2044446280,6,Oximetry,FALSE
 W2044446280,7,Oxygen,FALSE
 W2044446280,8,Oxygen,FALSE
+W2069612295,1,"Cardiology Service, Hospital",TRUE
+W2069612295,2,Episode of Care,TRUE
+W2069612295,3,"Medical Staff, Hospital",TRUE
+W2069612295,4,"Outpatient Clinics, Hospital",TRUE
+W2069612295,5,Referral and Consultation,TRUE
+W2069612295,6,"Cardiology Service, Hospital",FALSE
+W2069612295,7,Consultants,FALSE
+W2069612295,8,Health Care Costs,FALSE
+W2069612295,9,Humans,FALSE
+W2069612295,10,Medical Audit,FALSE
+W2069612295,11,"Medical Staff, Hospital",FALSE
+W2069612295,12,"Medical Staff, Hospital",FALSE
+W2069612295,13,"Outpatient Clinics, Hospital",FALSE
+W2069612295,14,Referral and Consultation,FALSE
+W2069612295,15,State Medicine,FALSE
+W2069612295,16,State Medicine,FALSE
+W2069612295,17,United Kingdom,FALSE
+W2069612295,18,Workforce,FALSE
 W2071169598,1,Anaphylaxis,TRUE
 W2071169598,2,Anaphylaxis,TRUE
 W2071169598,3,Referral and Consultation,TRUE
@@ -24486,24 +24486,6 @@ W2016240439,21,United Kingdom,FALSE
 W2016240439,22,Vasomotor System,FALSE
 W2016240439,23,Women's Health,FALSE
 W2016240439,24,Women's Health,FALSE
-W2088098193,1,Budgets,TRUE
-W2088098193,2,Delivery of Health Care,TRUE
-W2088098193,3,"Economics, Medical",TRUE
-W2088098193,4,Health Expenditures,TRUE
-W2088098193,5,Public Health,TRUE
-W2088098193,6,Public Health Administration,TRUE
-W2088098193,7,Accountable Care Organizations,FALSE
-W2088098193,8,Delivery of Health Care,FALSE
-W2088098193,9,Delivery of Health Care,FALSE
-W2088098193,10,"Delivery of Health Care, Integrated",FALSE
-W2088098193,11,"Economics, Medical",FALSE
-W2088098193,12,Federal Government,FALSE
-W2088098193,13,Health Care Costs,FALSE
-W2088098193,14,Health Expenditures,FALSE
-W2088098193,15,Humans,FALSE
-W2088098193,16,Public Health,FALSE
-W2088098193,17,Public Health Administration,FALSE
-W2088098193,18,United States,FALSE
 W2023858483,1,"Genetic Diseases, Inborn",TRUE
 W2023858483,2,Genetic Testing,TRUE
 W2023858483,3,Genomics,TRUE
@@ -24524,6 +24506,24 @@ W2023858483,17,Public Health,FALSE
 W2023858483,18,Public Health,FALSE
 W2023858483,19,State Government,FALSE
 W2023858483,20,United States,FALSE
+W2088098193,1,Budgets,TRUE
+W2088098193,2,Delivery of Health Care,TRUE
+W2088098193,3,"Economics, Medical",TRUE
+W2088098193,4,Health Expenditures,TRUE
+W2088098193,5,Public Health,TRUE
+W2088098193,6,Public Health Administration,TRUE
+W2088098193,7,Accountable Care Organizations,FALSE
+W2088098193,8,Delivery of Health Care,FALSE
+W2088098193,9,Delivery of Health Care,FALSE
+W2088098193,10,"Delivery of Health Care, Integrated",FALSE
+W2088098193,11,"Economics, Medical",FALSE
+W2088098193,12,Federal Government,FALSE
+W2088098193,13,Health Care Costs,FALSE
+W2088098193,14,Health Expenditures,FALSE
+W2088098193,15,Humans,FALSE
+W2088098193,16,Public Health,FALSE
+W2088098193,17,Public Health Administration,FALSE
+W2088098193,18,United States,FALSE
 W2002748095,1,European Continental Ancestry Group,TRUE
 W2002748095,2,Trans Fatty Acids,TRUE
 W2002748095,3,Adult,FALSE
@@ -24752,18 +24752,6 @@ W1973435512,14,alpha 1-Antitrypsin,FALSE
 W1973435512,15,alpha 1-Antitrypsin,FALSE
 W1973435512,16,alpha 1-Antitrypsin Deficiency,FALSE
 W1973435512,17,alpha 1-Antitrypsin Deficiency,FALSE
-W1981560819,1,Health Policy,TRUE
-W1981560819,2,Insurance Benefits,TRUE
-W1981560819,3,"Insurance, Health",TRUE
-W1981560819,4,Patient Protection and Affordable Care Act,TRUE
-W1981560819,5,State Government,TRUE
-W1981560819,6,Humans,FALSE
-W1981560819,7,Insurance Benefits,FALSE
-W1981560819,8,Insurance Coverage,FALSE
-W1981560819,9,Insurance Coverage,FALSE
-W1981560819,10,"Insurance, Health",FALSE
-W1981560819,11,"Insurance, Health",FALSE
-W1981560819,12,United States,FALSE
 W1969787953,1,Forms and Records Control,TRUE
 W1969787953,2,Fraud,TRUE
 W1969787953,3,Medicare,TRUE
@@ -24788,6 +24776,25 @@ W1969787953,21,Security Measures,FALSE
 W1969787953,22,Theft,FALSE
 W1969787953,23,Theft,FALSE
 W1969787953,24,United States,FALSE
+W1981560819,1,Health Policy,TRUE
+W1981560819,2,Insurance Benefits,TRUE
+W1981560819,3,"Insurance, Health",TRUE
+W1981560819,4,Patient Protection and Affordable Care Act,TRUE
+W1981560819,5,State Government,TRUE
+W1981560819,6,Humans,FALSE
+W1981560819,7,Insurance Benefits,FALSE
+W1981560819,8,Insurance Coverage,FALSE
+W1981560819,9,Insurance Coverage,FALSE
+W1981560819,10,"Insurance, Health",FALSE
+W1981560819,11,"Insurance, Health",FALSE
+W1981560819,12,United States,FALSE
+W2091957008,1,Fraud,TRUE
+W2091957008,2,Homicide,TRUE
+W2091957008,3,National Health Programs,TRUE
+W2091957008,4,Humans,FALSE
+W2091957008,5,India,FALSE
+W2091957008,6,Rural Health Services,FALSE
+W2091957008,7,Vulnerable Populations,FALSE
 W2329125958,1,Health Policy,TRUE
 W2329125958,2,Insurance Benefits,TRUE
 W2329125958,3,"Insurance, Health",TRUE
@@ -24801,13 +24808,6 @@ W2329125958,10,"Insurance, Health",FALSE
 W2329125958,11,"Insurance, Health",FALSE
 W2329125958,12,State Government,FALSE
 W2329125958,13,United States,FALSE
-W2091957008,1,Fraud,TRUE
-W2091957008,2,Homicide,TRUE
-W2091957008,3,National Health Programs,TRUE
-W2091957008,4,Humans,FALSE
-W2091957008,5,India,FALSE
-W2091957008,6,Rural Health Services,FALSE
-W2091957008,7,Vulnerable Populations,FALSE
 W1991213086,1,Emigration and Immigration,TRUE
 W1991213086,2,Government Regulation,TRUE
 W1991213086,3,Healthcare Disparities,TRUE
@@ -26056,13 +26056,6 @@ W2048729231,19,Female,FALSE
 W2048729231,20,Humans,FALSE
 W2048729231,21,Male,FALSE
 W2048729231,22,Schizophrenia,FALSE
-W2131797202,1,Primary Prevention,TRUE
-W2131797202,2,Cost-Benefit Analysis,FALSE
-W2131797202,3,Female,FALSE
-W2131797202,4,Humans,FALSE
-W2131797202,5,Male,FALSE
-W2131797202,6,Mexico,FALSE
-W2131797202,7,Primary Prevention,FALSE
 W2079737121,1,Hospital Mortality,TRUE
 W2079737121,2,Hospitalization,TRUE
 W2079737121,3,Hospitals,TRUE
@@ -26095,6 +26088,13 @@ W2079737121,29,Reproducibility of Results,FALSE
 W2079737121,30,Retrospective Studies,FALSE
 W2079737121,31,Sex Distribution,FALSE
 W2079737121,32,Young Adult,FALSE
+W2131797202,1,Primary Prevention,TRUE
+W2131797202,2,Cost-Benefit Analysis,FALSE
+W2131797202,3,Female,FALSE
+W2131797202,4,Humans,FALSE
+W2131797202,5,Male,FALSE
+W2131797202,6,Mexico,FALSE
+W2131797202,7,Primary Prevention,FALSE
 W2017335757,1,"Accidents, Traffic",TRUE
 W2017335757,2,"Models, Theoretical",TRUE
 W2017335757,3,Wounds and Injuries,TRUE
@@ -26896,20 +26896,6 @@ W2018947367,10,Informed Consent,FALSE
 W2018947367,11,Patient Education as Topic,FALSE
 W2018947367,12,Prognosis,FALSE
 W2018947367,13,Risk,FALSE
-W3021720820,1,International Cooperation,TRUE
-W3021720820,2,Kidney Transplantation,TRUE
-W3021720820,3,Developing Countries,FALSE
-W3021720820,4,Developing Countries,FALSE
-W3021720820,5,Humans,FALSE
-W3021720820,6,"Kidney Failure, Chronic",FALSE
-W3021720820,7,"Kidney Failure, Chronic",FALSE
-W3021720820,8,Kidney Transplantation,FALSE
-W3021720820,9,Kidney Transplantation,FALSE
-W3021720820,10,Tissue Donors,FALSE
-W3021720820,11,Tissue Donors,FALSE
-W3021720820,12,Tissue and Organ Procurement,FALSE
-W3021720820,13,Tissue and Organ Procurement,FALSE
-W3021720820,14,Vulnerable Populations,FALSE
 W2042866291,1,Health Expenditures,TRUE
 W2042866291,2,"Hospitals, Community",TRUE
 W2042866291,3,Physicians,TRUE
@@ -26927,6 +26913,20 @@ W2042866291,14,Physicians,FALSE
 W2042866291,15,Physicians,FALSE
 W2042866291,16,Physicians,FALSE
 W2042866291,17,United States,FALSE
+W3021720820,1,International Cooperation,TRUE
+W3021720820,2,Kidney Transplantation,TRUE
+W3021720820,3,Developing Countries,FALSE
+W3021720820,4,Developing Countries,FALSE
+W3021720820,5,Humans,FALSE
+W3021720820,6,"Kidney Failure, Chronic",FALSE
+W3021720820,7,"Kidney Failure, Chronic",FALSE
+W3021720820,8,Kidney Transplantation,FALSE
+W3021720820,9,Kidney Transplantation,FALSE
+W3021720820,10,Tissue Donors,FALSE
+W3021720820,11,Tissue Donors,FALSE
+W3021720820,12,Tissue and Organ Procurement,FALSE
+W3021720820,13,Tissue and Organ Procurement,FALSE
+W3021720820,14,Vulnerable Populations,FALSE
 W2023021772,1,Child Behavior,TRUE
 W2023021772,2,Child Behavior Disorders,TRUE
 W2023021772,3,Education,TRUE
@@ -27643,28 +27643,6 @@ W2039799700,16,Social Media,FALSE
 W2039799700,17,Specialty Boards,FALSE
 W2039799700,18,Specialty Boards,FALSE
 W2039799700,19,United States,FALSE
-W2120860835,1,"Education, Medical",TRUE
-W2120860835,2,Physicians,TRUE
-W2120860835,3,Time Factors,TRUE
-W2120860835,4,Clinical Competence,FALSE
-W2120860835,5,Cost Control,FALSE
-W2120860835,6,"Education, Medical",FALSE
-W2120860835,7,"Education, Medical",FALSE
-W2120860835,8,"Education, Medical",FALSE
-W2120860835,9,"Education, Premedical",FALSE
-W2120860835,10,"Education, Premedical",FALSE
-W2120860835,11,"Education, Premedical",FALSE
-W2120860835,12,Fellowships and Scholarships,FALSE
-W2120860835,13,Fellowships and Scholarships,FALSE
-W2120860835,14,Health Care Costs,FALSE
-W2120860835,15,Humans,FALSE
-W2120860835,16,Internship and Residency,FALSE
-W2120860835,17,Internship and Residency,FALSE
-W2120860835,18,Internship and Residency,FALSE
-W2120860835,19,Physicians,FALSE
-W2120860835,20,Quality of Health Care,FALSE
-W2120860835,21,"Schools, Medical",FALSE
-W2120860835,22,United States,FALSE
 W2071581514,1,Antihypertensive Agents,TRUE
 W2071581514,2,Blood Pressure,TRUE
 W2071581514,3,Blood Pressure Determination,TRUE
@@ -27694,6 +27672,28 @@ W2071581514,26,Risk Factors,FALSE
 W2071581514,27,Rural Population,FALSE
 W2071581514,28,Rural Population,FALSE
 W2071581514,29,Time Factors,FALSE
+W2120860835,1,"Education, Medical",TRUE
+W2120860835,2,Physicians,TRUE
+W2120860835,3,Time Factors,TRUE
+W2120860835,4,Clinical Competence,FALSE
+W2120860835,5,Cost Control,FALSE
+W2120860835,6,"Education, Medical",FALSE
+W2120860835,7,"Education, Medical",FALSE
+W2120860835,8,"Education, Medical",FALSE
+W2120860835,9,"Education, Premedical",FALSE
+W2120860835,10,"Education, Premedical",FALSE
+W2120860835,11,"Education, Premedical",FALSE
+W2120860835,12,Fellowships and Scholarships,FALSE
+W2120860835,13,Fellowships and Scholarships,FALSE
+W2120860835,14,Health Care Costs,FALSE
+W2120860835,15,Humans,FALSE
+W2120860835,16,Internship and Residency,FALSE
+W2120860835,17,Internship and Residency,FALSE
+W2120860835,18,Internship and Residency,FALSE
+W2120860835,19,Physicians,FALSE
+W2120860835,20,Quality of Health Care,FALSE
+W2120860835,21,"Schools, Medical",FALSE
+W2120860835,22,United States,FALSE
 W2048425867,1,Aging,TRUE
 W2048425867,2,Hearing Aids,TRUE
 W2048425867,3,Hearing Loss,TRUE
@@ -29309,6 +29309,20 @@ W1981572601,19,Practice Guidelines as Topic,FALSE
 W1981572601,20,Primary Prevention,FALSE
 W1981572601,21,Randomized Controlled Trials as Topic,FALSE
 W1981572601,22,Risk Assessment,FALSE
+W2061018891,1,Global Health,TRUE
+W2061018891,2,Mental Disorders,TRUE
+W2061018891,3,Mental Health,TRUE
+W2061018891,4,Mental Health Services,TRUE
+W2061018891,5,Female,FALSE
+W2061018891,6,Humans,FALSE
+W2061018891,7,Male,FALSE
+W2061018891,8,Mental Disorders,FALSE
+W2061018891,9,Mental Disorders,FALSE
+W2061018891,10,Mental Disorders,FALSE
+W2061018891,11,Mental Health Services,FALSE
+W2061018891,12,Needs Assessment,FALSE
+W2061018891,13,Prevalence,FALSE
+W2061018891,14,World Health Organization,FALSE
 W2053450095,1,Biomedical Research,TRUE
 W2053450095,2,Comparative Effectiveness Research,TRUE
 W2053450095,3,Human Experimentation,TRUE
@@ -29326,20 +29340,6 @@ W2053450095,14,Prospective Studies,FALSE
 W2053450095,15,Randomized Controlled Trials as Topic,FALSE
 W2053450095,16,Risk,FALSE
 W2053450095,17,United States,FALSE
-W2061018891,1,Global Health,TRUE
-W2061018891,2,Mental Disorders,TRUE
-W2061018891,3,Mental Health,TRUE
-W2061018891,4,Mental Health Services,TRUE
-W2061018891,5,Female,FALSE
-W2061018891,6,Humans,FALSE
-W2061018891,7,Male,FALSE
-W2061018891,8,Mental Disorders,FALSE
-W2061018891,9,Mental Disorders,FALSE
-W2061018891,10,Mental Disorders,FALSE
-W2061018891,11,Mental Health Services,FALSE
-W2061018891,12,Needs Assessment,FALSE
-W2061018891,13,Prevalence,FALSE
-W2061018891,14,World Health Organization,FALSE
 W2165926695,1,Angiotensin II Type 1 Receptor Blockers,TRUE
 W2165926695,2,Benzimidazoles,TRUE
 W2165926695,3,Heart Failure,TRUE
@@ -31255,6 +31255,13 @@ W2094960568,12,Internet,FALSE
 W2094960568,13,"Medical Staff, Hospital",FALSE
 W2094960568,14,Patient Safety,FALSE
 W2094960568,15,United Kingdom,FALSE
+W2111632652,1,Delivery of Health Care,TRUE
+W2111632652,2,Economic Competition,TRUE
+W2111632652,3,Delivery of Health Care,FALSE
+W2111632652,4,Delivery of Health Care,FALSE
+W2111632652,5,Health Services Accessibility,FALSE
+W2111632652,6,Health Services Accessibility,FALSE
+W2111632652,7,Humans,FALSE
 W2030278469,1,Cardiac Surgical Procedures,TRUE
 W2030278469,2,Endocarditis,TRUE
 W2030278469,3,Mitral Valve Insufficiency,TRUE
@@ -31295,13 +31302,6 @@ W2095139582,7,Humans,FALSE
 W2095139582,8,Interprofessional Relations,FALSE
 W2095139582,9,Interprofessional Relations,FALSE
 W2095139582,10,Physicians,FALSE
-W2111632652,1,Delivery of Health Care,TRUE
-W2111632652,2,Economic Competition,TRUE
-W2111632652,3,Delivery of Health Care,FALSE
-W2111632652,4,Delivery of Health Care,FALSE
-W2111632652,5,Health Services Accessibility,FALSE
-W2111632652,6,Health Services Accessibility,FALSE
-W2111632652,7,Humans,FALSE
 W4231777931,1,Awards and Prizes,TRUE
 W4231777931,2,Delivery of Health Care,TRUE
 W4231777931,3,Leadership,TRUE
@@ -31790,26 +31790,6 @@ W1971083033,20,Socioeconomic Factors,FALSE
 W1971083033,21,South America,FALSE
 W1971083033,22,South America,FALSE
 W1971083033,23,Urban Health,FALSE
-W2117403104,1,"Angioplasty, Balloon, Coronary",TRUE
-W2117403104,2,"Emergency Service, Hospital",TRUE
-W2117403104,3,Myocardial Infarction,TRUE
-W2117403104,4,Aged,FALSE
-W2117403104,5,"Aged, 80 and over",FALSE
-W2117403104,6,Cohort Studies,FALSE
-W2117403104,7,Electrocardiography,FALSE
-W2117403104,8,Female,FALSE
-W2117403104,9,Heart Failure,FALSE
-W2117403104,10,Heart Failure,FALSE
-W2117403104,11,Humans,FALSE
-W2117403104,12,Japan,FALSE
-W2117403104,13,Male,FALSE
-W2117403104,14,Middle Aged,FALSE
-W2117403104,15,Myocardial Infarction,FALSE
-W2117403104,16,Myocardial Infarction,FALSE
-W2117403104,17,Myocardial Infarction,FALSE
-W2117403104,18,Proportional Hazards Models,FALSE
-W2117403104,19,Time Factors,FALSE
-W2117403104,20,Treatment Outcome,FALSE
 W1997719514,1,Estradiol,TRUE
 W1997719514,2,Estriol,TRUE
 W1997719514,3,"Polysaccharides, Bacterial",TRUE
@@ -31838,6 +31818,26 @@ W1997719514,25,Pseudomonas aeruginosa,FALSE
 W1997719514,26,Pseudomonas aeruginosa,FALSE
 W1997719514,27,Pseudomonas aeruginosa,FALSE
 W1997719514,28,Registries,FALSE
+W2117403104,1,"Angioplasty, Balloon, Coronary",TRUE
+W2117403104,2,"Emergency Service, Hospital",TRUE
+W2117403104,3,Myocardial Infarction,TRUE
+W2117403104,4,Aged,FALSE
+W2117403104,5,"Aged, 80 and over",FALSE
+W2117403104,6,Cohort Studies,FALSE
+W2117403104,7,Electrocardiography,FALSE
+W2117403104,8,Female,FALSE
+W2117403104,9,Heart Failure,FALSE
+W2117403104,10,Heart Failure,FALSE
+W2117403104,11,Humans,FALSE
+W2117403104,12,Japan,FALSE
+W2117403104,13,Male,FALSE
+W2117403104,14,Middle Aged,FALSE
+W2117403104,15,Myocardial Infarction,FALSE
+W2117403104,16,Myocardial Infarction,FALSE
+W2117403104,17,Myocardial Infarction,FALSE
+W2117403104,18,Proportional Hazards Models,FALSE
+W2117403104,19,Time Factors,FALSE
+W2117403104,20,Treatment Outcome,FALSE
 W2022890200,1,Dexamethasone,TRUE
 W2022890200,2,"Fasciitis, Plantar",TRUE
 W2022890200,3,"Fasciitis, Plantar",TRUE
@@ -31887,16 +31887,6 @@ W2325519930,12,"Social Control, Formal",FALSE
 W2325519930,13,Surveys and Questionnaires,FALSE
 W2325519930,14,United States,FALSE
 W2325519930,15,Workload,FALSE
-W2065414332,1,"Economics, Behavioral",TRUE
-W2065414332,2,Health Behavior,TRUE
-W2065414332,3,Health Care Reform,TRUE
-W2065414332,4,Health Policy,TRUE
-W2065414332,5,Health Policy,TRUE
-W2065414332,6,Health Care Reform,FALSE
-W2065414332,7,Health Policy,FALSE
-W2065414332,8,Humans,FALSE
-W2065414332,9,United Kingdom,FALSE
-W2065414332,10,United States,FALSE
 W2087673547,1,Central Nervous System Diseases,TRUE
 W2087673547,2,Mental Disorders,TRUE
 W2087673547,3,Central Nervous System Diseases,FALSE
@@ -31912,6 +31902,16 @@ W2087673547,12,Neuropsychiatry,FALSE
 W2087673547,13,Neuropsychiatry,FALSE
 W2087673547,14,Neuropsychology,FALSE
 W2087673547,15,Neuropsychology,FALSE
+W2065414332,1,"Economics, Behavioral",TRUE
+W2065414332,2,Health Behavior,TRUE
+W2065414332,3,Health Care Reform,TRUE
+W2065414332,4,Health Policy,TRUE
+W2065414332,5,Health Policy,TRUE
+W2065414332,6,Health Care Reform,FALSE
+W2065414332,7,Health Policy,FALSE
+W2065414332,8,Humans,FALSE
+W2065414332,9,United Kingdom,FALSE
+W2065414332,10,United States,FALSE
 W1987144389,1,Drug and Narcotic Control,TRUE
 W1987144389,2,Medication Reconciliation,TRUE
 W1987144389,3,Prescription Drugs,TRUE
@@ -33990,6 +33990,25 @@ W1989509557,20,Suicide,FALSE
 W1989509557,21,Urban Health,FALSE
 W1989509557,22,Urban Health,FALSE
 W1989509557,23,Young Adult,FALSE
+W4253746234,1,Babesiosis,TRUE
+W4253746234,2,Animals,FALSE
+W4253746234,3,Babesia,FALSE
+W4253746234,4,Babesia,FALSE
+W4253746234,5,Babesia microti,FALSE
+W4253746234,6,Babesia microti,FALSE
+W4253746234,7,Babesiosis,FALSE
+W4253746234,8,Babesiosis,FALSE
+W4253746234,9,Babesiosis,FALSE
+W4253746234,10,Babesiosis,FALSE
+W4253746234,11,Communicable Disease Control,FALSE
+W4253746234,12,Communicable Disease Control,FALSE
+W4253746234,13,Endemic Diseases,FALSE
+W4253746234,14,Humans,FALSE
+W4253746234,15,Ixodes,FALSE
+W4253746234,16,Ixodes,FALSE
+W4253746234,17,Spleen,FALSE
+W4253746234,18,Spleen,FALSE
+W4253746234,19,Tick-Borne Diseases,FALSE
 W2106339572,1,"Anemia, Aplastic",TRUE
 W2106339572,2,Benzoates,TRUE
 W2106339572,3,Hydrazines,TRUE
@@ -34018,25 +34037,6 @@ W2106339572,25,Pyrazoles,FALSE
 W2106339572,26,Pyrazoles,FALSE
 W2106339572,27,Recurrence,FALSE
 W2106339572,28,Young Adult,FALSE
-W4253746234,1,Babesiosis,TRUE
-W4253746234,2,Animals,FALSE
-W4253746234,3,Babesia,FALSE
-W4253746234,4,Babesia,FALSE
-W4253746234,5,Babesia microti,FALSE
-W4253746234,6,Babesia microti,FALSE
-W4253746234,7,Babesiosis,FALSE
-W4253746234,8,Babesiosis,FALSE
-W4253746234,9,Babesiosis,FALSE
-W4253746234,10,Babesiosis,FALSE
-W4253746234,11,Communicable Disease Control,FALSE
-W4253746234,12,Communicable Disease Control,FALSE
-W4253746234,13,Endemic Diseases,FALSE
-W4253746234,14,Humans,FALSE
-W4253746234,15,Ixodes,FALSE
-W4253746234,16,Ixodes,FALSE
-W4253746234,17,Spleen,FALSE
-W4253746234,18,Spleen,FALSE
-W4253746234,19,Tick-Borne Diseases,FALSE
 W2113550278,1,Autoimmune Diseases,TRUE
 W2113550278,2,Herpes Zoster,TRUE
 W2113550278,3,Herpes Zoster,TRUE
@@ -34516,17 +34516,6 @@ W2003555674,9,Medicine,FALSE
 W2003555674,10,Physicians,FALSE
 W2003555674,11,Quality of Health Care,FALSE
 W2003555674,12,United States,FALSE
-W2087949720,1,Blast Injuries,TRUE
-W2087949720,2,Explosive Agents,TRUE
-W2087949720,3,Eye Injuries,TRUE
-W2087949720,4,Air Pressure,FALSE
-W2087949720,5,Blast Injuries,FALSE
-W2087949720,6,Cadaver,FALSE
-W2087949720,7,Corneal Injuries,FALSE
-W2087949720,8,Explosive Agents,FALSE
-W2087949720,9,Eye Injuries,FALSE
-W2087949720,10,Humans,FALSE
-W2087949720,11,Intraocular Pressure,FALSE
 W2088748500,1,Bone Density,TRUE
 W2088748500,2,Mass Screening,TRUE
 W2088748500,3,"Osteoporosis, Postmenopausal",TRUE
@@ -34542,6 +34531,17 @@ W2088748500,12,Middle Aged,FALSE
 W2088748500,13,"Osteoporosis, Postmenopausal",FALSE
 W2088748500,14,Time Factors,FALSE
 W2088748500,15,United States,FALSE
+W2087949720,1,Blast Injuries,TRUE
+W2087949720,2,Explosive Agents,TRUE
+W2087949720,3,Eye Injuries,TRUE
+W2087949720,4,Air Pressure,FALSE
+W2087949720,5,Blast Injuries,FALSE
+W2087949720,6,Cadaver,FALSE
+W2087949720,7,Corneal Injuries,FALSE
+W2087949720,8,Explosive Agents,FALSE
+W2087949720,9,Eye Injuries,FALSE
+W2087949720,10,Humans,FALSE
+W2087949720,11,Intraocular Pressure,FALSE
 W1992785136,1,Certification,TRUE
 W1992785136,2,Expert Testimony,TRUE
 W1992785136,3,Shaken Baby Syndrome,TRUE
@@ -35252,14 +35252,6 @@ W1978444485,21,"Receptors, Cytoplasmic and Nuclear",FALSE
 W1978444485,22,Repressor Proteins,FALSE
 W1978444485,23,Repressor Proteins,FALSE
 W1978444485,24,Thiophenes,FALSE
-W2073020481,1,State Medicine,TRUE
-W2073020481,2,Telemedicine,TRUE
-W2073020481,3,Cost Savings,FALSE
-W2073020481,4,Humans,FALSE
-W2073020481,5,State Medicine,FALSE
-W2073020481,6,Telemedicine,FALSE
-W2073020481,7,Telemedicine,FALSE
-W2073020481,8,United Kingdom,FALSE
 W2160760548,1,Population Growth,TRUE
 W2160760548,2,Conservation of Natural Resources,FALSE
 W2160760548,3,Conservation of Natural Resources,FALSE
@@ -35273,6 +35265,14 @@ W2160760548,10,Health Services Accessibility,FALSE
 W2160760548,11,Humans,FALSE
 W2160760548,12,Women's Health Services,FALSE
 W2160760548,13,Women's Health Services,FALSE
+W2073020481,1,State Medicine,TRUE
+W2073020481,2,Telemedicine,TRUE
+W2073020481,3,Cost Savings,FALSE
+W2073020481,4,Humans,FALSE
+W2073020481,5,State Medicine,FALSE
+W2073020481,6,Telemedicine,FALSE
+W2073020481,7,Telemedicine,FALSE
+W2073020481,8,United Kingdom,FALSE
 W1985384343,1,Athletic Performance,TRUE
 W1985384343,2,Deception,TRUE
 W1985384343,3,Doping in Sports,TRUE
@@ -35949,6 +35949,20 @@ W2043494540,9,Norway,FALSE
 W2043494540,10,"Schizophrenia, Paranoid",FALSE
 W2043494540,11,"Schizophrenia, Paranoid",FALSE
 W2043494540,12,Terrorism,FALSE
+W2043608208,1,Exercise,TRUE
+W2043608208,2,Sports Medicine,TRUE
+W2043608208,3,Water-Electrolyte Balance,TRUE
+W2043608208,4,Dehydration,FALSE
+W2043608208,5,Dehydration,FALSE
+W2043608208,6,Exercise,FALSE
+W2043608208,7,Humans,FALSE
+W2043608208,8,Hyponatremia,FALSE
+W2043608208,9,Hyponatremia,FALSE
+W2043608208,10,Hyponatremia,FALSE
+W2043608208,11,Sports Medicine,FALSE
+W2043608208,12,Thirst,FALSE
+W2043608208,13,Thirst,FALSE
+W2043608208,14,Water-Electrolyte Balance,FALSE
 W2045525467,1,Energy Drinks,TRUE
 W2045525467,2,European Union,TRUE
 W2045525467,3,Food Labeling,TRUE
@@ -35987,20 +36001,6 @@ W1998844183,12,Humans,FALSE
 W1998844183,13,Patient Safety,FALSE
 W1998844183,14,Patient Safety,FALSE
 W1998844183,15,United States,FALSE
-W2043608208,1,Exercise,TRUE
-W2043608208,2,Sports Medicine,TRUE
-W2043608208,3,Water-Electrolyte Balance,TRUE
-W2043608208,4,Dehydration,FALSE
-W2043608208,5,Dehydration,FALSE
-W2043608208,6,Exercise,FALSE
-W2043608208,7,Humans,FALSE
-W2043608208,8,Hyponatremia,FALSE
-W2043608208,9,Hyponatremia,FALSE
-W2043608208,10,Hyponatremia,FALSE
-W2043608208,11,Sports Medicine,FALSE
-W2043608208,12,Thirst,FALSE
-W2043608208,13,Thirst,FALSE
-W2043608208,14,Water-Electrolyte Balance,FALSE
 W2108747546,1,Appetite Depressants,TRUE
 W2108747546,2,Fructose,TRUE
 W2108747546,3,Obesity,TRUE
@@ -38266,6 +38266,16 @@ W2070545460,8,"National Academies of Science, Engineering, and Medicine, U.S., H
 W2070545460,9,"Product Surveillance, Postmarketing",FALSE
 W2070545460,10,United States,FALSE
 W2070545460,11,United States Food and Drug Administration,FALSE
+W2078474983,1,Delivery of Health Care,TRUE
+W2078474983,2,Disaster Planning,TRUE
+W2078474983,3,Standard of Care,TRUE
+W2078474983,4,Decision Making,FALSE
+W2078474983,5,Delivery of Health Care,FALSE
+W2078474983,6,Delivery of Health Care,FALSE
+W2078474983,7,Delivery of Health Care,FALSE
+W2078474983,8,Humans,FALSE
+W2078474983,9,Public Health Administration,FALSE
+W2078474983,10,Resource Allocation,FALSE
 W2096910113,1,Career Choice,TRUE
 W2096910113,2,Physicians,TRUE
 W2096910113,3,Professional Practice Location,TRUE
@@ -38296,16 +38306,6 @@ W2096910113,27,"Students, Medical",FALSE
 W2096910113,28,Urban Health,FALSE
 W2096910113,29,Urban Health,FALSE
 W2096910113,30,Young Adult,FALSE
-W2078474983,1,Delivery of Health Care,TRUE
-W2078474983,2,Disaster Planning,TRUE
-W2078474983,3,Standard of Care,TRUE
-W2078474983,4,Decision Making,FALSE
-W2078474983,5,Delivery of Health Care,FALSE
-W2078474983,6,Delivery of Health Care,FALSE
-W2078474983,7,Delivery of Health Care,FALSE
-W2078474983,8,Humans,FALSE
-W2078474983,9,Public Health Administration,FALSE
-W2078474983,10,Resource Allocation,FALSE
 W1972084433,1,Health Care Costs,TRUE
 W1972084433,2,Health Policy,TRUE
 W1972084433,3,"Insurance, Health",TRUE
@@ -39802,6 +39802,20 @@ W2020396236,9,Professional Practice,FALSE
 W2020396236,10,"Reimbursement, Incentive",FALSE
 W2020396236,11,Specialty Boards,FALSE
 W2020396236,12,United States,FALSE
+W2075503966,1,Internship and Residency,TRUE
+W2075503966,2,Interprofessional Relations,TRUE
+W2075503966,3,"Medical Staff, Hospital",TRUE
+W2075503966,4,Physician's Role,TRUE
+W2075503966,5,Age Factors,FALSE
+W2075503966,6,Clinical Competence,FALSE
+W2075503966,7,Documentation,FALSE
+W2075503966,8,Documentation,FALSE
+W2075503966,9,Hospitalists,FALSE
+W2075503966,10,Humans,FALSE
+W2075503966,11,"Medical Staff, Hospital",FALSE
+W2075503966,12,Medicine,FALSE
+W2075503966,13,Patient Discharge,FALSE
+W2075503966,14,United States,FALSE
 W2024379430,1,Diet,TRUE
 W2024379430,2,Feeding Behavior,TRUE
 W2024379430,3,Food Services,TRUE
@@ -39820,20 +39834,6 @@ W2024379430,15,Physicians,FALSE
 W2024379430,16,"Schools, Medical",FALSE
 W2024379430,17,United States,FALSE
 W2024379430,18,United States,FALSE
-W2075503966,1,Internship and Residency,TRUE
-W2075503966,2,Interprofessional Relations,TRUE
-W2075503966,3,"Medical Staff, Hospital",TRUE
-W2075503966,4,Physician's Role,TRUE
-W2075503966,5,Age Factors,FALSE
-W2075503966,6,Clinical Competence,FALSE
-W2075503966,7,Documentation,FALSE
-W2075503966,8,Documentation,FALSE
-W2075503966,9,Hospitalists,FALSE
-W2075503966,10,Humans,FALSE
-W2075503966,11,"Medical Staff, Hospital",FALSE
-W2075503966,12,Medicine,FALSE
-W2075503966,13,Patient Discharge,FALSE
-W2075503966,14,United States,FALSE
 W2037592434,1,Beverages,TRUE
 W2037592434,2,Energy Intake,TRUE
 W2037592434,3,Food Supply,TRUE
@@ -40460,31 +40460,6 @@ W2170739863,17,Placenta,FALSE
 W2170739863,18,Placenta,FALSE
 W2170739863,19,Pregnancy,FALSE
 W2170739863,20,"T-Lymphocytes, Regulatory",FALSE
-W2063353796,1,Child Health Services,TRUE
-W2063353796,2,International Cooperation,TRUE
-W2063353796,3,Maternal Health Services,TRUE
-W2063353796,4,Child,FALSE
-W2063353796,5,Child Health Services,FALSE
-W2063353796,6,Child Health Services,FALSE
-W2063353796,7,Child Mortality,FALSE
-W2063353796,8,Child Welfare,FALSE
-W2063353796,9,Child Welfare,FALSE
-W2063353796,10,"Child, Preschool",FALSE
-W2063353796,11,Developing Countries,FALSE
-W2063353796,12,Developing Countries,FALSE
-W2063353796,13,Female,FALSE
-W2063353796,14,Financial Support,FALSE
-W2063353796,15,Global Health,FALSE
-W2063353796,16,Humans,FALSE
-W2063353796,17,Infant,FALSE
-W2063353796,18,"Infant, Newborn",FALSE
-W2063353796,19,Maternal Health Services,FALSE
-W2063353796,20,Maternal Health Services,FALSE
-W2063353796,21,Maternal Welfare,FALSE
-W2063353796,22,Maternal Welfare,FALSE
-W2063353796,23,Perinatal Care,FALSE
-W2063353796,24,Perinatal Care,FALSE
-W2063353796,25,Perinatal Care,FALSE
 W1979103647,1,"Arthroplasty, Replacement, Hip",TRUE
 W1979103647,2,"Arthroplasty, Replacement, Knee",TRUE
 W1979103647,3,Comparative Effectiveness Research,TRUE
@@ -40510,6 +40485,31 @@ W1979103647,22,Reoperation,FALSE
 W1979103647,23,"Schools, Medical",FALSE
 W1979103647,24,United States,FALSE
 W1979103647,25,United States Agency for Healthcare Research and Quality,FALSE
+W2063353796,1,Child Health Services,TRUE
+W2063353796,2,International Cooperation,TRUE
+W2063353796,3,Maternal Health Services,TRUE
+W2063353796,4,Child,FALSE
+W2063353796,5,Child Health Services,FALSE
+W2063353796,6,Child Health Services,FALSE
+W2063353796,7,Child Mortality,FALSE
+W2063353796,8,Child Welfare,FALSE
+W2063353796,9,Child Welfare,FALSE
+W2063353796,10,"Child, Preschool",FALSE
+W2063353796,11,Developing Countries,FALSE
+W2063353796,12,Developing Countries,FALSE
+W2063353796,13,Female,FALSE
+W2063353796,14,Financial Support,FALSE
+W2063353796,15,Global Health,FALSE
+W2063353796,16,Humans,FALSE
+W2063353796,17,Infant,FALSE
+W2063353796,18,"Infant, Newborn",FALSE
+W2063353796,19,Maternal Health Services,FALSE
+W2063353796,20,Maternal Health Services,FALSE
+W2063353796,21,Maternal Welfare,FALSE
+W2063353796,22,Maternal Welfare,FALSE
+W2063353796,23,Perinatal Care,FALSE
+W2063353796,24,Perinatal Care,FALSE
+W2063353796,25,Perinatal Care,FALSE
 W2026580410,1,Child Health Services,TRUE
 W2026580410,2,Child Welfare,TRUE
 W2026580410,3,Delivery of Health Care,TRUE
@@ -41199,13 +41199,6 @@ W2101667309,22,"Pulmonary Disease, Chronic Obstructive",FALSE
 W2101667309,23,Risk Assessment,FALSE
 W2101667309,24,Smoking,FALSE
 W2101667309,25,Smoking,FALSE
-W2079493268,1,Government Regulation,TRUE
-W2079493268,2,Off-Label Use,TRUE
-W2079493268,3,Drug Approval,FALSE
-W2079493268,4,Drug Approval,FALSE
-W2079493268,5,Drug-Related Side Effects and Adverse Reactions,FALSE
-W2079493268,6,France,FALSE
-W2079493268,7,Off-Label Use,FALSE
 W2017389862,1,Clinical Trials as Topic,TRUE
 W2017389862,2,Evidence-Based Medicine,TRUE
 W2017389862,3,Guidelines as Topic,TRUE
@@ -41213,6 +41206,13 @@ W2017389862,4,Evidence-Based Medicine,FALSE
 W2017389862,5,Guidelines as Topic,FALSE
 W2017389862,6,Humans,FALSE
 W2017389862,7,Knowledge,FALSE
+W2079493268,1,Government Regulation,TRUE
+W2079493268,2,Off-Label Use,TRUE
+W2079493268,3,Drug Approval,FALSE
+W2079493268,4,Drug Approval,FALSE
+W2079493268,5,Drug-Related Side Effects and Adverse Reactions,FALSE
+W2079493268,6,France,FALSE
+W2079493268,7,Off-Label Use,FALSE
 W2073350334,1,Cost Control,TRUE
 W2073350334,2,"Education, Medical",TRUE
 W2073350334,3,Health Care Costs,TRUE
@@ -45367,6 +45367,26 @@ W2021376182,23,Off-Label Use,FALSE
 W2021376182,24,Opportunistic Infections,FALSE
 W2021376182,25,Opportunistic Infections,FALSE
 W2021376182,26,Ranibizumab,FALSE
+W2004914263,1,Acetazolamide,TRUE
+W2004914263,2,Altitude,TRUE
+W2004914263,3,Carbonic Anhydrase Inhibitors,TRUE
+W2004914263,4,"Sleep Apnea, Obstructive",TRUE
+W2004914263,5,Travel,TRUE
+W2004914263,6,Acetazolamide,FALSE
+W2004914263,7,Aged,FALSE
+W2004914263,8,Carbonic Anhydrase Inhibitors,FALSE
+W2004914263,9,Continuous Positive Airway Pressure,FALSE
+W2004914263,10,Cross-Over Studies,FALSE
+W2004914263,11,Double-Blind Method,FALSE
+W2004914263,12,Female,FALSE
+W2004914263,13,Humans,FALSE
+W2004914263,14,Male,FALSE
+W2004914263,15,Middle Aged,FALSE
+W2004914263,16,Oxygen,FALSE
+W2004914263,17,Oxygen,FALSE
+W2004914263,18,"Sleep Apnea, Obstructive",FALSE
+W2004914263,19,Switzerland,FALSE
+W2004914263,20,Treatment Outcome,FALSE
 W1967973891,1,Hot Temperature,TRUE
 W1967973891,2,Myocardial Infarction,TRUE
 W1967973891,3,Adult,FALSE
@@ -45392,26 +45412,6 @@ W1967973891,22,Time Factors,FALSE
 W1967973891,23,Wales,FALSE
 W1967973891,24,Wales,FALSE
 W1967973891,25,Young Adult,FALSE
-W2004914263,1,Acetazolamide,TRUE
-W2004914263,2,Altitude,TRUE
-W2004914263,3,Carbonic Anhydrase Inhibitors,TRUE
-W2004914263,4,"Sleep Apnea, Obstructive",TRUE
-W2004914263,5,Travel,TRUE
-W2004914263,6,Acetazolamide,FALSE
-W2004914263,7,Aged,FALSE
-W2004914263,8,Carbonic Anhydrase Inhibitors,FALSE
-W2004914263,9,Continuous Positive Airway Pressure,FALSE
-W2004914263,10,Cross-Over Studies,FALSE
-W2004914263,11,Double-Blind Method,FALSE
-W2004914263,12,Female,FALSE
-W2004914263,13,Humans,FALSE
-W2004914263,14,Male,FALSE
-W2004914263,15,Middle Aged,FALSE
-W2004914263,16,Oxygen,FALSE
-W2004914263,17,Oxygen,FALSE
-W2004914263,18,"Sleep Apnea, Obstructive",FALSE
-W2004914263,19,Switzerland,FALSE
-W2004914263,20,Treatment Outcome,FALSE
 W2033238314,1,Longevity,TRUE
 W2033238314,2,Sports,TRUE
 W2033238314,3,Adult,FALSE
@@ -47132,6 +47132,19 @@ W2015454556,16,Humans,FALSE
 W2015454556,17,Osteoarthritis,FALSE
 W2015454556,18,Osteoarthritis,FALSE
 W2015454556,19,United States,FALSE
+W2060104983,1,Medicare,TRUE
+W2060104983,2,Reimbursement Mechanisms,TRUE
+W2060104983,3,Capitation Fee,FALSE
+W2060104983,4,Cost Savings,FALSE
+W2060104983,5,Episode of Care,FALSE
+W2060104983,6,Fee-for-Service Plans,FALSE
+W2060104983,7,Fee-for-Service Plans,FALSE
+W2060104983,8,Humans,FALSE
+W2060104983,9,Medicare,FALSE
+W2060104983,10,Medicare Part C,FALSE
+W2060104983,11,Medicare Part C,FALSE
+W2060104983,12,Reimbursement Mechanisms,FALSE
+W2060104983,13,United States,FALSE
 W2019584272,1,"Anti-Inflammatory Agents, Non-Steroidal",TRUE
 W2019584272,2,Aspirin,TRUE
 W2019584272,3,Macular Degeneration,TRUE
@@ -47155,19 +47168,6 @@ W2019584272,20,Risk,FALSE
 W2019584272,21,Time Factors,FALSE
 W2019584272,22,Wisconsin,FALSE
 W2019584272,23,Wisconsin,FALSE
-W2060104983,1,Medicare,TRUE
-W2060104983,2,Reimbursement Mechanisms,TRUE
-W2060104983,3,Capitation Fee,FALSE
-W2060104983,4,Cost Savings,FALSE
-W2060104983,5,Episode of Care,FALSE
-W2060104983,6,Fee-for-Service Plans,FALSE
-W2060104983,7,Fee-for-Service Plans,FALSE
-W2060104983,8,Humans,FALSE
-W2060104983,9,Medicare,FALSE
-W2060104983,10,Medicare Part C,FALSE
-W2060104983,11,Medicare Part C,FALSE
-W2060104983,12,Reimbursement Mechanisms,FALSE
-W2060104983,13,United States,FALSE
 W2049497180,1,HIV Seropositivity,TRUE
 W2049497180,2,Immunocompromised Host,TRUE
 W2049497180,3,Influenza Vaccines,TRUE
@@ -48167,15 +48167,6 @@ W2323329563,4,Erythrocytes,FALSE
 W2323329563,5,Government Regulation,FALSE
 W2323329563,6,Humans,FALSE
 W2323329563,7,Insurance Coverage,FALSE
-W2059824165,1,Hyperglycemia,TRUE
-W2059824165,2,Inpatients,TRUE
-W2059824165,3,Blood Glucose,FALSE
-W2059824165,4,Blood Glucose,FALSE
-W2059824165,5,Humans,FALSE
-W2059824165,6,Hyperglycemia,FALSE
-W2059824165,7,Hypoglycemic Agents,FALSE
-W2059824165,8,Hypoglycemic Agents,FALSE
-W2059824165,9,Practice Guidelines as Topic,FALSE
 W2119221808,1,Anterior Compartment Syndrome,TRUE
 W2119221808,2,Exercise,TRUE
 W2119221808,3,Musculoskeletal Pain,TRUE
@@ -48192,6 +48183,15 @@ W2119221808,13,Pressure,FALSE
 W2119221808,14,Professional Practice,FALSE
 W2119221808,15,Punctures,FALSE
 W2119221808,16,Punctures,FALSE
+W2059824165,1,Hyperglycemia,TRUE
+W2059824165,2,Inpatients,TRUE
+W2059824165,3,Blood Glucose,FALSE
+W2059824165,4,Blood Glucose,FALSE
+W2059824165,5,Humans,FALSE
+W2059824165,6,Hyperglycemia,FALSE
+W2059824165,7,Hypoglycemic Agents,FALSE
+W2059824165,8,Hypoglycemic Agents,FALSE
+W2059824165,9,Practice Guidelines as Topic,FALSE
 W1983327706,1,Bicarbonates,TRUE
 W1983327706,2,Blood Gas Analysis,TRUE
 W1983327706,3,Carbon Dioxide,TRUE
@@ -49600,13 +49600,6 @@ W2010180058,16,Refugees,FALSE
 W2010180058,17,Relief Work,FALSE
 W2010180058,18,Risk Assessment,FALSE
 W2010180058,19,Syria,FALSE
-W2058587910,1,Neoplasms,TRUE
-W2058587910,2,Cost of Illness,FALSE
-W2058587910,3,Developing Countries,FALSE
-W2058587910,4,Healthcare Disparities,FALSE
-W2058587910,5,Humans,FALSE
-W2058587910,6,Neoplasms,FALSE
-W2058587910,7,Neoplasms,FALSE
 W1973761573,1,"Analgesics, Opioid",TRUE
 W1973761573,2,"Analgesics, Opioid",TRUE
 W1973761573,3,"Arthritis, Rheumatoid",TRUE
@@ -49623,6 +49616,13 @@ W1973761573,13,Male,FALSE
 W1973761573,14,Practice Guidelines as Topic,FALSE
 W1973761573,15,Randomized Controlled Trials as Topic,FALSE
 W1973761573,16,Risk,FALSE
+W2058587910,1,Neoplasms,TRUE
+W2058587910,2,Cost of Illness,FALSE
+W2058587910,3,Developing Countries,FALSE
+W2058587910,4,Healthcare Disparities,FALSE
+W2058587910,5,Humans,FALSE
+W2058587910,6,Neoplasms,FALSE
+W2058587910,7,Neoplasms,FALSE
 W2081424657,1,Antivenins,TRUE
 W2081424657,2,Neglected Diseases,TRUE
 W2081424657,3,Snake Bites,TRUE
@@ -52204,6 +52204,18 @@ W1974120352,6,Physicians,FALSE
 W1974120352,7,Physicians,FALSE
 W1974120352,8,Quality of Health Care,FALSE
 W1974120352,9,United States,FALSE
+W1968644320,1,Biomedical Research,TRUE
+W1968644320,2,Clinical Trials as Topic,TRUE
+W1968644320,3,Information Dissemination,TRUE
+W1968644320,4,Biomedical Research,FALSE
+W1968644320,5,"Databases, Factual",FALSE
+W1968644320,6,Decision Making,FALSE
+W1968644320,7,Disclosure,FALSE
+W1968644320,8,Drug Industry,FALSE
+W1968644320,9,Publishing,FALSE
+W1968644320,10,Publishing,FALSE
+W1968644320,11,Research Support as Topic,FALSE
+W1968644320,12,Treatment Outcome,FALSE
 W2059378575,1,Acute Coronary Syndrome,TRUE
 W2059378575,2,Anti-Bacterial Agents,TRUE
 W2059378575,3,Clarithromycin,TRUE
@@ -52239,18 +52251,6 @@ W2059378575,32,"Pulmonary Disease, Chronic Obstructive",FALSE
 W2059378575,33,Risk Factors,FALSE
 W2059378575,34,United Kingdom,FALSE
 W2059378575,35,United Kingdom,FALSE
-W1968644320,1,Biomedical Research,TRUE
-W1968644320,2,Clinical Trials as Topic,TRUE
-W1968644320,3,Information Dissemination,TRUE
-W1968644320,4,Biomedical Research,FALSE
-W1968644320,5,"Databases, Factual",FALSE
-W1968644320,6,Decision Making,FALSE
-W1968644320,7,Disclosure,FALSE
-W1968644320,8,Drug Industry,FALSE
-W1968644320,9,Publishing,FALSE
-W1968644320,10,Publishing,FALSE
-W1968644320,11,Research Support as Topic,FALSE
-W1968644320,12,Treatment Outcome,FALSE
 W1995342601,1,Anesthesiology,TRUE
 W1995342601,2,Deception,TRUE
 W1995342601,3,Professional Misconduct,TRUE
@@ -53898,24 +53898,6 @@ W2041538254,14,Research Support as Topic,FALSE
 W2041538254,15,Science,FALSE
 W2041538254,16,Science,FALSE
 W2041538254,17,United States,FALSE
-W2049483131,1,"Analgesics, Opioid",TRUE
-W2049483131,2,Drug Prescriptions,TRUE
-W2049483131,3,"Emergency Service, Hospital",TRUE
-W2049483131,4,Practice Guidelines as Topic,TRUE
-W2049483131,5,"Analgesics, Opioid",FALSE
-W2049483131,6,"Analgesics, Opioid",FALSE
-W2049483131,7,Chronic Pain,FALSE
-W2049483131,8,Chronic Pain,FALSE
-W2049483131,9,Drug Overdose,FALSE
-W2049483131,10,Drug Overdose,FALSE
-W2049483131,11,Evidence-Based Medicine,FALSE
-W2049483131,12,Humans,FALSE
-W2049483131,13,New York City,FALSE
-W2049483131,14,Opioid-Related Disorders,FALSE
-W2049483131,15,Opioid-Related Disorders,FALSE
-W2049483131,16,Patient Discharge,FALSE
-W2049483131,17,United States,FALSE
-W2049483131,18,United States,FALSE
 W2142713480,1,Diffusion of Innovation,TRUE
 W2142713480,2,Genomics,TRUE
 W2142713480,3,Health Services Accessibility,TRUE
@@ -53936,6 +53918,24 @@ W2142713480,17,Risk Assessment,FALSE
 W2142713480,18,"Sequence Analysis, DNA",FALSE
 W2142713480,19,Treatment Outcome,FALSE
 W2142713480,20,United States,FALSE
+W2049483131,1,"Analgesics, Opioid",TRUE
+W2049483131,2,Drug Prescriptions,TRUE
+W2049483131,3,"Emergency Service, Hospital",TRUE
+W2049483131,4,Practice Guidelines as Topic,TRUE
+W2049483131,5,"Analgesics, Opioid",FALSE
+W2049483131,6,"Analgesics, Opioid",FALSE
+W2049483131,7,Chronic Pain,FALSE
+W2049483131,8,Chronic Pain,FALSE
+W2049483131,9,Drug Overdose,FALSE
+W2049483131,10,Drug Overdose,FALSE
+W2049483131,11,Evidence-Based Medicine,FALSE
+W2049483131,12,Humans,FALSE
+W2049483131,13,New York City,FALSE
+W2049483131,14,Opioid-Related Disorders,FALSE
+W2049483131,15,Opioid-Related Disorders,FALSE
+W2049483131,16,Patient Discharge,FALSE
+W2049483131,17,United States,FALSE
+W2049483131,18,United States,FALSE
 W2030331137,1,Electronic Health Records,TRUE
 W2030331137,2,Genomics,TRUE
 W2030331137,3,Patient Care,TRUE
@@ -54525,13 +54525,6 @@ W2080202332,17,Prospective Studies,FALSE
 W2080202332,18,Resistance Training,FALSE
 W2080202332,19,Tendinopathy,FALSE
 W2080202332,20,Treatment Outcome,FALSE
-W2066928604,1,"Education, Nursing, Baccalaureate",TRUE
-W2066928604,2,Nurses,TRUE
-W2066928604,3,"Education, Nursing, Baccalaureate",FALSE
-W2066928604,4,Health Care Reform,FALSE
-W2066928604,5,Nurses,FALSE
-W2066928604,6,Nurses,FALSE
-W2066928604,7,United States,FALSE
 W2056591310,1,Blast Injuries,TRUE
 W2056591310,2,Disaster Planning,TRUE
 W2056591310,3,Emergency Medical Services,TRUE
@@ -54547,6 +54540,13 @@ W2056591310,12,Humans,FALSE
 W2056591310,13,Terrorism,FALSE
 W2056591310,14,Traumatology,FALSE
 W2056591310,15,Triage,FALSE
+W2066928604,1,"Education, Nursing, Baccalaureate",TRUE
+W2066928604,2,Nurses,TRUE
+W2066928604,3,"Education, Nursing, Baccalaureate",FALSE
+W2066928604,4,Health Care Reform,FALSE
+W2066928604,5,Nurses,FALSE
+W2066928604,6,Nurses,FALSE
+W2066928604,7,United States,FALSE
 W2059664610,1,Government Regulation,TRUE
 W2059664610,2,Health Promotion,TRUE
 W2059664610,3,Public Health,TRUE
@@ -55454,19 +55454,6 @@ W2320856307,15,Humans,FALSE
 W2320856307,16,Male,FALSE
 W2320856307,17,Middle Aged,FALSE
 W2320856307,18,Young Adult,FALSE
-W2087545035,1,Medical Errors,TRUE
-W2087545035,2,Physician Impairment,TRUE
-W2087545035,3,Substance-Related Disorders,TRUE
-W2087545035,4,Accreditation,FALSE
-W2087545035,5,Harm Reduction,FALSE
-W2087545035,6,Humans,FALSE
-W2087545035,7,Medical Errors,FALSE
-W2087545035,8,Physical Examination,FALSE
-W2087545035,9,Physician Impairment,FALSE
-W2087545035,10,Physician-Patient Relations,FALSE
-W2087545035,11,"Social Control, Formal",FALSE
-W2087545035,12,Substance-Related Disorders,FALSE
-W2087545035,13,United States,FALSE
 W2002792723,1,Career Choice,TRUE
 W2002792723,2,Child Welfare,TRUE
 W2002792723,3,Internship and Residency,TRUE
@@ -55488,6 +55475,19 @@ W2002792723,18,Science,FALSE
 W2002792723,19,Science,FALSE
 W2002792723,20,United States,FALSE
 W2002792723,21,Workforce,FALSE
+W2087545035,1,Medical Errors,TRUE
+W2087545035,2,Physician Impairment,TRUE
+W2087545035,3,Substance-Related Disorders,TRUE
+W2087545035,4,Accreditation,FALSE
+W2087545035,5,Harm Reduction,FALSE
+W2087545035,6,Humans,FALSE
+W2087545035,7,Medical Errors,FALSE
+W2087545035,8,Physical Examination,FALSE
+W2087545035,9,Physician Impairment,FALSE
+W2087545035,10,Physician-Patient Relations,FALSE
+W2087545035,11,"Social Control, Formal",FALSE
+W2087545035,12,Substance-Related Disorders,FALSE
+W2087545035,13,United States,FALSE
 W2080318184,1,Diseases in Twins,TRUE
 W2080318184,2,Gastrointestinal Tract,TRUE
 W2080318184,3,Kwashiorkor,TRUE
@@ -55880,21 +55880,6 @@ W2166047934,22,Secondary Prevention,FALSE
 W2166047934,23,Single-Blind Method,FALSE
 W2166047934,24,Time Factors,FALSE
 W2166047934,25,Treatment Outcome,FALSE
-W2327691591,1,Hepacivirus,TRUE
-W2327691591,2,"Hepatitis C, Chronic",TRUE
-W2327691591,3,Antiviral Agents,FALSE
-W2327691591,4,Antiviral Agents,FALSE
-W2327691591,5,Antiviral Agents,FALSE
-W2327691591,6,Hepacivirus,FALSE
-W2327691591,7,"Hepatitis C, Chronic",FALSE
-W2327691591,8,"Hepatitis C, Chronic",FALSE
-W2327691591,9,"Hepatitis C, Chronic",FALSE
-W2327691591,10,Humans,FALSE
-W2327691591,11,Nutrition Surveys,FALSE
-W2327691591,12,Prevalence,FALSE
-W2327691591,13,"RNA, Viral",FALSE
-W2327691591,14,"RNA, Viral",FALSE
-W2327691591,15,United States,FALSE
 W2060235532,1,Mutation,TRUE
 W2060235532,2,Osteogenesis Imperfecta,TRUE
 W2060235532,3,Osteoporosis,TRUE
@@ -55919,6 +55904,21 @@ W2060235532,21,Pedigree,FALSE
 W2060235532,22,Wnt1 Protein,FALSE
 W2060235532,23,Wnt1 Protein,FALSE
 W2060235532,24,Young Adult,FALSE
+W2327691591,1,Hepacivirus,TRUE
+W2327691591,2,"Hepatitis C, Chronic",TRUE
+W2327691591,3,Antiviral Agents,FALSE
+W2327691591,4,Antiviral Agents,FALSE
+W2327691591,5,Antiviral Agents,FALSE
+W2327691591,6,Hepacivirus,FALSE
+W2327691591,7,"Hepatitis C, Chronic",FALSE
+W2327691591,8,"Hepatitis C, Chronic",FALSE
+W2327691591,9,"Hepatitis C, Chronic",FALSE
+W2327691591,10,Humans,FALSE
+W2327691591,11,Nutrition Surveys,FALSE
+W2327691591,12,Prevalence,FALSE
+W2327691591,13,"RNA, Viral",FALSE
+W2327691591,14,"RNA, Viral",FALSE
+W2327691591,15,United States,FALSE
 W1984984753,1,"Arthroplasty, Replacement, Hip",TRUE
 W1984984753,2,"Arthroplasty, Replacement, Knee",TRUE
 W1984984753,3,Length of Stay,TRUE
@@ -57434,6 +57434,13 @@ W2111818570,13,Medicaid,FALSE
 W2111818570,14,Patient Protection and Affordable Care Act,FALSE
 W2111818570,15,United States,FALSE
 W2111818570,16,Young Adult,FALSE
+W1970054402,1,Biomedical Research,TRUE
+W1970054402,2,Decision Making,TRUE
+W1970054402,3,Patient Participation,TRUE
+W1970054402,4,Patient-Centered Care,TRUE
+W1970054402,5,Biomedical Research,FALSE
+W1970054402,6,Humans,FALSE
+W1970054402,7,"Outcome Assessment, Health Care",FALSE
 W2021523240,1,Infections,TRUE
 W2021523240,2,Transfusion Reaction,TRUE
 W2021523240,3,Blood Transfusion,FALSE
@@ -57445,13 +57452,6 @@ W2021523240,8,Risk Factors,FALSE
 W2021523240,9,Unnecessary Procedures,FALSE
 W2021523240,10,Unnecessary Procedures,FALSE
 W2021523240,11,Unnecessary Procedures,FALSE
-W1970054402,1,Biomedical Research,TRUE
-W1970054402,2,Decision Making,TRUE
-W1970054402,3,Patient Participation,TRUE
-W1970054402,4,Patient-Centered Care,TRUE
-W1970054402,5,Biomedical Research,FALSE
-W1970054402,6,Humans,FALSE
-W1970054402,7,"Outcome Assessment, Health Care",FALSE
 W2090128787,1,"Analgesics, Opioid",TRUE
 W2090128787,2,Patient Care Planning,TRUE
 W2090128787,3,"Practice Patterns, Physicians'",TRUE
@@ -58163,6 +58163,15 @@ W1987837347,9,Patient Protection and Affordable Care Act,FALSE
 W1987837347,10,"Quality Indicators, Health Care",FALSE
 W1987837347,11,Social Responsibility,FALSE
 W1987837347,12,United States,FALSE
+W2325776793,1,Acquired Immunodeficiency Syndrome,TRUE
+W2325776793,2,Global Health,TRUE
+W2325776793,3,Pandemics,TRUE
+W2325776793,4,Acquired Immunodeficiency Syndrome,FALSE
+W2325776793,5,Acquired Immunodeficiency Syndrome,FALSE
+W2325776793,6,HIV Infections,FALSE
+W2325776793,7,HIV Infections,FALSE
+W2325776793,8,Health Expenditures,FALSE
+W2325776793,9,Humans,FALSE
 W1973014085,1,Food Supply,TRUE
 W1973014085,2,Malnutrition,TRUE
 W1973014085,3,Nutrition Policy,TRUE
@@ -58177,15 +58186,6 @@ W1973014085,11,Goals,FALSE
 W1973014085,12,Humans,FALSE
 W1973014085,13,Malnutrition,FALSE
 W1973014085,14,Nutritional Status,FALSE
-W2325776793,1,Acquired Immunodeficiency Syndrome,TRUE
-W2325776793,2,Global Health,TRUE
-W2325776793,3,Pandemics,TRUE
-W2325776793,4,Acquired Immunodeficiency Syndrome,FALSE
-W2325776793,5,Acquired Immunodeficiency Syndrome,FALSE
-W2325776793,6,HIV Infections,FALSE
-W2325776793,7,HIV Infections,FALSE
-W2325776793,8,Health Expenditures,FALSE
-W2325776793,9,Humans,FALSE
 W2013664730,1,Diagnostic and Statistical Manual of Mental Disorders,TRUE
 W2013664730,2,Mental Disorders,TRUE
 W2013664730,3,Humans,FALSE
@@ -58392,19 +58392,6 @@ W2112139841,5,"Data Interpretation, Statistical",FALSE
 W2112139841,6,Randomized Controlled Trials as Topic,FALSE
 W2112139841,7,Research Design,FALSE
 W2112139841,8,Treatment Outcome,FALSE
-W2050890087,1,Delivery of Health Care,TRUE
-W2050890087,2,Nutrition Policy,TRUE
-W2050890087,3,Child Nutrition Disorders,FALSE
-W2050890087,4,Child Nutrition Disorders,FALSE
-W2050890087,5,"Child, Preschool",FALSE
-W2050890087,6,Delivery of Health Care,FALSE
-W2050890087,7,Ethiopia,FALSE
-W2050890087,8,Female,FALSE
-W2050890087,9,Healthy People Programs,FALSE
-W2050890087,10,Healthy People Programs,FALSE
-W2050890087,11,Humans,FALSE
-W2050890087,12,Infant,FALSE
-W2050890087,13,Nutritional Status,FALSE
 W2089413556,1,Blood Glucose,TRUE
 W2089413556,2,"Diabetes Mellitus, Type 1",TRUE
 W2089413556,3,Diabetic Ketoacidosis,TRUE
@@ -58434,6 +58421,19 @@ W2089413556,26,"Monitoring, Physiologic",FALSE
 W2089413556,27,"Monitoring, Physiologic",FALSE
 W2089413556,28,Prognosis,FALSE
 W2089413556,29,Risk Factors,FALSE
+W2050890087,1,Delivery of Health Care,TRUE
+W2050890087,2,Nutrition Policy,TRUE
+W2050890087,3,Child Nutrition Disorders,FALSE
+W2050890087,4,Child Nutrition Disorders,FALSE
+W2050890087,5,"Child, Preschool",FALSE
+W2050890087,6,Delivery of Health Care,FALSE
+W2050890087,7,Ethiopia,FALSE
+W2050890087,8,Female,FALSE
+W2050890087,9,Healthy People Programs,FALSE
+W2050890087,10,Healthy People Programs,FALSE
+W2050890087,11,Humans,FALSE
+W2050890087,12,Infant,FALSE
+W2050890087,13,Nutritional Status,FALSE
 W2041424843,1,Altitude,TRUE
 W2041424843,2,Altitude Sickness,TRUE
 W2041424843,3,Retinal Diseases,TRUE
@@ -58473,6 +58473,16 @@ W2330698052,17,Male,FALSE
 W2330698052,18,Public Health,FALSE
 W2330698052,19,Vulnerable Populations,FALSE
 W2330698052,20,"Water Pollutants, Chemical",FALSE
+W1969250736,1,Child Nutrition Disorders,TRUE
+W1969250736,2,Nutrition Policy,TRUE
+W1969250736,3,Child,FALSE
+W1969250736,4,Child Nutrition Disorders,FALSE
+W1969250736,5,Child Welfare,FALSE
+W1969250736,6,Female,FALSE
+W1969250736,7,Global Health,FALSE
+W1969250736,8,Health Priorities,FALSE
+W1969250736,9,Humans,FALSE
+W1969250736,10,Women's Health,FALSE
 W2061341087,1,Health Services Misuse,TRUE
 W2061341087,2,Hospitals,TRUE
 W2061341087,3,Mortality,TRUE
@@ -58495,16 +58505,6 @@ W2061341087,19,"Reimbursement, Incentive",FALSE
 W2061341087,20,Risk Assessment,FALSE
 W2061341087,21,Time Factors,FALSE
 W2061341087,22,United States,FALSE
-W1969250736,1,Child Nutrition Disorders,TRUE
-W1969250736,2,Nutrition Policy,TRUE
-W1969250736,3,Child,FALSE
-W1969250736,4,Child Nutrition Disorders,FALSE
-W1969250736,5,Child Welfare,FALSE
-W1969250736,6,Female,FALSE
-W1969250736,7,Global Health,FALSE
-W1969250736,8,Health Priorities,FALSE
-W1969250736,9,Humans,FALSE
-W1969250736,10,Women's Health,FALSE
 W2043049369,1,Evidence-Based Medicine,TRUE
 W2043049369,2,Health Policy,TRUE
 W2043049369,3,Public Health Administration,TRUE
@@ -58855,13 +58855,6 @@ W2167536067,4,"Surgical Procedures, Operative",TRUE
 W2167536067,5,Humans,FALSE
 W2167536067,6,Observation,FALSE
 W2167536067,7,"Surgical Procedures, Operative",FALSE
-W2048282142,1,Delivery of Health Care,TRUE
-W2048282142,2,Economic Recession,TRUE
-W2048282142,3,Health Care Rationing,TRUE
-W2048282142,4,Delivery of Health Care,FALSE
-W2048282142,5,Health Care Rationing,FALSE
-W2048282142,6,Humans,FALSE
-W2048282142,7,Spain,FALSE
 W2052612012,1,Evaluation Studies as Topic,TRUE
 W2052612012,2,Inventions,TRUE
 W2052612012,3,Randomized Controlled Trials as Topic,TRUE
@@ -58871,6 +58864,13 @@ W2052612012,6,Humans,FALSE
 W2052612012,7,Randomized Controlled Trials as Topic,FALSE
 W2052612012,8,"Surgical Procedures, Operative",FALSE
 W2052612012,9,Time Factors,FALSE
+W2048282142,1,Delivery of Health Care,TRUE
+W2048282142,2,Economic Recession,TRUE
+W2048282142,3,Health Care Rationing,TRUE
+W2048282142,4,Delivery of Health Care,FALSE
+W2048282142,5,Health Care Rationing,FALSE
+W2048282142,6,Humans,FALSE
+W2048282142,7,Spain,FALSE
 W1991056790,1,Adrenal Cortex Hormones,TRUE
 W1991056790,2,Adrenal Cortex Hormones,TRUE
 W1991056790,3,Authorship,TRUE
@@ -61309,20 +61309,6 @@ W2023755279,14,Mutation,FALSE
 W2023755279,15,Patents as Topic,FALSE
 W2023755279,16,Patents as Topic,FALSE
 W2023755279,17,United States,FALSE
-W2149650904,1,Docosahexaenoic Acids,TRUE
-W2149650904,2,Influenza A virus,TRUE
-W2149650904,3,Orthomyxoviridae Infections,TRUE
-W2149650904,4,"Active Transport, Cell Nucleus",FALSE
-W2149650904,5,"Active Transport, Cell Nucleus",FALSE
-W2149650904,6,Animals,FALSE
-W2149650904,7,Docosahexaenoic Acids,FALSE
-W2149650904,8,Docosahexaenoic Acids,FALSE
-W2149650904,9,Docosahexaenoic Acids,FALSE
-W2149650904,10,Humans,FALSE
-W2149650904,11,Mice,FALSE
-W2149650904,12,Orthomyxoviridae Infections,FALSE
-W2149650904,13,Virus Replication,FALSE
-W2149650904,14,Virus Replication,FALSE
 W2019814003,1,Mental Disorders,TRUE
 W2019814003,2,Adolescent,FALSE
 W2019814003,3,Adult,FALSE
@@ -61338,6 +61324,20 @@ W2019814003,12,Mental Health Services,FALSE
 W2019814003,13,Resource Allocation,FALSE
 W2019814003,14,Resource Allocation,FALSE
 W2019814003,15,Socioeconomic Factors,FALSE
+W2149650904,1,Docosahexaenoic Acids,TRUE
+W2149650904,2,Influenza A virus,TRUE
+W2149650904,3,Orthomyxoviridae Infections,TRUE
+W2149650904,4,"Active Transport, Cell Nucleus",FALSE
+W2149650904,5,"Active Transport, Cell Nucleus",FALSE
+W2149650904,6,Animals,FALSE
+W2149650904,7,Docosahexaenoic Acids,FALSE
+W2149650904,8,Docosahexaenoic Acids,FALSE
+W2149650904,9,Docosahexaenoic Acids,FALSE
+W2149650904,10,Humans,FALSE
+W2149650904,11,Mice,FALSE
+W2149650904,12,Orthomyxoviridae Infections,FALSE
+W2149650904,13,Virus Replication,FALSE
+W2149650904,14,Virus Replication,FALSE
 W1977530121,1,Community Health Services,TRUE
 W1977530121,2,Electronic Health Records,TRUE
 W1977530121,3,Health Care Costs,TRUE
@@ -64842,6 +64842,17 @@ W2082546833,10,Patient Care,FALSE
 W2082546833,11,Patient Care Team,FALSE
 W2082546833,12,Patient Education as Topic,FALSE
 W2082546833,13,Research,FALSE
+W2036809936,1,Clinical Trials as Topic,TRUE
+W2036809936,2,"Liability, Legal",TRUE
+W2036809936,3,Self Report,TRUE
+W2036809936,4,Treatment Outcome,TRUE
+W2036809936,5,Clinical Trials as Topic,FALSE
+W2036809936,6,Data Collection,FALSE
+W2036809936,7,Drug-Related Side Effects and Adverse Reactions,FALSE
+W2036809936,8,"Ethics Committees, Research",FALSE
+W2036809936,9,Humans,FALSE
+W2036809936,10,Risk,FALSE
+W2036809936,11,Surveys and Questionnaires,FALSE
 W2090644610,1,African Continental Ancestry Group,TRUE
 W2090644610,2,Bariatric Surgery,TRUE
 W2090644610,3,Health Services Accessibility,TRUE
@@ -64884,17 +64895,6 @@ W2005468540,12,"Renal Insufficiency, Chronic",FALSE
 W2005468540,13,Risk,FALSE
 W2005468540,14,United States,FALSE
 W2005468540,15,United States,FALSE
-W2036809936,1,Clinical Trials as Topic,TRUE
-W2036809936,2,"Liability, Legal",TRUE
-W2036809936,3,Self Report,TRUE
-W2036809936,4,Treatment Outcome,TRUE
-W2036809936,5,Clinical Trials as Topic,FALSE
-W2036809936,6,Data Collection,FALSE
-W2036809936,7,Drug-Related Side Effects and Adverse Reactions,FALSE
-W2036809936,8,"Ethics Committees, Research",FALSE
-W2036809936,9,Humans,FALSE
-W2036809936,10,Risk,FALSE
-W2036809936,11,Surveys and Questionnaires,FALSE
 W1993599558,1,"Emergency Service, Hospital",TRUE
 W1993599558,2,Insurance Coverage,TRUE
 W1993599558,3,Medicaid,TRUE
@@ -69876,6 +69876,13 @@ W2615231960,15,Male,FALSE
 W2615231960,16,Middle Aged,FALSE
 W2615231960,17,Risk Assessment,FALSE
 W2615231960,18,Risk Factors,FALSE
+W2082230531,1,Data Collection,TRUE
+W2082230531,2,Health Services Research,TRUE
+W2082230531,3,Primary Prevention,TRUE
+W2082230531,4,Public Health,TRUE
+W2082230531,5,Health Promotion,FALSE
+W2082230531,6,Humans,FALSE
+W2082230531,7,United Kingdom,FALSE
 W2038687954,1,Anti-Bacterial Agents,TRUE
 W2038687954,2,Fluoroquinolones,TRUE
 W2038687954,3,Retinal Detachment,TRUE
@@ -69898,13 +69905,6 @@ W2038687954,19,Registries,FALSE
 W2038687954,20,Registries,FALSE
 W2038687954,21,Retinal Detachment,FALSE
 W2038687954,22,Risk,FALSE
-W2082230531,1,Data Collection,TRUE
-W2082230531,2,Health Services Research,TRUE
-W2082230531,3,Primary Prevention,TRUE
-W2082230531,4,Public Health,TRUE
-W2082230531,5,Health Promotion,FALSE
-W2082230531,6,Humans,FALSE
-W2082230531,7,United Kingdom,FALSE
 W1978549314,1,Intestinal Volvulus,TRUE
 W1978549314,2,Torsion Abnormality,TRUE
 W1978549314,3,Humans,FALSE
@@ -69951,6 +69951,15 @@ W2078319424,5,Communication,FALSE
 W2078319424,6,"Health Knowledge, Attitudes, Practice",FALSE
 W2078319424,7,Patient Care,FALSE
 W2078319424,8,United States,FALSE
+W1993234684,1,Clinical Competence,TRUE
+W1993234684,2,College Admission Test,TRUE
+W1993234684,3,"Schools, Medical",TRUE
+W1993234684,4,Thinking,TRUE
+W1993234684,5,Curriculum,FALSE
+W1993234684,6,Decision Making,FALSE
+W1993234684,7,Patient Care,FALSE
+W1993234684,8,Patient Care,FALSE
+W1993234684,9,United States,FALSE
 W1988356347,1,Abstracting and Indexing,TRUE
 W1988356347,2,Congresses as Topic,TRUE
 W1988356347,3,"Education, Medical",TRUE
@@ -69963,15 +69972,6 @@ W1988356347,9,"Peer Review, Research",FALSE
 W1988356347,10,Publication Bias,FALSE
 W1988356347,11,Publishing,FALSE
 W1988356347,12,Time Factors,FALSE
-W1993234684,1,Clinical Competence,TRUE
-W1993234684,2,College Admission Test,TRUE
-W1993234684,3,"Schools, Medical",TRUE
-W1993234684,4,Thinking,TRUE
-W1993234684,5,Curriculum,FALSE
-W1993234684,6,Decision Making,FALSE
-W1993234684,7,Patient Care,FALSE
-W1993234684,8,Patient Care,FALSE
-W1993234684,9,United States,FALSE
 W1976261481,1,Electronic Health Records,TRUE
 W1976261481,2,Patient Care,TRUE
 W1976261481,3,"Practice Management, Medical",TRUE
@@ -71703,15 +71703,6 @@ W2043004524,9,Hospital Bed Capacity,FALSE
 W2043004524,10,Intensive Care Units,FALSE
 W2043004524,11,United Kingdom,FALSE
 W2043004524,12,United States,FALSE
-W2062273717,1,Global Health,TRUE
-W2062273717,2,International Cooperation,TRUE
-W2062273717,3,Delivery of Health Care,FALSE
-W2062273717,4,Delivery of Health Care,FALSE
-W2062273717,5,Global Health,FALSE
-W2062273717,6,Health Promotion,FALSE
-W2062273717,7,Health Promotion,FALSE
-W2062273717,8,Humans,FALSE
-W2062273717,9,Terminology as Topic,FALSE
 W1976653331,1,Benzazepines,TRUE
 W1976653331,2,Bupropion,TRUE
 W1976653331,3,Dopamine Uptake Inhibitors,TRUE
@@ -71736,6 +71727,15 @@ W1976653331,21,Smoking Cessation,FALSE
 W1976653331,22,Tobacco Use Disorder,FALSE
 W1976653331,23,Treatment Outcome,FALSE
 W1976653331,24,Varenicline,FALSE
+W2062273717,1,Global Health,TRUE
+W2062273717,2,International Cooperation,TRUE
+W2062273717,3,Delivery of Health Care,FALSE
+W2062273717,4,Delivery of Health Care,FALSE
+W2062273717,5,Global Health,FALSE
+W2062273717,6,Health Promotion,FALSE
+W2062273717,7,Health Promotion,FALSE
+W2062273717,8,Humans,FALSE
+W2062273717,9,Terminology as Topic,FALSE
 W2058182518,1,Biomedical Research,TRUE
 W2058182518,2,Health Expenditures,TRUE
 W2058182518,3,National Institutes of Health (U.S.),TRUE
@@ -72475,19 +72475,6 @@ W2142186622,13,Male,FALSE
 W2142186622,14,Middle Aged,FALSE
 W2142186622,15,Registries,FALSE
 W2142186622,16,Scandinavian and Nordic Countries,FALSE
-W2316287948,1,Health Policy,TRUE
-W2316287948,2,Human Rights Abuses,TRUE
-W2316287948,3,Mental Disorders,TRUE
-W2316287948,4,Mental Health,TRUE
-W2316287948,5,Mental Health Services,TRUE
-W2316287948,6,Global Health,FALSE
-W2316287948,7,Humans,FALSE
-W2316287948,8,Mental Disorders,FALSE
-W2316287948,9,Mental Disorders,FALSE
-W2316287948,10,Mental Health,FALSE
-W2316287948,11,Mental Health Services,FALSE
-W2316287948,12,Quality-Adjusted Life Years,FALSE
-W2316287948,13,World Health Organization,FALSE
 W2165412776,1,Cervical Intraepithelial Neoplasia,TRUE
 W2165412776,2,"DNA, Viral",TRUE
 W2165412776,3,Mass Screening,TRUE
@@ -72521,6 +72508,19 @@ W2165412776,30,Uterine Cervical Neoplasms,FALSE
 W2165412776,31,Uterine Cervical Neoplasms,FALSE
 W2165412776,32,Vaginal Smears,FALSE
 W2165412776,33,Young Adult,FALSE
+W2316287948,1,Health Policy,TRUE
+W2316287948,2,Human Rights Abuses,TRUE
+W2316287948,3,Mental Disorders,TRUE
+W2316287948,4,Mental Health,TRUE
+W2316287948,5,Mental Health Services,TRUE
+W2316287948,6,Global Health,FALSE
+W2316287948,7,Humans,FALSE
+W2316287948,8,Mental Disorders,FALSE
+W2316287948,9,Mental Disorders,FALSE
+W2316287948,10,Mental Health,FALSE
+W2316287948,11,Mental Health Services,FALSE
+W2316287948,12,Quality-Adjusted Life Years,FALSE
+W2316287948,13,World Health Organization,FALSE
 W1977515750,1,Delivery of Health Care,TRUE
 W1977515750,2,Warfare,TRUE
 W1977515750,3,Delivery of Health Care,FALSE

@@ -9074,6 +9074,19 @@ W2079885675,17,Membrane Potentials,FALSE
 W2079885675,18,Rats,FALSE
 W2079885675,19,Strontium,FALSE
 W2079885675,20,Strontium,FALSE
+W2083638558,1,"Cloning, Molecular",TRUE
+W2083638558,2,"Genes, Synthetic",TRUE
+W2083638558,3,Peptide Fragments,TRUE
+W2083638558,4,Ribonucleases,TRUE
+W2083638558,5,Amino Acid Sequence,FALSE
+W2083638558,6,Base Sequence,FALSE
+W2083638558,7,DNA Restriction Enzymes,FALSE
+W2083638558,8,Escherichia coli,FALSE
+W2083638558,9,Escherichia coli,FALSE
+W2083638558,10,Oligodeoxyribonucleotides,FALSE
+W2083638558,11,Oligodeoxyribonucleotides,FALSE
+W2083638558,12,Peptide Fragments,FALSE
+W2083638558,13,Ribonucleases,FALSE
 W1983961122,1,Carcinogens,TRUE
 W1983961122,2,"Cell Transformation, Neoplastic",TRUE
 W1983961122,3,Gene Expression Regulation,TRUE
@@ -9093,6 +9106,19 @@ W1983961122,16,Methylnitronitrosoguanidine,FALSE
 W1983961122,17,Mice,FALSE
 W1983961122,18,Retroviridae,FALSE
 W1983961122,19,Retroviridae,FALSE
+W1986474620,1,"Genes, Viral",TRUE
+W1986474620,2,Muridae,TRUE
+W1986474620,3,"Neoplasms, Experimental",TRUE
+W1986474620,4,Papillomaviridae,TRUE
+W1986474620,5,Age Factors,FALSE
+W1986474620,6,Animals,FALSE
+W1986474620,7,"DNA, Viral",FALSE
+W1986474620,8,"DNA, Viral",FALSE
+W1986474620,9,Gene Expression Regulation,FALSE
+W1986474620,10,Muridae,FALSE
+W1986474620,11,"Neoplasms, Experimental",FALSE
+W1986474620,12,Papillomaviridae,FALSE
+W1986474620,13,"Transcription, Genetic",FALSE
 W2052993533,1,Alcohol Oxidoreductases,TRUE
 W2052993533,2,Gene Expression Regulation,TRUE
 W2052993533,3,Leucine,TRUE
@@ -9107,32 +9133,6 @@ W2052993533,11,Enzyme Repression,FALSE
 W2052993533,12,"Genes, Regulator",FALSE
 W2052993533,13,Leucine,FALSE
 W2052993533,14,Saccharomyces cerevisiae,FALSE
-W2083638558,1,"Cloning, Molecular",TRUE
-W2083638558,2,"Genes, Synthetic",TRUE
-W2083638558,3,Peptide Fragments,TRUE
-W2083638558,4,Ribonucleases,TRUE
-W2083638558,5,Amino Acid Sequence,FALSE
-W2083638558,6,Base Sequence,FALSE
-W2083638558,7,DNA Restriction Enzymes,FALSE
-W2083638558,8,Escherichia coli,FALSE
-W2083638558,9,Escherichia coli,FALSE
-W2083638558,10,Oligodeoxyribonucleotides,FALSE
-W2083638558,11,Oligodeoxyribonucleotides,FALSE
-W2083638558,12,Peptide Fragments,FALSE
-W2083638558,13,Ribonucleases,FALSE
-W1986474620,1,"Genes, Viral",TRUE
-W1986474620,2,Muridae,TRUE
-W1986474620,3,"Neoplasms, Experimental",TRUE
-W1986474620,4,Papillomaviridae,TRUE
-W1986474620,5,Age Factors,FALSE
-W1986474620,6,Animals,FALSE
-W1986474620,7,"DNA, Viral",FALSE
-W1986474620,8,"DNA, Viral",FALSE
-W1986474620,9,Gene Expression Regulation,FALSE
-W1986474620,10,Muridae,FALSE
-W1986474620,11,"Neoplasms, Experimental",FALSE
-W1986474620,12,Papillomaviridae,FALSE
-W1986474620,13,"Transcription, Genetic",FALSE
 W1998603555,1,Acquired Immunodeficiency Syndrome,TRUE
 W1998603555,2,"Antibodies, Viral",TRUE
 W1998603555,3,Blood Donors,TRUE
@@ -13066,19 +13066,6 @@ W2080540282,7,Escherichia coli,FALSE
 W2080540282,8,Gene Expression Regulation,FALSE
 W2080540282,9,Molecular Weight,FALSE
 W2080540282,10,Plasmodium,FALSE
-W1970633327,1,Antibodies,TRUE
-W1970633327,2,Erythrocytes,TRUE
-W1970633327,3,Melanoma,TRUE
-W1970633327,4,Plasmodium falciparum,TRUE
-W1970633327,5,Animals,FALSE
-W1970633327,6,Antigen-Antibody Complex,FALSE
-W1970633327,7,Aotus trivirgatus,FALSE
-W1970633327,8,Aotus trivirgatus,FALSE
-W1970633327,9,Erythrocytes,FALSE
-W1970633327,10,Humans,FALSE
-W1970633327,11,Immune Sera,FALSE
-W1970633327,12,Melanoma,FALSE
-W1970633327,13,Plasmodium falciparum,FALSE
 W2051029292,1,Base Sequence,TRUE
 W2051029292,2,Genes,TRUE
 W2051029292,3,"RNA, Transfer, Amino Acyl",TRUE
@@ -13093,6 +13080,19 @@ W2051029292,11,Pseudouridine,FALSE
 W2051029292,12,"RNA, Transfer, Amino Acyl",FALSE
 W2051029292,13,Saccharomyces cerevisiae,FALSE
 W2051029292,14,"Suppression, Genetic",FALSE
+W1970633327,1,Antibodies,TRUE
+W1970633327,2,Erythrocytes,TRUE
+W1970633327,3,Melanoma,TRUE
+W1970633327,4,Plasmodium falciparum,TRUE
+W1970633327,5,Animals,FALSE
+W1970633327,6,Antigen-Antibody Complex,FALSE
+W1970633327,7,Aotus trivirgatus,FALSE
+W1970633327,8,Aotus trivirgatus,FALSE
+W1970633327,9,Erythrocytes,FALSE
+W1970633327,10,Humans,FALSE
+W1970633327,11,Immune Sera,FALSE
+W1970633327,12,Melanoma,FALSE
+W1970633327,13,Plasmodium falciparum,FALSE
 W2074922245,1,Diabetes Mellitus,TRUE
 W2074922245,2,Insulin,TRUE
 W2074922245,3,Amino Acid Sequence,FALSE
@@ -16195,17 +16195,6 @@ W2051379385,9,Mice,FALSE
 W2051379385,10,X Chromosome,FALSE
 W2051379385,11,beta 2-Microglobulin,FALSE
 W2051379385,12,beta 2-Microglobulin,FALSE
-W1995312493,1,Graft Rejection,TRUE
-W1995312493,2,H-2 Antigens,TRUE
-W1995312493,3,Histocompatibility Antigens Class II,TRUE
-W1995312493,4,Islets of Langerhans Transplantation,TRUE
-W1995312493,5,Animals,FALSE
-W1995312493,6,H-2 Antigens,FALSE
-W1995312493,7,Histocompatibility Antigens Class II,FALSE
-W1995312493,8,Major Histocompatibility Complex,FALSE
-W1995312493,9,Mice,FALSE
-W1995312493,10,T-Lymphocytes,FALSE
-W1995312493,11,T-Lymphocytes,FALSE
 W2010221809,1,Aflatoxins,TRUE
 W2010221809,2,DNA,TRUE
 W2010221809,3,Aflatoxin B1,FALSE
@@ -16217,6 +16206,17 @@ W2010221809,8,Nucleic Acid Conformation,FALSE
 W2010221809,9,Osmolar Concentration,FALSE
 W2010221809,10,Sodium Chloride,FALSE
 W2010221809,11,Sodium Chloride,FALSE
+W1995312493,1,Graft Rejection,TRUE
+W1995312493,2,H-2 Antigens,TRUE
+W1995312493,3,Histocompatibility Antigens Class II,TRUE
+W1995312493,4,Islets of Langerhans Transplantation,TRUE
+W1995312493,5,Animals,FALSE
+W1995312493,6,H-2 Antigens,FALSE
+W1995312493,7,Histocompatibility Antigens Class II,FALSE
+W1995312493,8,Major Histocompatibility Complex,FALSE
+W1995312493,9,Mice,FALSE
+W1995312493,10,T-Lymphocytes,FALSE
+W1995312493,11,T-Lymphocytes,FALSE
 W2006812525,1,Chagas Disease,TRUE
 W2006812525,2,Rheumatoid Factor,TRUE
 W2006812525,3,Animals,FALSE
@@ -17757,6 +17757,17 @@ W2053409978,8,Chromosomes,FALSE
 W2053409978,9,DNA Replication,FALSE
 W2053409978,10,Drosophila melanogaster,FALSE
 W2053409978,11,Drosophila melanogaster,FALSE
+W1975949685,1,Ciliophora,TRUE
+W1975949685,2,Microtubules,TRUE
+W1975949685,3,Animals,FALSE
+W1975949685,4,Ciliophora,FALSE
+W1975949685,5,Cytoplasm,FALSE
+W1975949685,6,Cytoplasm,FALSE
+W1975949685,7,"Microscopy, Electron",FALSE
+W1975949685,8,Microtubules,FALSE
+W1975949685,9,Spindle Apparatus,FALSE
+W1975949685,10,Spindle Apparatus,FALSE
+W1975949685,11,Tubulin,FALSE
 W2015988933,1,"Antigens, Surface",TRUE
 W2015988933,2,Gene Amplification,TRUE
 W2015988933,3,T-Lymphocytes,TRUE
@@ -17769,17 +17780,6 @@ W2015988933,9,Humans,FALSE
 W2015988933,10,"Repetitive Sequences, Nucleic Acid",FALSE
 W2015988933,11,T-Lymphocytes,FALSE
 W2015988933,12,Transfection,FALSE
-W1975949685,1,Ciliophora,TRUE
-W1975949685,2,Microtubules,TRUE
-W1975949685,3,Animals,FALSE
-W1975949685,4,Ciliophora,FALSE
-W1975949685,5,Cytoplasm,FALSE
-W1975949685,6,Cytoplasm,FALSE
-W1975949685,7,"Microscopy, Electron",FALSE
-W1975949685,8,Microtubules,FALSE
-W1975949685,9,Spindle Apparatus,FALSE
-W1975949685,10,Spindle Apparatus,FALSE
-W1975949685,11,Tubulin,FALSE
 W2016732346,1,"Receptors, Dopamine",TRUE
 W2016732346,2,Animals,FALSE
 W2016732346,3,Corpus Striatum,FALSE
@@ -20406,18 +20406,6 @@ W2020490067,7,Chromosome Mapping,FALSE
 W2020490067,8,DNA,FALSE
 W2020490067,9,"DNA, Recombinant",FALSE
 W2020490067,10,Mutation,FALSE
-W1975487363,1,Bacterial Proteins,TRUE
-W1975487363,2,Bacteriophage lambda,TRUE
-W1975487363,3,Escherichia coli,TRUE
-W1975487363,4,Viral Proteins,TRUE
-W1975487363,5,Bacterial Proteins,FALSE
-W1975487363,6,Bacteriophage lambda,FALSE
-W1975487363,7,Drug Stability,FALSE
-W1975487363,8,"Electrophoresis, Polyacrylamide Gel",FALSE
-W1975487363,9,Escherichia coli,FALSE
-W1975487363,10,"Genes, Viral",FALSE
-W1975487363,11,Kinetics,FALSE
-W1975487363,12,Viral Proteins,FALSE
 W1552593866,1,Glucosyltransferases,TRUE
 W1552593866,2,Lysosomes,TRUE
 W1552593866,3,N-Acetylglucosaminyltransferases,TRUE
@@ -20442,6 +20430,18 @@ W1552593866,21,Phosphorylation,FALSE
 W1552593866,22,Tritium,FALSE
 W1552593866,23,Uridine Diphosphate N-Acetylglucosamine,FALSE
 W1552593866,24,Uridine Diphosphate N-Acetylglucosamine,FALSE
+W1975487363,1,Bacterial Proteins,TRUE
+W1975487363,2,Bacteriophage lambda,TRUE
+W1975487363,3,Escherichia coli,TRUE
+W1975487363,4,Viral Proteins,TRUE
+W1975487363,5,Bacterial Proteins,FALSE
+W1975487363,6,Bacteriophage lambda,FALSE
+W1975487363,7,Drug Stability,FALSE
+W1975487363,8,"Electrophoresis, Polyacrylamide Gel",FALSE
+W1975487363,9,Escherichia coli,FALSE
+W1975487363,10,"Genes, Viral",FALSE
+W1975487363,11,Kinetics,FALSE
+W1975487363,12,Viral Proteins,FALSE
 W2045425113,1,Actins,TRUE
 W2045425113,2,Adenosine Triphosphate,TRUE
 W2045425113,3,Myosins,TRUE
@@ -21753,6 +21753,11 @@ W1998922007,14,Phenylacetates,FALSE
 W1998922007,15,Schizophrenia,FALSE
 W1998922007,16,Schizophrenia,FALSE
 W1998922007,17,Time Factors,FALSE
+W2049150697,1,Magnetic Resonance Spectroscopy,TRUE
+W2049150697,2,Magnetic Resonance Spectroscopy,FALSE
+W2049150697,3,Mathematics,FALSE
+W2049150697,4,Physical Phenomena,FALSE
+W2049150697,5,Physics,FALSE
 W1963807489,1,Deoxy Sugars,TRUE
 W1963807489,2,Deoxyglucose,TRUE
 W1963807489,3,Odorants,TRUE
@@ -21769,11 +21774,6 @@ W1963807489,13,Olfactory Bulb,FALSE
 W1963807489,14,Plant Extracts,FALSE
 W1963807489,15,Rats,FALSE
 W1963807489,16,Respiration,FALSE
-W2049150697,1,Magnetic Resonance Spectroscopy,TRUE
-W2049150697,2,Magnetic Resonance Spectroscopy,FALSE
-W2049150697,3,Mathematics,FALSE
-W2049150697,4,Physical Phenomena,FALSE
-W2049150697,5,Physics,FALSE
 W2023875499,1,Aphrodisiacs,TRUE
 W2023875499,2,"Sexual Behavior, Animal",TRUE
 W2023875499,3,Yohimbine,TRUE
@@ -23263,6 +23263,21 @@ W2002785964,11,Phosphorylcholine,FALSE
 W2002785964,12,Pneumococcal Infections,FALSE
 W2002785964,13,Streptococcus pneumoniae,FALSE
 W2002785964,14,Streptococcus pneumoniae,FALSE
+W2083479623,1,Antigen-Antibody Reactions,TRUE
+W2083479623,2,"Antigens, Viral",TRUE
+W2083479623,3,Carbohydrates,TRUE
+W2083479623,4,Immune Sera,TRUE
+W2083479623,5,Viral Proteins,TRUE
+W2083479623,6,"Antibodies, Monoclonal",FALSE
+W2083479623,7,"Antibodies, Monoclonal",FALSE
+W2083479623,8,"Antigens, Viral",FALSE
+W2083479623,9,Carbohydrates,FALSE
+W2083479623,10,Immune Sera,FALSE
+W2083479623,11,Orthomyxoviridae,FALSE
+W2083479623,12,Orthomyxoviridae,FALSE
+W2083479623,13,Rauscher Virus,FALSE
+W2083479623,14,Rauscher Virus,FALSE
+W2083479623,15,Viral Proteins,FALSE
 W2084392102,1,Exocytosis,TRUE
 W2084392102,2,Influenza A virus,TRUE
 W2084392102,3,Viral Envelope Proteins,TRUE
@@ -23285,21 +23300,6 @@ W2084392102,19,Radioimmunoassay,FALSE
 W2084392102,20,"Receptors, Virus",FALSE
 W2084392102,21,"Receptors, Virus",FALSE
 W2084392102,22,Viral Envelope Proteins,FALSE
-W2083479623,1,Antigen-Antibody Reactions,TRUE
-W2083479623,2,"Antigens, Viral",TRUE
-W2083479623,3,Carbohydrates,TRUE
-W2083479623,4,Immune Sera,TRUE
-W2083479623,5,Viral Proteins,TRUE
-W2083479623,6,"Antibodies, Monoclonal",FALSE
-W2083479623,7,"Antibodies, Monoclonal",FALSE
-W2083479623,8,"Antigens, Viral",FALSE
-W2083479623,9,Carbohydrates,FALSE
-W2083479623,10,Immune Sera,FALSE
-W2083479623,11,Orthomyxoviridae,FALSE
-W2083479623,12,Orthomyxoviridae,FALSE
-W2083479623,13,Rauscher Virus,FALSE
-W2083479623,14,Rauscher Virus,FALSE
-W2083479623,15,Viral Proteins,FALSE
 W2068118637,1,Aging,TRUE
 W2068118637,2,Amygdala,TRUE
 W2068118637,3,Cerebral Cortex,TRUE
@@ -26339,21 +26339,6 @@ W1964862002,17,Plasmacytoma,FALSE
 W1964862002,18,Rats,FALSE
 W1964862002,19,T-Lymphocytes,FALSE
 W1964862002,20,T-Lymphocytes,FALSE
-W2034448814,1,"Cytotoxicity, Immunologic",TRUE
-W2034448814,2,Graft vs Host Disease,TRUE
-W2034448814,3,Immunoglobulin Idiotypes,TRUE
-W2034448814,4,T-Lymphocytes,TRUE
-W2034448814,5,Animals,FALSE
-W2034448814,6,"Antigens, Surface",FALSE
-W2034448814,7,"Antigens, Surface",FALSE
-W2034448814,8,Graft vs Host Disease,FALSE
-W2034448814,9,Immunoglobulin Idiotypes,FALSE
-W2034448814,10,"Killer Cells, Natural",FALSE
-W2034448814,11,"Killer Cells, Natural",FALSE
-W2034448814,12,Major Histocompatibility Complex,FALSE
-W2034448814,13,Phenotype,FALSE
-W2034448814,14,Rats,FALSE
-W2034448814,15,T-Lymphocytes,FALSE
 W2008416814,1,Hypothalamic Hormones,TRUE
 W2008416814,2,Melanins,TRUE
 W2008416814,3,Pituitary Hormones,TRUE
@@ -26371,6 +26356,21 @@ W2008416814,14,Rana pipiens,FALSE
 W2008416814,15,Salmon,FALSE
 W2008416814,16,Skin Pigmentation,FALSE
 W2008416814,17,Skin Pigmentation,FALSE
+W2034448814,1,"Cytotoxicity, Immunologic",TRUE
+W2034448814,2,Graft vs Host Disease,TRUE
+W2034448814,3,Immunoglobulin Idiotypes,TRUE
+W2034448814,4,T-Lymphocytes,TRUE
+W2034448814,5,Animals,FALSE
+W2034448814,6,"Antigens, Surface",FALSE
+W2034448814,7,"Antigens, Surface",FALSE
+W2034448814,8,Graft vs Host Disease,FALSE
+W2034448814,9,Immunoglobulin Idiotypes,FALSE
+W2034448814,10,"Killer Cells, Natural",FALSE
+W2034448814,11,"Killer Cells, Natural",FALSE
+W2034448814,12,Major Histocompatibility Complex,FALSE
+W2034448814,13,Phenotype,FALSE
+W2034448814,14,Rats,FALSE
+W2034448814,15,T-Lymphocytes,FALSE
 W2012585736,1,Glycoproteins,TRUE
 W2012585736,2,Growth Inhibitors,TRUE
 W2012585736,3,Mullerian Ducts,TRUE
@@ -28296,6 +28296,13 @@ W2017975180,5,Chromosome Mapping,FALSE
 W2017975180,6,Gene Expression Regulation,FALSE
 W2017975180,7,"Leukemia, Experimental",FALSE
 W2017975180,8,Rats,FALSE
+W2012170897,1,Hemoglobins,TRUE
+W2012170897,2,Allosteric Regulation,FALSE
+W2012170897,3,"Hemoglobins, Abnormal",FALSE
+W2012170897,4,Humans,FALSE
+W2012170897,5,Kinetics,FALSE
+W2012170897,6,Macromolecular Substances,FALSE
+W2012170897,7,Protein Binding,FALSE
 W1970956790,1,"DNA, Viral",TRUE
 W1970956790,2,"RNA, Messenger",TRUE
 W1970956790,3,Retroviridae,TRUE
@@ -28308,13 +28315,6 @@ W1970956790,9,Poly A,FALSE
 W1970956790,10,"RNA, Messenger",FALSE
 W1970956790,11,Retroviridae,FALSE
 W1970956790,12,"Transcription, Genetic",FALSE
-W2012170897,1,Hemoglobins,TRUE
-W2012170897,2,Allosteric Regulation,FALSE
-W2012170897,3,"Hemoglobins, Abnormal",FALSE
-W2012170897,4,Humans,FALSE
-W2012170897,5,Kinetics,FALSE
-W2012170897,6,Macromolecular Substances,FALSE
-W2012170897,7,Protein Binding,FALSE
 W2052333855,1,Hypothalamus,TRUE
 W2052333855,2,"Immunity, Innate",TRUE
 W2052333855,3,"Killer Cells, Natural",TRUE
@@ -30106,6 +30106,24 @@ W2019638314,17,Spinal Cord,FALSE
 W2019638314,18,Spinal Cord,FALSE
 W2019638314,19,Synapses,FALSE
 W2019638314,20,Synapses,FALSE
+W2073190753,1,"Chromosomes, Human, 1-3",TRUE
+W2073190753,2,"Chromosomes, Human, 4-5",TRUE
+W2073190753,3,Oncogenes,TRUE
+W2073190753,4,Adenocarcinoma,FALSE
+W2073190753,5,Adenocarcinoma,FALSE
+W2073190753,6,Animals,FALSE
+W2073190753,7,Chromosome Aberrations,FALSE
+W2073190753,8,Chromosome Mapping,FALSE
+W2073190753,9,Cricetinae,FALSE
+W2073190753,10,Humans,FALSE
+W2073190753,11,Hybrid Cells,FALSE
+W2073190753,12,Kidney Neoplasms,FALSE
+W2073190753,13,Kidney Neoplasms,FALSE
+W2073190753,14,Lung Neoplasms,FALSE
+W2073190753,15,Lung Neoplasms,FALSE
+W2073190753,16,Male,FALSE
+W2073190753,17,Mice,FALSE
+W2073190753,18,Nucleic Acid Hybridization,FALSE
 W2029399853,1,Collagen,TRUE
 W2029399853,2,DNA,TRUE
 W2029399853,3,Fibroblasts,TRUE
@@ -30129,24 +30147,6 @@ W2029399853,20,Humans,FALSE
 W2029399853,21,Mitochondrial Proteins,FALSE
 W2029399853,22,Phenotype,FALSE
 W2029399853,23,"Receptors, Complement",FALSE
-W2073190753,1,"Chromosomes, Human, 1-3",TRUE
-W2073190753,2,"Chromosomes, Human, 4-5",TRUE
-W2073190753,3,Oncogenes,TRUE
-W2073190753,4,Adenocarcinoma,FALSE
-W2073190753,5,Adenocarcinoma,FALSE
-W2073190753,6,Animals,FALSE
-W2073190753,7,Chromosome Aberrations,FALSE
-W2073190753,8,Chromosome Mapping,FALSE
-W2073190753,9,Cricetinae,FALSE
-W2073190753,10,Humans,FALSE
-W2073190753,11,Hybrid Cells,FALSE
-W2073190753,12,Kidney Neoplasms,FALSE
-W2073190753,13,Kidney Neoplasms,FALSE
-W2073190753,14,Lung Neoplasms,FALSE
-W2073190753,15,Lung Neoplasms,FALSE
-W2073190753,16,Male,FALSE
-W2073190753,17,Mice,FALSE
-W2073190753,18,Nucleic Acid Hybridization,FALSE
 W2011235810,1,Amino Acyl-tRNA Synthetases,TRUE
 W2011235810,2,Tyrosine-tRNA Ligase,TRUE
 W2011235810,3,Amino Acyl-tRNA Synthetases,FALSE
