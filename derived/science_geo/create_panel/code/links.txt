@@ -1,5 +1,2 @@
-./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_analysis_samps/output
-./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/analyze_openalex/output
-./mesh/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/author_mesh_terms/output
-./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/wos_ids/output
-./eo/ | /export/home/dor/cxu/innovation_projs/raw/geo
+./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/clean_openalex/output
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
