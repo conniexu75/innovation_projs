@@ -1,1 +1,0 @@
-./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/analyze_openalex/output

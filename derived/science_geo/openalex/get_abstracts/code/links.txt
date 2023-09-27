@@ -1,0 +1,1 @@
+./pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/get_pt/output/
