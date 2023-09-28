@@ -1,3 +1,0 @@
-./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
-./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output/
-./pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/prep_analysis_samps/output/
