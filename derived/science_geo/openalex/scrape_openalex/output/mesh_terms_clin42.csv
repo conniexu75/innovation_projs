@@ -1,5 +1,5 @@
-id,which_mesh,term,is_major_topic
-W2058945987,1,Skin,TRUE
-W2058945987,2,Skin Diseases,TRUE
-W2058945987,3,Virus Diseases,TRUE
-W2058945987,4,Humans,FALSE
+id,which_mesh,term,is_major_topic,qualifier_name
+W2058945987,1,Skin,TRUE,
+W2058945987,2,Skin Diseases,TRUE,
+W2058945987,3,Virus Diseases,TRUE,
+W2058945987,4,Humans,FALSE,
