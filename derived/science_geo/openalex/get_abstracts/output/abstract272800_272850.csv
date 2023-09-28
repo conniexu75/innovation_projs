@@ -1,0 +1,50 @@
+id,abstract
+https://openalex.org/W1968545963,"A detailed record of the strontium-87 to strontium-86 ratio in seawater during the last 100 million years was determined by measuring this ratio in 137 well-preserved and well-dated fossil foraminifera samples. Sample preservation was evaluated from scanning electron microscopy studies, measured strontium-calcium ratios, and pore water strontium isotope ratios. The evolution of the strontium isotopic ratio in seawater offers a means to evaluate long-term changes in the global strontium isotope mass balance. Results show that the marine strontium isotope composition can be used for correlating and dating well-preserved authigenic marine sediments throughout much of the Cenozoic to a precision of +/-1 million years. The strontium-87 to strontium-86 ratio in seawater increased sharply across the Cretaceous/Tertiary boundary, but this feature is not readily explained as strontium input from a bolide impact on land."
+https://openalex.org/W1981334972,"More and more scientists and engineers are becoming interested in using supercomputers. Earlier barriers to using these machines are disappearing as software for their use improves. Meanwhile, new parallel supercomputer architectures are emerging that may provide rapid growth in performance. These systems may use a large number of processors with an intricate memory system that is both parallel and hierarchical; they will require even more advanced software. Compilers that restructure user programs to exploit the machine organization seem to be essential. A wide range of algorithms and applications is being developed in an effort to provide high parallel processing performance in many fields. The Cedar supercomputer, presently operating with eight processors in parallel, uses advanced system and applications software developed at the University of Illinois during the past 12 years. This software should allow the number of processors in Cedar to be doubled annually, providing rapid performance advances in the next decade."
+https://openalex.org/W2038722857,
+https://openalex.org/W2080539253,"Scientific research has always relied on communication for gathering and providing access to data; for exchanging information; for holding discussions, meetings, and seminars; for collaborating with widely dispersed researchers; and for disseminating results. The pace and complexity of modern research, especially collaborations of researchers in different institutions, has dramatically increased scientists' communications needs. Scientists now need immediate access to data and information, to colleagues and collaborators, and to advanced computing and information services. Furthermore, to be really useful, communication facilities must be integrated with the scientist's normal day-to-day working environment. Scientists depend on computing and communications tools and are handicapped without them."
+https://openalex.org/W2071550130,"Programs are judged not only by whether they faithfully carry out the intended processing but also by whether they are understandable and easily changed. Programming systems for artificial intelligence applications use specialized languages, environments, and knowledge-based tools to reduce the complexity of the programming task. Language styles based on procedures, objects, logic, rules, and constraints reflect different models for organizing programs and facilitate program evolution and understandability. To make programming easier, multiple styles can be integrated as sublanguages in a programming environment. Programming environments provide tools that analyze programs and create informative displays of their structure. Programs can be modified by direct interaction with these displays. These tools and languages are helping computer scientists to regain a sense of control over systems that have become increasingly complex."
+https://openalex.org/W2071103259,"First developed two decades ago, knowledge-based systems have seen widespread application in recent years. While performance has been a strong focus of attention, building such systems has also expanded our conception of a computer program from a black box providing an answer to something capable of explaining its answers, acquiring new knowledge, and transferring knowledge to students. These abilities derive from distinguishing clearly what the program knows from how that knowledge will be used, making it possible to use the same knowledge in different ways."
+https://openalex.org/W1989602191,Surprisingly affordable workstations with powerful graphics and computational capabilities will be on the desks of students and professionals within the next 2 years. Leading computer manufacturers and universities are creating a UNIX-based systems software regime that allows for portable applications software that can run on a wide range of workstations and that exploits emerging technologies.
+https://openalex.org/W2028391080,"The demand for high-speed computers is increasing, and as the limits on single-processor computers are approached, researchers are turning their attention to parallel computers. Parallel computers have more than one processing element; massively parallel computers contain many processing elements. Constructing computers on this scale and learning how to program them effectively will be major challenges in the next decade. Several such computers, for example the Connection Machine and the NON-VON, are under development."
+https://openalex.org/W2022871459,
+https://openalex.org/W1965132339,
+https://openalex.org/W2000653171,"Multiprocessors built from today's microprocessors are economically attractive. Although we can use these multiprocessors for time-sharing applications, it would be preferable to use them as true parallel processors. One key to achieving efficient parallel processing is to match the communications capabilities of the multiprocessor to the communications needs of the problem. The other key is improved parallel programming systems. If these are achieved, then efficient parallel processing can be approached from both ends by providing more communications capability in the hardware and restructuring the problem to reduce the communications requirements."
+https://openalex.org/W2021896290,
+https://openalex.org/W1964949940,
+https://openalex.org/W1986829141,
+https://openalex.org/W2096878539,
+https://openalex.org/W2156631264,
+https://openalex.org/W4250592095,
+https://openalex.org/W4251452608,
+https://openalex.org/W1966574063,
+https://openalex.org/W1966733280,
+https://openalex.org/W1969997275,
+https://openalex.org/W1988299854,
+https://openalex.org/W1995543912,
+https://openalex.org/W2000216644,
+https://openalex.org/W2002186976,
+https://openalex.org/W2014653125,
+https://openalex.org/W2041462933,
+https://openalex.org/W2044182830,
+https://openalex.org/W2049675282,
+https://openalex.org/W2060306945,
+https://openalex.org/W2066353426,
+https://openalex.org/W2069383712,
+https://openalex.org/W2076782060,
+https://openalex.org/W2088019588,
+https://openalex.org/W4206053958,
+https://openalex.org/W4206397479,
+https://openalex.org/W4206605581,
+https://openalex.org/W4229789484,
+https://openalex.org/W4230201711,
+https://openalex.org/W4230525206,
+https://openalex.org/W4233764705,
+https://openalex.org/W4235398537,"In the Table of Contents of the issue of 14 February (p. 653), the title of the report on page 731 by R. S. Ostrow et al. should have been ""Detection of papillomavirus DNA in human semen."""
+https://openalex.org/W4240024313,
+https://openalex.org/W4242444473,
+https://openalex.org/W4242740575,
+https://openalex.org/W4243657115,
+https://openalex.org/W4243884018,
+https://openalex.org/W4246975974,
+https://openalex.org/W4255296751,

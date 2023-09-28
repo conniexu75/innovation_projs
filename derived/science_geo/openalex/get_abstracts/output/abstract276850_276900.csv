@@ -1,0 +1,51 @@
+id,abstract
+https://openalex.org/W2036040790,Rechargeable lithium-ion batteries that use an aqueous electrolyte have been developed. Cells with LiMn(2)O(4) and VO(2)(B) as electrodes and 5 M LiNO(3) in water as the electrolyte provide a fundamentally safe and cost-effective technology that can compete with nickelcadmium and lead-acid batteries on the basis of stored energy per unit of weight.
+https://openalex.org/W2045926351,"Profiles of diapycnal eddy diffusivity to a maximum depth of 4000 meters were derived from ocean velocity and temperature microstructure data obtained in conjunction with separate experiments in the Northeast Pacific and Northeast Atlantic oceans. These profiles indicate that in the ocean interior where the internal wave field is at background intensity, the diapycnal eddy diffusivity is small (on the order of 0.1 × 10–4 meters squared per second) and independent of depth, in apparent contradiction with large-scale budget studies. Enhanced dissipation is observed in regions of elevated internal wave energy, particularly near steeply sloping boundaries (where the eddy diffusivity estimates exceed 1 × 10–4 meters squared per second). These results suggest that basin-averaged mixing rates may be dominated by processes occurring near the ocean boundaries."
+https://openalex.org/W2052837945,"Ocean models routinely used in simulations of the Earth's climate do not resolve mesoscale eddies because of the immense computational cost. A new parameterization of the effects of these eddies has been implemented in a widely used model. A comparison of its solution with that of the conventional parameterization shows significant improvements in the global temperature distribution, the poleward and surface heat fluxes, and the locations of deep-water formation."
+https://openalex.org/W1964948832,"Organometallic chemists have synthesized a remarkable variety of new structural types. In these structures ligands, which are organic or inorganic molecules of variable independent stability, bind to one or more transition metal atoms. An approach to an understanding of the electronic structure, geometrical preferences, and reactivity of these complexes may be made if the molecule is ""decomposed"" conceptually into a metal fragment, ML(n), and a ligand. A library of the molecular orbitals of these fragments is becoming available. One then ""reconstructs"" the molecule by examining the interaction of the orbitals of the ligand, typically an organic molecule, with the orbitals of the ML(n), fragment."
+https://openalex.org/W2031705984,The configurational-bias Monte Carlo technique is applied to simulate the adsorption of long chain alkanes in zeolites. This simulation technique is several orders of magnitude more efficient than conventional methods that can be used to simulate the adsorption of long chain alkanes. The calculated heats of adsorption are found to be in excellent agreement with experimental data. The results show a surprising chain length dependence of the heats of adsorption. This dependence has a simple molecular explanation in terms of preferential siting of the long chain alkanes.
+https://openalex.org/W2000280229,"Multispectral images obtained during the Galileo probe's second encounter with the moon reveal the compositional nature of the north polar regions and the northeastern limb. Mare deposits in these regions are found to be primarily low to medium titanium lavas and, as on the western limb, show only slight spectral heterogeneity. The northern light plains are found to have the spectral characteristics of highlands materials, show little evidence for the presence of cryptomaria, and were most likely emplaced by impact processes regardless of their age."
+https://openalex.org/W2017011914,
+https://openalex.org/W3197710023,
+https://openalex.org/W1980601292,"Numerical models of the Earth`s atmosphere and oceans are used to simulate the behavior of the climate system, to assess likely impacts of greenhouse warming, and recently, to predict some aspects of climate fluctuations on time scales up to a year. Typically, the ocean is represented by a large number of grid boxes some hundreds of meters deep. The equations of motion are marched forward in time for each grid box, in steps whose length must be decreased if the grid length is decreased. As a result, cutting grid length in half in every direction increases computational cost by an order of magnitude. Developing models that are fast enough, even on massively parallel computers, to run long climate simulations with smaller grid size is thus widely regarded as one of the grand challenges for scientific computing. But there is an even greater challenge to increasing the fidelity of climate models: improving the representation of the aggregate effect of processes that occur at scales smaller than the model grid size. This perspective article discusses work in the area of ocean eddies and their relationship to climate. 11 refs."
+https://openalex.org/W2016543026,
+https://openalex.org/W2040482866,
+https://openalex.org/W4241671643,
+https://openalex.org/W4246676345,
+https://openalex.org/W114106541,
+https://openalex.org/W1964879396,
+https://openalex.org/W1990124506,
+https://openalex.org/W1992134988,
+https://openalex.org/W1994158207,
+https://openalex.org/W1996939121,
+https://openalex.org/W2006599478,
+https://openalex.org/W2011920975,
+https://openalex.org/W2027596043,
+https://openalex.org/W2028067397,
+https://openalex.org/W2048652455,
+https://openalex.org/W128795412,
+https://openalex.org/W154844677,
+https://openalex.org/W1967272137,
+https://openalex.org/W1980433730,
+https://openalex.org/W1984193674,
+https://openalex.org/W2027629281,
+https://openalex.org/W2029605798,
+https://openalex.org/W2054448172,
+https://openalex.org/W2062274177,
+https://openalex.org/W2990554194,
+https://openalex.org/W40084428,
+https://openalex.org/W4206620379,
+https://openalex.org/W4232369797,
+https://openalex.org/W4233203265,
+https://openalex.org/W4235933600,
+https://openalex.org/W4236516791,
+https://openalex.org/W4238307276,
+https://openalex.org/W4238521528,"Important information in the article ""Insulin wars: New advances may throw market into turbulence"" (News and Comment, 12 Dec. 1980, p. 1225) came from a review written by Scott R. King of F. Eberstadt & Co., Inc., New York. Credit to King was inadvertently omitted from the article."
+https://openalex.org/W4238803348,
+https://openalex.org/W4239028101,
+https://openalex.org/W4240831805,
+https://openalex.org/W4244438844,
+https://openalex.org/W4245953105,
+https://openalex.org/W4254074153,
+https://openalex.org/W4292138944,
+https://openalex.org/W4293749109,
