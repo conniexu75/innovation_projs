@@ -209,6 +209,13 @@ program clean_samps
     gen msa_c_world = msa_comb
     replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")-1) + ", US" if country == "United States" & !mi(msa_c_world)
     replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)
+    
+
+    // drop if author_id is <  5000000000
+    gen num = subinstr(athr_id, "A", "",.)
+    destring num, replace
+    drop if num < 5000000000
+    drop num
 
     //  we don't want to count broad and HHMI if they are affiliated with other institutions.
     cap drop author_id 
@@ -288,7 +295,7 @@ program clean_mesh
         }
     }
     keep if is_major_topic == "TRUE" 
-    gduplicates drop id term, force
+    gduplicates drop id term qualifier_name, force
     gen gen_mesh = term if strpos(term, ",") == 0 & strpos(term, ";") == 0
     replace gen_mesh = term if strpos(term, "Models")>0
     replace gen_mesh = subinstr(gen_mesh, "&; ", "&",.)
@@ -297,7 +304,7 @@ program clean_mesh
     replace rev_mesh = reverse(rev_mesh)
     replace gen_mesh = rev_mesh if mi(gen_mesh)
     drop rev_mesh
-    contract id gen_mesh, nomiss
+    contract id gen_mesh qualifier_name, nomiss
     save ${temp}/contracted_gen_mesh_`samp', replace
     merge m:1 id using ${temp}/pmid_id_xwalk_`samp', assert(1 2 3) keep(3) nogen 
     cap drop _freq
@@ -322,12 +329,12 @@ program clean_concepts
         }
     }
     gunique id
-    bys id: egen min_level = min(level)
-    bys id level: egen max_score = max(score)
-    keep if min_level == level & max_score == score
-    gunique id
+    *bys id: egen min_level = min(level)
+    *bys id level: egen max_score = max(score)
+    *keep if min_level == level & max_score == score
+    *gunique id
     gduplicates drop id term, force
-    keep id term
+    *keep id term
     save ${temp}/concepts_`samp', replace
     merge m:1 id using ${temp}/pmid_id_xwalk_`samp', assert(1 2 3) keep(3) nogen 
     cap drop _freq
