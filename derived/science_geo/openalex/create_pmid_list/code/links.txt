@@ -1,3 +1,2 @@
-./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
 ./pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/get_pt/output/
 ./xwalk/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/append_pmids/output/
