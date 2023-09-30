@@ -312,6 +312,10 @@ program clean_mesh
         merge m:1 pmid using ../external/pmids_jrnl/newfund_pmids, keep(3) nogen keepusing(pmid)
     }
     save ../output/contracted_gen_mesh_`samp', replace
+    bys id: gen n = _n
+    greshape wide qualifier_name gen_mes, i(id pmid) j(n)
+    gduplicates drop id, force
+    save ../output/reshaped_gen_mesh_`samp', replace
 end
 
 program clean_concepts
@@ -335,6 +339,7 @@ program clean_concepts
     *gunique id
     gduplicates drop id term, force
     *keep id term
+    drop if level > 2
     save ${temp}/concepts_`samp', replace
     merge m:1 id using ${temp}/pmid_id_xwalk_`samp', assert(1 2 3) keep(3) nogen 
     cap drop _freq
@@ -342,6 +347,13 @@ program clean_concepts
         merge m:1 pmid using ../external/pmids_jrnl/newfund_pmids, keep(3) nogen keepusing(pmid)
     }
     save ../output/concepts_`samp', replace
+    drop concept_id pmid
+    gsort id -score
+    by id: replace which_concept  = _n
+    greshape wide term level score, i(id) j(which_concept)
+    drop level*
+    drop score*
+    save ../output/reshaped_concepts_`samp', replace
 end
 
 program split_sample
