@@ -12,9 +12,12 @@ program main
     make_panel
 end
 program make_panel
+    import delimited ../external/clusters/text4.csv, clear
+    save ../temp/clusters, replace
+
     use id pmid which_athr which_affl inst inst_id year journal_abbr cite_count country_code country city msacode msa_comb athr_id athr_name affl_wt cite_affl_wt cite_wt using ../external/openalex/cleaned_all_all_jrnls, clear
-    merge m:1 id using ../external/openalex/concepts_all_jrnls, keep(3) nogen
-    rename term field
+    merge m:1 athr_id year using ../temp/clusters, keep(1 3) nogen
+    rename cluster_label field
 
     bys pmid: egen num_athrs = max(which_athr)
     bys pmid which_athr: egen num_affls = max(which_affl)
@@ -52,7 +55,6 @@ program make_panel
     bys athr_id year msa_comb: gen msa_counter = _n == 1
     bys athr_id year: egen num_msas = total(msa_counter)
     
-    stop 
 
     // assign each researcher to a singular institution in a year
     // keep modal affiliation if multiple in one year
