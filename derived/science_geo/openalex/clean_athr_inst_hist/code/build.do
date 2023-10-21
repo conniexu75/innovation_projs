@@ -9,16 +9,17 @@ set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_athr_inst_hist"
 
 program main
-    append
-    merge_geo
+    *append
+    *merge_geo
+    clean_panel
 end
 program append
     qui {
         forval i = 1/10966 {
             import delimited ../external/pprs/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
-            gen yr = substr(pub_date, 1,4)
-            destring yr, replace
-            gcontract athr_id  yr inst_id, freq(num_times)
+            gen year = substr(pub_date, 1,4)
+            destring year, replace
+            gcontract athr_id  year inst_id, freq(num_times)
             drop if mi(inst_id)
             fmerge m:1 athr_id using ../external/athrs/list_of_athrs, assert(1 2 3) keep(3) nogen
             save ${temp}/ppr`i', replace
@@ -28,7 +29,8 @@ program append
     forval i = 1/10966 {
         append using ${temp}/ppr`i'
     }
-    gcollapse (sum) num_times, by(athr_id inst_id yr)
+    gcollapse (sum) num_times, by(athr_id inst_id year)
+    drop if athr_id == "A9999999999"
     save ${temp}/appended_pprs, replace
 end
 
@@ -69,7 +71,7 @@ program merge_geo
     replace inst = associated if inlist(associated, "Agro ParisTech", "Veterans Health Administration", "Institut de Recherche pour le Développement", "Austrian Academy of Sciences", "Institutos Nacionais de Ciência e Tecnologia", "Chinese Academy of Forestry", "Chinese Academy of Tropical Agricultural Sciences")
     replace inst = associated if inlist(associated, "Instituto de Salud Carlos III", "National Aeronautics and Space Administration", "Ludwig Boltzmann Gesellschaft", "United States Air Force", "Centre Nouvelle Aquitaine-Bordeaux", "RIKEN", "Agricultural Research Council")
     replace inst = associated if inlist(associated, "Centro Científico Tecnológico - La Plata", "National Research Council Canada", "Royal Netherlands Academy of Arts and Sciences","Defence Research and Development Organisation", "Canadian Institutes of Health Research", "Italian Institute of Technology", "United Nations University")
-    replace inst = associated if inlist(associated, "IBM Research - Thomas J. Watson Research Center", "Délégation Ile-de-France Sud","Grenoble Institute of Technology", "François Rabelais University", "Chinese Academy of Social Sciences", "National Science Foundation" , "Federal University of Toulouse Midi-Pyrénées")
+    replace inst = associated if inlist(associated, "IBM Research - Thomas J. Watson Research Center", "Délégation Ile-de-France Sud","Grenoble Institute of Technology", "François Rabelais University", "Chinese Academy of Social Sciences", "National Science Foundation" , "Federal University of Toulouse Midi-Pyearénées")
     replace inst = associated if inlist(associated, "Chinese Center For Disease Control and Prevention", "Johns Hopkins Medicine", "Cancer Research UK", "Centre Hospitalier Universitaire de Bordeaux", "Puglia Salute", "Hospices Civils de Lyon", "Ministry of Science and Technology", "Servicio de Salud de Castilla La Mancha")
     replace inst = associated if inlist(associated, "Grenoble Alpes University","Arts et Metiers Institute of Technology", "University of Paris-Saclay", "Biomedical Research Council", "Senckenberg Society for Nature Research", "Centre Hospitalier Régional et Universitaire de Lille", "Schön Klinik Roseneck", "ESPCI Paris")
     replace inst = associated if inlist(associated, "National Academy of Sciences of Armenia", "University of the Philippines System", "Madrid Institute for Advanced Studies", "CGIAR", "Ministry of Science, Technology and Innovation", "Institut Polytechnique de Bordeaux")
@@ -104,37 +106,73 @@ program merge_geo
     keep inst_id new_inst new_id region city country country_code type inst
     drop if mi(inst_id) 
     save ${temp}/all_inst_chars, replace
-    
-    use ${temp}/appended_pprs, clear
-    fmerge m:1 inst_id using ${temp}/all_inst_chars, assert(2 3) keep(3) nogen
+end 
 
-    // keep inst with the largest num_times in a yr
-    bys athr_id yr: egen max_num_times = max(num_times)
+program clean_panel
+    use ${temp}/appended_pprs, clear
+    gunique athr_id year
+    local N = r(unique)
+    fmerge m:1 inst_id using ${temp}/all_inst_chars, assert(2 3) keep(3) nogen
+    replace inst_id = new_id if !mi(new_inst)
+    replace inst = new_inst if !mi(new_inst)
+    gduplicates tag athr_id inst_id year, gen(dup_entry)
+    bys athr_id inst_id year: egen tot_times = sum(num_times) 
+    replace num_times = tot_times
+    drop if dup_entry > 0 & mi(new_inst)
+    drop new_inst new_id dup_entry tot_times type
+    gsort athr_id inst_id year country city
+    gduplicates drop athr_id inst_id year, force
+    // keep inst with the largest num_times in a year
+    bys athr_id year: egen max_num_times = max(num_times)
     drop if num_times != max_num_times
     drop max_num_times
-    // if there are multiple in a year but there is a consecutive pair by year, then choose that inst
-    bys athr_id yr: gen has_mult = _N > 1
-    bys athr_id inst (yr): gen same_as_after = yr == yr[_n+1]-1 & has_mult[_n+1]==0
-    bys athr_id inst (yr): gen same_as_before = yr == yr[_n-1]+1  & has_mult[_n-1]==0
-
-    gen cond = max(same_as_after, same_as_before)
-    drop if (has_mult == 1 & cond == 0) 
-    bys athr_id yr: replace has_mult = _N > 1
     
-    // next do city
-    bys athr_id city (yr): replace same_as_after = yr == yr[_n+1]-1 & has_mult[_n+1]==0
-    bys athr_id city (yr): replace same_as_before = yr == yr[_n-1]+1 & has_mult[_n-1]==0
-    replace cond = max(same_as_after, same_as_before)
-    drop if (has_mult == 1 & cond == 0) 
-    bys athr_id yr: replace has_mult = _N > 1
-    // do again
-    bys athr_id inst (yr): replace same_as_after = yr == yr[_n+1]-1 & has_mult[_n+1]==0
-    bys athr_id inst (yr): replace same_as_before = yr == yr[_n-1]+1  & has_mult[_n-1]==0
+    // imputation process
+    foreach loc in inst city country {
+        cap drop has_mult same_as_after same_as_before has_before has_after
+        // if there are mult in a year but sandwiched by the same, then choose that one 
+        bys athr_id year: gen has_mult = _N > 1
+        bys athr_id `loc' (year): gen same_as_after = year[_n+1]-year <= 3 & has_mult[_n+1]==0
+        bys athr_id `loc' (year): gen same_as_before = year - year[_n-1] <= 3  & has_mult[_n-1]==0
+        gen sandwiched = has_mult == 1 & same_as_after == 1 & same_as_before == 1
+        bys athr_id year: egen has_sandwich = max(sandwiched)
+        drop if has_sandwich ==1 & sandwiched == 0
+        drop sandwiched has_sandwich
+        bys athr_id year: replace has_mult = _N > 1
+       
+        // now we prioritize the year before
+        bys athr_id `loc' (year): replace same_as_after = year[_n+1]-year <= 3 & has_mult[_n+1]==0
+        bys athr_id `loc' (year): replace same_as_before = year - year[_n-1] <= 3  & has_mult[_n-1]==0
+        bys athr_id year: egen has_before = max(same_as_before)
+        drop if has_mult == 1 & has_before == 1 & same_as_before == 0
+        bys athr_id year: replace has_mult = _N > 1
+        // now do same for the year after 
+        bys athr_id `loc' (year): replace same_as_after = year[_n+1]-year <= 3 & has_mult[_n+1]==0
+        bys athr_id `loc' (year): replace same_as_before = year - year[_n-1] <= 3  & has_mult[_n-1]==0
+        bys athr_id year: egen has_after = max(same_as_after)
+        drop if has_mult == 1 & has_after == 1 & same_as_after == 0
+        bys athr_id year: replace has_mult = _N > 1
+    }
 
-    replace cond = max(same_as_after, same_as_before)
-    drop if (has_mult == 1 & cond == 0) 
-    drop if (has_mult == 1 & same_as_before == 0)  & !(has_mult == 1 & cond == 0)
-    bys athr_id yr: replace has_mult = _N > 1
+    // if there are sandwiched insts no mater what the year gap is
+    hashsort athr_id year
+    gen prev_inst = inst_id[_n-1]
+    gen post_inst = inst_id[_n+1]
+    gen sandwich = prev_inst == post_inst & prev_inst != inst_id if athr_id[_n-1] == athr_id[_n+1] & athr[_n-1] == athr_id
+    replace inst_id = prev_inst if sandwich == 1
+    replace inst = inst[_n-1] if sandwich == 1
+    drop sandwich
+    bys athr_id: egen modal_inst = mode(inst_id)
+    bys athr_id year: replace has_mult = _N > 1
+    gen mode_match = inst_id == modal_inst
+    bys athr_id year: egen has_mode_match = max(mode_match)
+    drop if has_mult == 1 & has_mode_match == 1 & mode_match == 0
+    gen rand = rnormal(0,1)
+    gsort athr_id year rand
+    gduplicates drop athr_id year, force
+    gisid athr_id year
+    gunique athr_id year
+    assert r(unique) == `N'
     save ../output/athr_panel, replace
 end
 
