@@ -173,7 +173,50 @@ program clean_panel
     gisid athr_id year
     gunique athr_id year
     assert r(unique) == `N'
+    keep athr_id inst_id year num_times inst country_code country city region
+
+    // do some final cleaning
+    drop if !inrange(year, 1945, 2023)
     save ../output/athr_panel, replace
+    import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
+    gcontract stateshort statefull
+    drop _freq
+    drop if mi(stateshort)
+    rename statefull region
+    merge 1:m region using ../output/athr_panel, assert(1 2 3) keep(2 3) nogen
+    replace stateshort =  "DC" if region == "District of Columbia"
+    replace stateshort =  "VI" if region == "Virgin Islands, U.S."
+    gen us_state = stateshort if country_code == "US"
+    replace city = "Saint Louis" if city == "St Louis"
+    replace city = "Winston Salem" if city == "Winston-Salem"
+    merge m:1 city us_state using ../external/geo/city_msa, assert(1 2 3) keep(1 3) nogen
+    replace msatitle = "Washington-Arlington-Alexandria, DC-VA-MD-WV"  if us_state == "DC"
+    replace msatitle = "New York-Newark-Jersey City, NY-NJ-PA" if city == "The Bronx" & us_state == "NY"
+    replace msatitle = "Miami-Fort Lauderdale-West Palm Beach, FL" if city == "Coral Gables" & us_state == "FL"
+    replace msatitle = "Springfield, MA" if city == "Amherst Center"
+    replace msatitle = "Hartford-West Hartford-East Hartford, CT" if city == "Storrs" & us_state == "CT"
+    replace msatitle = "Tampa-St. Petersburg-Clearwater, FL" if city == "Temple Terrace" & us_state == "FL"
+    replace msatitle = "San Francisco-Oakland-Haywerd, CA" if city == "Foster City" & us_state == "CA"
+    gen msa_comb = msatitle
+    replace  msa_comb = "Research Triangle Park, NC" if msa_comb == "Durham-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | city == "Research Triangle Park" | city == "Res Triangle Park"
+    replace  msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
+    gen msa_c_world = msa_comb
+    replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")-1) + ", US" if country == "United States" & !mi(msa_c_world)
+    replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)
+    compress, nocoalesce
+    save ../output/athr_panel, replace
+
+    replace athr_id = subinstr(athr_id, "A", "", .)
+    destring athr_id, replace
+    tsset athr_id year
+    tsfill
+    foreach var in inst_id inst country_code country city region msacode msa_comb msa_c_world msatitle {
+        bys athr_id (year): replace  `var' = `var'[_n-1] if mi(`var') & !mi(`var'[_n-1])
+    }
+    tostring athr_id, replace
+    replace athr_id = "A" + athr_id
+    compress, nocoalesce
+    save ../output/filled_in_panel, replace
 end
 
 main
