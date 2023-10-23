@@ -177,13 +177,55 @@ program clean_panel
 
     // do some final cleaning
     drop if !inrange(year, 1945, 2023)
-    save ../output/athr_panel, replace
+    save ${temp}/athr_panel, replace
+    
+    import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
+    glevelsof statefull , local(state_names)
+    use ${temp}/athr_panel, clear
+    foreach s in `state_names' {
+        replace region = "`s'" if mi(region) & country_code == "US" & strpos(inst, "`s'")>0
+    }
+    replace region = "Pennsylvania" if country_code == "US" & inlist(city, "Pittsburgh" , "Philadelphia") 
+    replace region = "California" if country_code == "US" & inlist(city, "Stanford", "Los Angeles", "San Diego", "La Jolla", "Berkeley", "San Francisco", "Thousand Oaks", "Mountain View")
+    replace region = "California" if country_code == "US" & inlist(city, "San Jose", "South San Francisco", "Pasadena", "Irving", "La Cañada Flintridge", "Duarte", "Menlo Park", "Livermore")
+    replace region = "Massachusetts" if country_code == "US" & inlist(city, "Boston", "Cambridge", "Medford", "Wellesley", "Falmouth", "Woods Hole", "Framingham")
+    replace region = "Maryland" if country_code == "US" & inlist(city, "Bethesda", "Baltimore", "Silver Spring", "Greenbelt", "Gaithersburg", "Federick")
+    replace region = "Ohio" if country_code == "US" & inlist(city, "Toledo", "Dayton", "Oxford", "Cleveland")
+    replace region = "New Jersey" if country_code == "US" & inlist(city, "New Brunswick")
+    replace region = "Arizona" if country_code == "US" & inlist(city, "Phoenix")
+    replace region = "Illinois" if country_code == "US" & inlist(city, "Chicago", "Evanston")
+    replace region = "New York" if country_code == "US" & inlist(city, "New York", "Ithaca", "Bronx", "Rochester", "Cold Spring Harbor", "Syracuse", "Upton", "Albany", "Manhasset")
+    replace region = "Connecticut" if country_code == "US" & inlist(city, "New Haven")
+    replace region = "District of Columbia" if country_code == "US" & inlist(city, "Washington")
+    replace region = "North Carolina" if country_code == "US" & inlist(city, "Durham")
+    replace region = "South Carolina" if country_code == "US" & inlist(city, "Greenville")
+    replace region = "Wisconsin" if country_code == "US" & inlist(city, "Madison", "Milwaukee")
+    replace region = "Florida" if country_code == "US" & inlist(city, "Coral Gables", "Miami")
+    replace region = "Washington" if country_code == "US" & inlist(city, "Seattle", "Richland")
+    replace region = "Colorado" if country_code == "US" & inlist(city, "Denver", "Boulder", "Fort Collins")
+    replace region = "Louisiana" if country_code == "US" & inlist(city, "New Orleans")
+    replace region = "Deleware" if country_code == "US" & inlist(city, "Wilmington")
+    replace region = "Tennesse" if country_code == "US" & inlist(city, "Memphis", "Oak Ridge", "Nashville")
+    replace region = "Georgia" if country_code == "US" & inlist(city, "Atlanta", "Augusta")
+    replace region = "Texas" if country_code == "US" & inlist(city, "Houston", "Dallas", "San Antonio")
+    replace region = "New Mexico" if country_code == "US" & inlist(city, "Los Alamos", "Carlsbad", "Albuquerque")
+    replace region = "Michigan" if country_code == "US" & inlist(city, "Ann Arbor", "Detroit", "Flint")
+    replace region = "Rhode Island" if country_code == "US" & inlist(city, "Providence")
+    replace region = "Hawaii" if country_code == "US" & inlist(city, "Honolulu")
+    replace region = "Missouri" if country_code == "US" & inlist(city, "St Louis")
+    replace region = "Minnesota" if country_code == "US" & inlist(city, "Minneapolis")
+    replace region = "Virginia" if country_code == "US" & inlist(city, "Reston", "Williamsburg", "North Laurel")
+    replace region = "New Hampshire" if country_code == "US" & inlist(city, "Hanover")
+    replace region = "Illinois" if country_code == "US" & inlist(city, "Lemont", "North Chicago")
+    replace region = "Utah" if country_code == "US" & inlist(city, "Provo", "Salt Lake City")
+    save ${temp}/athr_panel, replace
+
     import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
     gcontract stateshort statefull
     drop _freq
     drop if mi(stateshort)
     rename statefull region
-    merge 1:m region using ../output/athr_panel, assert(1 2 3) keep(2 3) nogen
+    merge 1:m region using ${temp}/athr_panel, assert(1 2 3) keep(2 3) nogen
     replace stateshort =  "DC" if region == "District of Columbia"
     replace stateshort =  "VI" if region == "Virgin Islands, U.S."
     gen us_state = stateshort if country_code == "US"
@@ -196,7 +238,7 @@ program clean_panel
     replace msatitle = "Springfield, MA" if city == "Amherst Center"
     replace msatitle = "Hartford-West Hartford-East Hartford, CT" if city == "Storrs" & us_state == "CT"
     replace msatitle = "Tampa-St. Petersburg-Clearwater, FL" if city == "Temple Terrace" & us_state == "FL"
-    replace msatitle = "San Francisco-Oakland-Haywerd, CA" if city == "Foster City" & us_state == "CA"
+    replace msatitle = "San Francisco-Oakland-Hayward, CA" if city == "Foster City" & us_state == "CA"
     gen msa_comb = msatitle
     replace  msa_comb = "Research Triangle Park, NC" if msa_comb == "Durham-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | city == "Research Triangle Park" | city == "Res Triangle Park"
     replace  msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
@@ -204,7 +246,7 @@ program clean_panel
     replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")-1) + ", US" if country == "United States" & !mi(msa_c_world)
     replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)
     compress, nocoalesce
-    save ../output/athr_panel, replace
+    save ${temp}/athr_panel, replace
 
     replace athr_id = subinstr(athr_id, "A", "", .)
     destring athr_id, replace
