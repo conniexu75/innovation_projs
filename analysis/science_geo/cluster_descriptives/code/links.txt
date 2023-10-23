@@ -1,2 +1,2 @@
-./acs/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_acs/output
-./pubmed/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/create_panel/output
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/create_analysis_samp/output
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
