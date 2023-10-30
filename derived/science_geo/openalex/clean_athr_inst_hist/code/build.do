@@ -9,17 +9,18 @@ set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_athr_inst_hist"
 
 program main
-    *append
+    append
     *merge_geo
-    clean_panel
+    *clean_panel
 end
 program append
     qui {
-        forval i = 1/10966 {
+        forval i = 8001/10966 {
             import delimited ../external/pprs/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
-            gen year = substr(pub_date, 1,4)
-            destring year, replace
-            gcontract athr_id  year inst_id, freq(num_times)
+            gen date = date(pub_date, "YMD")
+            format date %td
+            gen qrtr = qofd(date)
+            gcontract athr_id  qrtr inst_id, freq(num_times)
             drop if mi(inst_id)
             fmerge m:1 athr_id using ../external/athrs/list_of_athrs, assert(1 2 3) keep(3) nogen
             save ${temp}/ppr`i', replace
@@ -27,10 +28,11 @@ program append
     }
     clear
     forval i = 1/10966 {
+        di "`i'"
         append using ${temp}/ppr`i'
     }
-    gcollapse (sum) num_times, by(athr_id inst_id year)
     drop if athr_id == "A9999999999"
+    gcollapse (sum) num_times, by(athr_id inst_id qrtr)
     save ${temp}/appended_pprs, replace
 end
 
@@ -110,20 +112,22 @@ end
 
 program clean_panel
     use ${temp}/appended_pprs, clear
-    gunique athr_id year
+    drop if mi(`time')
+    local time qrtr
+    gunique athr_id `time' 
     local N = r(unique)
     fmerge m:1 inst_id using ${temp}/all_inst_chars, assert(2 3) keep(3) nogen
     replace inst_id = new_id if !mi(new_inst)
     replace inst = new_inst if !mi(new_inst)
-    gduplicates tag athr_id inst_id year, gen(dup_entry)
-    bys athr_id inst_id year: egen tot_times = sum(num_times) 
+    gduplicates tag athr_id inst_id `time', gen(dup_entry)
+    bys athr_id inst_id `time': egen tot_times = sum(num_times) 
     replace num_times = tot_times
     drop if dup_entry > 0 & mi(new_inst)
     drop new_inst new_id dup_entry tot_times type
-    gsort athr_id inst_id year country city
-    gduplicates drop athr_id inst_id year, force
+    gsort athr_id inst_id `time' country city
+    gduplicates drop athr_id inst_id `time', force
     // keep inst with the largest num_times in a year
-    bys athr_id year: egen max_num_times = max(num_times)
+    bys athr_id `time': egen max_num_times = max(num_times)
     drop if num_times != max_num_times
     drop max_num_times
     
@@ -131,31 +135,31 @@ program clean_panel
     foreach loc in inst city country {
         cap drop has_mult same_as_after same_as_before has_before has_after
         // if there are mult in a year but sandwiched by the same, then choose that one 
-        bys athr_id year: gen has_mult = _N > 1
-        bys athr_id `loc' (year): gen same_as_after = year[_n+1]-year <= 3 & has_mult[_n+1]==0
-        bys athr_id `loc' (year): gen same_as_before = year - year[_n-1] <= 3  & has_mult[_n-1]==0
+        bys athr_id `time': gen has_mult = _N > 1
+        bys athr_id `loc' (`time'): gen same_as_after = `time'[_n+1]-`time' <= 3 & has_mult[_n+1]==0
+        bys athr_id `loc' (`time'): gen same_as_before = `time' - `time'[_n-1] <= 3  & has_mult[_n-1]==0
         gen sandwiched = has_mult == 1 & same_as_after == 1 & same_as_before == 1
-        bys athr_id year: egen has_sandwich = max(sandwiched)
+        bys athr_id `time': egen has_sandwich = max(sandwiched)
         drop if has_sandwich ==1 & sandwiched == 0
         drop sandwiched has_sandwich
-        bys athr_id year: replace has_mult = _N > 1
+        bys athr_id `time': replace has_mult = _N > 1
        
         // now we prioritize the year before
-        bys athr_id `loc' (year): replace same_as_after = year[_n+1]-year <= 3 & has_mult[_n+1]==0
-        bys athr_id `loc' (year): replace same_as_before = year - year[_n-1] <= 3  & has_mult[_n-1]==0
-        bys athr_id year: egen has_before = max(same_as_before)
+        bys athr_id `loc' (`time'): replace same_as_after = `time'[_n+1]-`time' <= 12 & has_mult[_n+1]==0
+        bys athr_id `loc' (`time'): replace same_as_before = `time' - `time'[_n-1] <= 12  & has_mult[_n-1]==0
+        bys athr_id `time': egen has_before = max(same_as_before)
         drop if has_mult == 1 & has_before == 1 & same_as_before == 0
-        bys athr_id year: replace has_mult = _N > 1
-        // now do same for the year after 
-        bys athr_id `loc' (year): replace same_as_after = year[_n+1]-year <= 3 & has_mult[_n+1]==0
-        bys athr_id `loc' (year): replace same_as_before = year - year[_n-1] <= 3  & has_mult[_n-1]==0
-        bys athr_id year: egen has_after = max(same_as_after)
+        bys athr_id `time': replace has_mult = _N > 1
+        // now do same for the `time' after 
+        bys athr_id `loc' (`time'): replace same_as_after = `time'[_n+1]-`time' <= 12 & has_mult[_n+1]==0
+        bys athr_id `loc' (`time'): replace same_as_before = `time' - `time'[_n-1] <= 12  & has_mult[_n-1]==0
+        bys athr_id `time': egen has_after = max(same_as_after)
         drop if has_mult == 1 & has_after == 1 & same_as_after == 0
-        bys athr_id year: replace has_mult = _N > 1
+        bys athr_id `time': replace has_mult = _N > 1
     }
 
-    // if there are sandwiched insts no mater what the year gap is
-    hashsort athr_id year
+    // if there are sandwiched insts no mater what the `time' gap is
+    hashsort athr_id `time'
     gen prev_inst = inst_id[_n-1]
     gen post_inst = inst_id[_n+1]
     gen sandwich = prev_inst == post_inst & prev_inst != inst_id if athr_id[_n-1] == athr_id[_n+1] & athr[_n-1] == athr_id
@@ -163,19 +167,20 @@ program clean_panel
     replace inst = inst[_n-1] if sandwich == 1
     drop sandwich
     bys athr_id: egen modal_inst = mode(inst_id)
-    bys athr_id year: replace has_mult = _N > 1
+    bys athr_id `time': replace has_mult = _N > 1
     gen mode_match = inst_id == modal_inst
-    bys athr_id year: egen has_mode_match = max(mode_match)
+    bys athr_id `time': egen has_mode_match = max(mode_match)
     drop if has_mult == 1 & has_mode_match == 1 & mode_match == 0
     gen rand = rnormal(0,1)
-    gsort athr_id year rand
-    gduplicates drop athr_id year, force
-    gisid athr_id year
-    gunique athr_id year
+    gsort athr_id `time' rand
+    gduplicates drop athr_id `time', force
+    gisid athr_id `time'
+    gunique athr_id `time'
     assert r(unique) == `N'
-    keep athr_id inst_id year num_times inst country_code country city region
+    keep athr_id inst_id `time' num_times inst country_code country city region
 
     // do some final cleaning
+    gen year = yofd(dofq(qrtr))
     drop if !inrange(year, 1945, 2023)
     save ${temp}/athr_panel, replace
     
@@ -250,10 +255,10 @@ program clean_panel
 
     replace athr_id = subinstr(athr_id, "A", "", .)
     destring athr_id, replace
-    tsset athr_id year
+    tsset athr_id `time'
     tsfill
     foreach var in inst_id inst country_code country city region msacode msa_comb msa_c_world msatitle {
-        bys athr_id (year): replace  `var' = `var'[_n-1] if mi(`var') & !mi(`var'[_n-1])
+        bys athr_id (`time'): replace  `var' = `var'[_n-1] if mi(`var') & !mi(`var'[_n-1])
     }
     tostring athr_id, replace
     replace athr_id = "A" + athr_id
