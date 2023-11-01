@@ -7,11 +7,14 @@ pause on
 set seed 8975
 set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_athr_inst_hist"
+global output "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
 
 program main
-    append
+    *append
     *merge_geo
-    *clean_panel
+    *clean_panel, time(year)
+    *clean_panel, time(qrtr)
+    convert_year_to_qrtr
 end
 program append
     qui {
@@ -111,9 +114,13 @@ program merge_geo
 end 
 
 program clean_panel
+    syntax, time(str)
     use ${temp}/appended_pprs, clear
+    gen year = yofd(dofq(qrtr))
     drop if mi(`time')
-    local time qrtr
+    if "`time'" == "year" {
+        gcollapse (sum) num_times, by(athr_id inst_id `time')
+    }
     gunique athr_id `time' 
     local N = r(unique)
     fmerge m:1 inst_id using ${temp}/all_inst_chars, assert(2 3) keep(3) nogen
@@ -126,7 +133,7 @@ program clean_panel
     drop new_inst new_id dup_entry tot_times type
     gsort athr_id inst_id `time' country city
     gduplicates drop athr_id inst_id `time', force
-    // keep inst with the largest num_times in a year
+    // keep inst with the largest num_times in a 
     bys athr_id `time': egen max_num_times = max(num_times)
     drop if num_times != max_num_times
     drop max_num_times
@@ -134,25 +141,27 @@ program clean_panel
     // imputation process
     foreach loc in inst city country {
         cap drop has_mult same_as_after same_as_before has_before has_after
-        // if there are mult in a year but sandwiched by the same, then choose that one 
+        if "`time'" == "year" local range 3
+        if "`time'" == "qrtr" local range 12 
+        // if there are mult in a  but sandwiched by the same, then choose that one 
         bys athr_id `time': gen has_mult = _N > 1
-        bys athr_id `loc' (`time'): gen same_as_after = `time'[_n+1]-`time' <= 3 & has_mult[_n+1]==0
-        bys athr_id `loc' (`time'): gen same_as_before = `time' - `time'[_n-1] <= 3  & has_mult[_n-1]==0
+        bys athr_id `loc' (`time'): gen same_as_after = `time'[_n+1]-`time' <= `range' & has_mult[_n+1]==0
+        bys athr_id `loc' (`time'): gen same_as_before = `time' - `time'[_n-1] <= `range'  & has_mult[_n-1]==0
         gen sandwiched = has_mult == 1 & same_as_after == 1 & same_as_before == 1
         bys athr_id `time': egen has_sandwich = max(sandwiched)
         drop if has_sandwich ==1 & sandwiched == 0
         drop sandwiched has_sandwich
         bys athr_id `time': replace has_mult = _N > 1
        
-        // now we prioritize the year before
-        bys athr_id `loc' (`time'): replace same_as_after = `time'[_n+1]-`time' <= 12 & has_mult[_n+1]==0
-        bys athr_id `loc' (`time'): replace same_as_before = `time' - `time'[_n-1] <= 12  & has_mult[_n-1]==0
+        // now we prioritize the  before
+        bys athr_id `loc' (`time'): replace same_as_after = `time'[_n+1]-`time' <= `range' & has_mult[_n+1]==0
+        bys athr_id `loc' (`time'): replace same_as_before = `time' - `time'[_n-1] <= `range'  & has_mult[_n-1]==0
         bys athr_id `time': egen has_before = max(same_as_before)
         drop if has_mult == 1 & has_before == 1 & same_as_before == 0
         bys athr_id `time': replace has_mult = _N > 1
         // now do same for the `time' after 
-        bys athr_id `loc' (`time'): replace same_as_after = `time'[_n+1]-`time' <= 12 & has_mult[_n+1]==0
-        bys athr_id `loc' (`time'): replace same_as_before = `time' - `time'[_n-1] <= 12  & has_mult[_n-1]==0
+        bys athr_id `loc' (`time'): replace same_as_after = `time'[_n+1]-`time' <= `range' & has_mult[_n+1]==0
+        bys athr_id `loc' (`time'): replace same_as_before = `time' - `time'[_n-1] <= `range'  & has_mult[_n-1]==0
         bys athr_id `time': egen has_after = max(same_as_after)
         drop if has_mult == 1 & has_after == 1 & same_as_after == 0
         bys athr_id `time': replace has_mult = _N > 1
@@ -174,13 +183,14 @@ program clean_panel
     gen rand = rnormal(0,1)
     gsort athr_id `time' rand
     gduplicates drop athr_id `time', force
-    gisid athr_id `time'
     gunique athr_id `time'
     assert r(unique) == `N'
+    drop if mi(`time')
+    gisid athr_id `time'
     keep athr_id inst_id `time' num_times inst country_code country city region
 
     // do some final cleaning
-    gen year = yofd(dofq(qrtr))
+    cap gen year  = yofd(dofq(qrtr))
     drop if !inrange(year, 1945, 2023)
     save ${temp}/athr_panel, replace
     
@@ -263,7 +273,27 @@ program clean_panel
     tostring athr_id, replace
     replace athr_id = "A" + athr_id
     compress, nocoalesce
-    save ../output/filled_in_panel, replace
+    save ${output}/filled_in_panel_`time', replace
 end
 
+program convert_year_to_qrtr
+    use ${temp}/appended_pprs, clear
+    gen year = yofd(dofq(qrtr))
+    keep if inrange(year, 1945, 2023)
+    drop if mi(qrtr) | mi(year)
+    gcontract athr_id qrtr year
+    drop _freq
+    merge m:1 athr_id year using ${output}/filled_in_panel_year, keep(1 3) keepusing(country country_code city inst_id inst msatitle msa_comb msacode) nogen
+    replace athr_id = subinstr(athr_id, "A", "", .)
+    destring athr_id, replace
+    tsset athr_id qrtr 
+    tsfill
+    tostring athr_id, replace
+    replace athr_id = "A" + athr_id
+    replace year = yofd(dofq(qrtr)) 
+    foreach var in inst_id inst country_code country city msatitle msa_comb msatitle msacode {
+        bys athr_id (qrtr) : replace  `var' = `var'[_n-1] if mi(`var') & !mi(`var'[_n-1])
+    }
+    save ${temp}/filled_in_panel_qrtr, replace
+end
 main
