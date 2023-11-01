@@ -9,9 +9,10 @@ here, set
 
 program main
     global temp "/export/scratch/cxu_sci_geo/create_panel"
-    global insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
-    foreach t in qrtr {
-        create_mesh_xw, time(`t')
+    global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
+    global qrtr_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist"
+    foreach t in qrtr year {
+        *create_mesh_xw, time(`t')
         make_panel, time(`t')
     }
 end
@@ -74,7 +75,23 @@ program make_panel
 
     use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name using ../external/openalex/cleaned_all_all_jrnls, clear
     gen qrtr = qofd(pub_date)
-    merge m:1 athr_id `time' using ${insts}/filled_in_panel_`time', assert(1 2 3) keep(3) nogen
+/*    gen hy = hofd(pub_date)
+    merge m:1 athr_id year using ${year_insts}/filled_in_panel_year, assert(1 2 3) keep(3) nogen
+    preserve
+    gcontract hy qrtr year athr_id msa_comb
+    drop if mi(msa_comb)
+    drop _freq
+    gcontract msa_comb hy qrtr year, freq(size)
+    save ../temp/all_sizes, replace
+    restore
+    preserve
+    foreach t in hy qrtr year {
+        use ../temp/all_sizes, clear
+        gcollapse (sum) size, by(`t' msa_comb)
+        save ../temp/`t'_cluster_size, replace
+    }
+    restore*/
+    merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(3) nogen
     merge m:1 athr_id year using ../temp/clusters, assert(1 2 3) keep(3) nogen
     rename cluster_label field
     gduplicates drop pmid athr_id inst_id, force
@@ -109,40 +126,35 @@ program make_panel
     keep if country_code == "US" & !mi(msa_comb)
    
     // get avg team size
-    drop author_id
-    bys pmid athr_id (which_athr which_affl): gen author_id = _n == 1
-    bys pmid (which_athr which_affl): gen which_athr2 = sum(author_id)
-    replace which_athr = which_athr2
-    drop which_athr2
-    bys pmid athr_id which_athr msacode (which_affl): gen msa_id = _n == 1
-    bys athr_id year msa_comb: gen msa_counter = _n == 1
-    bys athr_id year: egen num_msas = total(msa_counter)
-    bys athr_id pmid msa_comb: gen athr_pmid_cntr = _n == 1
-    bys athr_id msa_comb `time': egen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
+    bys athr_id pmid : gen athr_pmid_cntr = _n == 1
+    bys athr_id `time': egen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
 
     preserve
     if "`time'" == "year" {
         gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
+        merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
         gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
         // make into balanced panel
-        merge m:1 athr_id `time' using ${insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
+        merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     bys athr_id `time': gen name_id = _n == 1
     bys `time': egen tot_authors = total(name_id)
-    bys field `time': egen tot_authors_field = total(name_id)
     drop name_id
     bys athr_id msa_comb `time': gen name_id = _n == 1
     bys msa_comb `time': egen msa_size = total(name_id)
-    replace msa_size = msa_size - 1 if msa_size > 1
+    replace msa_size = msa_size - 1  if msa_size > 1
     gen cluster_shr = msa_size/tot_authors
     drop name_id
-    bys athr_id field msa_comb `time': gen name_id_field = _n == 1
-    bys msa_comb field `time': egen msa_size_field = total(name_id)
-    replace msa_size_field = msa_size_field -1 
-    gen field_cluster_shr = msa_size_field/tot_authors_field
+
+    gen top_15 = !mi(affl_wt)
+    bys athr_id year: egen has_top_15 = max(top_15)
+    bys athr_id msa_comb `time': gen name_id = _n == 1 if has_top_15 == 1
+    bys msa_comb `time': egen unbal_msa_size = total(name_id) 
+    replace unbal_msa_size = unbal_msa_size - 1 if unbal_msa_size > 1
     drop if mi(cite_affl_wt) | mi(affl_wt) 
+
     merge 1:1 athr_id `time' using ${temp}/athr_concept_`time', assert(1 2 3) keep(1 3) nogen
     merge 1:1 athr_id `time' using ${temp}/athr_mesh_`time', assert(1 2 3) keep(1 3) nogen
     merge 1:1 athr_id `time' using ${temp}/athr_qualifier_`time', assert(1 2 3) keep(1 3) nogen
@@ -154,26 +166,29 @@ program make_panel
     preserve
     if "`time'" == "year" {
         gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
+        merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
         gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
         // make into balanced panel
-        merge m:1 athr_id `time' using ${insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
+        merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     bys athr_id `time': gen name_id = _n == 1
     bys `time': egen tot_authors = total(name_id)
-    bys field `time': egen tot_authors_field = total(name_id)
     drop name_id
     bys athr_id msa_comb `time': gen name_id = _n == 1
     bys msa_comb `time': egen msa_size = total(name_id)
-    replace msa_size = msa_size - 1 if msa_size > 1
+    replace msa_size = msa_size - 1 
     gen cluster_shr = msa_size/tot_authors
     drop name_id
-    bys athr_id field msa_comb `time': gen name_id_field = _n == 1
-    bys msa_comb field `time': egen msa_size_field = total(name_id)
-    replace msa_size_field = msa_size_field -1 
-    gen field_cluster_shr = msa_size_field/tot_authors_field
+    
+    gen top_15 = !mi(affl_wt)
+    bys athr_id year: egen has_top_15 = max(top_15)
+    bys athr_id msa_comb `time': gen name_id = _n == 1 if has_top_15 == 1
+    bys msa_comb `time': egen unbal_msa_size = total(name_id) 
+    replace unbal_msa_size = unbal_msa_size - 1
     drop if mi(cite_affl_wt) | mi(affl_wt) 
+    
     merge 1:1 athr_id `time' using ${temp}/athr_concept_`time', assert(1 2 3) keep(1 3) nogen
     merge 1:1 athr_id `time' using ${temp}/athr_mesh_`time', assert(1 2 3) keep(1 3) nogen
     merge 1:1 athr_id `time' using ${temp}/athr_qualifier_`time', assert(1 2 3) keep(1 3) nogen
