@@ -7,7 +7,7 @@ pause on
 set seed 8975
 
 program main
-    foreach t in year {
+    foreach t in year qrtr {
         sample_desc, time(`t')
         maps, time(`t')
         raw_bs, time(`t')
