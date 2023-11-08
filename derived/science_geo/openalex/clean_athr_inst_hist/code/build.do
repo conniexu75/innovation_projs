@@ -12,7 +12,7 @@ global output "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
 program main
     *append
     *merge_geo
-    *clean_panel, time(year)
+    clean_panel, time(year)
     *clean_panel, time(qrtr)
     convert_year_to_qrtr
 end
@@ -141,8 +141,8 @@ program clean_panel
     // imputation process
     foreach loc in inst city country {
         cap drop has_mult same_as_after same_as_before has_before has_after
-        if "`time'" == "year" local range 3
-        if "`time'" == "qrtr" local range 12 
+        if "`time'" == "year" local range 5
+        if "`time'" == "qrtr" local range 20 
         // if there are mult in a  but sandwiched by the same, then choose that one 
         bys athr_id `time': gen has_mult = _N > 1
         bys athr_id `loc' (`time'): gen same_as_after = `time'[_n+1]-`time' <= `range' & has_mult[_n+1]==0
@@ -175,6 +175,15 @@ program clean_panel
     replace inst_id = prev_inst if sandwich == 1
     replace inst = inst[_n-1] if sandwich == 1
     drop sandwich
+    // if there are sandwiched city no mater what the `time' gap is
+    hashsort athr_id `time'
+    gen prev_city = city[_n-1]
+    gen post_city = city[_n+1]
+    gen sandwich = prev_city == post_city & prev_city != city if athr_id[_n-1] == athr_id[_n+1] & athr[_n-1] == athr_id
+    replace inst_id = prev_inst if sandwich == 1
+    replace inst = inst[_n-1] if sandwich == 1
+    drop sandwich
+
     bys athr_id: egen modal_inst = mode(inst_id)
     bys athr_id `time': replace has_mult = _N > 1
     gen mode_match = inst_id == modal_inst
