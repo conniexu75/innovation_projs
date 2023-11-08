@@ -5,14 +5,18 @@ program drop _all
 set scheme modern
 pause on
 set seed 8975
+global cite_affl_wt_name "Effective Paper Publications"
+global ln_y_name "ln(Effective Paper Publications)"
+global msa_size_name "Cluster Size"
+global ln_x_name "ln(Cluster Size)"
 
 program main
-    foreach t in year qrtr {
+    foreach t in year {
         sample_desc, time(`t')
-        maps, time(`t')
-        raw_bs, time(`t')
-        regression, time(`t')
-        output_tables, time(`t')
+*        maps, time(`t')
+*        raw_bs, time(`t')
+*        regression, time(`t')
+*        output_tables, time(`t')
     }
 end
 
@@ -21,6 +25,61 @@ program sample_desc
     use if !mi(msa_comb) using ../external/samp/athr_panel_full_comb_`time', clear 
     count
     gunique athr_id
+    gen ln_y = ln(cite_affl_wt)
+    gen ln_x = ln(msa_size)
+    foreach var in cite_affl_wt msa_size ln_y ln_x {
+        qui sum `var', d
+        local N = r(N)
+        local mean : dis %3.2f r(mean)
+        local sd : dis %3.2f r(sd)
+        local p5 :  dis %3.2f r(p5)
+        local p25 :  dis %3.2f r(p25)
+        local p50 :  dis %3.2f r(p50)
+        local p75 :  dis %3.2f r(p75)
+        local p95 :  dis %3.2f r(p95)
+        tw hist `var', frac ytitle("Share of author-years", size(small)) xtitle("${`var'_name}", size(small)) color(teal) legend(on order(- "N = `N'" ///
+                                                                "Mean = `mean'" ///
+                                                                "            (`sd')" ///
+                                                                "p5 = `p5'" ///
+                                                                "p25 = `p25'" ///
+                                                                "p50 = `p50'" ///
+                                                                "p75 = `p75'" ///
+                                                                "p95 = `p95'") pos(1) ring(0) size(vsmall))
+        graph export ../output/figures/`var-'_dist.pdf, replace
+    }
+    preserve
+    gcollapse (mean) msa_size cite_affl_wt, by(msa_comb `time')
+    xtile p  = msa_size, nq(20)
+    gen msa_lab = "" 
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p1" if msa_comb == "Prescott, AZ" & year == 2022
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p5" if msa_comb == "Harrisonburg, VA" & year == 2016
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p10" if msa_comb == "Chico, CA" & year == 2020
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p25" if msa_comb == "Reno, NV" & year == 1986 
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p50" if msa_comb == "Fort Wayne, IN" & year == 2020
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p75" if msa_comb == "Toledo, OH" & year == 2013
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p90" if msa_comb == "Cincinnati, OH-KY-IN" & year == 2023
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p95" if msa_comb == "Dallas-Fort Worth-Arlington, TX" & year == 2016
+    replace msa_lab =  msa_comb + " " + string(`time')  + "p99" if msa_comb == "Los Angeles-Long Beach-Anaheim, CA" & year == 2016
+    replace msa_lab =  msa_comb + " " + string(`time')   if msa_comb == "Bay Area, CA" & year == 1997 
+    replace msa_lab =  msa_comb + " " + string(`time')   if msa_comb == "Bay Area, CA" & year == 2022 
+    replace msa_lab =  msa_comb + " " + string(`time')   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 1997 
+    replace msa_lab =  msa_comb + " " + string(`time')   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2022 
+
+    tw scatter cite_affl_wt msa_size if cite_affl_wt < 1,  mcolor(gs13) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || scatter cite_affl_wt msa_size if !mi(msa_lab) , mcolor(teal) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Size in Year", size(small)) ytitle("Average Effective Output", size(small))  jitter(5) legend(off)
+   graph export ../output/figures/dist_scatter_`time'.pdf, replace
+   hashsort p -cite_affl_wt 
+   by p: egen mean_msa = mean(msa_size)
+   by p: egen mean_cite = mean(cite_affl_wt)
+   hashsort p -cite_affl_wt  
+   gduplicates drop p mean_msa mean_cite, force
+   drop msa_lab
+   gen msa_lab = msa_comb + " " + string(`time')  + "p"+string(p)
+   qui reg mean_cite mean_msa
+   local coef = _b[mean_msa]
+    tw scatter mean_cite mean_msa, mcolor(teal) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall))  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Size in Year", size(small)) ytitle("Average Effective Output", size(small)) legend(on order(- "Slope = `coef'") pos(5) ring(0) size(tiny))
+    graph export ../output/figures/binscatter_`time'.pdf, replace
+
+   restore
     preserve
     gcollapse (mean) msa_size cluster_shr, by(msa_comb)
     gsort - msa_size
@@ -139,8 +198,10 @@ program regression
     bys msa_comb `time': egen unbal_msa_size = total(count)
     bys `time': egen tot_unbal_msa_size = total(unbal_msa_size)
     gen unbal_cluster_shr = unbal_msa_size/tot_unbal_msa_size
-    replace msa_size = 0.0000000000001 if msa_size == 0
+*    replace msa_size = 0.0000000000001 if msa_size == 0
     gegen msa = group(msa_comb)
+    gegen msa_field = group(msa field)
+    gegen year_field = group(year field)
     gen ln_y = ln(cite_affl_wt)
     gen ln_x = ln(msa_size)
     gen ln_x_cluster = ln(cluster_shr)
@@ -157,6 +218,9 @@ program regression
         mat coef_`time' = nullmat(coef_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
         reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field  athr_id)
         mat coef_`time' = nullmat(coef_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
+        local slope : dis %3.2f _b[ln_x]
+        binscatter2  ln_y ln_x ,controls(avg_team_size) absorb(year msa field year_field msa_field athr_id) ytitle("Log Output") xtitle("Log Cluster Size") legend(on order(- "Slope = `slope'") pos(5) ring(0) lwidth(none))
+        graph export ../output/figures/final_bs_`time'.pdf, replace
 
         reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
@@ -186,8 +250,6 @@ program regression
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
         reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field  athr_id)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field  athr_id)
-        mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
     }
     if "`time'" == "qrtr" {
         reghdfe ln_y ln_x avg_team_size, absorb(year msa field)
@@ -203,11 +265,11 @@ program regression
 
         reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year)
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field msa#year)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field)
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field msa#year field#year)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field msa#year)
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field msa#year field#year msa#field)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
         reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field  msa#year athr_id)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
@@ -225,15 +287,13 @@ program regression
         replace ln_x_cluster = ln(unbal_cluster_shr)
         reghdfe ln_y ln_x avg_team_size, absorb(year msa field)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field msa#year)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field msa#year field#year)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field msa#year)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field msa#year field#year field#msa)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
         reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field msa#year athr_id)
-        mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field msa#year athr_id)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
     }
 end
