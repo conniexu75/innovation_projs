@@ -13,10 +13,10 @@ global ln_x_name "ln(Cluster Size)"
 program main
     foreach t in year {
         sample_desc, time(`t')
-*        maps, time(`t')
-*        raw_bs, time(`t')
-*        regression, time(`t')
-*        output_tables, time(`t')
+        maps, time(`t')
+        raw_bs, time(`t')
+        regression, time(`t')
+        output_tables, time(`t')
     }
 end
 
@@ -198,8 +198,10 @@ program regression
     bys msa_comb `time': egen unbal_msa_size = total(count)
     bys `time': egen tot_unbal_msa_size = total(unbal_msa_size)
     gen unbal_cluster_shr = unbal_msa_size/tot_unbal_msa_size
-*    replace msa_size = 0.0000000000001 if msa_size == 0
+    replace msa_size = 0.0000000000001 if msa_size == 0
     gegen msa = group(msa_comb)
+    rename inst inst_name
+    gegen inst = group(inst_id)
     gegen msa_field = group(msa field)
     gegen year_field = group(year field)
     gen ln_y = ln(cite_affl_wt)
@@ -210,45 +212,55 @@ program regression
     binscatter2  ln_y ln_x ,controls(avg_team_size) ytitle("Log Output") xtitle("Log Cluster Size") legend(on order(- "Slope = `slope'") pos(5) ring(0) lwidth(none))
     graph export ../output/figures/bs_`time'.pdf, replace
     if "`time'" == "year" {
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field) vce(cluster msa)
         mat coef_`time' = nullmat(coef_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year) vce(cluster msa)
         mat coef_`time' = nullmat(coef_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field) vce(cluster msa)
         mat coef_`time' = nullmat(coef_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field  athr_id)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field inst) vce(cluster msa)
+        mat coef_`time' = nullmat(coef_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field  inst athr_id) vce(cluster msa)
+        mat coef_`time' = nullmat(coef_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field  inst athr_id inst#year) vce(cluster msa)
         mat coef_`time' = nullmat(coef_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
         local slope : dis %3.2f _b[ln_x]
         binscatter2  ln_y ln_x ,controls(avg_team_size) absorb(year msa field year_field msa_field athr_id) ytitle("Log Output") xtitle("Log Cluster Size") legend(on order(- "Slope = `slope'") pos(5) ring(0) lwidth(none))
         graph export ../output/figures/final_bs_`time'.pdf, replace
 
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field)
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field) vce(cluster msa)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year)
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year) vce(cluster msa)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field)
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field) vce(cluster msa)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field  athr_id)
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field inst) vce(cluster msa)
+        mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field inst inst#year) vce(cluster msa)
+        mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
+        reghdfe ln_y ln_x_cluster avg_team_size, absorb(year msa field field#year msa#field  inst inst#year athr_id) vce(cluster msa)
         mat cluster_`time' = nullmat(cluster_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
     
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa athr_id field )
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa athr_id field inst) vce(cluster msa)
         mat field_`time' = nullmat(field_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa athr_id gen_mesh1 gen_mesh2 )
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa athr_id gen_mesh1 gen_mesh2 inst) vce(cluster msa)
         mat field_`time' = nullmat(field_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa athr_id qualifier_name1 qualifier_name2 )
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa athr_id qualifier_name1 qualifier_name2 inst) vce(cluster msa)
         mat field_`time' = nullmat(field_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa athr_id term1 term2 )
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa athr_id term1 term2 inst) vce(cluster msa)
         mat field_`time' = nullmat(field_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
         
         replace ln_x = ln(unbal_msa_size)
         replace ln_x_cluster = ln(unbal_cluster_shr)
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field) vce(cluster msa)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year) vce(cluster msa)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field) vce(cluster msa)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
-        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field  athr_id)
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field inst) vce(cluster msa)
+        mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
+        reghdfe ln_y ln_x avg_team_size, absorb(year msa field field#year msa#field inst athr_id) vce(cluster msa)
         mat unbal_`time' = nullmat(unbal_`time'), (_b[ln_x] \  _b[avg_team_size] \ e(N))
     }
     if "`time'" == "qrtr" {
