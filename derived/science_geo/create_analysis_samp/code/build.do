@@ -9,11 +9,13 @@ here, set
 
 program main
     global temp "/export/scratch/cxu_sci_geo/create_panel"
+    global output "/export/scratch/cxu_sci_geo/create_panel/output"
     global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
     global qrtr_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist"
-    foreach t in qrtr year {
-        *create_mesh_xw, time(`t')
+    foreach t in year { //year {
+        create_mesh_xw, time(`t')
         make_panel, time(`t')
+        make_panel, time(`t') firstlast(1)
     }
 end
 
@@ -61,7 +63,7 @@ program create_mesh_xw
 end
 
 program make_panel
-    syntax, time(string)
+    syntax, time(string) [, firstlast(int 0)]
     import delimited ../external/clusters/text4.csv, clear
     drop cluster_name
     replace athr_id = subinstr(athr_id, "A", "", .)
@@ -74,23 +76,14 @@ program make_panel
     save ../temp/clusters, replace
 
     use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name using ../external/openalex/cleaned_all_all_jrnls, clear
-    gen qrtr = qofd(pub_date)
-/*    gen hy = hofd(pub_date)
-    merge m:1 athr_id year using ${year_insts}/filled_in_panel_year, assert(1 2 3) keep(3) nogen
-    preserve
-    gcontract hy qrtr year athr_id msa_comb
-    drop if mi(msa_comb)
-    drop _freq
-    gcontract msa_comb hy qrtr year, freq(size)
-    save ../temp/all_sizes, replace
-    restore
-    preserve
-    foreach t in hy qrtr year {
-        use ../temp/all_sizes, clear
-        gcollapse (sum) size, by(`t' msa_comb)
-        save ../temp/`t'_cluster_size, replace
+    bys pmid: egen first_athr = min(which_athr)
+    bys pmid: egen last_athr = max(which_athr)
+    local suf = "" 
+    if `firstlast' == 1 {
+        keep if which_athr == first_athr | which_athr == last_athr
+        local suf = "_firstlast" 
     }
-    restore*/
+    gen qrtr = qofd(pub_date)
     merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(3) nogen
     merge m:1 athr_id year using ../temp/clusters, assert(1 2 3) keep(3) nogen
     rename cluster_label field
@@ -104,6 +97,7 @@ program make_panel
     bys pmid which_athr: gen num_affls = _N
     bys pmid: egen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs
+
     local date  date("`c(current_date)'", "DMY")
     if "`time'" == "qrtr" {
         gen time_since_pub = qofd(`date') - `time'+1
@@ -124,7 +118,30 @@ program make_panel
     
     // restrict to USA
     keep if country_code == "US" & !mi(msa_comb)
-   
+
+    preserve
+    gcontract pmid `time' athr_id
+    drop _freq
+    merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time' , assert(1 2 3) keep(3) nogen keepusing(msa_comb)
+    rename athr_id focal_id
+    save ${temp}/focal_list, replace
+    rename focal_id athr_id 
+    rename msa_comb coathr_msa
+    save ${temp}/coauthors, replace
+    restore
+
+    preserve
+    use ${temp}/focal_list,clear
+    joinby pmid using ${temp}/coauthors
+    drop if focal_id == athr_id
+    gcontract focal_id `time' msa_comb athr_id coathr_msa
+    drop _freq
+    keep if coathr_msa == msa_comb
+    gcontract focal_id `time', freq(num_coauthors_same_msa)
+    rename focal_id athr_id
+    save ${temp}/coauthor_in_msa_`time', replace
+    restore
+
     // get avg team size
     bys athr_id pmid : gen athr_pmid_cntr = _n == 1
     bys athr_id `time': egen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
@@ -132,10 +149,14 @@ program make_panel
     preserve
     if "`time'" == "year" {
         gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
+        merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
+        replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
         gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
+        merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
+        replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
@@ -145,6 +166,7 @@ program make_panel
     bys athr_id msa_comb `time': gen name_id = _n == 1
     bys msa_comb `time': egen msa_size = total(name_id)
     replace msa_size = msa_size - 1  if msa_size > 1
+    replace msa_size = msa_size - num_coauthors_same_msa  
     gen cluster_shr = msa_size/tot_authors
     drop name_id
 
@@ -153,7 +175,10 @@ program make_panel
     bys athr_id msa_comb `time': gen name_id = _n == 1 if has_top_15 == 1
     bys msa_comb `time': egen unbal_msa_size = total(name_id) 
     replace unbal_msa_size = unbal_msa_size - 1 if unbal_msa_size > 1
+    replace unbal_msa_size = unbal_msa_size - num_coauthors_same_msa 
     drop if mi(cite_affl_wt) | mi(affl_wt) 
+    replace cite_affl_wt = 0 if mi(cite_affl_wt)
+    replace affl_wt = 0 if mi(affl_wt)
 
     merge 1:1 athr_id `time' using ${temp}/athr_concept_`time', assert(1 2 3) keep(1 3) nogen
     merge 1:1 athr_id `time' using ${temp}/athr_mesh_`time', assert(1 2 3) keep(1 3) nogen
@@ -161,15 +186,19 @@ program make_panel
     foreach var in term1 term2 gen_mesh1 gen_mesh2 qualifier_name1 qualifier_name2 {
         bys athr_id (`time') : replace `var' = `var'[_n-1] if mi(`var') & !mi(`var'[_n-1])
     }
-    save ../output/athr_panel_full_comb_`time', replace
+    save ${output}/athr_panel_full_comb_`time'`suf', replace
     restore
     preserve
     if "`time'" == "year" {
         gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
+        merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
+        replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
         gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
+        merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
+        replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
@@ -179,6 +208,7 @@ program make_panel
     bys athr_id msa_comb `time': gen name_id = _n == 1
     bys msa_comb `time': egen msa_size = total(name_id)
     replace msa_size = msa_size - 1 
+    replace msa_size = msa_size - num_coauthors_same_msa  
     gen cluster_shr = msa_size/tot_authors
     drop name_id
     
@@ -186,16 +216,19 @@ program make_panel
     bys athr_id year: egen has_top_15 = max(top_15)
     bys athr_id msa_comb `time': gen name_id = _n == 1 if has_top_15 == 1
     bys msa_comb `time': egen unbal_msa_size = total(name_id) 
-    replace unbal_msa_size = unbal_msa_size - 1
+    replace unbal_msa_size = unbal_msa_size - 1 if unbal_msa_size > 1
+    replace unbal_msa_size = unbal_msa_size - num_coauthors_same_msa 
     drop if mi(cite_affl_wt) | mi(affl_wt) 
-    
+    replace cite_affl_wt = 0 if mi(cite_affl_wt)
+    replace affl_wt = 0 if mi(affl_wt)
+
     merge 1:1 athr_id `time' using ${temp}/athr_concept_`time', assert(1 2 3) keep(1 3) nogen
     merge 1:1 athr_id `time' using ${temp}/athr_mesh_`time', assert(1 2 3) keep(1 3) nogen
     merge 1:1 athr_id `time' using ${temp}/athr_qualifier_`time', assert(1 2 3) keep(1 3) nogen
     foreach var in term1 term2 gen_mesh1 gen_mesh2 qualifier_name1 qualifier_name2 {
         bys athr_id (`time') : replace `var' = `var'[_n-1] if mi(`var') & !mi(`var'[_n-1])
     }
-    save ../output/athr_panel_full_`time', replace
+    save ${output}/athr_panel_full_`time'`suf', replace
     restore
 end
 
