@@ -115,7 +115,12 @@ program make_panel
     gsort pmid cite_wt
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     qui gen cite_affl_wt = affl_wt * cite_wt
-    
+    qui gunique pmid
+    local articles = r(unique)
+    qui sum affl_wt
+    assert round(r(sum)-`articles') == 0
+    qui sum cite_affl_wt
+    assert round(r(sum)-`articles') == 0
     // restrict to USA
     keep if country_code == "US" & !mi(msa_comb)
 
