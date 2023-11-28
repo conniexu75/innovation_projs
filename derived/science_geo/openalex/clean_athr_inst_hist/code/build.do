@@ -150,13 +150,13 @@ program clean_panel
     drop new_inst new_inst_id dup_entry tot_times type
     gsort athr_id inst_id `time' country city
     gduplicates drop athr_id inst_id `time', force
-    // keep inst with the largest num_times in a 
+    // keep inst with the largest num_times in a  year
     bys athr_id `time': egen max_num_times = max(num_times)
     drop if num_times != max_num_times
     drop max_num_times
     
     // imputation process
-    foreach loc in inst_id city country {
+    foreach loc in inst_id inst_id inst_id city country {
         cap drop has_mult same_as_after same_as_before has_before has_after
         if "`time'" == "year" local range 5
         if "`time'" == "qrtr" local range 20 
@@ -183,11 +183,11 @@ program clean_panel
         drop if has_mult == 1 & has_after == 1 & same_as_after == 0
         bys athr_id `time': replace has_mult = _N > 1
     }
-
     // if there are sandwiched insts no mater what the `time' gap is
     hashsort athr_id `time'
     gen prev_inst = inst_id[_n-1]
     gen post_inst = inst_id[_n+1]
+
     gen sandwich = prev_inst == post_inst & prev_inst != inst_id if athr_id[_n-1] == athr_id[_n+1] & athr[_n-1] == athr_id
     replace inst_id = prev_inst if sandwich == 1
     replace inst = inst[_n-1] if sandwich == 1
