@@ -1,0 +1,2 @@
+./samp/ | /export/scratch/cxu_sci_geo/create_panel/output
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
