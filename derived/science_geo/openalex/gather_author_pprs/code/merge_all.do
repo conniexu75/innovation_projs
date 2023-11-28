@@ -7,7 +7,7 @@ pause on
 set seed 8975
 here, set
 set maxvar 120000
-global temp "/export/scratch/cxu_sci_geo/openalex"
+global temp "/export/scratch/cxu_sci_geo/gather_author_ppr"
 
 program main
     append_pprs
@@ -30,12 +30,12 @@ program append_pprs
         drop if mi(id)
         replace id = subinstr(id, "//openalex.org", "", .)
         replace id = subinstr(id, "/", "", .)
-        save ../temp/works`i', replace
+        save ${temp}/works`i', replace
     }
 
     clear
     forval i = 1/`N' {
-       append using ../temp/works`i'
+       append using ${temp}/works`i'
        gduplicates drop
     }
     save ../output/list_of_works, replace

@@ -1,0 +1,2 @@
+./abstracts/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/get_abstracts/output/
+./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/clean_openalex/output/

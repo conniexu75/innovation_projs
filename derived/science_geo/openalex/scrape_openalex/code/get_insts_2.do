@@ -17,11 +17,11 @@ program append_files
         forval i = 1/143 {
             import delimited using ../output/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict)
             gen n = `i'
-            save ../temp/openalex_authors`i', replace
+            save ${temp}/openalex_authors`i', replace
         }
         clear
         forval i = 1/143 {
-            append using ../temp/openalex_authors`i'
+            append using ${temp}/openalex_authors`i'
         }
     }
     destring pmid, replace
@@ -60,11 +60,11 @@ program append_files
     qui {
         forval i = 1/51 {
             import delimited ../output/openalex_authors_clin`i', stringcols(_all) clear bindquotes(strict)
-            save ../temp/openalex_authors_clin`i', replace
+            save ${temp}/openalex_authors_clin`i', replace
         }
         clear
         forval i = 1/51 {
-            append using ../temp/openalex_authors_clin`i'
+            append using ${temp}/openalex_authors_clin`i'
         }
     }
     destring pmid, replace

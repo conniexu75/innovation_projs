@@ -17,11 +17,11 @@ program append_files
         forval i = 1/142 {
             import delimited using ../output/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict)
             gen n = `i'
-            save ../temp/openalex_authors`i', replace
+            save ${temp}/openalex_authors`i', replace
         }
         clear
         forval i = 1/142 {
-            append using ../temp/openalex_authors`i'
+            append using ${temp}/openalex_authors`i'
         }
     }
     destring pmid, replace
@@ -54,17 +54,17 @@ program append_files
     drop which_athr2
     bys pmid which_athr (which_affl) : replace which_affl = _n 
     gisid pmid which_athr which_affl
-    save ../temp/openalex_all_jrnls_merged, replace
+    save ${temp}/openalex_all_jrnls_merged, replace
 
     // repeat for clin med
     qui {
         forval i = 1/51 {
             import delimited ../output/openalex_authors_clin`i', stringcols(_all) clear bindquotes(strict)
-            save ../temp/openalex_authors_clin`i', replace
+            save ${temp}/openalex_authors_clin`i', replace
         }
         clear
         forval i = 1/51 {
-            append using ../temp/openalex_authors_clin`i'
+            append using ${temp}/openalex_authors_clin`i'
         }
     }
     destring pmid, replace
@@ -96,7 +96,7 @@ program append_files
     drop which_athr2
     bys pmid which_athr (which_affl) : replace which_affl = _n 
     gisid pmid which_athr which_affl
-    save ../temp/openalex_clin_med_merged, replace
+    save ${temp}/openalex_clin_med_merged, replace
 
 /*    append using ../output/openalex_newfund_jrnls_merged
     gcontract inst_id
