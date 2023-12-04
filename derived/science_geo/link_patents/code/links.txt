@@ -1,0 +1,2 @@
+./openalex/ | /export/scratch/cxu_sci_geo/create_first_last
+./patents/ | /export/home/dor/cxu/innovation_projs/raw/patents
