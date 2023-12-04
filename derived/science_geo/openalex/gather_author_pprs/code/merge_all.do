@@ -13,11 +13,11 @@ program main
     append_pprs
 end
 program append_pprs
-    use ../output/list_of_athrs,clear 
+    use ../output/list_of_clin_athrs,clear 
     count
     local N = ceil(r(N)/500)
     forval i = 1/`N' {
-        import delimited using ../output/works`i', clear
+        import delimited using ../output/clin_works`i', clear
         cap ds v2
         if _rc ==0 {
             keep v2
@@ -30,15 +30,15 @@ program append_pprs
         drop if mi(id)
         replace id = subinstr(id, "//openalex.org", "", .)
         replace id = subinstr(id, "/", "", .)
-        save ${temp}/works`i', replace
+        save ${temp}/clin_works`i', replace
     }
 
     clear
     forval i = 1/`N' {
-       append using ${temp}/works`i'
+       append using ${temp}/clin_works`i'
        gduplicates drop
     }
-    save ../output/list_of_works, replace
+    save ../output/list_of_clin_works, replace
 end
 
 
