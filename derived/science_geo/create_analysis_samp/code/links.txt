@@ -1,4 +1,5 @@
-./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/clean_openalex/output
+./openalex/ | /export/scratch/cxu_sci_geo/clean_openalex_output
+./firstlast/ | /export/scratch/cxu_sci_geo/create_first_last
 ./clusters/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/cluster_fields/output
 ./insts/ | /export/scratch/cxu_sci_geo/clean_athr_inst_hist_output
 ./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo

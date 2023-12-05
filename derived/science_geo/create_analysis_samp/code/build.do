@@ -12,9 +12,8 @@ program main
     global output "/export/scratch/cxu_sci_geo/create_panel/output"
     global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
     global qrtr_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist"
-    foreach t in year { //year {
+    foreach t in year { 
         create_mesh_xw, time(`t')
-        make_panel, time(`t')
         make_panel, time(`t') firstlast(1)
     }
 end
@@ -76,11 +75,9 @@ program make_panel
     save ../temp/clusters, replace
 
     use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name using ../external/openalex/cleaned_all_all_jrnls, clear
-    bys pmid: egen first_athr = min(which_athr)
-    bys pmid: egen last_athr = max(which_athr)
     local suf = "" 
     if `firstlast' == 1 {
-        keep if which_athr == first_athr | which_athr == last_athr
+        use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name using ../external/firstlast/cleaned_all_all_jrnls, clear
         local suf = "_firstlast" 
     }
     gen qrtr = qofd(pub_date)
