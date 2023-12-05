@@ -1,4 +1,4 @@
 ./full_openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/scrape_openalex/output
-./newfund/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/clean_openalex/output
+./newfund/ | /export/scratch/cxu_sci_geo/create_first_last
 ./new_pt/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/get_pt/output
 ./pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/append_pmids/output

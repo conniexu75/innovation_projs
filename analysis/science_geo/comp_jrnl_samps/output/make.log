@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-08-31 01:24:50
-Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_samps/code
+Makelog started: 2023-11-28 23:54:57
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_jrnl_samps/code
 --------------------------------------------------------------------------------
 External links successfully created!
 
@@ -15,8 +15,8 @@ ___/   /   /___/   /   /___/       MP—Parallel Edition
                                    800-STATA-PC        https://www.stata.com
                                    979-696-4600        stata@stata.com
 
-Stata license: Unlimited-user 4-core, expiring 17 Nov 2023
-Serial number: 501709306977
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
   Licensed to: Harvard Business School
                Research Computing
 
@@ -26,8 +26,8 @@ Notes:
       3. More than 2 billion observations are allowed; see help obs_advice.
       4. Maximum number of variables is set to 120,000; see help set_maxvar.
 
-. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_samps/cod
-> e/analysis.do" 
+. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_jrnl_samp
+> s/code/analysis.do" 
 
 . set more off
 
@@ -44,7 +44,8 @@ Notes:
 . set seed 8975
 
 . here, set
-/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_samps/code/
+/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_jrnl_samps/code
+> /
 
 . 
 . program main
@@ -412,244 +413,220 @@ Notes:
 SAMPLE IS : cns newfund
 (0 observations deleted)
 
-     +-------------------------------+
-     | country    affl_wt       perc |
-     |-------------------------------|
-  2. |           16687.22   14.14746 |
-     +-------------------------------+
-
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   49.58133 |
-  2. | United Kingdom   11.51315 |
-  3. |        Germany   3.236197 |
-  4. |         Canada     2.5846 |
-  5. |          Japan   2.338013 |
+  1. |  United States    57.0656 |
+  2. | United Kingdom   13.60238 |
+  3. |        Germany   3.735048 |
+  4. |         Canada   2.926942 |
+  5. |          Japan    2.79285 |
      |---------------------------|
-  6. |         France   2.000072 |
-  7. |      Australia   1.864161 |
-  8. |    Switzerland   1.377179 |
-  9. |    Netherlands   .9905764 |
- 10. |          Italy   .9545682 |
+  6. |         France    2.36704 |
+  7. |      Australia   2.105515 |
+  8. |    Switzerland   1.631752 |
+  9. |          China   1.511868 |
+ 10. |         Sweden   1.183298 |
      |---------------------------|
- 11. |         Sweden   .9432017 |
- 12. |          China   .9319713 |
- 13. |         Israel   .8188279 |
- 14. |          India   .6442267 |
- 15. |        Belgium    .423327 |
+ 11. |    Netherlands   1.161097 |
+ 12. |          Italy    1.10604 |
+ 13. |         Israel   .9577387 |
+ 14. |          India   .7503841 |
+ 15. |        Belgium   .5408093 |
      |---------------------------|
- 16. |   South Africa   .3809446 |
- 17. |        Denmark   .3750795 |
- 18. |        Czechia   .3608038 |
- 19. |          Spain    .357868 |
- 20. |       Tanzania   .3083912 |
+ 16. |        Denmark   .4444582 |
+ 17. |   South Africa   .4204815 |
+ 18. |       Tanzania   .4173734 |
+ 19. |          Spain   .3809642 |
+ 20. |        Austria   .3663118 |
      +---------------------------+
-Total articles: 117952
+Total articles: 112609
 
-      +--------------------------------+
-      | msa_c_~d    affl_wt       perc |
-      |--------------------------------|
-   1. |            17871.59   15.15158 |
-      +--------------------------------+
+      +-------------------------------+
+      | msa_c_~d   affl_wt       perc |
+      |-------------------------------|
+  23. |                886   .7867932 |
+      +-------------------------------+
 
-     +-------------------------------------------------+
-     |                          msa_c_world       perc |
-     |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   6.249161 |
-  2. |      New York-Newark-Jersey City, US   5.167939 |
-  3. |  Washington-Arlington-Alexandria, US    4.65135 |
-  4. |                         Bay Area, US   4.625808 |
-  5. |                           London, GB     4.3115 |
-     |-------------------------------------------------|
-  6. |   Los Angeles-Long Beach-Anaheim, US   2.161258 |
-  7. |               San Diego-Carlsbad, US   2.055735 |
-  8. |                        Cambridge, GB   1.653358 |
-  9. |         Chicago-Naperville-Elgin, US   1.478018 |
- 10. |   Philadelphia-Camden-Wilmington, US   1.351949 |
-     |-------------------------------------------------|
- 11. |                New Haven-Milford, US   1.332741 |
- 12. |        Baltimore-Columbia-Towson, US   1.115315 |
- 13. |                            Paris, FR   1.095456 |
- 14. |          Seattle-Tacoma-Bellevue, US   1.050019 |
- 15. |           Research Triangle Park, US   1.043032 |
-     |-------------------------------------------------|
- 16. |                           Oxford, GB   .9328527 |
- 17. |                            Tokyo, JP   .7819749 |
- 18. |                          Madison, US   .7320021 |
- 19. |                        St. Louis, US   .6984425 |
- 20. | Houston-The Woodlands-Sugar Land, US   .6980741 |
-     +-------------------------------------------------+
-Total articles: 117952
+     +------------------------------------------------+
+     |                         msa_c_world       perc |
+     |------------------------------------------------|
+  1. |         Boston-Cambridge-Newton, US   7.053166 |
+  2. | Washington-Arlington-Alexandria, US   6.491932 |
+  3. |     New York-Newark-Jersey City, US   5.904058 |
+  4. |                        Bay Area, US   5.202071 |
+  5. |                          London, GB   4.888597 |
+     |------------------------------------------------|
+  6. |  Los Angeles-Long Beach-Anaheim, US   2.485592 |
+  7. |              San Diego-Carlsbad, US   2.261364 |
+  8. |                       Cambridge, GB   2.090419 |
+  9. |        Chicago-Naperville-Elgin, US   1.791153 |
+ 10. |               New Haven-Milford, US   1.534069 |
+     |------------------------------------------------|
+ 11. |  Philadelphia-Camden-Wilmington, US     1.5021 |
+ 12. |                           Paris, FR   1.392873 |
+ 13. |       Baltimore-Columbia-Towson, US   1.347583 |
+ 14. |         Seattle-Tacoma-Bellevue, US   1.151773 |
+ 15. |          Research Triangle Park, US   1.147777 |
+     |------------------------------------------------|
+ 16. |                          Oxford, GB   1.115808 |
+ 17. |                           Tokyo, JP   .8960208 |
+ 18. |                         Beijing, CN   .8946887 |
+ 19. |                         Madison, US   .8902485 |
+ 20. |                          Ithaca, US    .811658 |
+     +------------------------------------------------+
+Total articles: 112609
 
-       +----------------------------+
-       | inst    affl_wt       perc |
-       |----------------------------|
-    1. |        16680.87   14.14209 |
-       +----------------------------+
-
-     +------------------------------------------------------------------+
-     |                                                  inst       perc |
-     |------------------------------------------------------------------|
-  1. |                                    Harvard University   2.728875 |
-  2. |                         National Institutes of Health   1.705031 |
-  3. |                                  University of London   1.619236 |
-  4. |                                   Stanford University   1.475036 |
-  5. |                 Massachusetts Institute of Technology   1.292495 |
-     |------------------------------------------------------------------|
-  6. |                                       Yale University   1.259987 |
-  7. |               University of California, San Francisco   1.205996 |
-  8. | United States Department of Health and Human Services    1.11136 |
-  9. |                    University of California, Berkeley   1.104529 |
- 10. |                                    Max Planck Society   1.019555 |
-     |------------------------------------------------------------------|
- 11. |                                   Columbia University   1.018633 |
- 12. |                               University of Cambridge   .9099315 |
- 13. |                   University of California, San Diego    .871845 |
- 14. |                                Rockefeller University   .8112981 |
- 15. |                                  University of Oxford   .7604548 |
-     |------------------------------------------------------------------|
- 16. |                 University of California, Los Angeles   .7338157 |
- 17. |                            University of Pennsylvania   .7131229 |
- 18. |                                    Cornell University   .7006559 |
- 19. |                              Johns Hopkins University   .6854404 |
- 20. |                    California Institute of Technology   .6748257 |
-     +------------------------------------------------------------------+
-Total articles: 117952
+     +----------------------------------------------------+
+     |                                    inst       perc |
+     |----------------------------------------------------|
+  1. |           National Institutes of Health   3.396709 |
+  2. |                      Harvard University    3.11254 |
+  3. |                     Stanford University    1.79515 |
+  4. |                         Yale University   1.439494 |
+  5. | University of California, San Francisco   1.335595 |
+     |----------------------------------------------------|
+  6. |      University of California, Berkeley   1.325827 |
+  7. |                      Max Planck Society   1.199726 |
+  8. |                     Columbia University    1.17575 |
+  9. |                Medical Research Council   1.138897 |
+ 10. |                Johns Hopkins University   1.107816 |
+     |----------------------------------------------------|
+ 11. |   Massachusetts Institute of Technology   1.102931 |
+ 12. |                 University of Cambridge   1.078067 |
+ 13. |         Howard Hughes Medical Institute   1.015905 |
+ 14. |                    University of Oxford   .9235497 |
+ 15. |                  Rockefeller University   .9186655 |
+     |----------------------------------------------------|
+ 16. |   University of California, Los Angeles   .8951327 |
+ 17. |         University of Wisconsin–Madison   .8289746 |
+ 18. |     University of California, San Diego   .8174302 |
+ 19. |                University of Washington     .81077 |
+ 20. |                      Cornell University   .7983376 |
+     +----------------------------------------------------+
+Total articles: 112609
 (0 observations deleted)
 
-     +-------------------------------+
-     | country   cite_a~t       perc |
-     |-------------------------------|
-  2. |            10203.7   8.650723 |
-     +-------------------------------+
-
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States     55.081 |
-  2. | United Kingdom    8.33988 |
-  3. |        Germany   5.328391 |
-  4. |          China   3.219904 |
-  5. |          Japan   2.829865 |
+  1. |  United States   59.51939 |
+  2. | United Kingdom   9.243225 |
+  3. |        Germany   5.705377 |
+  4. |          China   4.588805 |
+  5. |          Japan   3.214307 |
      |---------------------------|
-  6. |         France   2.265892 |
-  7. |         Canada   2.100216 |
-  8. |    Switzerland   1.939511 |
-  9. |    Netherlands   1.402996 |
- 10. |      Australia   1.210666 |
+  6. |         France   2.513371 |
+  7. |    Switzerland   2.454381 |
+  8. |         Canada   2.209013 |
+  9. |    Netherlands    1.44647 |
+ 10. |      Australia   1.270094 |
      |---------------------------|
- 11. |         Sweden   1.001521 |
- 12. |          Italy   .8519421 |
- 13. |         Israel   .8011774 |
- 14. |          Spain   .5909737 |
- 15. |        Austria   .5119209 |
+ 11. |         Sweden   1.115836 |
+ 12. |          Italy   .8659351 |
+ 13. |         Israel   .8477001 |
+ 14. |        Austria   .5399755 |
+ 15. |          Spain   .5341991 |
      |---------------------------|
- 16. |        Belgium   .4652223 |
- 17. |        Denmark   .4122524 |
- 18. |    South Korea   .3352882 |
- 19. |      Singapore   .2647919 |
- 20. |   South Africa   .2397748 |
+ 16. |    South Korea   .4906769 |
+ 17. |        Belgium   .4741524 |
+ 18. |        Denmark   .4318276 |
+ 19. |   South Africa   .2548078 |
+ 20. |      Singapore   .2425192 |
      +---------------------------+
-Total articles: 117952
+Total articles: 112609
 
       +--------------------------------+
       | msa_c_~d   cite_a~t       perc |
       |--------------------------------|
-   2. |            10895.52   9.237252 |
+  77. |            205.5672   .1825495 |
       +--------------------------------+
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   10.41726 |
-  2. |      New York-Newark-Jersey City, US   6.474459 |
-  3. |                         Bay Area, US   6.322416 |
-  4. |  Washington-Arlington-Alexandria, US   3.847457 |
-  5. |               San Diego-Carlsbad, US   3.019935 |
+  1. |          Boston-Cambridge-Newton, US   11.35559 |
+  2. |                         Bay Area, US   6.979825 |
+  3. |      New York-Newark-Jersey City, US   6.814952 |
+  4. |  Washington-Arlington-Alexandria, US   5.497619 |
+  5. |               San Diego-Carlsbad, US   3.329479 |
      |-------------------------------------------------|
-  6. |                           London, GB   2.982227 |
-  7. |                        Cambridge, GB   2.119189 |
-  8. |   Los Angeles-Long Beach-Anaheim, US   2.021258 |
-  9. |                          Beijing, CN   1.655355 |
- 10. |          Seattle-Tacoma-Bellevue, US   1.549231 |
+  6. |                           London, GB   3.099848 |
+  7. |                          Beijing, CN    2.96356 |
+  8. |                        Cambridge, GB   2.466082 |
+  9. |   Los Angeles-Long Beach-Anaheim, US   2.148008 |
+ 10. |          Seattle-Tacoma-Bellevue, US   1.696152 |
      |-------------------------------------------------|
- 11. |                New Haven-Milford, US   1.343952 |
- 12. |   Philadelphia-Camden-Wilmington, US   1.293314 |
- 13. |                            Paris, FR   1.210457 |
- 14. |           Research Triangle Park, US   1.173467 |
- 15. |        Baltimore-Columbia-Towson, US   1.166049 |
+ 11. |                New Haven-Milford, US   1.516108 |
+ 12. |                            Paris, FR   1.488835 |
+ 13. |   Philadelphia-Camden-Wilmington, US   1.375633 |
+ 14. |                           Oxford, GB   1.358529 |
+ 15. |        Baltimore-Columbia-Towson, US    1.35229 |
      |-------------------------------------------------|
- 16. |         Chicago-Naperville-Elgin, US   1.153612 |
- 17. |                           Oxford, GB   1.015611 |
- 18. | Houston-The Woodlands-Sugar Land, US   .9864565 |
- 19. |                            Tokyo, JP   .9827081 |
- 20. |      Dallas-Fort Worth-Arlington, US   .9797503 |
+ 16. |           Research Triangle Park, US   1.307081 |
+ 17. |         Chicago-Naperville-Elgin, US   1.240263 |
+ 18. | Houston-The Woodlands-Sugar Land, US   1.131876 |
+ 19. |                        St. Louis, US   1.043515 |
+ 20. |                            Tokyo, JP   1.008471 |
      +-------------------------------------------------+
-Total articles: 117952
+Total articles: 112609
 
-       +---------------------------+
-       | inst   cite_a~t      perc |
-       |---------------------------|
-    1. |        10198.76   8.64653 |
-       +---------------------------+
-
-     +------------------------------------------------------------------+
-     |                                                  inst       perc |
-     |------------------------------------------------------------------|
-  1. |                                    Harvard University   4.178358 |
-  2. |                                   Stanford University   2.334126 |
-  3. |                 Massachusetts Institute of Technology    2.23009 |
-  4. |               University of California, San Francisco   1.604015 |
-  5. |                                    Max Planck Society    1.55246 |
-     |------------------------------------------------------------------|
-  6. |                         National Institutes of Health   1.360868 |
-  7. |                                       Yale University   1.298819 |
-  8. |                                Rockefeller University   1.181753 |
-  9. |                   University of California, San Diego   1.106322 |
- 10. |                                   Columbia University   1.058929 |
-     |------------------------------------------------------------------|
- 11. |                    University of California, Berkeley   1.009248 |
- 12. |                                  Mass General Brigham   .9868252 |
- 13. |                           Chinese Academy of Sciences   .9838858 |
- 14. | United States Department of Health and Human Services   .8731056 |
- 15. |                    Washington University in St. Louis   .8688829 |
-     |------------------------------------------------------------------|
- 16. |                              University of Washington   .8606892 |
- 17. |                            University of Pennsylvania   .8412521 |
- 18. |                                  University of Oxford   .8375665 |
- 19. |                                  University of London   .8188227 |
- 20. |                    California Institute of Technology   .7901198 |
-     +------------------------------------------------------------------+
-Total articles: 117952
-(177 real changes made)
+     +--------------------------------------------------------+
+     |                                        inst       perc |
+     |--------------------------------------------------------|
+  1. |                          Harvard University   4.427171 |
+  2. |                         Stanford University   2.852501 |
+  3. |               National Institutes of Health   2.514873 |
+  4. |                 Chinese Academy of Sciences   2.014057 |
+  5. |                          Max Planck Society   1.810463 |
+     |--------------------------------------------------------|
+  6. |     University of California, San Francisco   1.803317 |
+  7. |             Howard Hughes Medical Institute   1.624487 |
+  8. |                             Yale University    1.47901 |
+  9. |                      Rockefeller University   1.292328 |
+ 10. |                             Broad Institute   1.241631 |
+     |--------------------------------------------------------|
+ 11. |       Massachusetts Institute of Technology   1.222319 |
+ 12. |          University of California, Berkeley   1.183789 |
+ 13. |                    University of Washington    1.15656 |
+ 14. |                    Johns Hopkins University   1.153693 |
+ 15. |                         Columbia University   1.118133 |
+     |--------------------------------------------------------|
+ 16. |         University of California, San Diego   1.099489 |
+ 17. |                        Mass General Brigham   1.086759 |
+ 18. | Whitehead Institute for Biomedical Research   1.021017 |
+ 19. |                  University of Pennsylvania   .9653189 |
+ 20. |                        University of Oxford   .9631295 |
+     +--------------------------------------------------------+
+Total articles: 112609
+(149 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations              354   ->   177         
+Number of observations              298   ->   149         
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
                                   share   ->   shareunwt sharewt
 -----------------------------------------------------------------------------
-(2,633 real changes made)
+(1,892 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations            5,266   ->   2,633       
+Number of observations            3,784   ->   1,892       
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
                                   share   ->   shareunwt sharewt
 -----------------------------------------------------------------------------
-(10,306 real changes made)
+(7,032 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations           20,612   ->   10,306      
+Number of observations           14,064   ->   7,032       
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
@@ -658,244 +635,220 @@ xij variables:
 SAMPLE IS : scisub newfund
 (0 observations deleted)
 
-     +-------------------------------+
-     | country    affl_wt       perc |
-     |-------------------------------|
-  2. |           2269.193   7.570286 |
-     +-------------------------------+
-
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   53.63941 |
-  2. | United Kingdom   7.248291 |
-  3. |        Germany   5.550189 |
-  4. |          Japan   3.903539 |
-  5. |         Canada   3.107574 |
+  1. |  United States   55.93744 |
+  2. | United Kingdom   8.094944 |
+  3. |        Germany   6.060918 |
+  4. |          China   4.531111 |
+  5. |          Japan   4.323592 |
      |---------------------------|
-  6. |          China   2.823584 |
-  7. |         France   2.650715 |
-  8. |    Switzerland    1.84219 |
-  9. |    Netherlands   1.472825 |
- 10. |          Italy   1.238411 |
+  6. |         France   3.196817 |
+  7. |         Canada   3.195102 |
+  8. |    Switzerland   2.020306 |
+  9. |    Netherlands   1.550388 |
+ 10. |          Italy   1.337724 |
      |---------------------------|
- 11. |      Australia   1.090755 |
- 12. |         Israel   1.057497 |
- 13. |         Sweden    1.02441 |
- 14. |          Spain   .9248205 |
- 15. |        Belgium   .6716498 |
+ 11. |      Australia   1.171366 |
+ 12. |         Israel   1.171366 |
+ 13. |         Sweden    1.10105 |
+ 14. |          Spain   .9895726 |
+ 15. |    South Korea   .8163545 |
      |---------------------------|
- 16. |    South Korea   .5851769 |
- 17. |        Austria   .5353632 |
- 18. |      Singapore   .3713743 |
- 19. |        Denmark   .3644815 |
- 20. |        Finland   .2801654 |
+ 16. |        Belgium    .734033 |
+ 17. |        Austria   .5728202 |
+ 18. |      Singapore   .3721616 |
+ 19. |        Denmark   .3635865 |
+ 20. |        Finland   .2846951 |
      +---------------------------+
-Total articles: 29975
+Total articles: 29154
 
-      +--------------------------------+
-      | msa_c_~d    affl_wt       perc |
-      |--------------------------------|
-   2. |            2420.918   8.076456 |
-      +--------------------------------+
+      +-------------------------------+
+      | msa_c_~d   affl_wt       perc |
+      |-------------------------------|
+  75. |               62.5   .2143788 |
+      +-------------------------------+
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   8.213411 |
-  2. |      New York-Newark-Jersey City, US    6.20185 |
-  3. |                         Bay Area, US   6.177427 |
-  4. |  Washington-Arlington-Alexandria, US   3.160306 |
-  5. |               San Diego-Carlsbad, US   2.825274 |
+  1. |          Boston-Cambridge-Newton, US   8.782671 |
+  2. |                         Bay Area, US   6.374768 |
+  3. |      New York-Newark-Jersey City, US   6.337038 |
+  4. |  Washington-Arlington-Alexandria, US   4.412774 |
+  5. |               San Diego-Carlsbad, US    2.81608 |
      |-------------------------------------------------|
-  6. |   Los Angeles-Long Beach-Anaheim, US    2.47727 |
-  7. |                           London, GB   2.472717 |
-  8. |        Baltimore-Columbia-Towson, US   1.801765 |
-  9. |          Seattle-Tacoma-Bellevue, US   1.611537 |
- 10. |                            Paris, FR   1.587704 |
+  6. |                           London, GB   2.692598 |
+  7. |   Los Angeles-Long Beach-Anaheim, US   2.636002 |
+  8. |                          Beijing, CN   2.342732 |
+  9. |        Baltimore-Columbia-Towson, US   2.039171 |
+ 10. |                            Paris, FR    1.95342 |
      |-------------------------------------------------|
- 11. |                        Cambridge, GB   1.572441 |
- 12. |           Research Triangle Park, US   1.462114 |
- 13. | Houston-The Woodlands-Sugar Land, US   1.438664 |
- 14. |   Philadelphia-Camden-Wilmington, US   1.424962 |
- 15. |                            Tokyo, JP   1.421712 |
+ 11. |                        Cambridge, GB   1.864238 |
+ 12. | Houston-The Woodlands-Sugar Land, US   1.624134 |
+ 13. |   Philadelphia-Camden-Wilmington, US   1.536667 |
+ 14. |          Seattle-Tacoma-Bellevue, US   1.521232 |
+ 15. |                            Tokyo, JP   1.468066 |
      |-------------------------------------------------|
- 16. |         Chicago-Naperville-Elgin, US   1.242375 |
- 17. |                New Haven-Milford, US   1.212624 |
- 18. |                          Toronto, CA   1.133504 |
- 19. |                          Beijing, CN   1.086132 |
- 20. |                        St. Louis, US   1.032211 |
+ 16. |           Research Triangle Park, US   1.396035 |
+ 17. |                New Haven-Milford, US   1.293133 |
+ 18. |         Chicago-Naperville-Elgin, US   1.248542 |
+ 19. |                          Toronto, CA   1.217672 |
+ 20. |                        St. Louis, US   1.092474 |
      +-------------------------------------------------+
-Total articles: 29975
+Total articles: 29154
 
-      +---------------------------+
-      | inst   affl_wt       perc |
-      |---------------------------|
-   1. |        2268.24   7.567105 |
-      +---------------------------+
-
-     +------------------------------------------------------------------+
-     |                                                  inst       perc |
-     |------------------------------------------------------------------|
-  1. |                                    Harvard University    3.14036 |
-  2. |                                   Stanford University   2.193811 |
-  3. |               University of California, San Francisco   1.891088 |
-  4. |                                    Max Planck Society   1.492012 |
-  5. |                                   Columbia University   1.424813 |
-     |------------------------------------------------------------------|
-  6. |                 Massachusetts Institute of Technology   1.363796 |
-  7. |                         National Institutes of Health    1.25882 |
-  8. |                   University of California, San Diego   1.209716 |
-  9. |                                  University of London   1.170529 |
- 10. |                                       Yale University   1.152286 |
-     |------------------------------------------------------------------|
- 11. |                              Johns Hopkins University   1.062367 |
- 12. |                            University of Pennsylvania   .9516432 |
- 13. |                    University of California, Berkeley   .9417014 |
- 14. |                                  Mass General Brigham   .9349187 |
- 15. |                    Washington University in St. Louis   .9000114 |
-     |------------------------------------------------------------------|
- 16. | United States Department of Health and Human Services   .8690904 |
- 17. |                 University of California, Los Angeles   .8614426 |
- 18. |                              University of Washington   .8567416 |
- 19. |                               University of Cambridge   .8365008 |
- 20. |                                  Harris Health System   .7833943 |
-     +------------------------------------------------------------------+
-Total articles: 29975
+     +----------------------------------------------------+
+     |                                    inst       perc |
+     |----------------------------------------------------|
+  1. |                      Harvard University   3.402621 |
+  2. |                     Stanford University   2.570831 |
+  3. |           National Institutes of Health   2.431913 |
+  4. | University of California, San Francisco   2.040886 |
+  5. |                Johns Hopkins University   1.751046 |
+     |----------------------------------------------------|
+  6. |                      Max Planck Society   1.715031 |
+  7. |             Chinese Academy of Sciences   1.615559 |
+  8. |                     Columbia University   1.488647 |
+  9. |                         Yale University   1.251972 |
+ 10. |                    Mass General Brigham   1.227962 |
+     |----------------------------------------------------|
+ 11. |     University of California, San Diego   1.227962 |
+ 12. |         Howard Hughes Medical Institute   1.133635 |
+ 13. |                University of Washington   1.090759 |
+ 14. |              University of Pennsylvania   1.061604 |
+ 15. |   Massachusetts Institute of Technology   .9724223 |
+     |----------------------------------------------------|
+ 16. |      Washington University in St. Louis   .9672772 |
+ 17. |   University of California, Los Angeles    .951842 |
+ 18. |                                  Inserm   .9295465 |
+ 19. |      University of California, Berkeley   .9295465 |
+ 20. |              Baylor College of Medicine   .9106812 |
+     +----------------------------------------------------+
+Total articles: 29154
 (0 observations deleted)
-
-     +-------------------------------+
-     | country   cite_a~t       perc |
-     |-------------------------------|
-  3. |           2018.622   6.734351 |
-     +-------------------------------+
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   53.65282 |
-  2. | United Kingdom   7.187385 |
-  3. |        Germany   5.193707 |
-  4. |          China   4.032023 |
-  5. |          Japan   3.517387 |
+  1. |  United States   55.69386 |
+  2. | United Kingdom   8.057282 |
+  3. |        Germany   5.726488 |
+  4. |          China   5.591237 |
+  5. |          Japan   3.767457 |
      |---------------------------|
-  6. |         Canada   2.680526 |
-  7. |         France   2.395446 |
-  8. |    Switzerland   1.707287 |
-  9. |    Netherlands   1.670577 |
- 10. |      Australia   1.470263 |
+  6. |         France   2.842858 |
+  7. |         Canada    2.83565 |
+  8. |    Switzerland   1.845202 |
+  9. |    Netherlands    1.74799 |
+ 10. |      Australia   1.555726 |
      |---------------------------|
- 11. |          Italy   1.260746 |
- 12. |         Sweden   1.233493 |
- 13. |         Israel    1.05915 |
- 14. |          Spain   .9580091 |
- 15. |        Belgium   .7121181 |
+ 11. |          Italy   1.301085 |
+ 12. |         Sweden   1.258138 |
+ 13. |         Israel   1.126756 |
+ 14. |          Spain   .9951803 |
+ 15. |        Belgium   .7628762 |
      |---------------------------|
- 16. |    South Korea   .5571045 |
- 17. |        Denmark   .5460404 |
- 18. |        Austria   .4618736 |
- 19. |      Singapore   .4483977 |
- 20. |        Finland   .2837796 |
+ 16. |    South Korea   .6931633 |
+ 17. |        Denmark    .586598 |
+ 18. |        Austria   .4781242 |
+ 19. |      Singapore   .4627258 |
+ 20. |      Hong Kong   .3295876 |
      +---------------------------+
-Total articles: 29975
+Total articles: 29154
 
       +--------------------------------+
       | msa_c_~d   cite_a~t       perc |
       |--------------------------------|
-   2. |            2149.027   7.169399 |
+ 113. |            37.35046   .1281144 |
       +--------------------------------+
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   10.00619 |
-  2. |                         Bay Area, US    6.61007 |
-  3. |      New York-Newark-Jersey City, US   6.513863 |
-  4. |  Washington-Arlington-Alexandria, US   2.757734 |
-  5. |               San Diego-Carlsbad, US   2.634306 |
+  1. |          Boston-Cambridge-Newton, US   10.84075 |
+  2. |                         Bay Area, US   7.011378 |
+  3. |      New York-Newark-Jersey City, US   6.608138 |
+  4. |  Washington-Arlington-Alexandria, US   3.717507 |
+  5. |                          Beijing, CN   2.827344 |
      |-------------------------------------------------|
-  6. |                           London, GB   2.506628 |
-  7. |   Los Angeles-Long Beach-Anaheim, US   2.272711 |
-  8. |                        Cambridge, GB   1.703616 |
-  9. |        Baltimore-Columbia-Towson, US   1.703534 |
- 10. |          Seattle-Tacoma-Bellevue, US   1.624503 |
+  6. |                           London, GB   2.618218 |
+  7. |               San Diego-Carlsbad, US   2.558686 |
+  8. |   Los Angeles-Long Beach-Anaheim, US   2.406633 |
+  9. |                        Cambridge, GB    2.16342 |
+ 10. |        Baltimore-Columbia-Towson, US   2.069971 |
      |-------------------------------------------------|
- 11. | Houston-The Woodlands-Sugar Land, US   1.444247 |
- 12. |                            Paris, FR   1.423701 |
- 13. |                          Beijing, CN   1.338746 |
- 14. |   Philadelphia-Camden-Wilmington, US   1.306381 |
- 15. |                            Tokyo, JP   1.284462 |
+ 11. |                            Paris, FR   1.686329 |
+ 12. | Houston-The Woodlands-Sugar Land, US   1.674057 |
+ 13. |          Seattle-Tacoma-Bellevue, US   1.525228 |
+ 14. |   Philadelphia-Camden-Wilmington, US   1.373146 |
+ 15. |                New Haven-Milford, US   1.316932 |
      |-------------------------------------------------|
- 16. |           Research Triangle Park, US   1.262655 |
- 17. |                        St. Louis, US   1.216313 |
- 18. |         Chicago-Naperville-Elgin, US   1.146027 |
- 19. |                New Haven-Milford, US   1.119153 |
- 20. |                          Toronto, CA   1.088694 |
+ 16. |                        St. Louis, US   1.306744 |
+ 17. |                            Tokyo, JP   1.295118 |
+ 18. |           Research Triangle Park, US   1.253917 |
+ 19. |                           Oxford, GB   1.162947 |
+ 20. |                          Toronto, CA   1.122126 |
      +-------------------------------------------------+
-Total articles: 29975
+Total articles: 29154
 
-      +----------------------------+
-      | inst   cite_a~t       perc |
-      |----------------------------|
-   1. |        2017.114   6.729321 |
-      +----------------------------+
-
-     +------------------------------------------------------------------+
-     |                                                  inst       perc |
-     |------------------------------------------------------------------|
-  1. |                                    Harvard University   3.456792 |
-  2. |                                   Stanford University   2.453147 |
-  3. |                 Massachusetts Institute of Technology   1.755236 |
-  4. |               University of California, San Francisco   1.655339 |
-  5. |                                  Mass General Brigham   1.251696 |
-     |------------------------------------------------------------------|
-  6. |                                   Columbia University   1.236344 |
-  7. |                   University of California, San Diego   1.231424 |
-  8. |                                    Max Planck Society    1.15166 |
-  9. |                                  University of London   1.145888 |
- 10. |                         National Institutes of Health   1.091473 |
-     |------------------------------------------------------------------|
- 11. |                                       Yale University   1.053135 |
- 12. |                              Johns Hopkins University   1.028864 |
- 13. |                                     Boston University   .9713762 |
- 14. |                    University of California, Berkeley   .9489278 |
- 15. |                    Washington University in St. Louis   .9263478 |
-     |------------------------------------------------------------------|
- 16. |                            University of Pennsylvania   .8778177 |
- 17. |                           Chinese Academy of Sciences   .8565888 |
- 18. |                                   New York University   .8311085 |
- 19. | United States Department of Health and Human Services   .8074939 |
- 20. |                               University of Cambridge   .7945845 |
-     +------------------------------------------------------------------+
-Total articles: 29975
-(145 real changes made)
+     +----------------------------------------------------+
+     |                                    inst       perc |
+     |----------------------------------------------------|
+  1. |                      Harvard University   3.589486 |
+  2. |                     Stanford University   2.979528 |
+  3. |           National Institutes of Health   2.207134 |
+  4. |             Chinese Academy of Sciences   1.946258 |
+  5. | University of California, San Francisco   1.864439 |
+     |----------------------------------------------------|
+  6. |                    Mass General Brigham   1.780921 |
+  7. |                Johns Hopkins University   1.716689 |
+  8. |                      Max Planck Society   1.338871 |
+  9. |                         Broad Institute   1.335551 |
+ 10. |                     Columbia University   1.297132 |
+     |----------------------------------------------------|
+ 11. |                         Yale University   1.278198 |
+ 12. |     University of California, San Diego   1.255948 |
+ 13. |   Massachusetts Institute of Technology   1.066084 |
+ 14. |                     New York University   1.063932 |
+ 15. |      Washington University in St. Louis   1.014568 |
+     |----------------------------------------------------|
+ 16. |                University of Washington   1.012601 |
+ 17. |      University of California, Berkeley   1.012389 |
+ 18. |              University of Pennsylvania   .9563829 |
+ 19. |  Memorial Sloan Kettering Cancer Center   .9187866 |
+ 20. |                                  Inserm   .8756689 |
+     +----------------------------------------------------+
+Total articles: 29154
+(87 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations              290   ->   145         
+Number of observations              174   ->   87          
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
                                   share   ->   shareunwt sharewt
 -----------------------------------------------------------------------------
-(1,882 real changes made)
+(1,000 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations            3,764   ->   1,882       
+Number of observations            2,000   ->   1,000       
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
                                   share   ->   shareunwt sharewt
 -----------------------------------------------------------------------------
-(7,161 real changes made)
+(3,308 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations           14,322   ->   7,161       
+Number of observations            6,616   ->   3,308       
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
@@ -904,264 +857,240 @@ xij variables:
 SAMPLE IS : demsci newfund
 (0 observations deleted)
 
-     +-------------------------------+
-     | country    affl_wt       perc |
-     |-------------------------------|
-  2. |           71189.56   17.90027 |
-     +-------------------------------+
-
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   30.87409 |
-  2. |          China   7.368955 |
-  3. |          Japan   5.003192 |
-  4. |        Germany   4.426065 |
-  5. | United Kingdom   3.791726 |
+  1. |  United States   40.19929 |
+  2. |          China    8.60341 |
+  3. |          Japan   6.359193 |
+  4. |        Germany   5.164085 |
+  5. | United Kingdom   4.384515 |
      |---------------------------|
-  6. |         Canada   3.107944 |
-  7. |         France   2.864504 |
-  8. |          Italy   1.981762 |
-  9. |      Australia   1.978915 |
- 10. |          Spain   1.813612 |
+  6. |         Canada   3.715188 |
+  7. |         France   3.697244 |
+  8. |          Italy   2.291075 |
+  9. |      Australia   2.192193 |
+ 10. |          Spain   2.075109 |
      |---------------------------|
- 11. |    South Korea   1.718852 |
- 12. |    Netherlands   1.463598 |
- 13. |         Brazil   1.314976 |
- 14. |         Sweden   1.285107 |
- 15. |         Taiwan   1.223089 |
+ 11. |    South Korea   1.977776 |
+ 12. |    Netherlands   1.639175 |
+ 13. |         Sweden   1.544423 |
+ 14. |         Brazil   1.437279 |
+ 15. |         Taiwan   1.315677 |
      |---------------------------|
- 16. |          India   1.108678 |
- 17. |    Switzerland   1.008238 |
- 18. |         Israel   .6707647 |
- 19. |        Denmark   .6685756 |
- 20. |        Belgium   .6286597 |
+ 16. |          India   1.297347 |
+ 17. |    Switzerland   1.241967 |
+ 18. |         Israel   .8858103 |
+ 19. |        Denmark   .7586574 |
+ 20. |        Belgium   .7510411 |
      +---------------------------+
-Total articles: 397701
+Total articles: 387329
 
       +-------------------------------+
       | msa_c_~d   affl_wt       perc |
       |-------------------------------|
-   1. |            74087.4   18.62892 |
+  41. |               1723   .4448415 |
       +-------------------------------+
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |  Washington-Arlington-Alexandria, US   2.396979 |
-  2. |          Boston-Cambridge-Newton, US   2.175362 |
-  3. |      New York-Newark-Jersey City, US   2.136454 |
-  4. |                          Beijing, CN   1.635925 |
-  5. |                            Tokyo, JP   1.439387 |
+  1. |  Washington-Arlington-Alexandria, US   3.463593 |
+  2. |                          Beijing, CN   2.985705 |
+  3. |      New York-Newark-Jersey City, US   2.944912 |
+  4. |          Boston-Cambridge-Newton, US   2.920256 |
+  5. |                         Bay Area, US   1.912715 |
      |-------------------------------------------------|
-  6. |                         Bay Area, US   1.421573 |
-  7. |                            Paris, FR   1.165859 |
-  8. |                           London, GB   1.046147 |
-  9. |   Philadelphia-Camden-Wilmington, US   1.001781 |
- 10. |   Los Angeles-Long Beach-Anaheim, US   .9954041 |
+  6. |                            Paris, FR   1.863403 |
+  7. |                            Tokyo, JP   1.732119 |
+  8. |   Los Angeles-Long Beach-Anaheim, US   1.351693 |
+  9. |   Philadelphia-Camden-Wilmington, US    1.34795 |
+ 10. |           Research Triangle Park, US   1.283018 |
      |-------------------------------------------------|
- 11. |           Research Triangle Park, US   .9898341 |
- 12. |                            Seoul, KR   .9315777 |
- 13. |               San Diego-Carlsbad, US   .8728077 |
- 14. | Houston-The Woodlands-Sugar Land, US   .8359063 |
- 15. |         Chicago-Naperville-Elgin, US   .8191689 |
+ 11. |                           London, GB   1.211244 |
+ 12. |               San Diego-Carlsbad, US   1.151734 |
+ 13. |         Chicago-Naperville-Elgin, US   1.150185 |
+ 14. |                            Seoul, KR   1.087189 |
+ 15. | Houston-The Woodlands-Sugar Land, US   1.082929 |
      |-------------------------------------------------|
- 16. |        Baltimore-Columbia-Towson, US   .7547113 |
- 17. |                         Shanghai, CN   .7433202 |
- 18. |                        St. Louis, US   .5983667 |
- 19. |                          Toronto, CA   .5895584 |
- 20. |                           Madrid, ES   .5704618 |
+ 16. |        Baltimore-Columbia-Towson, US   1.045881 |
+ 17. |                        St. Louis, US   .8540543 |
+ 18. |                          Madison, US   .8229438 |
+ 19. |                         Shanghai, CN   .7327104 |
+ 20. |                          Toronto, CA   .7235451 |
      +-------------------------------------------------+
-Total articles: 397701
+Total articles: 387329
 
-       +----------------------------+
-       | inst    affl_wt       perc |
-       |----------------------------|
-    1. |        71173.49   17.89623 |
-       +----------------------------+
-
-     +------------------------------------------------------------------+
-     |                                                  inst       perc |
-     |------------------------------------------------------------------|
-  1. | United States Department of Health and Human Services   .8144273 |
-  2. |                                    Harvard University   .7491564 |
-  3. |                         National Institutes of Health   .7019997 |
-  4. |                           Chinese Academy of Sciences    .658545 |
-  5. |                                                Inserm   .5452387 |
-     |------------------------------------------------------------------|
-  6. |                                  University of London   .4554793 |
-  7. |                            University of Pennsylvania   .4468876 |
-  8. |                    Washington University in St. Louis   .4438002 |
-  9. |                       University of Wisconsin–Madison   .3883072 |
- 10. |                              Johns Hopkins University   .3882028 |
-     |------------------------------------------------------------------|
- 11. |                   University of California, San Diego   .3824634 |
- 12. |                                       Yale University   .3776263 |
- 13. |               University of California, San Francisco   .3702936 |
- 14. |                                    Cornell University   .3681632 |
- 15. |                                    Max Planck Society   .3678385 |
-     |------------------------------------------------------------------|
- 16. |                              University of Washington   .3636751 |
- 17. |                                   Stanford University   .3563466 |
- 18. |                          State University of New York    .355511 |
- 19. |                               The University of Tokyo   .3458168 |
- 20. |        French National Centre for Scientific Research   .3306478 |
-     +------------------------------------------------------------------+
-Total articles: 397701
+     +-----------------------------------------------------------+
+     |                                           inst       perc |
+     |-----------------------------------------------------------|
+  1. |                  National Institutes of Health   2.241376 |
+  2. |                    Chinese Academy of Sciences   1.787111 |
+  3. |                             Harvard University   .9384786 |
+  4. |                                         Inserm   .9002683 |
+  5. | French National Centre for Scientific Research   .8639942 |
+     |-----------------------------------------------------------|
+  6. |                University of Wisconsin–Madison   .7618846 |
+  7. |                       Johns Hopkins University   .7213506 |
+  8. |               University of Michigan–Ann Arbor   .6724257 |
+  9. |             Washington University in St. Louis   .6555151 |
+ 10. |                     University of Pennsylvania   .6069775 |
+     |-----------------------------------------------------------|
+ 11. |                        The University of Tokyo   .5447565 |
+ 12. |                                Yale University   .5362366 |
+ 13. |                            Stanford University   .5269422 |
+ 14. |            University of California, San Diego   .5269422 |
+ 15. |        University of California, San Francisco   .5262968 |
+     |-----------------------------------------------------------|
+ 16. |                             Cornell University   .5084825 |
+ 17. |          University of California, Los Angeles   .5026734 |
+ 18. |                       University of Washington   .4866664 |
+ 19. |              Spanish National Research Council   .4785337 |
+ 20. |                             Max Planck Society   .4674321 |
+     +-----------------------------------------------------------+
+Total articles: 387329
 (0 observations deleted)
-
-     +-------------------------------+
-     | country   cite_a~t       perc |
-     |-------------------------------|
-  2. |           58543.33   14.72044 |
-     +-------------------------------+
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   32.77384 |
-  2. |          China   7.295302 |
-  3. |          Japan   4.861599 |
-  4. |        Germany   4.719301 |
-  5. | United Kingdom   4.379914 |
+  1. |  United States   39.69302 |
+  2. |          China   8.596387 |
+  3. |          Japan   6.097131 |
+  4. |        Germany   5.391444 |
+  5. | United Kingdom   4.916254 |
      |---------------------------|
-  6. |         Canada   3.192868 |
-  7. |         France   2.991397 |
-  8. |      Australia   2.174539 |
-  9. |          Italy   2.170919 |
- 10. |          Spain    1.83402 |
+  6. |         France   3.688342 |
+  7. |         Canada   3.675484 |
+  8. |          Italy   2.463118 |
+  9. |      Australia    2.37628 |
+ 10. |          Spain   2.066592 |
      |---------------------------|
- 11. |    Netherlands   1.581979 |
- 12. |    South Korea   1.558656 |
- 13. |         Sweden   1.331251 |
- 14. |         Brazil   1.204999 |
- 15. |    Switzerland   1.127908 |
+ 11. |    South Korea   1.850294 |
+ 12. |    Netherlands   1.781753 |
+ 13. |         Sweden   1.558779 |
+ 14. |    Switzerland   1.332003 |
+ 15. |         Brazil   1.323516 |
      |---------------------------|
- 16. |          India   1.122541 |
- 17. |         Taiwan   .9946665 |
- 18. |        Denmark   .7341228 |
- 19. |        Belgium   .6907588 |
- 20. |         Israel   .6345717 |
+ 16. |          India   1.281212 |
+ 17. |         Taiwan   1.077062 |
+ 18. |        Denmark   .8259714 |
+ 19. |        Belgium   .8022853 |
+ 20. |         Israel   .7982154 |
      +---------------------------+
-Total articles: 397701
+Total articles: 387329
 
       +--------------------------------+
       | msa_c_~d   cite_a~t       perc |
       |--------------------------------|
-   1. |            61468.17   15.45588 |
+  57. |            1395.471   .3602806 |
       +--------------------------------+
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   2.589139 |
-  2. |  Washington-Arlington-Alexandria, US   2.506121 |
-  3. |      New York-Newark-Jersey City, US   2.208478 |
-  4. |                         Bay Area, US   1.689101 |
-  5. |                          Beijing, CN   1.553802 |
+  1. |  Washington-Arlington-Alexandria, US    3.30074 |
+  2. |          Boston-Cambridge-Newton, US   3.247519 |
+  3. |                          Beijing, CN   2.926014 |
+  4. |      New York-Newark-Jersey City, US   2.784781 |
+  5. |                         Bay Area, US   2.055923 |
      |-------------------------------------------------|
-  6. |                            Tokyo, JP   1.397012 |
-  7. |                           London, GB   1.278013 |
-  8. |                            Paris, FR   1.215941 |
-  9. |           Research Triangle Park, US   1.136332 |
- 10. |               San Diego-Carlsbad, US   1.076076 |
+  6. |                            Paris, FR   1.834066 |
+  7. |                            Tokyo, JP   1.685006 |
+  8. |                           London, GB   1.399123 |
+  9. |   Los Angeles-Long Beach-Anaheim, US   1.337617 |
+ 10. |           Research Triangle Park, US   1.327643 |
      |-------------------------------------------------|
- 11. |   Los Angeles-Long Beach-Anaheim, US   1.060063 |
- 12. |   Philadelphia-Camden-Wilmington, US   1.023324 |
- 13. | Houston-The Woodlands-Sugar Land, US   .9348679 |
- 14. |         Chicago-Naperville-Elgin, US   .8460839 |
- 15. |                            Seoul, KR   .8437014 |
+ 11. |               San Diego-Carlsbad, US   1.321375 |
+ 12. |   Philadelphia-Camden-Wilmington, US   1.259577 |
+ 13. | Houston-The Woodlands-Sugar Land, US   1.134857 |
+ 14. |        Baltimore-Columbia-Towson, US    1.09254 |
+ 15. |         Chicago-Naperville-Elgin, US   1.090206 |
      |-------------------------------------------------|
- 16. |        Baltimore-Columbia-Towson, US   .8418276 |
- 17. |                         Shanghai, CN   .8043221 |
- 18. |                          Toronto, CA   .6254942 |
- 19. |                        St. Louis, US   .5735937 |
- 20. |                           Madrid, ES   .5717575 |
+ 16. |                        St. Louis, US   1.027965 |
+ 17. |                            Seoul, KR   1.016243 |
+ 18. |                         Shanghai, CN   .7706303 |
+ 19. |                        Ann Arbor, US   .7656087 |
+ 20. |                          Toronto, CA   .7287003 |
      +-------------------------------------------------+
-Total articles: 397701
+Total articles: 387329
 
-       +----------------------------+
-       | inst   cite_a~t       perc |
-       |----------------------------|
-    1. |        58525.33   14.71591 |
-       +----------------------------+
-
-     +------------------------------------------------------------------+
-     |                                                  inst       perc |
-     |------------------------------------------------------------------|
-  1. |                                    Harvard University   .9035193 |
-  2. | United States Department of Health and Human Services   .8198061 |
-  3. |                         National Institutes of Health   .7212212 |
-  4. |                           Chinese Academy of Sciences   .6109153 |
-  5. |                                                Inserm   .5654731 |
-     |------------------------------------------------------------------|
-  6. |                                  University of London   .5456576 |
-  7. |                                   Stanford University   .5020996 |
-  8. |                   University of California, San Diego   .4606673 |
-  9. |                            University of Pennsylvania   .4449299 |
- 10. |                    Washington University in St. Louis   .4407237 |
-     |------------------------------------------------------------------|
- 11. |                              Johns Hopkins University   .4348391 |
- 12. |               University of California, San Francisco    .429165 |
- 13. |                                    Max Planck Society   .4166993 |
- 14. |           University of North Carolina at Chapel Hill   .3832182 |
- 15. |                              University of Washington   .3806958 |
-     |------------------------------------------------------------------|
- 16. |                      University of Michigan–Ann Arbor   .3729133 |
- 17. |                                  Mass General Brigham   .3717579 |
- 18. |                                    Cornell University   .3716583 |
- 19. |                                       Yale University    .362329 |
- 20. |     The University of Texas MD Anderson Cancer Center   .3611713 |
-     +------------------------------------------------------------------+
-Total articles: 397701
-(205 real changes made)
+     +-----------------------------------------------------------+
+     |                                           inst       perc |
+     |-----------------------------------------------------------|
+  1. |                  National Institutes of Health   2.072139 |
+  2. |                    Chinese Academy of Sciences   1.755235 |
+  3. |                             Harvard University     1.0063 |
+  4. |                                         Inserm   .9059206 |
+  5. |             Washington University in St. Louis    .883823 |
+     |-----------------------------------------------------------|
+  6. | French National Centre for Scientific Research    .851687 |
+  7. |                       Johns Hopkins University     .74547 |
+  8. |               University of Michigan–Ann Arbor   .7311116 |
+  9. |                            Stanford University   .6623828 |
+ 10. |                University of Wisconsin–Madison   .5840278 |
+     |-----------------------------------------------------------|
+ 11. |                     University of Pennsylvania   .5814148 |
+ 12. |            University of California, San Diego   .5750569 |
+ 13. |                        The University of Tokyo   .5676388 |
+ 14. |        University of California, San Francisco   .5576414 |
+ 15. |                           Mass General Brigham   .5500104 |
+     |-----------------------------------------------------------|
+ 16. |                             Max Planck Society   .4844484 |
+ 17. |    University of North Carolina at Chapel Hill   .4833433 |
+ 18. |                       University of Washington   .4827031 |
+ 19. |          University of California, Los Angeles    .477525 |
+ 20. |                                Yale University   .4739469 |
+     +-----------------------------------------------------------+
+Total articles: 387329
+(196 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations              410   ->   205         
+Number of observations              392   ->   196         
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
                                   share   ->   shareunwt sharewt
 -----------------------------------------------------------------------------
-(5,195 real changes made)
+(3,907 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations           10,390   ->   5,195       
+Number of observations            7,814   ->   3,907       
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
                                   share   ->   shareunwt sharewt
 -----------------------------------------------------------------------------
-(25,074 real changes made)
+(17,320 real changes made)
 (j = unwt wt)
 
 Data                               Long   ->   Wide
 -----------------------------------------------------------------------------
-Number of observations           50,148   ->   25,074      
+Number of observations           34,640   ->   17,320      
 Number of variables                   3   ->   3           
 j variable (2 values)               cat   ->   (dropped)
 xij variables:
                                   share   ->   shareunwt sharewt
 -----------------------------------------------------------------------------
 variable samp was str3 now str6
-(145 real changes made)
+(87 real changes made)
 (note: j = cns scisub)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                      322   ->   182                  
+Number of obs.                      236   ->   155                  
 Number of variables                    4  ->   5                    
 j (2 values)                       samp   ->   (dropped)
 xij variables:
                                    rank   ->   rankcns rankscisub
                                   share   ->   sharecns sharescisub
 -----------------------------------------------------------------------------
-(6 real changes made)
-(42 missing values generated)
+(7 real changes made)
+(74 missing values generated)
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
@@ -1183,33 +1112,33 @@ xij variables:
              |  rankcns ranksc~b
 -------------+------------------
      rankcns |   1.0000
-  rankscisub |   0.9842   1.0000
+  rankscisub |   0.9769   1.0000
 
-56
-(obs=140)
+60
+(obs=81)
 
              | sharecns shares~b
 -------------+------------------
     sharecns |   1.0000
- sharescisub |   0.9994   1.0000
+ sharescisub |   0.9993   1.0000
 
 file ../output/figures/cns_scisub_newfund_country_share_wt.pdf saved as PDF
     format
 variable samp was str3 now str6
-(1,882 real changes made)
+(1,000 real changes made)
 (note: j = cns scisub)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                    4,515   ->   2,994                
+Number of obs.                    2,892   ->   2,035                
 Number of variables                    4  ->   5                    
 j (2 values)                       samp   ->   (dropped)
 xij variables:
                                    rank   ->   rankcns rankscisub
                                   share   ->   sharecns sharescisub
 -----------------------------------------------------------------------------
-(2,994 real changes made)
-(1,473 missing values generated)
+(2,035 real changes made)
+(1,178 missing values generated)
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
@@ -1226,38 +1155,38 @@ xij variables:
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
-(obs=18)
+(obs=19)
 
              |  rankcns ranksc~b
 -------------+------------------
      rankcns |   1.0000
-  rankscisub |   0.8090   1.0000
+  rankscisub |   0.8794   1.0000
 
-11
-(obs=1,521)
+12
+(obs=857)
 
              | sharecns shares~b
 -------------+------------------
     sharecns |   1.0000
- sharescisub |   0.9914   1.0000
+ sharescisub |   0.9887   1.0000
 
 file ../output/figures/cns_scisub_newfund_msa_c_world_share_wt.pdf saved as
     PDF format
 variable samp was str3 now str6
-(7,161 real changes made)
+(3,308 real changes made)
 (note: j = cns scisub)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                   17,467   ->   12,545               
+Number of obs.                   10,340   ->   8,060                
 Number of variables                    4  ->   5                    
 j (2 values)                       samp   ->   (dropped)
 xij variables:
                                    rank   ->   rankcns rankscisub
                                   share   ->   sharecns sharescisub
 -----------------------------------------------------------------------------
-(5,968 real changes made)
-(7,623 missing values generated)
+(3,623 real changes made)
+(5,780 missing values generated)
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
@@ -1279,25 +1208,25 @@ xij variables:
              |  rankcns ranksc~b
 -------------+------------------
      rankcns |   1.0000
-  rankscisub |   0.7225   1.0000
+  rankscisub |   0.7226   1.0000
 
 5
-(obs=4,922)
+(obs=2,280)
 
              | sharecns shares~b
 -------------+------------------
     sharecns |   1.0000
- sharescisub |   0.9625   1.0000
+ sharescisub |   0.9543   1.0000
 
 file ../output/figures/cns_scisub_newfund_inst_share_wt.pdf saved as PDF
     format
 variable samp was str3 now str6
-(205 real changes made)
+(196 real changes made)
 (note: j = cns demsci)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                      382   ->   206                  
+Number of obs.                      345   ->   200                  
 Number of variables                    4  ->   5                    
 j (2 values)                       samp   ->   (dropped)
 xij variables:
@@ -1305,7 +1234,7 @@ xij variables:
                                   share   ->   sharecns sharedemsci
 -----------------------------------------------------------------------------
 (9 real changes made)
-(30 missing values generated)
+(55 missing values generated)
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
@@ -1327,33 +1256,33 @@ xij variables:
              |  rankcns rankde~i
 -------------+------------------
      rankcns |   1.0000
-  rankdemsci |   0.8106   1.0000
+  rankdemsci |   0.8076   1.0000
 
-56
-(obs=176)
+60
+(obs=145)
 
              | sharecns shared~i
 -------------+------------------
     sharecns |   1.0000
- sharedemsci |   0.9758   1.0000
+ sharedemsci |   0.9797   1.0000
 
 file ../output/figures/cns_demsci_newfund_country_share_wt.pdf saved as PDF
     format
 variable samp was str3 now str6
-(5,195 real changes made)
+(3,907 real changes made)
 (note: j = cns demsci)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                    7,828   ->   5,377                
+Number of obs.                    5,799   ->   4,117                
 Number of variables                    4  ->   5                    
 j (2 values)                       samp   ->   (dropped)
 xij variables:
                                    rank   ->   rankcns rankdemsci
                                   share   ->   sharecns sharedemsci
 -----------------------------------------------------------------------------
-(5,377 real changes made)
-(2,926 missing values generated)
+(4,117 real changes made)
+(2,435 missing values generated)
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
@@ -1370,38 +1299,38 @@ xij variables:
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
-(obs=15)
+(obs=16)
 
              |  rankcns rankde~i
 -------------+------------------
      rankcns |   1.0000
-  rankdemsci |   0.6923   1.0000
+  rankdemsci |   0.7351   1.0000
 
-11
-(obs=2,451)
+12
+(obs=1,682)
 
              | sharecns shared~i
 -------------+------------------
     sharecns |   1.0000
- sharedemsci |   0.8367   1.0000
+ sharedemsci |   0.8512   1.0000
 
 file ../output/figures/cns_demsci_newfund_msa_c_world_share_wt.pdf saved as
     PDF format
 variable samp was str3 now str6
-(25,074 real changes made)
+(17,320 real changes made)
 (note: j = cns demsci)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                   35,380   ->   26,771               
+Number of obs.                   24,352   ->   19,141               
 Number of variables                    4  ->   5                    
 j (2 values)                       samp   ->   (dropped)
 xij variables:
                                    rank   ->   rankcns rankdemsci
                                   share   ->   sharecns sharedemsci
 -----------------------------------------------------------------------------
-(13,095 real changes made)
-(18,162 missing values generated)
+(9,210 real changes made)
+(13,930 missing values generated)
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
@@ -1418,20 +1347,20 @@ xij variables:
 (0 real changes made)
 (0 real changes made)
 (0 real changes made)
-(obs=14)
+(obs=12)
 
              |  rankcns rankde~i
 -------------+------------------
      rankcns |   1.0000
-  rankdemsci |   0.0740   1.0000
+  rankdemsci |   0.4273   1.0000
 
 5
-(obs=8,609)
+(obs=5,211)
 
              | sharecns shared~i
 -------------+------------------
     sharecns |   1.0000
- sharedemsci |   0.7424   1.0000
+ sharedemsci |   0.7529   1.0000
 
 file ../output/figures/cns_demsci_newfund_inst_share_wt.pdf saved as PDF
     format
@@ -1442,6 +1371,6 @@ file ../output/figures/cns_demsci_newfund_inst_share_wt.pdf saved as PDF
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-08-31 01:30:35
-Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_samps/code
+Makelog ended: 2023-11-28 23:55:25
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_jrnl_samps/code
 --------------------------------------------------------------------------------

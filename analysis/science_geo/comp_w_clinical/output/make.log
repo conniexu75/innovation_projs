@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-08-31 01:15:17
-Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_indices/code
+Makelog started: 2023-11-28 23:55:38
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_w_clinical/code
 --------------------------------------------------------------------------------
 External links successfully created!
 
@@ -15,8 +15,8 @@ ___/   /   /___/   /   /___/       MP—Parallel Edition
                                    800-STATA-PC        https://www.stata.com
                                    979-696-4600        stata@stata.com
 
-Stata license: Unlimited-user 4-core, expiring 17 Nov 2023
-Serial number: 501709306977
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
   Licensed to: Harvard Business School
                Research Computing
 
@@ -26,8 +26,8 @@ Notes:
       3. More than 2 billion observations are allowed; see help obs_advice.
       4. Maximum number of variables is set to 120,000; see help set_maxvar.
 
-. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_indices/c
-> ode/analysis.do" 
+. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_w_clinica
+> l/code/analysis.do" 
 
 . set more off
 
@@ -44,7 +44,8 @@ Notes:
 . set seed 8975
 
 . here, set
-/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_indices/code/
+/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_w_clinical/code
+> /
 
 . 
 . program main
@@ -253,6 +254,6 @@ Notes:
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-08-31 01:16:09
-Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_indices/code
+Makelog ended: 2023-11-28 23:55:54
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_w_clinical/code
 --------------------------------------------------------------------------------
