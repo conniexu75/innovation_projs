@@ -8,6 +8,7 @@ set seed 8975
 here, set
 set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_openalex"
+global output "/export/scratch/cxu_sci_geo/clean_openalex_output"
 
 program main
     local samp all_jrnls
@@ -54,7 +55,7 @@ program aggregate_insts
     replace inst = associated if inlist(associated, "Medical Research Council", "National Institute for Health Research", "Academia Sinica", "National Scientific and Technical Research Council","Czech Academy of Sciences", "Commonwealth Scientific and Industrial Research Organisation")
     replace inst = associated if inlist(associated, "Slovak Academy of Sciences", "Indian Council of Medical Research", "Council of Scientific and Industrial Research", "National Institute for Astrophysics", "Bulgarian Academy of Sciences", "Centers for Disease Control and Prevention", "National Institute of Technology")
     replace inst = associated if inlist(associated, "Helmholtz Association of German Research Centres", "Helios Kliniken", "Shriners Hospitals for Children", "Hungarian Academy of Sciences", "National Agriculture and Food Research Organization", "Australian Research Council")
-    replace inst = associated if inlist(associated, "Agro ParisTech", "Veterans Health Administration", "Institut de Recherche pour le Développement", "Austrian Academy of Sciences", "Institutos Nacionais de Ciência e Tecnologia", "Chinese Academy of Forestry", "hinese Academy of Tropical Agricultural Sciences")
+    replace inst = associated if inlist(associated, "Agro ParisTech", "Veterans Health Administration", "Institut de Recherche pour le Développement", "Austrian Academy of Sciences", "Institutos Nacionais de Ciência e Tecnologia", "Chinese Academy of Forestry", "Chinese Academy of Tropical Agricultural Sciences")
     replace inst = associated if inlist(associated, "Instituto de Salud Carlos III", "National Aeronautics and Space Administration", "Ludwig Boltzmann Gesellschaft", "United States Air Force", "Centre Nouvelle Aquitaine-Bordeaux", "RIKEN", "Agricultural Research Council")
     replace inst = associated if inlist(associated, "Centro Científico Tecnológico - La Plata", "National Research Council Canada", "Royal Netherlands Academy of Arts and Sciences","Defence Research and Development Organisation", "Canadian Institutes of Health Research", "Italian Institute of Technology", "United Nations University")
     replace inst = associated if inlist(associated, "IBM Research - Thomas J. Watson Research Center", "Délégation Ile-de-France Sud","Grenoble Institute of Technology", "François Rabelais University", "Chinese Academy of Social Sciences", "National Science Foundation" , "Federal University of Toulouse Midi-Pyrénées")
@@ -91,7 +92,7 @@ program aggregate_insts
     rename associated_id new_id
     keep inst_id new_inst new_id region city country country_code type inst
     drop if mi(inst_id) 
-    save ../output/all_inst_geo_chars, replace
+    save ${output}/all_inst_geo_chars, replace
 end
 
 program clean_titles
@@ -146,6 +147,22 @@ program clean_samps
     syntax, samp(str)
     use pmid journal_abbr using ${temp}/openalex_`samp'_clean_titles, clear
     merge 1:m pmid using ../external/openalex/openalex_`samp'_merged, keep(3) nogen 
+    drop if inlist(id , "W2016575029", "W2331065494", "W4290207833", "W4290198809" , "W4290206947" , "W4290293465")
+    drop if inlist(id , "W4290277360", "W4290357912", "W4214483051", "W1978139107" , "W2045742772" , "W2049314578")
+    drop if inlist(id, "W1994190235","W2580449060", "W2082429191", "W2022687771", "W2040385059" , "W4229906281")
+    drop if inlist(id, "W4255455244" , "W1980313477", "W3048657354", "W1980462544")
+    drop if inlist(id, "W2002595366", "W2102489389", "W2001810314", "W4231356616", "W4230789027", "W2080003482", "W2107959600", "W2400624566" )
+    drop if inlist(id, "W4236962498", "W2084870845", "W2784316575", "W2955291917", "W2474836229")
+    drop if inlist(pmid, 13297012,13741605,13854582,14394134,20241600,21065007)
+    replace pmid = 15164053 if id == "W2103225674"
+    replace pmid = 27768894 if id == "W4242360498"
+    replace pmid = 5963230 if id == "W3083842255"
+    replace pmid = 4290025 if id == "W2007714458"
+    replace pmid = 9157877 if id == "W1988665546"
+    replace pmid = 11689469 if id == "W2148194696" 
+    replace pmid = 12089445 if id == "W3205595473"
+    replace pmid = 13111194 if id == "W2737242062"
+    replace pmid = 13113233 if id == "W2050270632"
     gen date = date(pub_date, "YMD")
     format %td date
     drop pub_date
@@ -156,8 +173,9 @@ program clean_samps
     rename date pub_date
     gen pub_mnth = month(pub_date)
     gen year = year(pub_date)
+    gen qrtr = qofd(pub_date)
     replace inst = "Johns Hopkins University" if strpos(raw_affl , "Bloomberg School of Public Health")>0 & inst == "Bloomberg (United States)"
-    merge m:1 inst_id using ../output/all_inst_geo_chars, assert(1 2 3) keep(1 3) nogen 
+    merge m:1 inst_id using ${output}/all_inst_geo_chars, assert(1 2 3) keep(1 3) nogen 
     replace inst = new_inst if !mi(new_inst)
     replace inst_id = new_id if !mi(new_inst)
     replace inst = "Johns Hopkins University" if  strpos(inst, "Johns Hopkins")>0
@@ -260,7 +278,7 @@ program clean_samps
     qui sum len
     local n = r(max)
     recast str`n' inst, force
-    save ../output/cleaned_all_`samp', replace
+    save ${output}/cleaned_all_`samp', replace
     preserve
     gcontract id pmid
     drop _freq
@@ -277,7 +295,7 @@ program clean_samps
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     qui gen cite_affl_wt = affl_wt * cite_wt
     compress, nocoalesce
-    save ../output/cleaned_last5yrs_`samp', replace
+    save ${output}/cleaned_last5yrs_`samp', replace
 end
 
 program clean_mesh  
@@ -311,11 +329,11 @@ program clean_mesh
     if "`samp'" == "all_jrnls" {
         merge m:1 pmid using ../external/pmids_jrnl/newfund_pmids, keep(3) nogen keepusing(pmid)
     }
-    save ../output/contracted_gen_mesh_`samp', replace
+    save ${output}/contracted_gen_mesh_`samp', replace
     bys id: gen n = _n
     greshape wide qualifier_name gen_mes, i(id pmid) j(n)
     gduplicates drop id, force
-    save ../output/reshaped_gen_mesh_`samp', replace
+    save ${output}/reshaped_gen_mesh_`samp', replace
 end
 
 program clean_concepts
@@ -346,20 +364,20 @@ program clean_concepts
     if "`samp'" == "all_jrnls" {
         merge m:1 pmid using ../external/pmids_jrnl/newfund_pmids, keep(3) nogen keepusing(pmid)
     }
-    save ../output/concepts_`samp', replace
+    save ${output}/concepts_`samp', replace
     drop concept_id pmid
     gsort id -score
     by id: replace which_concept  = _n
     greshape wide term level score, i(id) j(which_concept)
     drop level*
     drop score*
-    save ../output/reshaped_concepts_`samp', replace
+    save ${output}/reshaped_concepts_`samp', replace
 end
 
 program split_sample
     foreach samp in all last5yrs {
         preserve
-        use ../output/cleaned_`samp'_all_jrnls, clear
+        use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "cell", "science", "nature")
         drop cite_wt cite_affl_wt
         qui sum avg_cite_yr
@@ -369,14 +387,14 @@ program split_sample
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         qui gen cite_affl_wt = affl_wt * cite_wt
-        save ../output/cleaned_`samp'_newfund_cns, replace
+        save ${output}/cleaned_`samp'_newfund_cns, replace
         gcontract pmid
         drop _freq
-        save ../output/list_of_pmids_`samp'_newfund_cns, replace
+        save ${output}/list_of_pmids_`samp'_newfund_cns, replace
         restore
 
         preserve
-        use ../output/cleaned_`samp'_all_jrnls, clear
+        use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "cell_stem_cell", "nat_biotech", "nat_cell_bio", "nat_genet", "nat_med", "nat_med", "nat_neuro", "neuron", "nat_chem_bio")
         drop cite_wt cite_affl_wt
         qui sum avg_cite_yr
@@ -386,14 +404,14 @@ program split_sample
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         qui gen cite_affl_wt = affl_wt * cite_wt
-        save ../output/cleaned_`samp'_newfund_scisub, replace
+        save ${output}/cleaned_`samp'_newfund_scisub, replace
         gcontract pmid
         drop _freq
-        save ../output/list_of_pmids_`samp'_newfund_scisub, replace
+        save ${output}/list_of_pmids_`samp'_newfund_scisub, replace
         restore
 
         preserve
-        use ../output/cleaned_`samp'_all_jrnls, clear
+        use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "faseb", "jbc", "onco", "plos")
         drop cite_wt cite_affl_wt
         qui sum avg_cite_yr
@@ -403,33 +421,33 @@ program split_sample
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         qui gen cite_affl_wt = affl_wt * cite_wt
-        save ../output/cleaned_`samp'_newfund_demsci, replace
+        save ${output}/cleaned_`samp'_newfund_demsci, replace
         gcontract pmid
         drop _freq
-        save ../output/list_of_pmids_`samp'_newfund_demsci, replace
+        save ${output}/list_of_pmids_`samp'_newfund_demsci, replace
         restore
 
         preserve
-        use ../output/cleaned_`samp'_clin_med, clear
+        use ${output}/cleaned_`samp'_clin_med, clear
         gcontract pmid
         drop _freq
-        save ../output/list_of_pmids_`samp'_clin_med,  replace
+        save ${output}/list_of_pmids_`samp'_clin_med,  replace
         restore
     } 
     // split mesh terms
-    use ../output/contracted_gen_mesh_all_jrnls, clear
+    use ${output}/contracted_gen_mesh_all_jrnls, clear
     foreach samp in cns scisub demsci {
         preserve
-        merge m:1 pmid using ../output/list_of_pmids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
-        save ../output/contracted_gen_mesh_newfund_`samp', replace
+        merge m:1 pmid using ${output}/list_of_pmids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
+        save ${output}/contracted_gen_mesh_newfund_`samp', replace
         restore
     }
    // split concepts 
-    use ../output/concepts_all_jrnls, clear
+    use ${output}/concepts_all_jrnls, clear
     foreach samp in cns scisub demsci {
         preserve
-        merge m:1 pmid using ../output/list_of_pmids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
-        save ../output/concepts_newfund_`samp', replace
+        merge m:1 pmid using ${output}/list_of_pmids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
+        save ${output}/concepts_newfund_`samp', replace
         restore
     }
 end

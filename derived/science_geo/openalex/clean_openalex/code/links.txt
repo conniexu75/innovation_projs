@@ -1,5 +1,3 @@
 ./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
 ./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/scrape_openalex/output/
 ./pmids_jrnl/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/append_pmids/output/
-./wos/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/wos/clean_wos_exports/output/
-./new_pt/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/get_pt/output/
