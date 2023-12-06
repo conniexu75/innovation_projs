@@ -83,6 +83,7 @@ program make_panel
     gen qrtr = qofd(pub_date)
     merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(3) nogen
     merge m:1 athr_id year using ../temp/clusters, assert(1 2 3) keep(3) nogen
+    merge m:1 id using ../external/patents/patent_ppr_cnt, assert(1 2 3) keep(1 3) nogen keepusing(patent_count)
     rename cluster_label field
     gduplicates drop pmid athr_id inst_id, force
 
@@ -99,18 +100,28 @@ program make_panel
     if "`time'" == "qrtr" {
         gen time_since_pub = qofd(`date') - `time'+1
         gen avg_cite = cite_count/time_since_pub
+        gen avg_pat = patent_count/time_since_pub
     }
     if "`time'" == "year" {
         gen time_since_pub = yofd(`date') - `time'+1
         gen avg_cite = cite_count/time_since_pub
+        gen avg_pat = patent_count/time_since_pub
     }
     bys pmid: replace avg_cite = . if _n != 1
+    bys pmid: replace avg_pat = . if _n != 1
     sum avg_cite
     gen cite_wt = avg_cite/r(sum)
+    sum avg_pat
+    gen pat_wt = avg_pat/r(sum)
     qui gunique pmid
     qui replace cite_wt = cite_wt * r(unique)
+    qui gunique pmid
+    qui replace pat_wt = pat_wt * r(unique)
     gsort pmid cite_wt
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
+    gsort pmid pat_wt
+    qui bys pmid: replace pat_wt = pat_wt[_n-1] if mi(pat_wt)
+    qui gen pat_adj_wt = affl_wt * pat_wt
     qui gen cite_affl_wt = affl_wt * cite_wt
     qui gunique pmid
     local articles = r(unique)
@@ -118,6 +129,10 @@ program make_panel
     assert round(r(sum)-`articles') == 0
     qui sum cite_affl_wt
     assert round(r(sum)-`articles') == 0
+    qui sum pat_adj_wt
+    assert round(r(sum)-`articles') == 0
+    // these should sum to the number of patents
+    gen patent_wt = affl_wt * patent_count
     // restrict to USA
     keep if country_code == "US" & !mi(msa_comb)
 
@@ -147,16 +162,15 @@ program make_panel
     // get avg team size
     bys athr_id pmid : gen athr_pmid_cntr = _n == 1
     bys athr_id `time': egen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
-
     preserve
     if "`time'" == "year" {
-        gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
+        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt patent_wt patent_count (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
         merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
-        gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
+        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt patent_wt patent_count (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
         merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
@@ -192,13 +206,13 @@ program make_panel
     restore
     preserve
     if "`time'" == "year" {
-        gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
+        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt patent_wt patent_count (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
         merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
-        gcollapse (sum) affl_wt cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
+        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt patent_wt patent_count (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
         merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel

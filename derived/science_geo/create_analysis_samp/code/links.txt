@@ -1,5 +1,6 @@
 ./openalex/ | /export/scratch/cxu_sci_geo/clean_openalex_output
 ./firstlast/ | /export/scratch/cxu_sci_geo/create_first_last
 ./clusters/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/cluster_fields/output
+./patents/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/link_patents/output
 ./insts/ | /export/scratch/cxu_sci_geo/clean_athr_inst_hist_output
 ./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
