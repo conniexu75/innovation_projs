@@ -1,9 +1,102 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-12-04 16:26:44
+Makelog started: 2023-12-04 16:36:02
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/link_patents/code
 --------------------------------------------------------------------------------
 External links successfully created!
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/derived/science_geo/link_patents/co
+> de/build.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/home/dor/cxu/innovation_projs/derived/science_geo/link_patents/code/
+
+. 
+. program main
+  1.     merge_w_openalex
+  2. end
+
+. program merge_w_openalex
+  1.     use ../external/openalex/cleaned_all_all_jrnls, clear
+  2.     gcontract id
+  3.     drop _freq
+  4.     save ../temp/list_of_papers, replace
+  5. 
+.     import delimited ../external/patents/_pcs_oa.csv, clear
+  6.     tostring oaid , gen(id)
+  7.     replace id = "W"+id
+  8.     fmerge m:1 id using ../temp/list_of_papers, assert(1 2 3) keep(2 3) 
+  9.     gen wt = 1 if wherefound == "body" | wherefound == "front"
+ 10.     replace wt = 2 if wherefound == "both"
+ 11.     gen patent_count = _merge == 3
+ 12.     gcollapse (sum) wt patent_count, by(id)
+ 13.     save ../output/patent_ppr_cnt, replace
+ 14. end
+
+. 
+. ** 
+. main
+(file ../temp/list_of_papers.dta not found)
+file ../temp/list_of_papers.dta saved
+(encoding automatically selected: ISO-8859-1)
+(6 vars, 44,778,211 obs)
+id generated as str10
+variable id was str10 now str11
+(44,778,211 real changes made)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       374,412
+        from master                         0  
+        from using                    374,412  (_merge==2)
+
+    matched                         2,663,359  (_merge==3)
+    -----------------------------------------
+(750,603 missing values generated)
+(376,191 real changes made)
+(file ../output/patent_ppr_cnt.dta not found)
+file ../output/patent_ppr_cnt.dta saved
+
+. 
+. 
+end of do-file
+
 --------------------------------------------------------------------------------
-Makelog ended: 2023-12-04 16:26:44
+Makelog ended: 2023-12-04 16:39:31
 Working directory: /export/home/dor/cxu/innovation_projs/derived/science_geo/link_patents/code
 --------------------------------------------------------------------------------
