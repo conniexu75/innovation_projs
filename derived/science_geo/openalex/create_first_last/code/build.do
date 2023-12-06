@@ -20,7 +20,7 @@ end
 program create_firstlast 
     syntax, samp(str)
     if "`samp'" == "all_jrnls" {
-        use id pmid which_athr  which_affl pub_date year journal_abbr cite_count athr_id athr_name using ../external/openalex/cleaned_all_`samp', clear
+        use id pmid which_athr  which_affl pub_date year journal_abbr cite_count athr_id athr_name has_broad_affl has_hhmi_affl using ../external/openalex/cleaned_all_`samp', clear
     }
     if "`samp'" == "clin_med" {
         use  ../external/openalex/cleaned_all_`samp', clear
@@ -32,12 +32,7 @@ program create_firstlast
     drop if inlist(id, "W4255455244" , "W1980313477", "W3048657354", "W1980462544")
     drop if inlist(id, "W2002595366", "W2102489389", "W2001810314", "W4231356616", "W4230789027", "W2080003482", "W2107959600", "W2400624566" )
     drop if inlist(id, "W4236962498", "W2084870845", "W2784316575", "W2955291917", "W2474836229")
-    drop if pmid == 13297012
-    drop if pmid == 13741605
-    drop if pmid == 13854582
-    drop if pmid == 14394134
-    drop if pmid == 20241600 
-    drop if pmid == 21065007
+    drop if inlist(pmid, 13297012,13741605,13854582,14394134,20241600,21065007)
     replace pmid = 15164053 if id == "W2103225674"
     replace pmid = 27768894 if id == "W4242360498"
     replace pmid = 5963230 if id == "W3083842255"
