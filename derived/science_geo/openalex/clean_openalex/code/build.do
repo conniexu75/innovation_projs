@@ -9,18 +9,19 @@ here, set
 set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_openalex"
 global output "/export/scratch/cxu_sci_geo/clean_openalex_output"
+global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
 
 program main
     local samp all_jrnls
     local samp clin_med
-    aggregate_insts
+    *aggregate_insts
     foreach samp in all_jrnls clin_med {
-        clean_titles, samp(`samp')
+        *clean_titles, samp(`samp')
         clean_samps, samp(`samp')
-        clean_mesh, samp(`samp')
-        clean_concepts, samp(`samp')
+        *clean_mesh, samp(`samp')
+        *clean_concepts, samp(`samp')
     }
-    split_sample
+*    split_sample
 end
 
 program aggregate_insts
@@ -115,7 +116,7 @@ program clean_titles
     drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACOs")>0
     drop if lower_title == "response"
     drop if strpos(lower_title , "nuts")>0 & strpos(lower_title, "bolts")>0
-    foreach s in "economic" "economy" "public health" "hallmarks" "government" "reform" "equity" "payment" "politics" "policy" "policies" "comment" "guideline" "profession's" "interview" "debate" "profesor" "themes:"  "professionals" "physician" "workforce" "medical-education"  "medical education" "funding" "conference" "insurance" "fellowship" "ethics" "legislation" "the editor" "response : " "letters" "this week" "notes" "news " "a note" "obituary"  "review" "perspectives" "scientists" "book" "institution" "meeting" "university" "universities" "journals" "publication" "recent " "costs" "challenges" "researchers" "perspective" "reply" " war" " news" "a correction" "academia" "society" "academy of" "nomenclature" "teaching" "education" "college" "academics"  "political" "association for" "association of" "response by" "societies" "health care" "health-care"  "abstracts" "journal club" "curriculum" "women in science" "report:" "letter:" "editorial:" "lesson" "awards" "doctor" "nurse" "health workers" " story"  "case report" "a brief history" "lecture " "career" "finance" "criticism" "critique" "discussion" "world health" "workload" "compensation" "educators" "war" "announces" "training programmes" "nhs" "nih" "national institutes of health" "address" "public sector" "private sector" "government" "price" "reflections" "health care" "healthcare" "health-care" " law" "report" "note on" "insurer" "health service research" "error" "quality of life" {
+    foreach s in "economic" "economy" "public health" "hallmarks" "government" "reform" "equity" "payment" "politics" "policy" "policies" "comment" "guideline" "profession's" "interview" "debate" "professor" "themes:"  "professionals" "physician" "workforce" "medical-education"  "medical education" "funding" "conference" "insurance" "fellowship" "ethics" "legislation" "the editor" "response : " "letters" "this week" "notes" "news " "a note" "obituary"  "review" "perspectives" "scientists" "book" "institution" "meeting" "university" "universities" "journals" "publication" "recent " "costs" "challenges" "researchers" "perspective" "reply" " war" " news" "a correction" "academia" "society" "academy of" "nomenclature" "teaching" "education" "college" "academics"  "political" "association for" "association of" "response by" "societies" "health care" "health-care"  "abstracts" "journal club" "curriculum" "women in science" "report:" "letter:" "editorial:" "lesson" "awards" "doctor" "nurse" "health workers" " story"  "case report" "a brief history" "lecture " "career" "finance" "criticism" "critique" "discussion" "world health" "workload" "compensation" "educators" "war" "announces" "training programmes" "nhs" "nih" "national institutes of health" "address" "public sector" "private sector" "government" "price" "reflections" "health care" "healthcare" "health-care" " law" "report" "note on" "insurer" "health service research" "error" "quality of life" {
         drop if strpos(lower_title, "`s'")>0
     }
     gen strp = substr(lower_title, 1, strpos(lower_title, ": ")) if strpos(lower_title, ": ") > 0
@@ -147,6 +148,19 @@ program clean_samps
     syntax, samp(str)
     use pmid journal_abbr using ${temp}/openalex_`samp'_clean_titles, clear
     merge 1:m pmid using ../external/openalex/openalex_`samp'_merged, keep(3) nogen 
+    // clean date variables
+    gen date = date(pub_date, "YMD")
+    format %td date
+    drop pub_date
+    bys pmid: egen min_date = min(date)
+    replace date =min_date
+    drop min_date
+    cap drop author_id
+    rename date pub_date
+    gen pub_mnth = month(pub_date)
+    gen year = year(pub_date)
+    gen qrtr = qofd(pub_date)
+    // these OAIDs are misclassified or correspond to multiple pmids
     drop if inlist(id , "W2016575029", "W2331065494", "W4290207833", "W4290198809" , "W4290206947" , "W4290293465")
     drop if inlist(id , "W4290277360", "W4290357912", "W4214483051", "W1978139107" , "W2045742772" , "W2049314578")
     drop if inlist(id, "W1994190235","W2580449060", "W2082429191", "W2022687771", "W2040385059" , "W4229906281")
@@ -163,17 +177,7 @@ program clean_samps
     replace pmid = 12089445 if id == "W3205595473"
     replace pmid = 13111194 if id == "W2737242062"
     replace pmid = 13113233 if id == "W2050270632"
-    gen date = date(pub_date, "YMD")
-    format %td date
-    drop pub_date
-    bys pmid: egen min_date = min(date)
-    replace date =min_date
-    drop min_date
-    cap drop author_id
-    rename date pub_date
-    gen pub_mnth = month(pub_date)
-    gen year = year(pub_date)
-    gen qrtr = qofd(pub_date)
+    // fix some wrong institutions
     replace inst = "Johns Hopkins University" if strpos(raw_affl , "Bloomberg School of Public Health")>0 & inst == "Bloomberg (United States)"
     merge m:1 inst_id using ${output}/all_inst_geo_chars, assert(1 2 3) keep(1 3) nogen 
     replace inst = new_inst if !mi(new_inst)
@@ -184,10 +188,10 @@ program clean_samps
     replace inst = "Northwestern University" if inlist(inst, "Northwestern Medicine")
     replace inst = "National Institutes of Health" if  inlist(inst, "National Cancer Institute", "National Eye Institute", "National Heart, Lung, and Blood Institute", "National Human Genome Research Institute") | ///
               inlist(inst, "National Institute on Aging", "National Institute on Alcohol Abuse and Alcoholism", "National Institute of Allergy and Infectious Diseases", "National Institute of Arthritis and Musculoskeletal and Skin Diseases") | ///
-                        inlist(inst, "National Institute of Biomedical Imaging and Bioengineering", "National Institute of Child Health and Human Development", "National Institue of Dental and Craniofacial Research") | ///
+                        inlist(inst, "National Institute of Biomedical Imaging and Bioengineering", "National Institute of Child Health and Human Development", "National Institute of Dental and Craniofacial Research") | ///
                                   inlist(inst, "National Institute of Diabetes and Digestive and Kidney Diseases", "National Institute on Drug Abuse", "National Institute of Environmental Health Sciences", "National Institute of General Medical Sciences", "National Institute of Mental Health", "National Institute on Minority Health and Health Disparities") | ///
                                             inlist(inst, "National Institute of Neurological Disorders and Stroke", "National Institute of Nursing Research", "National Library of Medicine", "National Heart Lung and Blood Institute", "National Institutes of Health")
-    // extras
+    // drop any authors that are journals - these are probably reviews 
     gen is_lancet = strpos(raw_affl, "The Lancet")>0
     gen is_london = raw_affl == "London, UK." |  raw_affl == "London."
     gen is_bmj = (strpos(raw_affl, "BMJ")>0 | strpos(raw_affl, "British Medical Journal")>0)
@@ -202,7 +206,8 @@ program clean_samps
     drop is_lancet is_london is_bmj is_jama is_editor has_lancet has_london has_bmj has_jama has_editor
     save ${temp}/cleaned_all_`samp', replace
 
-    import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
+    // merge in MSA
+/*    import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
     gcontract stateshort statefull
     drop _freq
     drop if mi(stateshort)
@@ -220,22 +225,15 @@ program clean_samps
     replace msatitle = "Springfield, MA" if city == "Amherst Center" 
     replace msatitle = "Hartford-West Hartford-East Hartford, CT" if city == "Storrs" & us_state == "CT"
     replace msatitle = "Tampa-St. Petersburg-Clearwater, FL" if city == "Temple Terrace" & us_state == "FL"
-    replace msatitle = "San Francisco-Oakland-Haywerd, CA" if city == "Foster City" & us_state == "CA"
+    replace msatitle = "San Francisco-Oakland-Hayward, CA" if city == "Foster City" & us_state == "CA"
     gen msa_comb = msatitle
     replace  msa_comb = "Research Triangle Park, NC" if msa_comb == "Durham-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | city == "Research Triangle Park" | city == "Res Triangle Park"
     replace  msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
     gen msa_c_world = msa_comb
     replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")-1) + ", US" if country == "United States" & !mi(msa_c_world)
-    replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)
-    
+    replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)*/
 
-    // drop if author_id is <  5000000000
-    gen num = subinstr(athr_id, "A", "",.)
-    destring num, replace
-    drop if num < 5000000000
-    drop num
-
-    //  we don't want to count broad and HHMI if they are affiliated with other institutions.
+    //  we don't want to count broad and HHMI if they are affiliated with other institutions. or other funders 
     cap drop author_id 
     cap drop which_athr_counter num_which_athr min_which_athr which_athr2 
     bys pmid athr_id (which_athr which_affl): gen author_id = _n ==1
@@ -254,6 +252,21 @@ program clean_samps
     bys pmid which_athr: egen has_hhmi_affl = max(hhmi_affl)
     drop if num_affls > 1 & hhmi_affl == 1 
     drop if num_affls > 1 & funder == 1
+    cap drop stateshort
+    cap drop region
+    cap drop inst_id
+    cap drop country_code
+    cap drop country
+    cap drop city
+    cap drop us_state
+    cap drop msacode
+    cap drop msatitle 
+    cap drop population
+    cap drop msa_comb
+    cap drop msa_c_world
+    merge m:1 athr_id year using ${year_insts}/filled_in_panel_year, assert(1 2 3) keep(3) nogen
+    gduplicates drop pmid athr_id inst_id, force
+    // wt_adjust articles 
     qui hashsort pmid which_athr which_affl
     cap drop author_id
     bys pmid athr_id (which_athr which_affl): gen author_id = _n ==1
@@ -261,19 +274,70 @@ program clean_samps
     replace which_athr = which_athr2
     drop which_athr2
     bys pmid which_athr: replace num_affls = _N
+    assert num_affls == 1
     bys pmid: egen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs
+    gen impact_fctr = . 
+    replace impact_fctr = 60.9 if journal_abbr == "nature"
+    replace impact_fctr = 37.4 if journal_abbr == "nat_genet"
+    replace impact_fctr = 27.7 if journal_abbr == "nat_neuro"
+    replace impact_fctr = 15.6 if journal_abbr == "nat_chem_bio"
+    replace impact_fctr = 26.6 if journal_abbr == "nat_cell_bio"
+    replace impact_fctr = 59.1 if journal_abbr == "nat_biotech"
+    replace impact_fctr = 69.4 if journal_abbr == "nat_med"
+    replace impact_fctr = 54.5 if journal_abbr == "science"
+    replace impact_fctr = 57.5 if journal_abbr == "cell"
+    replace impact_fctr = 24.9 if journal_abbr == "cell_stem_cell"
+    replace impact_fctr = 18.6 if journal_abbr == "neuron"
+    replace impact_fctr = 8.8 if journal_abbr == "onco"
+    replace impact_fctr = 5.2 if journal_abbr == "faseb"
+    replace impact_fctr = 4.8 if journal_abbr == "jbc"
+    replace impact_fctr = 3.8 if journal_abbr == "plos"
+    replace impact_fctr = 35.3 if journal_abbr == "annals"
+    replace impact_fctr = 15.88 if journal_abbr == "bmj"
+    replace impact_fctr = 81.4 if journal_abbr == "jama"
+    replace impact_fctr = 118.1 if journal_abbr == "lancet"
+    replace impact_fctr = 115.7 if journal_abbr == "nejm"
+    qui bys journal_abbr: gen first_jrnl = _n == 1
+    qui sum impact_fctr if first_jrnl == 1
+    gen impact_shr = impactfctr/r(sum)
+stop 
     qui gen years_since_pub = 2022-year+1
     qui gen avg_cite_yr = cite_count/years_since_pub
     qui bys pmid: replace avg_cite_yr = . if _n != 1
+    qui bys pmid: replace impact_fctr = . if _n != 1
     qui sum avg_cite_yr
     gen cite_wt = avg_cite_yr/r(sum)
+    gen impact_cite = avg_cite_yr * impact_fctr
     qui gunique pmid
     qui replace cite_wt = cite_wt * r(unique)
     gsort pmid cite_wt
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     qui gen cite_affl_wt = affl_wt * cite_wt
+    
+    qui sum impact_fctr
+    gen impact_wt = impact_fctr/r(sum)
+    qui gunique pmid
+    qui replace impact_wt = impact_wt * r(unique)
+    gsort pmid impact_wt
+    qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
+    gen impact_affl_wt = affl_wt * impact_wt
+   
+    qui sum impact_cite
+    gen impact_cite_wt = impact_cite/r(sum)
+    qui gunique pmid
+    qui replace impact_cite_wt = impact_cite_wt * r(unique)
+    gsort pmid impact_cite_wt
+    qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
+    gen impact_cite_affl_wt = affl_wt * impact_cite_wt
+    qui gunique pmid
+    local articles = r(unique)
+    foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+        qui sum `wt'
+        assert round(r(sum)-`articles') == 0
+    }
     compress, nocoalesce
+  
     gen len = length(inst)
     qui sum len
     local n = r(max)
@@ -286,7 +350,7 @@ program clean_samps
     restore
 
     keep if inrange(pub_date, td(01jan2015), td(31dec2022)) & year >=2015
-    drop cite_wt cite_affl_wt
+    drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt
     qui sum avg_cite_yr
     gen cite_wt = avg_cite_yr/r(sum)
     qui gunique pmid
@@ -294,6 +358,29 @@ program clean_samps
     gsort pmid cite_wt
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     qui gen cite_affl_wt = affl_wt * cite_wt
+
+    qui sum impact_fctr
+    gen impact_wt = impact_fctr/r(sum)
+    qui gunique pmid
+    qui replace impact_wt = impact_wt * r(unique)
+    gsort pmid impact_wt
+    qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
+    gen impact_affl_wt = affl_wt * impact_wt
+
+    qui sum impact_cite
+    gen impact_cite_wt = impact_cite/r(sum)
+    qui gunique pmid
+    qui replace impact_cite_wt = impact_cite_wt * r(unique)
+    gsort pmid impact_cite_wt
+    qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
+    gen impact_cite_affl_wt = affl_wt * impact_cite_wt
+
+    qui gunique pmid
+    local articles = r(unique)
+    foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+        qui sum `wt'
+        assert round(r(sum)-`articles') == 0
+    }
     compress, nocoalesce
     save ${output}/cleaned_last5yrs_`samp', replace
 end
@@ -379,7 +466,7 @@ program split_sample
         preserve
         use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "cell", "science", "nature")
-        drop cite_wt cite_affl_wt
+        drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt
         qui sum avg_cite_yr
         gen cite_wt = avg_cite_yr/r(sum)
         qui gunique pmid
@@ -387,6 +474,28 @@ program split_sample
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         qui gen cite_affl_wt = affl_wt * cite_wt
+
+        qui sum impact_fctr
+        gen impact_wt = impact_fctr/r(sum)
+        qui gunique pmid
+        qui replace impact_wt = impact_wt * r(unique)
+        gsort pmid impact_wt
+        qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
+        gen impact_affl_wt = affl_wt * impact_wt
+
+        qui sum impact_cite
+        gen impact_cite_wt = impact_cite/r(sum)
+        qui gunique pmid
+        qui replace impact_cite_wt = impact_cite_wt * r(unique)
+        gsort pmid impact_cite_wt
+        qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
+        gen impact_cite_affl_wt = affl_wt * impact_cite_wt
+        qui gunique pmid
+        local articles = r(unique)
+        foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+            qui sum `wt'
+            assert round(r(sum)-`articles') == 0
+        }
         save ${output}/cleaned_`samp'_newfund_cns, replace
         gcontract pmid
         drop _freq
@@ -396,7 +505,7 @@ program split_sample
         preserve
         use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "cell_stem_cell", "nat_biotech", "nat_cell_bio", "nat_genet", "nat_med", "nat_med", "nat_neuro", "neuron", "nat_chem_bio")
-        drop cite_wt cite_affl_wt
+        drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt
         qui sum avg_cite_yr
         gen cite_wt = avg_cite_yr/r(sum)
         qui gunique pmid
@@ -404,6 +513,28 @@ program split_sample
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         qui gen cite_affl_wt = affl_wt * cite_wt
+
+        qui sum impact_fctr
+        gen impact_wt = impact_fctr/r(sum)
+        qui gunique pmid
+        qui replace impact_wt = impact_wt * r(unique)
+        gsort pmid impact_wt
+        qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
+        gen impact_affl_wt = affl_wt * impact_wt
+
+        qui sum impact_cite
+        gen impact_cite_wt = impact_cite/r(sum)
+        qui gunique pmid
+        qui replace impact_cite_wt = impact_cite_wt * r(unique)
+        gsort pmid impact_cite_wt
+        qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
+        gen impact_cite_affl_wt = affl_wt * impact_cite_wt
+        qui gunique pmid
+        local articles = r(unique)
+        foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+            qui sum `wt'
+            assert round(r(sum)-`articles') == 0
+        }
         save ${output}/cleaned_`samp'_newfund_scisub, replace
         gcontract pmid
         drop _freq
@@ -413,7 +544,7 @@ program split_sample
         preserve
         use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "faseb", "jbc", "onco", "plos")
-        drop cite_wt cite_affl_wt
+        drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt
         qui sum avg_cite_yr
         gen cite_wt = avg_cite_yr/r(sum)
         qui gunique pmid
@@ -421,6 +552,28 @@ program split_sample
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         qui gen cite_affl_wt = affl_wt * cite_wt
+
+        qui sum impact_fctr
+        gen impact_wt = impact_fctr/r(sum)
+        qui gunique pmid
+        qui replace impact_wt = impact_wt * r(unique)
+        gsort pmid impact_wt
+        qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
+        gen impact_affl_wt = affl_wt * impact_wt
+
+        qui sum impact_cite
+        gen impact_cite_wt = impact_cite/r(sum)
+        qui gunique pmid
+        qui replace impact_cite_wt = impact_cite_wt * r(unique)
+        gsort pmid impact_cite_wt
+        qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
+        gen impact_cite_affl_wt = affl_wt * impact_cite_wt
+        qui gunique pmid
+        local articles = r(unique)
+        foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+            qui sum `wt'
+            assert round(r(sum)-`articles') == 0
+        }
         save ${output}/cleaned_`samp'_newfund_demsci, replace
         gcontract pmid
         drop _freq
