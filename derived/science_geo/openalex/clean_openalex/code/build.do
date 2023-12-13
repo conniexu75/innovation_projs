@@ -14,14 +14,14 @@ global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
 program main
     local samp all_jrnls
     local samp clin_med
-    *aggregate_insts
+    aggregate_insts
     foreach samp in all_jrnls clin_med {
-        *clean_titles, samp(`samp')
+        clean_titles, samp(`samp')
         clean_samps, samp(`samp')
-        *clean_mesh, samp(`samp')
-        *clean_concepts, samp(`samp')
+        clean_mesh, samp(`samp')
+        clean_concepts, samp(`samp')
     }
-*    split_sample
+    split_sample
 end
 
 program aggregate_insts
@@ -148,6 +148,7 @@ program clean_samps
     syntax, samp(str)
     use pmid journal_abbr using ${temp}/openalex_`samp'_clean_titles, clear
     merge 1:m pmid using ../external/openalex/openalex_`samp'_merged, keep(3) nogen 
+    merge m:1 id using ../external/patents/patent_ppr_cnt, assert(1 2 3) keep(1 3) nogen keepusing(patent_count)
     // clean date variables
     gen date = date(pub_date, "YMD")
     format %td date
@@ -160,6 +161,7 @@ program clean_samps
     gen pub_mnth = month(pub_date)
     gen year = year(pub_date)
     gen qrtr = qofd(pub_date)
+    keep if inrange(year, 1945, 2022)
     // these OAIDs are misclassified or correspond to multiple pmids
     drop if inlist(id , "W2016575029", "W2331065494", "W4290207833", "W4290198809" , "W4290206947" , "W4290293465")
     drop if inlist(id , "W4290277360", "W4290357912", "W4214483051", "W1978139107" , "W2045742772" , "W2049314578")
@@ -206,33 +208,6 @@ program clean_samps
     drop is_lancet is_london is_bmj is_jama is_editor has_lancet has_london has_bmj has_jama has_editor
     save ${temp}/cleaned_all_`samp', replace
 
-    // merge in MSA
-/*    import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
-    gcontract stateshort statefull
-    drop _freq
-    drop if mi(stateshort)
-    rename statefull region
-    merge 1:m region using ${temp}/cleaned_all_`samp', assert(1 2 3) keep(2 3)  nogen
-    replace stateshort =  "DC" if region == "District of Columbia"
-    replace stateshort =  "VI" if region == "Virgin Islands, U.S."
-    gen us_state = stateshort if country_code == "US"
-    replace city = "Saint Louis" if city == "St Louis"
-    replace city = "Winston Salem" if city == "Winston-Salem"
-    merge m:1 city us_state using ../external/geo/city_msa, assert(1 2 3) keep(1 3) nogen
-    replace msatitle = "Washington-Arlington-Alexandria, DC-VA-MD-WV"  if us_state == "DC"
-    replace msatitle = "New York-Newark-Jersey City, NY-NJ-PA" if city == "The Bronx" & us_state == "NY"
-    replace msatitle = "Miami-Fort Lauderdale-West Palm Beach, FL" if city == "Coral Gables" & us_state == "FL"
-    replace msatitle = "Springfield, MA" if city == "Amherst Center" 
-    replace msatitle = "Hartford-West Hartford-East Hartford, CT" if city == "Storrs" & us_state == "CT"
-    replace msatitle = "Tampa-St. Petersburg-Clearwater, FL" if city == "Temple Terrace" & us_state == "FL"
-    replace msatitle = "San Francisco-Oakland-Hayward, CA" if city == "Foster City" & us_state == "CA"
-    gen msa_comb = msatitle
-    replace  msa_comb = "Research Triangle Park, NC" if msa_comb == "Durham-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | city == "Research Triangle Park" | city == "Res Triangle Park"
-    replace  msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
-    gen msa_c_world = msa_comb
-    replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")-1) + ", US" if country == "United States" & !mi(msa_c_world)
-    replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)*/
-
     //  we don't want to count broad and HHMI if they are affiliated with other institutions. or other funders 
     cap drop author_id 
     cap drop which_athr_counter num_which_athr min_which_athr which_athr2 
@@ -276,7 +251,26 @@ program clean_samps
     bys pmid which_athr: replace num_affls = _N
     assert num_affls == 1
     bys pmid: egen num_athrs = max(which_athr)
-    gen affl_wt = 1/num_affls * 1/num_athrs
+    gen affl_wt = 1/num_affls * 1/num_athrs // this just divides each paper by the # of authors on the paper
+    // now give each article a weight based on their ciatation count 
+    qui gen years_since_pub = 2022-year+1
+    qui gen avg_cite_yr = cite_count/years_since_pub
+    qui gen avg_pat_yr = pat_count/years_since_pub
+    qui bys pmid: replace avg_cite_yr = . if _n != 1
+    qui bys pmid: replace avg_pat_yr = . if _n != 1
+    qui sum avg_cite_yr
+    gen cite_wt = avg_cite_yr/r(sum) // each article is no longer weighted 1 
+    qui sum avg_pat_yr
+    gen pat_wt = avg_pat_yr/r(sum) 
+    bys journal_abbr: egen tot_cite_N = total(cite_wt)
+    gsort pmid cite_wt
+    qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
+    qui bys pmid: replace pat_wt = pat_wt[_n-1] if mi(pat_wt)
+    qui gunique pmid
+    local articles = r(unique)
+    qui gen cite_affl_wt = affl_wt * cite_wt * `articles'
+    qui gen pat_adj_wt  = affl_wt * pat_wt * `articles'
+    // now give each article a weight based on their journal impact factor 
     gen impact_fctr = . 
     replace impact_fctr = 60.9 if journal_abbr == "nature"
     replace impact_fctr = 37.4 if journal_abbr == "nat_genet"
@@ -298,46 +292,23 @@ program clean_samps
     replace impact_fctr = 81.4 if journal_abbr == "jama"
     replace impact_fctr = 118.1 if journal_abbr == "lancet"
     replace impact_fctr = 115.7 if journal_abbr == "nejm"
-    qui bys journal_abbr: gen first_jrnl = _n == 1
-    qui sum impact_fctr if first_jrnl == 1
-    gen impact_shr = impactfctr/r(sum)
-stop 
-    qui gen years_since_pub = 2022-year+1
-    qui gen avg_cite_yr = cite_count/years_since_pub
-    qui bys pmid: replace avg_cite_yr = . if _n != 1
-    qui bys pmid: replace impact_fctr = . if _n != 1
-    qui sum avg_cite_yr
-    gen cite_wt = avg_cite_yr/r(sum)
-    gen impact_cite = avg_cite_yr * impact_fctr
-    qui gunique pmid
-    qui replace cite_wt = cite_wt * r(unique)
-    gsort pmid cite_wt
-    qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
-    qui gen cite_affl_wt = affl_wt * cite_wt
-    
-    qui sum impact_fctr
-    gen impact_wt = impact_fctr/r(sum)
-    qui gunique pmid
-    qui replace impact_wt = impact_wt * r(unique)
-    gsort pmid impact_wt
-    qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
-    gen impact_affl_wt = affl_wt * impact_wt
    
-    qui sum impact_cite
-    gen impact_cite_wt = impact_cite/r(sum)
-    qui gunique pmid
-    qui replace impact_cite_wt = impact_cite_wt * r(unique)
-    gsort pmid impact_cite_wt
-    qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
-    gen impact_cite_affl_wt = affl_wt * impact_cite_wt
-    qui gunique pmid
-    local articles = r(unique)
-    foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+    qui bys pmid: gen pmid_cntr = _n == 1
+    qui bys journal_abbr: gen first_jrnl = _n == 1
+    qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+    qui sum impact_fctr if first_jrnl == 1
+    gen impact_shr = impact_fctr/r(sum) // weight that each journal gets
+    gen reweight_N = impact_shr * `articles' // adjust the N of each journal to reflect impact factor
+    replace  tot_cite_N = tot_cite_N * `articles'
+    gen impact_wt = reweight_N/jrnl_N // after adjusting each journal weight we divide by the number of articles in each journal to assign new weight to each paper
+    gen impact_affl_wt = impact_wt * affl_wt  
+    gen impact_cite_wt = reweight_N * cite_wt / tot_cite_N * `articles' 
+    gen impact_cite_affl_wt = impact_cite_wt * affl_wt 
+    foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt pat_adj_wt {
         qui sum `wt'
         assert round(r(sum)-`articles') == 0
     }
     compress, nocoalesce
-  
     gen len = length(inst)
     qui sum len
     local n = r(max)
@@ -350,34 +321,32 @@ stop
     restore
 
     keep if inrange(pub_date, td(01jan2015), td(31dec2022)) & year >=2015
-    drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt
+    drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt
     qui sum avg_cite_yr
     gen cite_wt = avg_cite_yr/r(sum)
-    qui gunique pmid
-    qui replace cite_wt = cite_wt * r(unique)
+    qui sum avg_pat_yr
+    gen pat_wt = avg_pat_yr/r(sum)
+    bys journal_abbr: egen tot_cite_N = total(cite_wt)
     gsort pmid cite_wt
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
-    qui gen cite_affl_wt = affl_wt * cite_wt
-
-    qui sum impact_fctr
-    gen impact_wt = impact_fctr/r(sum)
-    qui gunique pmid
-    qui replace impact_wt = impact_wt * r(unique)
-    gsort pmid impact_wt
-    qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
-    gen impact_affl_wt = affl_wt * impact_wt
-
-    qui sum impact_cite
-    gen impact_cite_wt = impact_cite/r(sum)
-    qui gunique pmid
-    qui replace impact_cite_wt = impact_cite_wt * r(unique)
-    gsort pmid impact_cite_wt
-    qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
-    gen impact_cite_affl_wt = affl_wt * impact_cite_wt
-
-    qui gunique pmid
+    gsort pmid pat_wt
+    qui bys pmid: replace pat_wt = pat_wt[_n-1] if mi(pat_wt)
+    gunique pmid 
     local articles = r(unique)
-    foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+    qui gen cite_affl_wt = affl_wt * cite_wt * `articles'
+    
+    qui bys journal_abbr: gen first_jrnl = _n == 1
+    qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+    qui sum impact_fctr if first_jrnl == 1
+    gen impact_shr = impact_fctr/r(sum)
+    gen reweight_N = impact_shr * `articles'
+    replace  tot_cite_N = tot_cite_N * `articles'
+    gen impact_wt = reweight_N/jrnl_N
+    gen impact_affl_wt = impact_wt * affl_wt
+    gen impact_cite_wt = reweight_N * cite_wt / tot_cite_N * `articles'
+    gen impact_cite_affl_wt = impact_cite_wt * affl_wt
+
+    foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt pat_adj_wt {
         qui sum `wt'
         assert round(r(sum)-`articles') == 0
     }
@@ -466,33 +435,32 @@ program split_sample
         preserve
         use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "cell", "science", "nature")
-        drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt
+        drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt
         qui sum avg_cite_yr
         gen cite_wt = avg_cite_yr/r(sum)
-        qui gunique pmid
-        qui replace cite_wt = cite_wt * r(unique)
+        qui sum avg_pat_yr
+        gen pat_wt = avg_pat_yr/r(sum)
+        bys journal_abbr: egen tot_cite_N = total(cite_wt)
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
-        qui gen cite_affl_wt = affl_wt * cite_wt
-
-        qui sum impact_fctr
-        gen impact_wt = impact_fctr/r(sum)
-        qui gunique pmid
-        qui replace impact_wt = impact_wt * r(unique)
-        gsort pmid impact_wt
-        qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
-        gen impact_affl_wt = affl_wt * impact_wt
-
-        qui sum impact_cite
-        gen impact_cite_wt = impact_cite/r(sum)
-        qui gunique pmid
-        qui replace impact_cite_wt = impact_cite_wt * r(unique)
-        gsort pmid impact_cite_wt
-        qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
-        gen impact_cite_affl_wt = affl_wt * impact_cite_wt
-        qui gunique pmid
+        gsort pmid pat_wt
+        qui bys pmid: replace pat_wt = pat_wt[_n-1] if mi(pat_wt)
+        gunique pmid 
         local articles = r(unique)
-        foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+        qui gen cite_affl_wt = affl_wt * cite_wt * `articles'
+        
+        qui bys journal_abbr: gen first_jrnl = _n == 1
+        qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+        qui sum impact_fctr if first_jrnl == 1
+        gen impact_shr = impact_fctr/r(sum)
+        gen reweight_N = impact_shr * `articles'
+        replace  tot_cite_N = tot_cite_N * `articles'
+        gen impact_wt = reweight_N/jrnl_N
+        gen impact_affl_wt = impact_wt * affl_wt
+        gen impact_cite_wt = reweight_N * cite_wt / tot_cite_N * `articles'
+        gen impact_cite_affl_wt = impact_cite_wt * affl_wt
+
+        foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt pat_adj_wt {
             qui sum `wt'
             assert round(r(sum)-`articles') == 0
         }
@@ -505,33 +473,32 @@ program split_sample
         preserve
         use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "cell_stem_cell", "nat_biotech", "nat_cell_bio", "nat_genet", "nat_med", "nat_med", "nat_neuro", "neuron", "nat_chem_bio")
-        drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt
+        drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt
         qui sum avg_cite_yr
         gen cite_wt = avg_cite_yr/r(sum)
-        qui gunique pmid
-        qui replace cite_wt = cite_wt * r(unique)
+        qui sum avg_pat_yr
+        gen pat_wt = avg_pat_yr/r(sum)
+        bys journal_abbr: egen tot_cite_N = total(cite_wt)
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
-        qui gen cite_affl_wt = affl_wt * cite_wt
-
-        qui sum impact_fctr
-        gen impact_wt = impact_fctr/r(sum)
-        qui gunique pmid
-        qui replace impact_wt = impact_wt * r(unique)
-        gsort pmid impact_wt
-        qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
-        gen impact_affl_wt = affl_wt * impact_wt
-
-        qui sum impact_cite
-        gen impact_cite_wt = impact_cite/r(sum)
-        qui gunique pmid
-        qui replace impact_cite_wt = impact_cite_wt * r(unique)
-        gsort pmid impact_cite_wt
-        qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
-        gen impact_cite_affl_wt = affl_wt * impact_cite_wt
-        qui gunique pmid
+        gsort pmid pat_wt
+        qui bys pmid: replace pat_wt = pat_wt[_n-1] if mi(pat_wt)
+        gunique pmid 
         local articles = r(unique)
-        foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
+        qui gen cite_affl_wt = affl_wt * cite_wt * `articles'
+        
+        qui bys journal_abbr: gen first_jrnl = _n == 1
+        qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+        qui sum impact_fctr if first_jrnl == 1
+        gen impact_shr = impact_fctr/r(sum)
+        gen reweight_N = impact_shr * `articles'
+        replace  tot_cite_N = tot_cite_N * `articles'
+        gen impact_wt = reweight_N/jrnl_N
+        gen impact_affl_wt = impact_wt * affl_wt
+        gen impact_cite_wt = reweight_N * cite_wt / tot_cite_N * `articles'
+        gen impact_cite_affl_wt = impact_cite_wt * affl_wt
+
+        foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt pat_adj_wt {
             qui sum `wt'
             assert round(r(sum)-`articles') == 0
         }
@@ -544,36 +511,6 @@ program split_sample
         preserve
         use ${output}/cleaned_`samp'_all_jrnls, clear
         keep if inlist(journal_abbr, "faseb", "jbc", "onco", "plos")
-        drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt
-        qui sum avg_cite_yr
-        gen cite_wt = avg_cite_yr/r(sum)
-        qui gunique pmid
-        qui replace cite_wt = cite_wt * r(unique)
-        gsort pmid cite_wt
-        qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
-        qui gen cite_affl_wt = affl_wt * cite_wt
-
-        qui sum impact_fctr
-        gen impact_wt = impact_fctr/r(sum)
-        qui gunique pmid
-        qui replace impact_wt = impact_wt * r(unique)
-        gsort pmid impact_wt
-        qui bys pmid: replace impact_wt = impact_wt[_n-1] if mi(impact_wt)
-        gen impact_affl_wt = affl_wt * impact_wt
-
-        qui sum impact_cite
-        gen impact_cite_wt = impact_cite/r(sum)
-        qui gunique pmid
-        qui replace impact_cite_wt = impact_cite_wt * r(unique)
-        gsort pmid impact_cite_wt
-        qui bys pmid: replace impact_cite_wt = impact_cite_wt[_n-1] if mi(impact_cite_wt)
-        gen impact_cite_affl_wt = affl_wt * impact_cite_wt
-        qui gunique pmid
-        local articles = r(unique)
-        foreach wt in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt {
-            qui sum `wt'
-            assert round(r(sum)-`articles') == 0
-        }
         save ${output}/cleaned_`samp'_newfund_demsci, replace
         gcontract pmid
         drop _freq
