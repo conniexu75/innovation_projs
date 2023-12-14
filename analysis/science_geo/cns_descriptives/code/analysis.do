@@ -3,6 +3,7 @@ clear all
 capture log close
 program drop _all
 set scheme modern
+graph set window fontface "Arial Narrow"
 pause on
 set seed 8975
 here, set
@@ -17,26 +18,32 @@ program main
     global msa_comb_name "MSAs"
     global msa_world_name "cities"
     global msa_c_world_name "cities"
-    foreach samp in cns {
-        di "OUTPUT START"
-        foreach data in newfund { 
-            foreach var in affl_wt cite_affl_wt {
-                athr_loc, data(`data') samp(`samp') wt_var(`var')
-                qui trends, data(`data') samp(`samp') wt_var(`var')
-            }
-            calc_broad_hhmi, data(`data') samp(`samp') 
-            top_mesh_terms, data(`data') samp(`samp') 
-            qui output_tables, data(`data') samp(`samp') 
-        }
-    } 
-    top_mesh_terms, data(clin) samp(med) 
+    di "OUTPUT START"
+    foreach var in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt pat_adj_wt {
+        athr_loc, data(newfund) samp(cns) wt_var(`var')
+        qui trends, data(newfund) samp(cns) wt_var(`var')
+        athr_loc, data(all) samp(jrnls) wt_var(`var')
+        qui trends, data(all) samp(jrnls) wt_var(`var')
+    }
+    *calc_broad_hhmi, data(`data') samp(`samp') 
+    *top_mesh_terms, data(cns) samp(`samp') 
+    qui output_tables, data(newfund) samp(cns) 
+    qui output_tables, data(all) samp(jrnls) 
 end
 
 program athr_loc
     syntax, data(str) samp(str)  wt_var(str)
-    local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
+    local suf = ""
+    if "`wt_var'" == "cite_affl_wt" local suf "_wt"
+    if "`wt_var'" == "impact_affl_wt" local suf "_if"
+    if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
+    if "`wt_var'" == "pat_adj_wt" local suf "_pat"
     use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
+    local end 20
     foreach loc in country msa_c_world inst {
+        if "`loc'" == "inst" {
+            local end 50
+        }
         qui gunique pmid 
         local articles = r(unique)
         qui sum `wt_var'
@@ -58,7 +65,7 @@ program athr_loc
         save ../temp/rankings_`loc'`suf', replace
         drop rank
         qui count
-        local rank_end = min(r(N),20) 
+        local rank_end = min(r(N),`end') 
         li `loc' perc in 1/`rank_end'
         di "Total articles: `total'"
         mkmat perc cum_perc in 1/`rank_end', mat(top_`loc'_`samp'`suf')
@@ -79,7 +86,8 @@ program athr_loc
         global `loc'_second "`r(levels)'"
         qui replace rank_grp = "second" if _n == 2
         qui replace rank_grp = "china" if `loc' == "China"
-        qui replace rank_grp = "rest of top 10" if inrange(_n,3,10) & rank_grp!="china"
+        qui replace rank_grp = "uk" if `loc' == "United Kingdom"
+        qui replace rank_grp = "rest of top 10" if inrange(_n,3,10) & !inlist(rank_grp,"china", "uk")
         qui replace rank_grp = "remaining" if mi(rank_grp)
         keep `loc' rank_grp
         qui save ../temp/`loc'_rank_`data'_`samp'`suf', replace
@@ -89,7 +97,7 @@ end
 
 program calc_broad_hhmi
    syntax, data(str) samp(str) 
-   use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
+   use if inrange(year, 1945, 2022) using ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
    qui gunique pmid which_athr
    local num_athrs = r(unique)
    qui gunique pmid which_athr if country == "United States"
@@ -132,8 +140,12 @@ end
 
 program trends
     syntax, data(str) samp(str)  wt_var(str)
-    local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
-    use ../external/openalex/cleaned_all_`data'_`samp', clear
+    local suf = ""
+    if "`wt_var'" == "cite_affl_wt" local suf "_wt"
+    if "`wt_var'" == "impact_affl_wt" local suf "_if"
+    if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
+    if "`wt_var'" == "pat_adj_wt" local suf "_pat"
+    use if inrange(year, 1945, 2022) using ../external/openalex/cleaned_all_`data'_`samp', clear
     cap drop counter
 
     gen msa_world = msatitle
@@ -150,30 +162,24 @@ program trends
         }
         qui sum year
         local min_year = max(1945,r(min))
-        qui egen year_bin  = cut(year), at(1945(2)2023) 
+        qui egen year_bin  = cut(year), at(1945(3)2023) 
         keep if !mi(`loc')
-*        keep if which_athr == 1
-        cap drop author_id 
-        qui bys pmid athr_id (which_athr which_affl) :  gen author_id = _n ==1
-         bys pmid (which_athr which_affl): gen which_athr2 = sum(author_id)
-         replace which_athr = which_athr2
-         cap drop num_athrs
-         bys pmid: egen num_athrs = max(which_athr) 
-         drop which_athr2
-         bys pmid which_athr: replace num_affls = _N
-        replace affl_wt = 1/num_affls * 1/num_athrs
-*j        qui replace affl_wt = 1/num_affls
         local year_var year_bin
-        qui bys pmid `year_var': replace counter = _n == 1
+        
+        /*qui bys pmid `year_var': replace counter = _n == 1
         qui bys `year_var': egen tot_in_`year_var' = total(counter)
         qui replace rank_grp = "remaining" if mi(rank_grp)
         bys pmid: replace cite_count = . if _n !=1 
         qui bys `year_var': egen tot_cites_in_`year_var' = total(cite_count)
         replace cite_wt = cite_count/ tot_cites_in_`year_var' * tot_in_`year_var'
+        replace impact_wt = impact_wt * jrnl_N / tot_in_`year_var' 
         hashsort pmid cite_wt
         qui by pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         replace cite_affl_wt = affl_wt * cite_wt 
-        collapse (sum) `wt_var' (mean) tot_in_`year_var' (firstnm) `loc'  , by(rank_grp `year_var')
+        replace impact_affl_wt = impact_wt * affl_wt*/
+
+        collapse (sum) `wt_var'  (firstnm) `loc'  , by(rank_grp `year_var')
+        bys `year_var': egen tot_in_`year_var' = total(`wt_var')
         qui gen perc = `wt_var'/tot_in_`year_var' * 100
         qui bys `year_var': egen tot = sum(perc)
         save ../temp/trends_`loc'`suf', replace
@@ -189,11 +195,12 @@ program trends
             label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places" 
         }
         if "`loc'" == "country" {
-            label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "China" 4 "Rest of the top 10 ${`loc'_name}" 5 "Remaining places" 
+            label define rank_grp 1 ${`loc'_first} 2 "United Kingdom" 3 "China" 4 "Rest of the top 10 ${`loc'_name}" 5 "Remaining places" 
         }
         label var rank_grp rank_grp
         qui gen group = 1 if rank_grp == "first"
-        qui replace group = 2 if rank_grp == "second"
+        qui replace group = 2 if rank_grp == "second"  & "`loc'"!= "country"
+        qui replace group = 2 if rank_grp == "uk" & "`loc'" == "country"
         qui replace group = 3 if rank_grp == "china" & "`loc'" == "country"
         local last = 2
         if "`loc'" == "country" local last = 3 
@@ -210,8 +217,8 @@ program trends
         qui levelsof group, local(rank_grps)
         local items = `r(r)'
         foreach x of local rank_grps {
-           colorpalette carto PurpOr, intensify(0.75)  n(`items') nograph
-           local stacklines `stacklines' area stack_perc `year_var' if group == `x', fcolor("`r(p`x')'") lcolor(black) lwidth(*0.2) || 
+           colorpalette carto Teal, intensify(0.85)  n(`items') nograph
+           local stacklines `stacklines' area stack_perc `year_var' if group == `x', fcolor("`r(p`x')'") lcolor(white) lwidth(*0.3) || 
 /*           if `x' == `max_grp' {
                local stacklines `stacklines' area stack_perc `year_var' if group == `x', fcolor("dimgray") lcolor(black) lwidth(*0.2) || 
            }*/
@@ -236,7 +243,9 @@ program trends
         qui replace labely_lab = "Rest of the top 10 ${`loc'_name}" if group == `last'+1
         qui replace labely_lab = "China" if group == 3 & "`loc'"=="country"
         qui replace labely_lab = ${`loc'_second} if group == 2
+        qui replace labely_lab = ${`loc'_second} if group == 2
         qui replace labely_lab = ${`loc'_first} if group == 1
+        qui replace labely_lab = "United Kingdom" if group == 2 & "`loc'"=="country"
         qui replace labely_lab = strproper(${`loc'_second}) if group == 2 & "`loc'" == "inst"
         qui replace labely_lab = strproper(${`loc'_first}) if group == 1 & "`loc'" == "inst"
         qui replace labely_lab = subinstr(labely_lab, "United States", "US", .)
@@ -251,7 +260,7 @@ program trends
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
               ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
               graphregion(margin(r+32)) plotregion(margin(zero)) ///
-              legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining places")  ring(1) pos(6) rows(2))
+              legend(off label(1 ${`loc'_first}) label(2 "United Kingdom") label(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining places")  ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
         }
         local w = 32 
@@ -303,8 +312,8 @@ end
 program output_tables
     syntax, data(str) samp(str)
     foreach file in top_country top_msa_c_world top_inst {
-        qui matrix_to_txt, saving("../output/tables/`file'_`data'_`samp'.txt") matrix(`file'_`data'_`samp') ///
-           title(<tab:`file'_`data'_`samp'>) format(%20.4f) replace
+*        qui matrix_to_txt, saving("../output/tables/`file'_`data'_`samp'.txt") matrix(`file'_`data'_`samp') ///
+*           title(<tab:`file'_`data'_`samp'>) format(%20.4f) replace
         qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.txt") matrix(`file'_`samp'_wt) ///
            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace
         qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
