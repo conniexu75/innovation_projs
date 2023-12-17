@@ -74,16 +74,16 @@ program make_panel
     bys athr_id (year): replace cluster_label = cluster_label[_n-1] if mi(cluster_label) & !mi(cluster_label[_n-1])
     save ../temp/clusters, replace
 
-    use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name using ../external/openalex/cleaned_all_all_jrnls, clear
+    use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name impact_fctr using ../external/openalex/cleaned_all_all_jrnls, clear
     local suf = "" 
     if `firstlast' == 1 {
-        use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name using ../external/firstlast/cleaned_all_all_jrnls, clear
+        use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name impact_fctr using ../external/firstlast/cleaned_all_all_jrnls, clear
         local suf = "_firstlast" 
     }
     gen qrtr = qofd(pub_date)
     merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(3) nogen
     merge m:1 athr_id year using ../temp/clusters, assert(1 2 3) keep(3) nogen
-    merge m:1 id using ../external/patents/patent_ppr_cnt, assert(1 2 3) keep(1 3) nogen keepusing(patent_count)
+    merge m:1 id using ../external/patents/patent_ppr_cnt, assert(1 2 3) keep(1 3) nogen keepusing(patent_count front_only body_only)
     rename cluster_label field
     gduplicates drop pmid athr_id inst_id, force
 
@@ -93,46 +93,76 @@ program make_panel
     drop which_athr2
 
     bys pmid which_athr: gen num_affls = _N
+    assert num_affls == 1
     bys pmid: egen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs
-
     local date  date("`c(current_date)'", "DMY")
     if "`time'" == "qrtr" {
         gen time_since_pub = qofd(`date') - `time'+1
         gen avg_cite = cite_count/time_since_pub
         gen avg_pat = patent_count/time_since_pub
+        gen avg_frnt = front_only/time_since_pub
+        gen avg_body = body_only/time_since_pub
     }
     if "`time'" == "year" {
         gen time_since_pub = yofd(`date') - `time'+1
         gen avg_cite = cite_count/time_since_pub
         gen avg_pat = patent_count/time_since_pub
+        gen avg_frnt = front_only/time_since_pub
+        gen avg_body = body_only/time_since_pub
     }
     bys pmid: replace avg_cite = . if _n != 1
     bys pmid: replace avg_pat = . if _n != 1
+    bys pmid: replace avg_frnt = . if _n != 1
+    bys pmid: replace avg_body = . if _n != 1
     sum avg_cite
     gen cite_wt = avg_cite/r(sum)
+    bys journal_abbr: egen tot_cite_N = total(cite_wt)
     sum avg_pat
     gen pat_wt = avg_pat/r(sum)
-    qui gunique pmid
-    qui replace cite_wt = cite_wt * r(unique)
-    qui gunique pmid
-    qui replace pat_wt = pat_wt * r(unique)
+    sum avg_frnt
+    gen frnt_wt = avg_frnt/r(sum)
+    sum avg_body
+    gen body_wt = avg_body/r(sum)
     gsort pmid cite_wt
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     gsort pmid pat_wt
     qui bys pmid: replace pat_wt = pat_wt[_n-1] if mi(pat_wt)
-    qui gen pat_adj_wt = affl_wt * pat_wt
-    qui gen cite_affl_wt = affl_wt * cite_wt
-    qui gunique pmid
+    gsort pmid frnt_wt
+    qui bys pmid: replace frnt_wt = frnt_wt[_n-1] if mi(frnt_wt)
+    gsort pmid body_wt
+    qui bys pmid: replace body_wt = body_wt[_n-1] if mi(body_wt)
+    gunique pmid
     local articles = r(unique)
+    qui gen pat_adj_wt = affl_wt * pat_wt * `articles'
+    qui gen cite_affl_wt = affl_wt * cite_wt * `articles'
+    qui gen frnt_adj_wt  = affl_wt * frnt_wt * `articles'
+    qui gen body_adj_wt  = affl_wt * body_wt * `articles'
+    qui bys pmid: gen pmid_cntr = _n == 1
+    qui bys journal_abbr: gen first_jrnl = _n == 1
+    qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+    qui sum impact_fctr if first_jrnl == 1
+    gen impact_shr = impact_fctr/r(sum)
+    gen reweight_N = impact_shr * `articles'
+    replace  tot_cite_N = tot_cite_N * `articles'
+    gen impact_wt = reweight_N/jrnl_N
+    gen impact_affl_wt = impact_wt * affl_wt
+    gen impact_cite_wt = reweight_N * cite_wt / tot_cite_N * `articles'
+    gen impact_cite_affl_wt = impact_cite_wt * affl_wt
     qui sum affl_wt
     assert round(r(sum)-`articles') == 0
     qui sum cite_affl_wt
     assert round(r(sum)-`articles') == 0
     qui sum pat_adj_wt
     assert round(r(sum)-`articles') == 0
-    // these should sum to the number of patents
-    gen patent_wt = affl_wt * patent_count
+    qui sum impact_affl_wt
+    assert round(r(sum)-`articles') == 0
+    qui sum impact_cite_affl_wt
+    assert round(r(sum)-`articles') == 0
+    qui sum frnt_adj_wt 
+    assert round(r(sum)-`articles') == 0
+    qui sum body_adj_wt 
+    assert round(r(sum)-`articles') == 0
     // restrict to USA
     keep if country_code == "US" & !mi(msa_comb)
 
@@ -164,13 +194,13 @@ program make_panel
     bys athr_id `time': egen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
     preserve
     if "`time'" == "year" {
-        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt patent_wt patent_count (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
+        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt frnt_adj_wt body_adj_wt front_only body_only (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
         merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
-        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt patent_wt patent_count (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
+        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count frnt_adj_wt body_adj_wt front_only body_only impact_affl_wt impact_cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
         merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
@@ -206,13 +236,13 @@ program make_panel
     restore
     preserve
     if "`time'" == "year" {
-        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt patent_wt patent_count (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
+        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt front_only body_only frnt_adj_wt body_adj_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
         merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
-        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt patent_wt patent_count (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
+        gcollapse (sum) affl_wt cite_affl_wt frnt_adj_wt body_adj_wt body_only front_only pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
         merge m:1 athr_id `time' using ${temp}/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
