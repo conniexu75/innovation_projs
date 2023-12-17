@@ -19,9 +19,11 @@ program main
     global msa_world_name "cities"
     global msa_c_world_name "cities"
     di "OUTPUT START"
-    foreach var in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt pat_adj_wt {
+    foreach var in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt pat_adj_wt frnt_adj_wt body_adj_wt {
+        di "CNS: `var'"
         athr_loc, data(newfund) samp(cns) wt_var(`var')
-        qui trends, data(newfund) samp(cns) wt_var(`var')
+*        qui trends, data(newfund) samp(cns) wt_var(`var')
+        di "ALL: `var'"
         athr_loc, data(all) samp(jrnls) wt_var(`var')
         qui trends, data(all) samp(jrnls) wt_var(`var')
     }
@@ -38,10 +40,13 @@ program athr_loc
     if "`wt_var'" == "impact_affl_wt" local suf "_if"
     if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
-    use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
+    if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
+    if "`wt_var'" == "body_adj_wt" local suf "_body"
+    use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear 
+    replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
     local end 20
-    foreach loc in country msa_c_world inst {
-        if "`loc'" == "inst" {
+    foreach loc in country msa_c_world inst msa_comb {
+        if "`loc'" == "inst" & inlist("wt_var", "affl_wt", "cite_affl_wt", "impact_affl_wt", "impact_cite_affl_wt") {
             local end 50
         }
         qui gunique pmid 
@@ -98,6 +103,7 @@ end
 program calc_broad_hhmi
    syntax, data(str) samp(str) 
    use if inrange(year, 1945, 2022) using ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
+   replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
    qui gunique pmid which_athr
    local num_athrs = r(unique)
    qui gunique pmid which_athr if country == "United States"
@@ -145,15 +151,21 @@ program trends
     if "`wt_var'" == "impact_affl_wt" local suf "_if"
     if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
-    use if inrange(year, 1945, 2022) using ../external/openalex/cleaned_all_`data'_`samp', clear
+    if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
+    if "`wt_var'" == "body_adj_wt" local suf "_body"
+    use if inrange(year, 1945, 2022)  using ../external/openalex/cleaned_all_`data'_`samp', clear
+    replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
     cap drop counter
 
     gen msa_world = msatitle
     replace msa_world = city if country != "United States"
     qui bys pmid year: gen counter = _n == 1
     qui bys year: egen tot_in_yr = total(counter)
-    foreach loc in country  msa_c_world inst {
+    foreach loc in country  msa_c_world inst msa_comb {
         preserve
+        if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
+            qui keep if country == "United States"
+        }
         replace `loc' = "harvard university" if `loc' == "university harvard"
         replace `loc' = "stanford university" if `loc' == "university stanford"
         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp'`suf', assert(1 3) keep(1 3) nogen
@@ -312,11 +324,15 @@ end
 program output_tables
     syntax, data(str) samp(str)
     foreach file in top_country top_msa_c_world top_inst {
-*        qui matrix_to_txt, saving("../output/tables/`file'_`data'_`samp'.txt") matrix(`file'_`data'_`samp') ///
-*           title(<tab:`file'_`data'_`samp'>) format(%20.4f) replace
         qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.txt") matrix(`file'_`samp'_wt) ///
            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace
         qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
+           title(<tab:`file'_`samp'>) format(%20.4f) replace
+        qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.txt") matrix(`file'_`samp') ///
+           title(<tab:`file'_`samp'>) format(%20.4f) replace
+        qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_wt.txt") matrix(`file'_`samp') ///
+           title(<tab:`file'_`samp'>) format(%20.4f) replace
+        qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.txt") matrix(`file'_`samp') ///
            title(<tab:`file'_`samp'>) format(%20.4f) replace
          }
  end
