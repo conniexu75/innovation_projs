@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-12-14 10:46:42
+Makelog started: 2023-12-20 23:36:59
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -62,18 +62,19 @@ not available in non-GUI version
   8.     global msa_world_name "cities"
   9.     global msa_c_world_name "cities"
  10.     di "OUTPUT START"
- 11.     foreach var in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt
->  pat_adj_wt {
- 12.         athr_loc, data(newfund) samp(cns) wt_var(`var')
- 13.         qui trends, data(newfund) samp(cns) wt_var(`var')
- 14.         athr_loc, data(all) samp(jrnls) wt_var(`var')
- 15.         qui trends, data(all) samp(jrnls) wt_var(`var')
- 16.     }
- 17.     *calc_broad_hhmi, data(`data') samp(`samp') 
+ 11.     foreach var in impact_cite_affl_wt body_adj_wt {
+ 12.         /*di "CNS: `var'"
+>         athr_loc, data(newfund) samp(cns) wt_var(`var')
+>         qui trends, data(newfund) samp(cns) wt_var(`var')*/
+.         di "ALL: `var'"
+ 13.         athr_loc, data(all) samp(jrnls) wt_var(`var')
+ 14.         qui trends, data(all) samp(jrnls) wt_var(`var')
+ 15.     }
+ 16.     *calc_broad_hhmi, data(`data') samp(`samp') 
 .     *top_mesh_terms, data(cns) samp(`samp') 
-.     qui output_tables, data(newfund) samp(cns) 
- 18.     qui output_tables, data(all) samp(jrnls) 
- 19. end
+.     *qui output_tables, data(newfund) samp(cns) 
+.     qui output_tables, data(all) samp(jrnls) 
+ 17. end
 
 . 
 . program athr_loc
@@ -83,130 +84,137 @@ not available in non-GUI version
   4.     if "`wt_var'" == "impact_affl_wt" local suf "_if"
   5.     if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
   6.     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
-  7.     use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear
-  8.     local end 20
-  9.     foreach loc in country msa_c_world inst {
- 10.         if "`loc'" == "inst" {
- 11.             local end 50
- 12.         }
- 13.         qui gunique pmid 
- 14.         local articles = r(unique)
- 15.         qui sum `wt_var'
- 16.         local total = round(r(sum))
- 17.         assert `total' == `articles'
- 18.         qui sum `wt_var' if !mi(`loc') 
- 19.         local denom = r(sum) 
- 20.         preserve
- 21.         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
- 22.             qui keep if country == "United States"
- 23.         }
- 24.         collapse (sum) `wt_var', by(`loc')
- 25.         qui hashsort -`wt_var' 
- 26.         qui gen perc = `wt_var' / `total' * 100
- 27.         li if mi(`loc')
- 28.         qui drop if mi(`loc')
- 29.         qui gen cum_perc = sum(perc) 
- 30.         gen rank = _n 
- 31.         save ../temp/rankings_`loc'`suf', replace
- 32.         drop rank
- 33.         qui count
- 34.         local rank_end = min(r(N),`end') 
- 35.         li `loc' perc in 1/`rank_end'
- 36.         di "Total articles: `total'"
- 37.         mkmat perc cum_perc in 1/`rank_end', mat(top_`loc'_`samp'`suf')
- 38.         mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , (
-> top_`loc'_`samp'`suf')
- 39.         qui levelsof `loc' in 1/2
- 40.         global top2_`loc'_`data' "`r(levels)'"
- 41.         if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "ms
+  7.     if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
+  8.     if "`wt_var'" == "body_adj_wt" local suf "_body"
+  9.     use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear 
+ 10.     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts G
+> eneral Hospital" , "Brigham and Women's Hospital")
+ 11.     local end 20
+ 12.     foreach loc in country msa_c_world inst {
+ 13.         if "`loc'" == "inst" & ("`wt_var'" != "pat_adj_wt" & "`wt_var'" !=
+>  "body_adj_wt") {
+ 14.             local end 50
+ 15.         }
+ 16.         qui gunique pmid 
+ 17.         local articles = r(unique)
+ 18.         qui sum `wt_var'
+ 19.         local total = round(r(sum))
+ 20.         assert `total' == `articles'
+ 21.         qui sum `wt_var' if !mi(`loc') 
+ 22.         local denom = r(sum) 
+ 23.         preserve
+ 24.         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
+ 25.             qui keep if country == "United States"
+ 26.         }
+ 27.         collapse (sum) `wt_var', by(`loc')
+ 28.         qui hashsort -`wt_var' 
+ 29.         qui gen perc = `wt_var' / `total' * 100
+ 30.         li if mi(`loc')
+ 31.         qui drop if mi(`loc')
+ 32.         qui gen cum_perc = sum(perc) 
+ 33.         gen rank = _n 
+ 34.         save ../temp/rankings_`loc'`suf', replace
+ 35.         drop rank
+ 36.         qui count
+ 37.         local rank_end = min(r(N),`end') 
+ 38.         li `loc' perc in 1/`rank_end'
+ 39.         di "Total articles: `total'"
+ 40.         mkmat perc cum_perc in 1/`rank_end', mat(top_`loc'_`samp'`suf')
+ 41. *        mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , 
+> (top_`loc'_`samp'`suf')
+.         qui levelsof `loc' in 1/2
+ 42.         global top2_`loc'_`data' "`r(levels)'"
+ 43.         if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "ms
 > aworld", "msa_c_world") {
- 42.             qui levelsof `loc' in 1/`rank_end'
- 43.             global `loc'_`data' "`r(levels)'"
- 44.         }
- 45.         qui gen rank_grp = "first" if _n == 1
- 46.         replace `loc' = "harvard university" if `loc' == "university harva
+ 44.             qui levelsof `loc' in 1/`rank_end'
+ 45.             global `loc'_`data' "`r(levels)'"
+ 46.         }
+ 47.         qui gen rank_grp = "first" if _n == 1
+ 48.         replace `loc' = "harvard university" if `loc' == "university harva
 > rd"
- 47.         replace `loc' = "stanford university" if `loc' == "university stan
+ 49.         replace `loc' = "stanford university" if `loc' == "university stan
 > ford"
- 48.         qui levelsof `loc' if _n == 1 
- 49.         global `loc'_first "`r(levels)'"
- 50.         qui levelsof `loc' if _n == 2
- 51. 
+ 50.         qui levelsof `loc' if _n == 1 
+ 51.         global `loc'_first "`r(levels)'"
+ 52.         qui levelsof `loc' if _n == 2
+ 53. 
 .         global `loc'_second "`r(levels)'"
- 52.         qui replace rank_grp = "second" if _n == 2
- 53.         qui replace rank_grp = "china" if `loc' == "China"
- 54.         qui replace rank_grp = "uk" if `loc' == "United Kingdom"
- 55.         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10) & !inl
+ 54.         qui replace rank_grp = "second" if _n == 2
+ 55.         qui replace rank_grp = "china" if `loc' == "China"
+ 56.         qui replace rank_grp = "uk" if `loc' == "United Kingdom"
+ 57.         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10) & !inl
 > ist(rank_grp,"china", "uk")
- 56.         qui replace rank_grp = "remaining" if mi(rank_grp)
- 57.         keep `loc' rank_grp
- 58.         qui save ../temp/`loc'_rank_`data'_`samp'`suf', replace
- 59.         restore
- 60.     }
- 61. end
+ 58.         qui replace rank_grp = "remaining" if mi(rank_grp)
+ 59.         keep `loc' rank_grp
+ 60.         qui save ../temp/`loc'_rank_`data'_`samp'`suf', replace
+ 61.         restore
+ 62.     }
+ 63. end
 
 . 
 . program calc_broad_hhmi
   1.    syntax, data(str) samp(str) 
   2.    use if inrange(year, 1945, 2022) using ../external/openalex/cleaned_las
 > t5yrs_`data'_`samp', clear
-  3.    qui gunique pmid which_athr
-  4.    local num_athrs = r(unique)
-  5.    qui gunique pmid which_athr if country == "United States"
-  6.    local num_athrs_US = r(unique)
-  7.    foreach i in broad hhmi {
-  8.        qui gunique pmid which_athr if has_`i'_affl == 1
-  9.        local num_`i' = r(unique)
- 10.        di `num_`i'' " authors of " `num_athrs' " are " "`i' affiliated or 
+  3.    replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts Ge
+> neral Hospital" , "Brigham and Women's Hospital")
+  4.    qui gunique pmid which_athr
+  5.    local num_athrs = r(unique)
+  6.    qui gunique pmid which_athr if country == "United States"
+  7.    local num_athrs_US = r(unique)
+  8.    foreach i in broad hhmi {
+  9.        qui gunique pmid which_athr if has_`i'_affl == 1
+ 10.        local num_`i' = r(unique)
+ 11.        di `num_`i'' " authors of " `num_athrs' " are " "`i' affiliated or 
 > " `num_`i''/`num_athrs'*100 " percent"
- 11.        qui gunique pmid which_athr if has_`i'_affl == 1 & country == "Unit
+ 12.        qui gunique pmid which_athr if has_`i'_affl == 1 & country == "Unit
 > ed States"
- 12.        local num_`i'_US = r(unique)
- 13.        di `num_`i'_US' " US authors of " `num_athrs_US' " are " "`i' affil
+ 13.        local num_`i'_US = r(unique)
+ 14.        di `num_`i'_US' " US authors of " `num_athrs_US' " are " "`i' affil
 > iated or " `num_`i'_US'/`num_athrs_US'*100 " percent"
- 14.        // hhmi has to be us
+ 15.        // hhmi has to be us
 .        preserve
- 15.        keep if country == "United States"
- 16.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Stanfor
+ 16.        keep if country == "United States"
+ 17.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Stanfor
 > d University" 
- 17.        local num_`i'_stanford = r(unique)
- 18.        di `num_`i'_stanford' " stanford authors of " `num_`i'_US' " are " 
+ 18.        local num_`i'_stanford = r(unique)
+ 19.        di `num_`i'_stanford' " stanford authors of " `num_`i'_US' " are " 
 > "`i' affiliated or " `num_`i'_stanford'/`num_`i'_US'*100 " percent"
- 19.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Harvard
+ 20.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Harvard
 >  University" 
- 20.        local num_`i'_harvard = r(unique)
- 21.        di `num_`i'_harvard' " harvard authors of " `num_`i'_US' " are " "`
+ 21.        local num_`i'_harvard = r(unique)
+ 22.        di `num_`i'_harvard' " harvard authors of " `num_`i'_US' " are " "`
 > i' affiliated or " `num_`i'_harvard'/`num_`i'_US'*100 " percent"
- 22.        restore
- 23.        if "`i'" == "broad" {
- 24.            qui count if  inlist(inst, "Harvard University", "Massachusetts
+ 23.        restore
+ 24.        if "`i'" == "broad" {
+ 25.            qui count if  inlist(inst, "Harvard University", "Massachusetts
 >  Institute of Technology", "Boston Children's Hospital", "Dana Farber Cancer 
 > Institute", "Massachusetts General Hospital", "Brigham and Women's Hospital",
 >  "Beth Israel Deaconess Medical Center")
- 25.            if r(N) > 0 {
- 26.                preserve
- 27.                keep if inlist(inst, "Harvard University", "Massachusetts I
+ 26.            if r(N) > 0 {
+ 27.                preserve
+ 28.                keep if inlist(inst, "Harvard University", "Massachusetts I
 > nstitute of Technology", "Boston Children's Hospital", "Dana Farber Cancer In
 > stitute", "Massachusetts General Hospital", "Brigham and Women's Hospital", "
 > Beth Israel Deaconess Medical Center")
- 28.                qui gunique pmid which_athr if has_`i'_affl == 1 
- 29.                local num_athrs_broad = r(unique)
- 30.                qui gunique pmid which_athr if has_`i'_affl == 1 & inst == 
+ 29.                qui gunique pmid which_athr if has_`i'_affl == 1 
+ 30.                local num_athrs_broad = r(unique)
+ 31.                qui gunique pmid which_athr if has_`i'_affl == 1 & inst == 
 > "Harvard University" 
- 31.                local num_`i'_harvard = r(unique)
- 32.                di `num_`i'_harvard' " harvard authors of " `num_athrs_broa
+ 32.                local num_`i'_harvard = r(unique)
+ 33.                di `num_`i'_harvard' " harvard authors of " `num_athrs_broa
 > d' " are " "`i' affiliated or " `num_`i'_harvard'/`num_athrs_broad'*100 " per
 > cent"
- 33.                qui gunique pmid which_athr if has_`i'_affl == 1 & inst == 
+ 34.                qui gunique pmid which_athr if has_`i'_affl == 1 & inst == 
 > "Massachusetts Institute of Technology" 
- 34.                local num_`i'_mit= r(unique)
- 35.                di `num_`i'_mit' " mit authors of " `num_athrs_broad' " are
+ 35.                local num_`i'_mit= r(unique)
+ 36.                di `num_`i'_mit' " mit authors of " `num_athrs_broad' " are
 >  " "`i' affiliated or " `num_`i'_mit'/`num_athrs_broad'*100 " percent"
- 36.                restore 
- 37.            }
- 38.         }
- 39.     }
- 40. end
+ 37.                restore 
+ 38.            }
+ 39.         }
+ 40.     }
+ 41. end
 
 . 
 . program trends
@@ -216,31 +224,38 @@ not available in non-GUI version
   4.     if "`wt_var'" == "impact_affl_wt" local suf "_if"
   5.     if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
   6.     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
-  7.     use if inrange(year, 1945, 2022) using ../external/openalex/cleaned_al
-> l_`data'_`samp', clear
-  8.     cap drop counter
-  9. 
+  7.     if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
+  8.     if "`wt_var'" == "body_adj_wt" local suf "_body"
+  9.     use if inrange(year, 1945, 2022)  using ../external/openalex/cleaned_a
+> ll_`data'_`samp', clear
+ 10.     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts G
+> eneral Hospital" , "Brigham and Women's Hospital")
+ 11.     cap drop counter
+ 12. 
 .     gen msa_world = msatitle
- 10.     replace msa_world = city if country != "United States"
- 11.     qui bys pmid year: gen counter = _n == 1
- 12.     qui bys year: egen tot_in_yr = total(counter)
- 13.     foreach loc in country  msa_c_world inst {
- 14.         preserve
- 15.         replace `loc' = "harvard university" if `loc' == "university harva
-> rd"
- 16.         replace `loc' = "stanford university" if `loc' == "university stan
-> ford"
- 17.         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp'`suf', a
-> ssert(1 3) keep(1 3) nogen
- 18.         if "`loc'" == "inst" {
- 19.             replace `loc' = strproper(`loc')
+ 13.     replace msa_world = city if country != "United States"
+ 14.     qui bys pmid year: gen counter = _n == 1
+ 15.     qui bys year: egen tot_in_yr = total(counter)
+ 16.     foreach loc in country  msa_c_world inst {
+ 17.         preserve
+ 18.         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
+ 19.             qui keep if country == "United States"
  20.         }
- 21.         qui sum year
- 22.         local min_year = max(1945,r(min))
- 23.         qui egen year_bin  = cut(year), at(1945(3)2023) 
- 24.         keep if !mi(`loc')
- 25.         local year_var year_bin
- 26.         
+ 21.         replace `loc' = "harvard university" if `loc' == "university harva
+> rd"
+ 22.         replace `loc' = "stanford university" if `loc' == "university stan
+> ford"
+ 23.         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp'`suf', a
+> ssert(1 3) keep(1 3) nogen
+ 24.         if "`loc'" == "inst" {
+ 25.             replace `loc' = strproper(`loc')
+ 26.         }
+ 27.         qui sum year
+ 28.         local min_year = max(1945,r(min))
+ 29.         qui egen year_bin  = cut(year), at(1945(3)2023) 
+ 30.         keep if !mi(`loc')
+ 31.         local year_var year_bin
+ 32.         
 .         /*qui bys pmid `year_var': replace counter = _n == 1
 >         qui bys `year_var': egen tot_in_`year_var' = total(counter)
 >         qui replace rank_grp = "remaining" if mi(rank_grp)
@@ -255,129 +270,128 @@ not available in non-GUI version
 >         replace impact_affl_wt = impact_wt * affl_wt*/
 . 
 .         collapse (sum) `wt_var'  (firstnm) `loc'  , by(rank_grp `year_var')
- 27.         bys `year_var': egen tot_in_`year_var' = total(`wt_var')
- 28.         qui gen perc = `wt_var'/tot_in_`year_var' * 100
- 29.         qui bys `year_var': egen tot = sum(perc)
- 30.         save ../temp/trends_`loc'`suf', replace
- 31.         qui replace tot = round(tot)
- 32.         assert tot==100
- 33.         qui drop tot
- 34.         if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "ms
+ 33.         bys `year_var': egen tot_in_`year_var' = total(`wt_var')
+ 34.         qui gen perc = `wt_var'/tot_in_`year_var' * 100
+ 35.         qui bys `year_var': egen tot = sum(perc)
+ 36.         save ../temp/trends_`loc'`suf', replace
+ 37.         qui replace tot = round(tot)
+ 38.         assert tot==100
+ 39.         qui drop tot
+ 40.         if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "ms
 > a_world" |  "`loc'" == "msa_c_world" | "`loc'" == "msa_comb" {
- 35.             label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Re
-> st of the top 10 ${`loc'_name}" 4 "Remaining places" 
- 36.         }
- 37.         if "`loc'" == "inst" {
- 38.             local proper_1 = strproper(${`loc'_first})
- 39.             local proper_2 = strproper(${`loc'_second})
- 40.             label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Rest of
->  the top 10 ${`loc'_name}" 4 "Remaining places" 
- 41.         }
- 42.         if "`loc'" == "country" {
- 43.             label define rank_grp 1 ${`loc'_first} 2 "United Kingdom" 3 "C
-> hina" 4 "Rest of the top 10 ${`loc'_name}" 5 "Remaining places" 
- 44.         }
- 45.         label var rank_grp rank_grp
- 46.         qui gen group = 1 if rank_grp == "first"
- 47.         qui replace group = 2 if rank_grp == "second"  & "`loc'"!= "countr
+ 41.             label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Re
+> maining top 10" 4 "Remaining places" 
+ 42.         }
+ 43.         if "`loc'" == "inst" {
+ 44.             local proper_1 = strproper(${`loc'_first})
+ 45.             local proper_2 = strproper(${`loc'_second})
+ 46.             label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Remaini
+> ng top 10" 4 "Remaining places" 
+ 47.         }
+ 48.         if "`loc'" == "country" {
+ 49.             label define rank_grp 1 ${`loc'_first} 2 "United Kingdom" 3 "C
+> hina" 4 "Remaining top 10" 5 "Remaining places" 
+ 50.         }
+ 51.         label var rank_grp rank_grp
+ 52.         qui gen group = 1 if rank_grp == "first"
+ 53.         qui replace group = 2 if rank_grp == "second"  & "`loc'"!= "countr
 > y"
- 48.         qui replace group = 2 if rank_grp == "uk" & "`loc'" == "country"
- 49.         qui replace group = 3 if rank_grp == "china" & "`loc'" == "country
+ 54.         qui replace group = 2 if rank_grp == "uk" & "`loc'" == "country"
+ 55.         qui replace group = 3 if rank_grp == "china" & "`loc'" == "country
 > "
- 50.         local last = 2
- 51.         if "`loc'" == "country" local last = 3 
- 52.         qui replace group = `last'+1 if rank_grp == "rest of top 10" 
- 53.         qui replace group = `last'+2 if rank_grp == "remaining"
- 54.         *qui replace group = `last'+3 if rank_grp == "missing"
+ 56.         local last = 2
+ 57.         if "`loc'" == "country" local last = 3 
+ 58.         qui replace group = `last'+1 if rank_grp == "rest of top 10" 
+ 59.         qui replace group = `last'+2 if rank_grp == "remaining"
+ 60.         *qui replace group = `last'+3 if rank_grp == "missing"
 .         qui hashsort `year_var' -group
- 55.         qui bys `year_var': gen stack_perc = sum(perc)
- 56.         keep rank_grp `year_var' `loc' perc group stack_perc
- 57.         local stacklines
- 58.         qui xtset group `year_var' 
- 59.         qui sum group 
- 60.         local max_grp = r(max)
- 61.         qui levelsof group, local(rank_grps)
- 62.         local items = `r(r)'
- 63.         foreach x of local rank_grps {
- 64.            colorpalette carto Teal, intensify(0.85)  n(`items') nograph
- 65.            local stacklines `stacklines' area stack_perc `year_var' if gro
+ 61.         qui bys `year_var': gen stack_perc = sum(perc)
+ 62.         keep rank_grp `year_var' `loc' perc group stack_perc
+ 63.         local stacklines
+ 64.         qui xtset group `year_var' 
+ 65.         qui sum group 
+ 66.         local max_grp = r(max)
+ 67.         qui levelsof group, local(rank_grps)
+ 68.         local items = `r(r)'
+ 69.         foreach x of local rank_grps {
+ 70.            colorpalette carto Teal, intensify(0.85)  n(`items') nograph
+ 71.            local stacklines `stacklines' area stack_perc `year_var' if gro
 > up == `x', fcolor("`r(p`x')'") lcolor(white) lwidth(*0.3) || 
- 66. /*           if `x' == `max_grp' {
+ 72. /*           if `x' == `max_grp' {
 >                local stacklines `stacklines' area stack_perc `year_var' if gr
 > oup == `x', fcolor("dimgray") lcolor(black) lwidth(*0.2) || 
 >            }*/
 .         }
- 67.         qui gen labely = . 
- 68.         qui gen rev_group = -group
- 69.         if "`loc'"=="country" {
- 70.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
+ 73.         qui gen labely = . 
+ 74.         qui gen rev_group = -group
+ 75.         if "`loc'"=="country" {
+ 76.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
 > up == 5
- 71.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+ 77.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
 > [_n-1] if group == 4
- 72.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] + perc[_n-2] if group == 3
- 73.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] + perc[_n-2] + perc[_n-3] if group == 2
- 74.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] + perc[_n-2] + perc[_n-3] + perc[_n-4] if group == 1
- 75.         }
- 76.         if "`loc'"!="country" {
- 77.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
-> up == 4
  78.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] if group == 3
+> [_n-1] + perc[_n-2] if group == 3
  79.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] + perc[_n-2] if group == 2
+> [_n-1] + perc[_n-2] + perc[_n-3] if group == 2
  80.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] + perc[_n-2] + perc[_n-3] if group == 1
+> [_n-1] + perc[_n-2] + perc[_n-3] + perc[_n-4] if group == 1
  81.         }
- 82. *        qui gen labely_lab = "Missing Info" if group == `last'+3
+ 82.         if "`loc'"!="country" {
+ 83.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
+> up == 4
+ 84.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] if group == 3
+ 85.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] if group == 2
+ 86.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] + perc[_n-3] if group == 1
+ 87.         }
+ 88. *        qui gen labely_lab = "Missing Info" if group == `last'+3
 .         qui gen labely_lab = "Everywhere else" if group == `last'+2
- 83.         qui replace labely_lab = "Rest of the top 10 ${`loc'_name}" if gro
-> up == `last'+1
- 84.         qui replace labely_lab = "China" if group == 3 & "`loc'"=="country
+ 89.         qui replace labely_lab = "Remaining top 10" if group == `last'+1
+ 90.         qui replace labely_lab = "China" if group == 3 & "`loc'"=="country
 > "
- 85.         qui replace labely_lab = ${`loc'_second} if group == 2
- 86.         qui replace labely_lab = ${`loc'_second} if group == 2
- 87.         qui replace labely_lab = ${`loc'_first} if group == 1
- 88.         qui replace labely_lab = "United Kingdom" if group == 2 & "`loc'"=
+ 91.         qui replace labely_lab = ${`loc'_second} if group == 2
+ 92.         qui replace labely_lab = ${`loc'_second} if group == 2
+ 93.         qui replace labely_lab = ${`loc'_first} if group == 1
+ 94.         qui replace labely_lab = "United Kingdom" if group == 2 & "`loc'"=
 > ="country"
- 89.         qui replace labely_lab = strproper(${`loc'_second}) if group == 2 
+ 95.         qui replace labely_lab = strproper(${`loc'_second}) if group == 2 
 > & "`loc'" == "inst"
- 90.         qui replace labely_lab = strproper(${`loc'_first}) if group == 1 &
+ 96.         qui replace labely_lab = strproper(${`loc'_first}) if group == 1 &
 >  "`loc'" == "inst"
- 91.         qui replace labely_lab = subinstr(labely_lab, "United States", "US
+ 97.         qui replace labely_lab = subinstr(labely_lab, "United States", "US
 > ", .)
- 92.         qui replace labely_lab = subinstr(labely_lab, "MA-NH", "US", .) if
+ 98.         qui replace labely_lab = subinstr(labely_lab, "MA-NH", "US", .) if
 >  strpos("`loc'" , "world")>0
- 93.         qui replace labely_lab = subinstr(labely_lab, "NY-NJ-PA", "US", .)
+ 99.         qui replace labely_lab = subinstr(labely_lab, "NY-NJ-PA", "US", .)
 >  if strpos("`loc'" , "world")>0
- 94.         qui replace labely_lab = subinstr(labely_lab, "CA", "US", .) if st
+100.         qui replace labely_lab = subinstr(labely_lab, "CA", "US", .) if st
 > rpos("`loc'" , "world")>0
- 95.         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "U
+101.         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "U
 > K", .)
- 96.         qui sum `year_var'
- 97.         replace `year_var' = 2023 if `year_var' == r(max)
- 98.         if "`loc'" == "country" {
- 99.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
+102.         qui sum `year_var'
+103.         replace `year_var' = 2023 if `year_var' == r(max)
+104.         if "`loc'" == "country" {
+105.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
 >  ==2023, ms(smcircle) ///
 >               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) m
 > label(labely_lab)), ///
 >               ytitle("Share of Worldwide Fundamental Science Research Output"
 > , size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(
 > 45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
->               graphregion(margin(r+32)) plotregion(margin(zero)) ///
+>               graphregion(margin(r+27)) plotregion(margin(zero)) ///
 >               legend(off label(1 ${`loc'_first}) label(2 "United Kingdom") la
-> bel(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining
->  places")  ring(1) pos(6) rows(2))
-100.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
+> bel(3 "China") label(4 "Remaining top 10") label(5 "Remaining places")  ring(
+> 1) pos(6) rows(2))
+106.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
 > `suf'.pdf , replace 
-101.         }
-102.         local w = 32 
-103.         if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "m
-> sa_c_world" | "`loc'" == "msa_comb") local w = 32
-104.         if "`loc'" != "country" {
-105.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
+107.         }
+108.         local w = 27 
+109.         if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "m
+> sa_c_world" | "`loc'" == "msa_comb") local w = 27 
+110.         if "`loc'" != "country" {
+111.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
 >  ==2023, ms(smcircle) ///
 >               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) m
 > label(labely_lab)), ///
@@ -386,14 +400,13 @@ not available in non-GUI version
 > 45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
 >               graphregion(margin(r+`w')) plotregion(margin(zero)) ///
 >               legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) lab
-> el(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places")  ring(1)
->  pos(6) rows(2))
-106.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
+> el(3 "Remaining top 10") label(4 "Remaining places")  ring(1) pos(6) rows(2))
+112.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
 > `suf'.pdf , replace 
-107.         }
-108.         restore
-109.     }
-110. end 
+113.         }
+114.         restore
+115.     }
+116. end 
 
 .     
 . program top_mesh_terms
@@ -432,1042 +445,42 @@ not available in non-GUI version
 . 
 . program output_tables
   1.     syntax, data(str) samp(str)
-  2.     foreach file in top_country top_msa_c_world top_inst {
-  3. *        qui matrix_to_txt, saving("../output/tables/`file'_`data'_`samp'.
-> txt") matrix(`file'_`data'_`samp') ///
-> *           title(<tab:`file'_`data'_`samp'>) format(%20.4f) replace
-.         qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.txt") ma
-> trix(`file'_`samp'_wt) ///
+  2.     cap mat if_comb = top_country_jrnls_if \ top_msa_c_world_jrnls_if
+  3.     cap mat body_comb = top_country_jrnls_body \ top_msa_c_world_jrnls_bod
+> y \ top_inst_jrnls_body
+  4.     cap matrix_to_txt, saving("../output/tables/comb.txt") matrix(comb) ti
+> tle(<tab:comb>) format(%20.4f) replace
+  5.     foreach file in top_country top_msa_c_world top_inst {
+  6.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.t
+> xt") matrix(`file'_`samp'_wt) ///
 >            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace
-  4.         qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") ma
-> trix(`file'_`samp') ///
+  7.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt"
+> ) matrix(`file'_`samp') ///
 >            title(<tab:`file'_`samp'>) format(%20.4f) replace
-  5.          }
-  6.  end
+  8.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.t
+> xt") matrix(`file'_`samp'_if) ///
+>            title(<tab:`file'_`samp'_if>) format(%20.4f) replace
+  9.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_w
+> t.txt") matrix(`file'_`samp'_if_wt) ///
+>            title(<tab:`file'_`samp'_if_wt>) format(%20.4f) replace
+ 10.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.
+> txt") matrix(`file'_`samp'_pat) ///
+>            title(<tab:`file'_`samp'_pat>) format(%20.4f) replace
+ 11.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_frnt
+> .txt") matrix(`file'_`samp'_frnt) ///
+>            title(<tab:`file'_`samp'_frnt>) format(%20.4f) replace
+ 12.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_body
+> .txt") matrix(`file'_`samp'_body) ///
+>            title(<tab:`file'_`samp'_body>) format(%20.4f) replace
+ 13.          }
+ 14.  end
 
 . ** 
 . main
 OUTPUT START
-(file ../temp/rankings_country.dta not found)
-file ../temp/rankings_country.dta saved
-
-     +---------------------------+
-     |        country       perc |
-     |---------------------------|
-  1. |  United States   53.73376 |
-  2. | United Kingdom   8.991009 |
-  3. |          China   8.354146 |
-  4. |        Germany   6.252081 |
-  5. |    Switzerland    2.80969 |
-     |---------------------------|
-  6. |         Canada   2.314352 |
-  7. |         France    2.31019 |
-  8. |          Japan   2.168665 |
-  9. |      Australia   2.022977 |
- 10. |    Netherlands   1.411089 |
-     |---------------------------|
- 11. |         Israel   1.182151 |
- 12. |         Sweden   .9324009 |
- 13. |        Austria   .8991009 |
- 14. |          Spain   .7950383 |
- 15. |    South Korea   .6743256 |
-     |---------------------------|
- 16. |        Belgium   .6535131 |
- 17. |          Italy   .6035631 |
- 18. |        Denmark   .5744256 |
- 19. |      Singapore   .4079254 |
- 20. |          India   .2289377 |
-     +---------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-     +-------------------------------+
-     | msa_c_~d   affl_wt       perc |
-     |-------------------------------|
- 72. |                 29   .2414252 |
-     +-------------------------------+
-(file ../temp/rankings_msa_c_world.dta not found)
-file ../temp/rankings_msa_c_world.dta saved
-
-     +------------------------------------------------+
-     |                         msa_c_world       perc |
-     |------------------------------------------------|
-  1. |         Boston-Cambridge-Newton, US   9.736097 |
-  2. |                        Bay Area, US    7.89627 |
-  3. |     New York-Newark-Jersey City, US   6.793207 |
-  4. |                         Beijing, CN    4.82018 |
-  5. | Washington-Arlington-Alexandria, US   2.784715 |
-     |------------------------------------------------|
-  6. |              San Diego-Carlsbad, US    2.74309 |
-  7. |                       Cambridge, GB   2.672328 |
-  8. |                          London, GB   2.505827 |
-  9. |  Los Angeles-Long Beach-Anaheim, US   2.239427 |
- 10. |         Seattle-Tacoma-Bellevue, US   1.535964 |
-     |------------------------------------------------|
- 11. |               New Haven-Milford, US   1.486014 |
- 12. |  Philadelphia-Camden-Wilmington, US   1.248751 |
- 13. |          Research Triangle Park, US   1.215451 |
- 14. |                          Oxford, GB   1.144689 |
- 15. |                           Paris, FR   1.144689 |
-     |------------------------------------------------|
- 16. |        Chicago-Naperville-Elgin, US   1.015651 |
- 17. |                          Zurich, CH    .990676 |
- 18. |     Dallas-Fort Worth-Arlington, US    .982351 |
- 19. |       Baltimore-Columbia-Towson, US   .9698635 |
- 20. |                          Ithaca, US   .9573759 |
-     +------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-      +---------------------------+
-      | inst   affl_wt       perc |
-      |---------------------------|
-   1. |         1047.5   8.720447 |
-      +---------------------------+
-(file ../temp/rankings_inst.dta not found)
-file ../temp/rankings_inst.dta saved
-
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University   4.083416 |
-  2. |                                 Stanford University   3.409091 |
-  3. |                                  Max Planck Society   2.185315 |
-  4. |               Massachusetts Institute of Technology   1.893939 |
-  5. |             University of California, San Francisco   1.727439 |
-     |----------------------------------------------------------------|
-  6. |                         Chinese Academy of Sciences   1.648352 |
-  7. |                              Rockefeller University   1.515152 |
-  8. |                       National Institutes of Health   1.498502 |
-  9. |                                     Yale University   1.269564 |
- 10. |                  University of California, Berkeley   1.194639 |
-     |----------------------------------------------------------------|
- 11. |                 University of California, San Diego   1.173826 |
- 12. |                                 Columbia University   1.057276 |
- 13. |                                  Cornell University   .9948385 |
- 14. |                            University of Washington    .990676 |
- 15. |              Memorial Sloan Kettering Cancer Center   .9324009 |
-     |----------------------------------------------------------------|
- 16. |                            Medical Research Council   .9282385 |
- 17. |                          University of Pennsylvania   .9032634 |
- 18. |                                University of Oxford   .8699633 |
- 19. |                  Washington University in St. Louis   .8408259 |
- 20. |                  California Institute of Technology   .8283383 |
-     |----------------------------------------------------------------|
- 21. |                             University of Cambridge   .8241758 |
- 22. |                                Mass General Brigham   .8200133 |
- 23. |                            Johns Hopkins University   .7992008 |
- 24. |                                Princeton University   .7950383 |
- 25. |                                   Peking University   .7409257 |
-     |----------------------------------------------------------------|
- 26. | The University of Texas Southwestern Medical Center   .7284383 |
- 27. |                       Weizmann Institute of Science   .7159507 |
- 28. |               University of California, Los Angeles   .6993007 |
- 29. |                                 New York University   .6784882 |
- 30. |                          Scripps Research Institute   .6410257 |
-     |----------------------------------------------------------------|
- 31. |                                   Boston University   .6118881 |
- 32. |                               University of Chicago   .5577756 |
- 33. |      French National Centre for Scientific Research    .545288 |
- 34. |                                     Duke University   .5411255 |
- 35. |                                          ETH Zurich   .5078255 |
-     |----------------------------------------------------------------|
- 36. |                                 Tsinghua University    .503663 |
- 37. |                           University College London   .4911755 |
- 38. |                             Imperial College London    .478688 |
- 39. |                           Wellcome Sanger Institute    .462038 |
- 40. |                                 University of Tokyo   .4495504 |
-     |----------------------------------------------------------------|
- 41. |                          Boston Children's Hospital    .445388 |
- 42. |               Salk Institute for Biological Studies   .4412254 |
- 43. |    Helmholtz Association of German Research Centres   .4162504 |
- 44. |                         The Francis Crick Institute   .4162504 |
- 45. |                                       Novant Health   .4120879 |
-     |----------------------------------------------------------------|
- 46. |                               University of Toronto   .4120879 |
- 47. |             Icahn School of Medicine at Mount Sinai   .3996004 |
- 48. |                             Northwestern University   .3954379 |
- 49. |                    University of Michigan–Ann Arbor   .3912754 |
- 50. |                        Dana-Farber Cancer Institute   .3871129 |
-     +----------------------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-file ../temp/rankings_country.dta saved
-
-     +---------------------------+
-     |        country       perc |
-     |---------------------------|
-  1. |  United States   28.64015 |
-  2. |          China   13.20571 |
-  3. |          Japan   5.620232 |
-  4. |        Germany   5.434092 |
-  5. | United Kingdom   4.810328 |
-     |---------------------------|
-  6. |         Canada   3.196171 |
-  7. |    South Korea   3.174979 |
-  8. |         France   2.649053 |
-  9. |      Australia    2.57382 |
- 10. |         Brazil   2.457968 |
-     |---------------------------|
- 11. |          Spain   2.325516 |
- 12. |          Italy   2.161628 |
- 13. |    Netherlands   1.896369 |
- 14. |         Taiwan    1.72577 |
- 15. |          India   1.630757 |
-     |---------------------------|
- 16. |         Sweden   1.384925 |
- 17. |    Switzerland   1.384925 |
- 18. |         Poland   .8957332 |
- 19. |        Denmark   .8890224 |
- 20. |        Belgium   .7689319 |
-     +---------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
-
-      +-------------------------------+
-      | msa_c_~d   affl_wt       perc |
-      |-------------------------------|
-  58. |              431.5   .3048177 |
-      +-------------------------------+
-file ../temp/rankings_msa_c_world.dta saved
-
-     +-------------------------------------------------+
-     |                          msa_c_world       perc |
-     |-------------------------------------------------|
-  1. |                          Beijing, CN   4.415442 |
-  2. |          Boston-Cambridge-Newton, US   2.654351 |
-  3. |      New York-Newark-Jersey City, US   2.317745 |
-  4. |                         Bay Area, US   2.035886 |
-  5. |                            Seoul, KR   1.796058 |
-     |-------------------------------------------------|
-  6. |  Washington-Arlington-Alexandria, US   1.663959 |
-  7. |                            Tokyo, JP   1.543515 |
-  8. |                           London, GB   1.308632 |
-  9. |   Los Angeles-Long Beach-Anaheim, US   1.028186 |
- 10. |                         Shanghai, CN    1.01759 |
-     |-------------------------------------------------|
- 11. |                            Paris, FR   1.011585 |
- 12. |               San Diego-Carlsbad, US   .8685363 |
- 13. |           Research Triangle Park, US   .8219129 |
- 14. |                           Taipei, TW   .7802345 |
- 15. |   Philadelphia-Camden-Wilmington, US   .7523311 |
-     |-------------------------------------------------|
- 16. |                        São Paulo, BR   .7194829 |
- 17. |         Chicago-Naperville-Elgin, US   .7170104 |
- 18. |                        Guangzhou, CN   .6929924 |
- 19. | Houston-The Woodlands-Sugar Land, US   .6823962 |
- 20. |        Baltimore-Columbia-Towson, US    .656612 |
-     +-------------------------------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
-
-       +---------------------------+
-       | inst   affl_wt       perc |
-       |---------------------------|
-    1. |           7043   4.975276 |
-       +---------------------------+
-file ../temp/rankings_inst.dta saved
-
-     +-------------------------------------------------------------+
-     |                                             inst       perc |
-     |-------------------------------------------------------------|
-  1. |                      Chinese Academy of Sciences   .9148064 |
-  2. |                               Harvard University   .9126872 |
-  3. |                              Stanford University   .7092399 |
-  4. |                    National Institutes of Health   .6802769 |
-  5. |          University of California, San Francisco   .4906047 |
-     |-------------------------------------------------------------|
-  6. |                         Johns Hopkins University   .4856598 |
-  7. |                               Max Planck Society   .4697655 |
-  8. |              University of California, San Diego   .4203165 |
-  9. |   French National Centre for Scientific Research   .4030093 |
- 10. |                                  Yale University   .3789912 |
-     |-------------------------------------------------------------|
- 11. |                              University of Tokyo    .376872 |
- 12. |         Chinese Academy of Agricultural Sciences   .3486154 |
- 13. |            Massachusetts Institute of Technology   .3482622 |
- 14. |                               Cornell University   .3320147 |
- 15. |                       University of Pennsylvania   .3249505 |
-     |-------------------------------------------------------------|
- 16. |                         University of Washington   .3210653 |
- 17. |                        Seoul National University   .2991664 |
- 18. |            University of California, Los Angeles   .2988132 |
- 19. |                              Columbia University   .2963408 |
- 20. |                          University of Cambridge   .2963408 |
-     |-------------------------------------------------------------|
- 21. |                             University of Oxford   .2959876 |
- 22. |               Washington University in St. Louis    .289983 |
- 23. |                                           Inserm    .288217 |
- 24. |                        Universidade de São Paulo   .2853914 |
- 25. | Helmholtz Association of German Research Centres   .2800933 |
-     |-------------------------------------------------------------|
- 26. |                             Mass General Brigham   .2793868 |
- 27. |               University of California, Berkeley   .2783272 |
- 28. |                             Karolinska Institute   .2769144 |
- 29. |      University of North Carolina at Chapel Hill    .276208 |
- 30. |                                Peking University   .2673778 |
-     |-------------------------------------------------------------|
- 31. |                                Boston University   .2599604 |
- 32. |                            University of Toronto    .259254 |
- 33. |                        University College London   .2585476 |
- 34. |                  University of California, Davis   .2567816 |
- 35. |                         University of Copenhagen   .2560752 |
-     |-------------------------------------------------------------|
- 36. |                                 Kyoto University   .2521899 |
- 37. |                Spanish National Research Council    .249011 |
- 38. |                 University of Michigan–Ann Arbor   .2479514 |
- 39. |                                Yonsei University   .2458322 |
- 40. |                     State University of New York   .2377084 |
-     |-------------------------------------------------------------|
- 41. |                  University of Wisconsin–Madison   .2292314 |
- 42. |                   University of British Columbia    .226759 |
- 43. |                          University of Minnesota    .226759 |
- 44. |                         University of Pittsburgh    .226759 |
- 45. |                              New York University   .2207544 |
-     |-------------------------------------------------------------|
- 46. |                              Leibniz Association    .216516 |
- 47. |                            University of Florida   .2129839 |
- 48. |                              Zhejiang University   .2126307 |
- 49. |                                 Osaka University   .2069794 |
- 50. |                                 Emory University   .2066262 |
-     +-------------------------------------------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
-(file ../temp/rankings_country_wt.dta not found)
-file ../temp/rankings_country_wt.dta saved
-
-     +---------------------------+
-     |        country       perc |
-     |---------------------------|
-  1. |  United States   52.81553 |
-  2. | United Kingdom   10.59885 |
-  3. |          China   9.717301 |
-  4. |        Germany   7.032759 |
-  5. |    Switzerland   2.366382 |
-     |---------------------------|
-  6. |         France    2.07188 |
-  7. |         Canada   1.759562 |
-  8. |          Japan   1.706672 |
-  9. |      Australia   1.474126 |
- 10. |    Netherlands   1.417049 |
-     |---------------------------|
- 11. |         Sweden   1.405238 |
- 12. |         Israel   1.126535 |
- 13. |        Austria   .6739736 |
- 14. |        Belgium   .6511973 |
- 15. |    South Korea   .6383242 |
-     |---------------------------|
- 16. |          Spain   .5935238 |
- 17. |   South Africa    .576184 |
- 18. |          Italy   .4587413 |
- 19. |      Singapore   .3886285 |
- 20. |        Denmark    .364565 |
-     +---------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-     +--------------------------------+
-     | msa_c_~d   cite_a~t       perc |
-     |--------------------------------|
- 91. |            17.33684   .1443293 |
-     +--------------------------------+
-(file ../temp/rankings_msa_c_world_wt.dta not found)
-file ../temp/rankings_msa_c_world_wt.dta saved
-
-     +-------------------------------------------------+
-     |                          msa_c_world       perc |
-     |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US    11.0454 |
-  2. |                         Bay Area, US   7.616136 |
-  3. |      New York-Newark-Jersey City, US     7.1193 |
-  4. |                          Beijing, CN   6.260358 |
-  5. |                           London, GB   3.943282 |
-     |-------------------------------------------------|
-  6. |               San Diego-Carlsbad, US    2.88544 |
-  7. |  Washington-Arlington-Alexandria, US   2.869365 |
-  8. |                        Cambridge, GB   2.842343 |
-  9. |          Seattle-Tacoma-Bellevue, US   2.206423 |
- 10. |                           Oxford, GB   1.905836 |
-     |-------------------------------------------------|
- 11. |   Los Angeles-Long Beach-Anaheim, US   1.866192 |
- 12. |   Philadelphia-Camden-Wilmington, US   1.368392 |
- 13. |                        Göttingen, DE   1.328604 |
- 14. |                            Paris, FR   1.239665 |
- 15. |                New Haven-Milford, US   1.233407 |
-     |-------------------------------------------------|
- 16. | Houston-The Woodlands-Sugar Land, US   1.184219 |
- 17. |           Research Triangle Park, US   1.138534 |
- 18. |                        St. Louis, US   1.028419 |
- 19. |                           Munich, DE   .9782589 |
- 20. |         Chicago-Naperville-Elgin, US   .9630452 |
-     +-------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-      +----------------------------+
-      | inst   cite_a~t       perc |
-      |----------------------------|
-   1. |        764.6149   6.365426 |
-      +----------------------------+
-(file ../temp/rankings_inst_wt.dta not found)
-file ../temp/rankings_inst_wt.dta saved
-
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University   4.177087 |
-  2. |                                 Stanford University   3.074571 |
-  3. |                         Chinese Academy of Sciences   2.558964 |
-  4. |               Massachusetts Institute of Technology   2.044322 |
-  5. |                           DeepMind (United Kingdom)   1.799186 |
-     |----------------------------------------------------------------|
-  6. |                                  Max Planck Society   1.785466 |
-  7. |                       National Institutes of Health   1.644444 |
-  8. |             University of California, San Francisco   1.493382 |
-  9. |                            University of Washington    1.40964 |
- 10. |                              Rockefeller University   1.274785 |
-     |----------------------------------------------------------------|
- 11. |                                     Yale University   1.132698 |
- 12. |                 University of California, San Diego   1.124783 |
- 13. |                                Mass General Brigham   1.039206 |
- 14. |                                University of Oxford   1.030725 |
- 15. |                                  Cornell University   1.003273 |
-     |----------------------------------------------------------------|
- 16. |                          University of Pennsylvania    .997825 |
- 17. |              Memorial Sloan Kettering Cancer Center   .9840081 |
- 18. |                  University of California, Berkeley   .9788116 |
- 19. |                                 Columbia University   .9766762 |
- 20. |                                 New York University   .9505633 |
-     |----------------------------------------------------------------|
- 21. |                  Washington University in St. Louis   .9423591 |
- 22. |                  California Institute of Technology   .8744356 |
- 23. |                                   Peking University   .8022223 |
- 24. |                       Weizmann Institute of Science   .7831081 |
- 25. |                            Medical Research Council    .754872 |
-     |----------------------------------------------------------------|
- 26. |                             University of Cambridge   .7533675 |
- 27. |                                Princeton University    .735855 |
- 28. |                           Wellcome Sanger Institute   .7341619 |
- 29. |                            Johns Hopkins University   .7178383 |
- 30. |                                   Boston University   .6880994 |
-     |----------------------------------------------------------------|
- 31. |                             Imperial College London   .6702588 |
- 32. |                                 Leibniz Association   .6609675 |
- 33. |                               University of Chicago   .6403801 |
- 34. |                                     Broad Institute   .6231788 |
- 35. | The University of Texas Southwestern Medical Center   .6204433 |
-     |----------------------------------------------------------------|
- 36. |             Icahn School of Medicine at Mount Sinai   .6142291 |
- 37. |         La Jolla Institute For Allergy & Immunology   .5840069 |
- 38. |                          Boston Children's Hospital   .5492765 |
- 39. |                             University of Göttingen   .5049715 |
- 40. |                        Dana-Farber Cancer Institute   .4962456 |
-     |----------------------------------------------------------------|
- 41. |                          Scripps Research Institute   .4843031 |
- 42. |                                       Novant Health   .4643756 |
- 43. |    Helmholtz Association of German Research Centres   .4601595 |
- 44. |                                Karolinska Institute   .4472854 |
- 45. |      French National Centre for Scientific Research   .4432735 |
-     |----------------------------------------------------------------|
- 46. |               University of California, Los Angeles   .4395327 |
- 47. |         University of North Carolina at Chapel Hill   .4327596 |
- 48. |                                 Tsinghua University   .3978918 |
- 49. |                           University College London   .3816723 |
- 50. |                                          ETH Zurich   .3601023 |
-     +----------------------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-file ../temp/rankings_country_wt.dta saved
-
-     +---------------------------+
-     |        country       perc |
-     |---------------------------|
-  1. |  United States   44.00517 |
-  2. |          China   10.89397 |
-  3. | United Kingdom   8.055575 |
-  4. |        Germany   6.081359 |
-  5. |          Japan   2.981822 |
-     |---------------------------|
-  6. |         Canada   2.479122 |
-  7. |         France   2.250058 |
-  8. |      Australia   2.098684 |
-  9. |    Switzerland   1.884963 |
- 10. |    Netherlands   1.759989 |
-     |---------------------------|
- 11. |    South Korea   1.449556 |
- 12. |         Sweden   1.347666 |
- 13. |          Italy   1.339871 |
- 14. |          Spain   1.333935 |
- 15. |         Brazil   1.027899 |
-     |---------------------------|
- 16. |         Israel   .9223143 |
- 17. |          India   .7673232 |
- 18. |        Belgium    .720425 |
- 19. |        Denmark   .6978868 |
- 20. |        Austria   .6510373 |
-     +---------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
-
-      +--------------------------------+
-      | msa_c_~d   cite_a~t       perc |
-      |--------------------------------|
-  80. |            251.4526   .1776297 |
-      +--------------------------------+
-file ../temp/rankings_msa_c_world_wt.dta saved
-
-     +-------------------------------------------------+
-     |                          msa_c_world       perc |
-     |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   7.765123 |
-  2. |                         Bay Area, US   5.652541 |
-  3. |      New York-Newark-Jersey City, US   5.317556 |
-  4. |                          Beijing, CN   5.085062 |
-  5. |                           London, GB    2.72537 |
-     |-------------------------------------------------|
-  6. |  Washington-Arlington-Alexandria, US   2.195967 |
-  7. |               San Diego-Carlsbad, US   1.991247 |
-  8. |                        Cambridge, GB    1.91697 |
-  9. |   Los Angeles-Long Beach-Anaheim, US   1.651897 |
- 10. |          Seattle-Tacoma-Bellevue, US   1.460125 |
-     |-------------------------------------------------|
- 11. |                           Oxford, GB   1.242957 |
- 12. |   Philadelphia-Camden-Wilmington, US    1.14839 |
- 13. |                            Paris, FR   1.129434 |
- 14. | Houston-The Woodlands-Sugar Land, US   1.115557 |
- 15. |           Research Triangle Park, US   1.040607 |
-     |-------------------------------------------------|
- 16. |                New Haven-Milford, US   .9834372 |
- 17. |                            Tokyo, JP   .9403574 |
- 18. |                         Shanghai, CN   .9254612 |
- 19. |                        St. Louis, US   .9253355 |
- 20. |        Baltimore-Columbia-Towson, US    .924641 |
-     +-------------------------------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
-
-       +----------------------------+
-       | inst   cite_a~t       perc |
-       |----------------------------|
-    1. |        7695.565   5.436257 |
-       +----------------------------+
-file ../temp/rankings_inst_wt.dta saved
-
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University   2.857976 |
-  2. |                                 Stanford University   2.168093 |
-  3. |                         Chinese Academy of Sciences   1.707364 |
-  4. |               Massachusetts Institute of Technology   1.303325 |
-  5. |                       National Institutes of Health   1.212647 |
-     |----------------------------------------------------------------|
-  6. |             University of California, San Francisco   1.157848 |
-  7. |                                  Max Planck Society   1.090607 |
-  8. |                 University of California, San Diego   .9023213 |
-  9. |                                     Yale University   .8693945 |
- 10. |                           DeepMind (United Kingdom)   .8570508 |
-     |----------------------------------------------------------------|
- 11. |                            University of Washington   .8440546 |
- 12. |                            Johns Hopkins University   .7963166 |
- 13. |                  University of California, Berkeley   .7770871 |
- 14. |                  Washington University in St. Louis   .7555212 |
- 15. |                                  Cornell University   .7331918 |
-     |----------------------------------------------------------------|
- 16. |                                University of Oxford   .7331253 |
- 17. |                          University of Pennsylvania   .7322356 |
- 18. |                                 Columbia University   .7199298 |
- 19. |                                Mass General Brigham   .7050122 |
- 20. |              Memorial Sloan Kettering Cancer Center   .6950076 |
-     |----------------------------------------------------------------|
- 21. |                                 New York University   .6943631 |
- 22. |                              Rockefeller University   .6706118 |
- 23. |                                   Boston University   .6549971 |
- 24. |                             University of Cambridge   .6088704 |
- 25. |                                   Peking University   .5629715 |
-     |----------------------------------------------------------------|
- 26. |             Icahn School of Medicine at Mount Sinai   .5461999 |
- 27. |                  California Institute of Technology   .4909258 |
- 28. |                                Princeton University   .4788458 |
- 29. |                           Wellcome Sanger Institute   .4753256 |
- 30. |                       Weizmann Institute of Science   .4746272 |
-     |----------------------------------------------------------------|
- 31. |    Helmholtz Association of German Research Centres   .4580165 |
- 32. |                            Medical Research Council   .4574544 |
- 33. |                             Imperial College London   .4438182 |
- 34. | The University of Texas Southwestern Medical Center   .4350927 |
- 35. |                                     Broad Institute    .425154 |
-     |----------------------------------------------------------------|
- 36. |                                 Leibniz Association   .4205928 |
- 37. |               University of California, Los Angeles   .4191005 |
- 38. |                                Karolinska Institute   .4167019 |
- 39. |                               University of Chicago   .4087315 |
- 40. |         University of North Carolina at Chapel Hill   .3875524 |
-     |----------------------------------------------------------------|
- 41. |                        Dana-Farber Cancer Institute   .3788065 |
- 42. |      French National Centre for Scientific Research   .3691581 |
- 43. |                           University College London   .3592322 |
- 44. |                    University of Michigan–Ann Arbor   .3442557 |
- 45. |   The University of Texas MD Anderson Cancer Center   .3409468 |
-     |----------------------------------------------------------------|
- 46. |                          Boston Children's Hospital   .3348114 |
- 47. |                                 University of Tokyo   .3235008 |
- 48. |                               University of Toronto   .2975173 |
- 49. |                            University of Queensland   .2819753 |
- 50. |                          Scripps Research Institute   .2788771 |
-     +----------------------------------------------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
-(file ../temp/rankings_country_if.dta not found)
-file ../temp/rankings_country_if.dta saved
-
-     +---------------------------+
-     |        country       perc |
-     |---------------------------|
-  1. |  United States   54.87608 |
-  2. |          China    8.49846 |
-  3. | United Kingdom   8.419653 |
-  4. |        Germany   6.158679 |
-  5. |    Switzerland   2.706203 |
-     |---------------------------|
-  6. |         Canada   2.287099 |
-  7. |         France   2.246587 |
-  8. |          Japan     2.0835 |
-  9. |      Australia   1.889326 |
- 10. |    Netherlands   1.425266 |
-     |---------------------------|
- 11. |         Israel   1.259529 |
- 12. |         Sweden   .9104818 |
- 13. |        Austria   .8907702 |
- 14. |          Spain   .7644706 |
- 15. |    South Korea   .6860462 |
-     |---------------------------|
- 16. |        Belgium   .6112297 |
- 17. |          Italy   .5825018 |
- 18. |        Denmark   .5789468 |
- 19. |      Singapore   .4221257 |
- 20. |          India   .2363988 |
-     +---------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-     +--------------------------------+
-     | msa_c_~d   impact~t       perc |
-     |--------------------------------|
- 74. |            28.68139   .2387728 |
-     +--------------------------------+
-(file ../temp/rankings_msa_c_world_if.dta not found)
-file ../temp/rankings_msa_c_world_if.dta saved
-
-     +------------------------------------------------+
-     |                         msa_c_world       perc |
-     |------------------------------------------------|
-  1. |         Boston-Cambridge-Newton, US    10.2195 |
-  2. |                        Bay Area, US    8.20007 |
-  3. |     New York-Newark-Jersey City, US   6.995387 |
-  4. |                         Beijing, CN   4.965358 |
-  5. | Washington-Arlington-Alexandria, US   2.869521 |
-     |------------------------------------------------|
-  6. |              San Diego-Carlsbad, US   2.863171 |
-  7. |                       Cambridge, GB   2.537328 |
-  8. |                          London, GB   2.365117 |
-  9. |  Los Angeles-Long Beach-Anaheim, US   2.266468 |
- 10. |         Seattle-Tacoma-Bellevue, US   1.552134 |
-     |------------------------------------------------|
- 11. |               New Haven-Milford, US   1.527196 |
- 12. |  Philadelphia-Camden-Wilmington, US    1.28293 |
- 13. |          Research Triangle Park, US   1.250916 |
- 14. |                           Paris, FR   1.138445 |
- 15. |                          Oxford, GB   1.105864 |
-     |------------------------------------------------|
- 16. |     Dallas-Fort Worth-Arlington, US   1.023137 |
- 17. |       Baltimore-Columbia-Towson, US   1.005207 |
- 18. |        Chicago-Naperville-Elgin, US   .9818223 |
- 19. |                          Zurich, CH    .965059 |
- 20. |                          Ithaca, US   .9487676 |
-     +------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-      +----------------------------+
-      | inst   impact~t       perc |
-      |----------------------------|
-   1. |         978.306   8.144406 |
-      +----------------------------+
-(file ../temp/rankings_inst_if.dta not found)
-file ../temp/rankings_inst_if.dta saved
-
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University   4.344357 |
-  2. |                                 Stanford University   3.576469 |
-  3. |                                  Max Planck Society   2.152963 |
-  4. |               Massachusetts Institute of Technology   2.030041 |
-  5. |             University of California, San Francisco   1.864873 |
-     |----------------------------------------------------------------|
-  6. |                         Chinese Academy of Sciences   1.732601 |
-  7. |                              Rockefeller University   1.702397 |
-  8. |                       National Institutes of Health   1.624639 |
-  9. |                                     Yale University   1.326837 |
- 10. |                 University of California, San Diego   1.211615 |
-     |----------------------------------------------------------------|
- 11. |                  University of California, Berkeley   1.196416 |
- 12. |                                 Columbia University   1.105421 |
- 13. |                            University of Washington    1.04119 |
- 14. |                                  Cornell University   .9772082 |
- 15. |              Memorial Sloan Kettering Cancer Center   .9615349 |
-     |----------------------------------------------------------------|
- 16. |                          University of Pennsylvania   .9124334 |
- 17. |                  Washington University in St. Louis   .9082332 |
- 18. |                                Mass General Brigham   .8803864 |
- 19. |                            Medical Research Council   .8667915 |
- 20. |                            Johns Hopkins University   .8373597 |
-     |----------------------------------------------------------------|
- 21. |                                University of Oxford   .8286515 |
- 22. |                  California Institute of Technology   .8223909 |
- 23. |                                Princeton University   .8019711 |
- 24. |                             University of Cambridge   .7963056 |
- 25. |                       Weizmann Institute of Science   .7615523 |
-     |----------------------------------------------------------------|
- 26. |                                   Peking University    .755874 |
- 27. | The University of Texas Southwestern Medical Center   .7392323 |
- 28. |               University of California, Los Angeles   .7275035 |
- 29. |                          Scripps Research Institute   .6648353 |
- 30. |                                 New York University    .658819 |
-     |----------------------------------------------------------------|
- 31. |                               University of Chicago   .5514894 |
- 32. |                                     Duke University   .5509785 |
- 33. |      French National Centre for Scientific Research   .5401886 |
- 34. |                                   Boston University    .536387 |
- 35. |                          Boston Children's Hospital   .5078793 |
-     |----------------------------------------------------------------|
- 36. |                                          ETH Zurich   .5067836 |
- 37. |                                 Tsinghua University   .5035994 |
- 38. |               Salk Institute for Biological Studies   .4740798 |
- 39. |                             Imperial College London   .4520476 |
- 40. |                                       Novant Health   .4487914 |
-     |----------------------------------------------------------------|
- 41. |             Icahn School of Medicine at Mount Sinai   .4457921 |
- 42. |                           University College London   .4404474 |
- 43. |                                 University of Tokyo    .438398 |
- 44. |                         The Francis Crick Institute   .4344984 |
- 45. |                               University of Toronto   .4248505 |
-     |----------------------------------------------------------------|
- 46. |                           Wellcome Sanger Institute   .4222929 |
- 47. |                        Dana-Farber Cancer Institute   .4134662 |
- 48. |    Helmholtz Association of German Research Centres    .409345 |
- 49. |                    University of Michigan–Ann Arbor   .4033845 |
- 50. |                             Northwestern University   .3829595 |
-     +----------------------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-file ../temp/rankings_country_if.dta saved
-
-     +---------------------------+
-     |        country       perc |
-     |---------------------------|
-  1. |  United States   52.16246 |
-  2. |          China   9.338179 |
-  3. | United Kingdom   8.025126 |
-  4. |        Germany   5.668947 |
-  5. |         Canada   2.542314 |
-     |---------------------------|
-  6. |          Japan   2.485297 |
-  7. |    Switzerland   2.413446 |
-  8. |         France   2.317665 |
-  9. |    Netherlands   1.839935 |
- 10. |      Australia   1.611957 |
-     |---------------------------|
- 11. |         Israel   1.280963 |
- 12. |         Sweden   1.216993 |
- 13. |          Spain   1.109855 |
- 14. |    South Korea   1.045529 |
- 15. |          Italy    1.00291 |
-     |---------------------------|
- 16. |        Austria    .743035 |
- 17. |        Belgium   .6598715 |
- 18. |        Denmark    .593981 |
- 19. |      Singapore   .5481879 |
- 20. |          India   .3013424 |
-     +---------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
-
-      +--------------------------------+
-      | msa_c_~d   impact~t       perc |
-      |--------------------------------|
-  59. |            411.4429   .2906491 |
-      +--------------------------------+
-file ../temp/rankings_msa_c_world_if.dta saved
-
-     +-------------------------------------------------+
-     |                          msa_c_world       perc |
-     |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   9.779922 |
-  2. |                         Bay Area, US   7.342592 |
-  3. |      New York-Newark-Jersey City, US    6.30067 |
-  4. |                          Beijing, CN   4.749757 |
-  5. |  Washington-Arlington-Alexandria, US   2.363936 |
-     |-------------------------------------------------|
-  6. |                        Cambridge, GB   2.305367 |
-  7. |               San Diego-Carlsbad, US   2.287994 |
-  8. |                           London, GB   2.254483 |
-  9. |   Los Angeles-Long Beach-Anaheim, US   2.119907 |
- 10. |          Seattle-Tacoma-Bellevue, US   1.543239 |
-     |-------------------------------------------------|
- 11. | Houston-The Woodlands-Sugar Land, US   1.483217 |
- 12. |   Philadelphia-Camden-Wilmington, US    1.45085 |
- 13. |                New Haven-Milford, US   1.359939 |
- 14. |           Research Triangle Park, US   1.315857 |
- 15. |                            Paris, FR   1.277142 |
-     |-------------------------------------------------|
- 16. |                           Oxford, GB   1.114447 |
- 17. |                          Toronto, CA   1.071306 |
- 18. |        Baltimore-Columbia-Towson, US   1.037501 |
- 19. |         Chicago-Naperville-Elgin, US   1.030394 |
- 20. |                           Ithaca, US   .9532866 |
-     +-------------------------------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
-
-       +----------------------------+
-       | inst   impact~t       perc |
-       |----------------------------|
-    1. |        9176.843   6.482652 |
-       +----------------------------+
-file ../temp/rankings_inst_if.dta saved
-
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University   3.687127 |
-  2. |                                 Stanford University   3.032335 |
-  3. |             University of California, San Francisco   1.766154 |
-  4. |               Massachusetts Institute of Technology   1.715312 |
-  5. |                         Chinese Academy of Sciences   1.595938 |
-     |----------------------------------------------------------------|
-  6. |                       National Institutes of Health   1.532877 |
-  7. |                                  Max Planck Society   1.458607 |
-  8. |                                     Yale University   1.176987 |
-  9. |                 University of California, San Diego   1.138439 |
- 10. |                                 Columbia University   .9848566 |
-     |----------------------------------------------------------------|
- 11. |                          University of Pennsylvania   .9753354 |
- 12. |                              Rockefeller University   .9407855 |
- 13. |                                   Boston University    .937872 |
- 14. |                                  Cornell University   .9202494 |
- 15. |              Memorial Sloan Kettering Cancer Center   .9019318 |
-     |----------------------------------------------------------------|
- 16. |                                Mass General Brigham   .8900632 |
- 17. |                  University of California, Berkeley   .8802395 |
- 18. |                            Johns Hopkins University   .8660749 |
- 19. |                             University of Cambridge   .8619183 |
- 20. |                                University of Oxford   .7571538 |
-     |----------------------------------------------------------------|
- 21. |                            University of Washington   .7539535 |
- 22. |                  Washington University in St. Louis   .7509714 |
- 23. |                                   Peking University   .7198046 |
- 24. |                                 New York University   .6876833 |
- 25. |                       Weizmann Institute of Science   .6784875 |
-     |----------------------------------------------------------------|
- 26. |               University of California, Los Angeles   .6587516 |
- 27. |             Icahn School of Medicine at Mount Sinai   .6394244 |
- 28. |                            Medical Research Council   .6157824 |
- 29. |                                Princeton University   .5582177 |
- 30. |                        Dana-Farber Cancer Institute   .5504862 |
-     |----------------------------------------------------------------|
- 31. |                                     Duke University   .5204092 |
- 32. |                           University College London   .5081586 |
- 33. |   The University of Texas MD Anderson Cancer Center   .4946045 |
- 34. |    Helmholtz Association of German Research Centres   .4858078 |
- 35. | The University of Texas Southwestern Medical Center   .4842179 |
-     |----------------------------------------------------------------|
- 36. |                  California Institute of Technology   .4782873 |
- 37. |                               University of Chicago   .4753241 |
- 38. |                          Baylor College of Medicine   .4700392 |
- 39. |                                Karolinska Institute   .4526078 |
- 40. |         University of North Carolina at Chapel Hill   .4507605 |
-     |----------------------------------------------------------------|
- 41. |                    University of Michigan–Ann Arbor   .4427162 |
- 42. |                           Wellcome Sanger Institute    .418442 |
- 43. |                          Boston Children's Hospital   .4143488 |
- 44. |                             Northwestern University   .4016656 |
- 45. |                               University of Toronto   .3985347 |
-     |----------------------------------------------------------------|
- 46. |                             Imperial College London   .3981997 |
- 47. |                          Scripps Research Institute   .3884482 |
- 48. |      French National Centre for Scientific Research    .386609 |
- 49. |               Salk Institute for Biological Studies   .3760632 |
- 50. |                                              Inserm   .3747947 |
-     +----------------------------------------------------------------+
-Total articles: 141560
-(0 real changes made)
-(0 real changes made)
+ALL: impact_cite_affl_wt
+(107 real changes made)
 (file ../temp/rankings_country_if_wt.dta not found)
-file ../temp/rankings_country_if_wt.dta saved
-
-     +---------------------------+
-     |        country       perc |
-     |---------------------------|
-  1. |  United States   53.79805 |
-  2. |          China   9.747118 |
-  3. | United Kingdom   9.666786 |
-  4. |        Germany   7.212519 |
-  5. |    Switzerland    2.25452 |
-     |---------------------------|
-  6. |         France   1.998655 |
-  7. |         Canada   1.795417 |
-  8. |          Japan    1.65248 |
-  9. |         Sweden   1.482433 |
- 10. |    Netherlands   1.458521 |
-     |---------------------------|
- 11. |      Australia   1.416697 |
- 12. |         Israel   1.224252 |
- 13. |    South Korea   .6720359 |
- 14. |        Austria   .6589334 |
- 15. |        Belgium   .6314234 |
-     |---------------------------|
- 16. |          Spain   .5829964 |
- 17. |   South Africa   .4748397 |
- 18. |          Italy   .4636993 |
- 19. |      Singapore   .3813569 |
- 20. |        Denmark   .3673144 |
-     +---------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-     +--------------------------------+
-     | msa_c_~d   impact~t       perc |
-     |--------------------------------|
- 80. |             19.8156   .1649651 |
-     +--------------------------------+
-(file ../temp/rankings_msa_c_world_if_wt.dta not found)
-file ../temp/rankings_msa_c_world_if_wt.dta saved
-
-     +-------------------------------------------------+
-     |                          msa_c_world       perc |
-     |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US    11.3218 |
-  2. |                         Bay Area, US   7.538709 |
-  3. |      New York-Newark-Jersey City, US   7.423172 |
-  4. |                          Beijing, CN   6.271924 |
-  5. |                           London, GB   3.468135 |
-     |-------------------------------------------------|
-  6. |               San Diego-Carlsbad, US   3.087072 |
-  7. |  Washington-Arlington-Alexandria, US   2.870467 |
-  8. |                        Cambridge, GB   2.584207 |
-  9. |          Seattle-Tacoma-Bellevue, US   2.343424 |
- 10. |   Los Angeles-Long Beach-Anaheim, US   1.927345 |
-     |-------------------------------------------------|
- 11. |                           Oxford, GB   1.871176 |
- 12. |                        Göttingen, DE   1.699291 |
- 13. |   Philadelphia-Camden-Wilmington, US   1.358026 |
- 14. |           Research Triangle Park, US   1.231381 |
- 15. |                New Haven-Milford, US   1.230086 |
-     |-------------------------------------------------|
- 16. |                            Paris, FR   1.180962 |
- 17. | Houston-The Woodlands-Sugar Land, US   1.163679 |
- 18. |                        St. Louis, US   1.051463 |
- 19. |                        Stockholm, SE   1.010234 |
- 20. |         Chicago-Naperville-Elgin, US   .9245001 |
-     +-------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-      +----------------------------+
-      | inst   impact~t       perc |
-      |----------------------------|
-   1. |        740.3913   6.163764 |
-      +----------------------------+
-(file ../temp/rankings_inst_if_wt.dta not found)
-file ../temp/rankings_inst_if_wt.dta saved
-
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University   4.351139 |
-  2. |                                 Stanford University   3.050408 |
-  3. |                         Chinese Academy of Sciences   2.477471 |
-  4. |               Massachusetts Institute of Technology   2.201271 |
-  5. |                                  Max Planck Society   1.770043 |
-     |----------------------------------------------------------------|
-  6. |                       National Institutes of Health   1.732991 |
-  7. |             University of California, San Francisco    1.58487 |
-  8. |                            University of Washington   1.557043 |
-  9. |                           DeepMind (United Kingdom)   1.384823 |
- 10. |                              Rockefeller University    1.30966 |
-     |----------------------------------------------------------------|
- 11. |                 University of California, San Diego   1.161498 |
- 12. |                                     Yale University   1.128962 |
- 13. |                                 New York University   1.127122 |
- 14. |                                Mass General Brigham   1.069877 |
- 15. |              Memorial Sloan Kettering Cancer Center   .9934771 |
-     |----------------------------------------------------------------|
- 16. |                                University of Oxford   .9865563 |
- 17. |                  Washington University in St. Louis   .9855053 |
- 18. |                          University of Pennsylvania   .9708858 |
- 19. |                                  Cornell University   .9679208 |
- 20. |                  University of California, Berkeley   .9528178 |
-     |----------------------------------------------------------------|
- 21. |                                 Columbia University   .9381096 |
- 22. |                  California Institute of Technology   .9152445 |
- 23. |                                 Leibniz Association   .8600234 |
- 24. |                       Weizmann Institute of Science   .8459941 |
- 25. |                                   Peking University   .8400714 |
-     |----------------------------------------------------------------|
- 26. |                            Johns Hopkins University   .7721604 |
- 27. |                                Princeton University   .7343772 |
- 28. |             Icahn School of Medicine at Mount Sinai    .725369 |
- 29. |         La Jolla Institute For Allergy & Immunology   .7248659 |
- 30. |                             University of Cambridge   .6964462 |
-     |----------------------------------------------------------------|
- 31. |                             University of Göttingen   .6859986 |
- 32. |                            Medical Research Council   .6738872 |
- 33. |                                     Broad Institute   .6590358 |
- 34. |                           Wellcome Sanger Institute   .6588852 |
- 35. |                               University of Chicago   .6423101 |
-     |----------------------------------------------------------------|
- 36. |                             Imperial College London   .6421745 |
- 37. | The University of Texas Southwestern Medical Center   .6176173 |
- 38. |                          Boston Children's Hospital   .5712448 |
- 39. |                                   Boston University   .5641888 |
- 40. |                                       Novant Health    .524736 |
-     |----------------------------------------------------------------|
- 41. |                                Karolinska Institute   .5176888 |
- 42. |                        Dana-Farber Cancer Institute     .51207 |
- 43. |                          Scripps Research Institute   .4915179 |
- 44. |         University of North Carolina at Chapel Hill   .4572092 |
- 45. |    Helmholtz Association of German Research Centres   .4522533 |
-     |----------------------------------------------------------------|
- 46. |               University of California, Los Angeles   .4497693 |
- 47. |      French National Centre for Scientific Research     .43119 |
- 48. |                                 Tsinghua University   .4023955 |
- 49. |                                 University of Tokyo   .3686156 |
- 50. |                         The Francis Crick Institute   .3574779 |
-     +----------------------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
 file ../temp/rankings_country_if_wt.dta saved
 
      +---------------------------+
@@ -1506,6 +519,7 @@ Total articles: 141560
       |--------------------------------|
  113. |            175.2716   .1238144 |
       +--------------------------------+
+(file ../temp/rankings_msa_c_world_if_wt.dta not found)
 file ../temp/rankings_msa_c_world_if_wt.dta saved
 
      +-------------------------------------------------+
@@ -1544,6 +558,7 @@ Total articles: 141560
        |----------------------------|
     1. |         7156.91   5.055743 |
        +----------------------------+
+(file ../temp/rankings_inst_if_wt.dta not found)
 file ../temp/rankings_inst_if_wt.dta saved
 
      +----------------------------------------------------------------+
@@ -1558,22 +573,22 @@ file ../temp/rankings_inst_if_wt.dta saved
   6. |                       National Institutes of Health   1.366971 |
   7. |                            Johns Hopkins University   1.245512 |
   8. |                 University of California, San Diego   1.190953 |
-  9. |                  University of California, Berkeley   1.158607 |
- 10. |                                  Max Planck Society   1.137298 |
+  9. |                                Mass General Brigham   1.160255 |
+ 10. |                  University of California, Berkeley   1.158607 |
      |----------------------------------------------------------------|
- 11. |                                     Yale University   1.133742 |
- 12. |                                 New York University   1.028731 |
- 13. |                  Washington University in St. Louis   1.024904 |
- 14. |              Memorial Sloan Kettering Cancer Center   1.017536 |
- 15. |                                   Boston University   .9831016 |
+ 11. |                                  Max Planck Society   1.137298 |
+ 12. |                                     Yale University   1.133742 |
+ 13. |                                 New York University   1.028731 |
+ 14. |                  Washington University in St. Louis   1.024904 |
+ 15. |              Memorial Sloan Kettering Cancer Center   1.017536 |
      |----------------------------------------------------------------|
- 16. |                                  Cornell University   .9586104 |
- 17. |                          University of Pennsylvania   .9001213 |
- 18. |                            University of Washington   .8917575 |
- 19. |             Icahn School of Medicine at Mount Sinai   .8730353 |
- 20. |                                 Columbia University   .8701859 |
+ 16. |                                   Boston University   .9831016 |
+ 17. |                                  Cornell University   .9586104 |
+ 18. |                          University of Pennsylvania   .9001213 |
+ 19. |                            University of Washington   .8917575 |
+ 20. |             Icahn School of Medicine at Mount Sinai   .8730353 |
      |----------------------------------------------------------------|
- 21. |                                Mass General Brigham   .8685203 |
+ 21. |                                 Columbia University   .8701859 |
  22. |                                University of Oxford    .825713 |
  23. |                             University of Cambridge   .8038968 |
  24. |                                   Peking University   .7453902 |
@@ -1612,293 +627,115 @@ file ../temp/rankings_inst_if_wt.dta saved
 Total articles: 141560
 (0 real changes made)
 (0 real changes made)
-(file ../temp/rankings_country_pat.dta not found)
-file ../temp/rankings_country_pat.dta saved
+ALL: body_adj_wt
+(107 real changes made)
+(file ../temp/rankings_country_body.dta not found)
+file ../temp/rankings_country_body.dta saved
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   63.38755 |
-  2. |          China   11.38328 |
-  3. | United Kingdom   5.635419 |
-  4. |        Germany    5.47407 |
-  5. |          Japan   2.514992 |
+  1. |  United States   59.89545 |
+  2. |          China   10.77966 |
+  3. | United Kingdom    5.01938 |
+  4. |        Germany   4.838151 |
+  5. |          Japan   3.604207 |
      |---------------------------|
-  6. |    Switzerland   2.063933 |
-  7. |         France    1.35788 |
-  8. |    Netherlands   1.328488 |
-  9. |         Canada   1.067896 |
- 10. |         Sweden   .9789112 |
+  6. |    Switzerland   2.140143 |
+  7. |         Canada   1.626616 |
+  8. |    Netherlands   1.415018 |
+  9. |         Sweden   1.297527 |
+ 10. |    South Korea   1.222303 |
      |---------------------------|
- 11. |         Israel   .7074952 |
- 12. |      Australia   .5564654 |
- 13. |        Austria   .4494285 |
- 14. |    South Korea    .431177 |
- 15. |      Singapore   .3966728 |
+ 11. |         France   1.013499 |
+ 12. |      Australia   .9390514 |
+ 13. |         Israel   .7547695 |
+ 14. |          Italy   .6503155 |
+ 15. |        Denmark   .5229426 |
      |---------------------------|
- 16. |          Spain   .3407612 |
- 17. |          Italy   .3239614 |
- 18. |        Belgium   .2987354 |
- 19. |         Taiwan   .2363752 |
- 20. |        Denmark   .1512823 |
-     +---------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-     +--------------------------------+
-     | msa_c_~d   pat_ad~t       perc |
-     |--------------------------------|
-112. |            8.066908   .0671571 |
-     +--------------------------------+
-(file ../temp/rankings_msa_c_world_pat.dta not found)
-file ../temp/rankings_msa_c_world_pat.dta saved
-
-     +-------------------------------------------------+
-     |                          msa_c_world       perc |
-     |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   21.86266 |
-  2. |                         Bay Area, US   11.01217 |
-  3. |                          Beijing, CN   8.694474 |
-  4. |      New York-Newark-Jersey City, US   7.478252 |
-  5. |               San Diego-Carlsbad, US   3.765025 |
-     |-------------------------------------------------|
-  6. |          Seattle-Tacoma-Bellevue, US   2.323441 |
-  7. |  Washington-Arlington-Alexandria, US   2.238012 |
-  8. |                           London, GB   1.866754 |
-  9. |                        Cambridge, GB   1.684976 |
- 10. |   Los Angeles-Long Beach-Anaheim, US   1.658067 |
-     |-------------------------------------------------|
- 11. |                        Göttingen, DE   1.532179 |
- 12. |   Philadelphia-Camden-Wilmington, US   1.264697 |
- 13. | Houston-The Woodlands-Sugar Land, US   1.234779 |
- 14. |         Chicago-Naperville-Elgin, US   1.163288 |
- 15. |                            Tokyo, JP    1.06312 |
-     |-------------------------------------------------|
- 16. |                        Amsterdam, NL   1.023556 |
- 17. |           Research Triangle Park, US   .9252192 |
- 18. |                           Oxford, GB   .9200014 |
- 19. |        Baltimore-Columbia-Towson, US   .8638058 |
- 20. |                        St. Louis, US    .794629 |
-     +-------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-
-      +----------------------------+
-      | inst   pat_ad~t       perc |
-      |----------------------------|
-   3. |        714.1754   5.945516 |
-      +----------------------------+
-(file ../temp/rankings_inst_pat.dta not found)
-file ../temp/rankings_inst_pat.dta saved
-
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University   9.407765 |
-  2. |               Massachusetts Institute of Technology   6.016839 |
-  3. |                  University of California, Berkeley   3.212073 |
-  4. |                                 Stanford University   3.204036 |
-  5. |                                     Broad Institute    2.86803 |
-     |----------------------------------------------------------------|
-  6. |                         Chinese Academy of Sciences   2.597603 |
-  7. |                                Mass General Brigham   2.147943 |
-  8. |             University of California, San Francisco   2.109631 |
-  9. |                       National Institutes of Health   2.002026 |
- 10. |                            University of Washington   1.966112 |
-     |----------------------------------------------------------------|
- 11. |              Memorial Sloan Kettering Cancer Center    1.42794 |
- 12. |                                   Boston University   1.288513 |
- 13. |                                  Max Planck Society   1.221177 |
- 14. |                        Dana-Farber Cancer Institute   1.114645 |
- 15. |                          Scripps Research Institute   1.030015 |
-     |----------------------------------------------------------------|
- 16. |                           DeepMind (United Kingdom)   .9972153 |
- 17. |                                  Cornell University   .9765022 |
- 18. |                  California Institute of Technology   .9703272 |
- 19. |                          University of Pennsylvania   .9646677 |
- 20. |                              Rockefeller University   .9300161 |
-     |----------------------------------------------------------------|
- 21. |                  Washington University in St. Louis   .8010775 |
- 22. |                               University of Chicago   .7587045 |
- 23. |                 University of California, San Diego   .7414735 |
- 24. |                     Vir Biotechnology (Switzerland)   .7327948 |
- 25. |                           Regeneron (United States)   .7161212 |
-     |----------------------------------------------------------------|
- 26. |                                     Yale University   .6994898 |
- 27. |                                 University of Tokyo   .6876973 |
- 28. |                                   Peking University   .6805124 |
- 29. |                                 Leibniz Association   .6712552 |
- 30. |                                Kettering University   .6527407 |
-     |----------------------------------------------------------------|
- 31. |                Beth Israel Deaconess Medical Center   .6495848 |
- 32. |               Salk Institute for Biological Studies   .6324064 |
- 33. |                            Johns Hopkins University   .6297554 |
- 34. |                           Wellcome Sanger Institute    .563745 |
- 35. |                             University of Göttingen   .5482285 |
-     |----------------------------------------------------------------|
- 36. | The University of Texas Southwestern Medical Center    .545241 |
- 37. |                                 Columbia University   .5349318 |
- 38. |                       Weizmann Institute of Science   .4983131 |
- 39. |                      Massachusetts General Hospital   .4961355 |
- 40. |                             Google (United Kingdom)   .4885299 |
-     |----------------------------------------------------------------|
- 41. |                                     Kobe University   .4822181 |
- 42. |                          Boston Children's Hospital   .4686794 |
- 43. |             Icahn School of Medicine at Mount Sinai   .4659969 |
- 44. |         La Jolla Institute For Allergy & Immunology   .4477139 |
- 45. |                            Medical Research Council   .4247496 |
-     |----------------------------------------------------------------|
- 46. |         University of North Carolina at Chapel Hill   .4142931 |
- 47. |                             University of Cambridge   .3947582 |
- 48. |                                 New York University   .3882361 |
- 49. |                                Karolinska Institute   .3432964 |
- 50. |                             Imperial College London   .3171237 |
-     +----------------------------------------------------------------+
-Total articles: 12012
-(0 real changes made)
-(0 real changes made)
-file ../temp/rankings_country_pat.dta saved
-
-     +---------------------------+
-     |        country       perc |
-     |---------------------------|
-  1. |  United States   55.42145 |
-  2. |          China   12.18962 |
-  3. | United Kingdom   4.958199 |
-  4. |        Germany   4.683868 |
-  5. |          Japan   3.974503 |
-     |---------------------------|
-  6. |         Canada   1.722476 |
-  7. |    Switzerland   1.697422 |
-  8. |         France   1.632659 |
-  9. |    Netherlands   1.516735 |
- 10. |    South Korea   1.495293 |
-     |---------------------------|
- 11. |         Sweden   1.141068 |
- 12. |      Australia   1.077074 |
- 13. |          Italy   .9923469 |
- 14. |         Israel   .7951387 |
- 15. |      Singapore   .7504584 |
-     |---------------------------|
- 16. |          Spain   .6738635 |
- 17. |        Denmark   .5989721 |
- 18. |        Belgium   .5191345 |
- 19. |        Austria   .4722683 |
- 20. |         Taiwan   .4390095 |
+ 16. |          Spain   .4757081 |
+ 17. |      Singapore   .4714141 |
+ 18. |         Taiwan   .3811356 |
+ 19. |        Austria   .3647354 |
+ 20. |   South Africa    .353871 |
      +---------------------------+
 Total articles: 141560
 (0 real changes made)
 (0 real changes made)
 
-      +-------------------------------+
-      | msa_c_~d   pat_ad~t      perc |
-      |-------------------------------|
-  99. |            188.4701   .133138 |
-      +-------------------------------+
-file ../temp/rankings_msa_c_world_pat.dta saved
+      +--------------------------------+
+      | msa_c_~d   body_a~t       perc |
+      |--------------------------------|
+ 104. |            161.8533   .1143355 |
+      +--------------------------------+
+(file ../temp/rankings_msa_c_world_body.dta not found)
+file ../temp/rankings_msa_c_world_body.dta saved
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   15.60068 |
-  2. |                         Bay Area, US   9.107201 |
-  3. |                          Beijing, CN   7.152718 |
-  4. |      New York-Newark-Jersey City, US   5.792405 |
-  5. |               San Diego-Carlsbad, US    2.77131 |
+  1. |          Boston-Cambridge-Newton, US    16.9364 |
+  2. |                         Bay Area, US   9.184037 |
+  3. |                          Beijing, CN   7.537503 |
+  4. |      New York-Newark-Jersey City, US   7.419494 |
+  5. |               San Diego-Carlsbad, US   2.839038 |
      |-------------------------------------------------|
-  6. |  Washington-Arlington-Alexandria, US   2.086425 |
-  7. |   Los Angeles-Long Beach-Anaheim, US   1.941127 |
-  8. |          Seattle-Tacoma-Bellevue, US   1.811647 |
-  9. |                           London, GB   1.413218 |
- 10. |                        Cambridge, GB   1.330441 |
+  6. |   Los Angeles-Long Beach-Anaheim, US   2.327529 |
+  7. |  Washington-Arlington-Alexandria, US   2.210193 |
+  8. |                           London, GB   1.884259 |
+  9. | Houston-The Woodlands-Sugar Land, US    1.74835 |
+ 10. |          Seattle-Tacoma-Bellevue, US   1.458942 |
      |-------------------------------------------------|
- 11. |                            Tokyo, JP   1.298449 |
- 12. |   Philadelphia-Camden-Wilmington, US   1.253959 |
- 13. | Houston-The Woodlands-Sugar Land, US   1.247745 |
- 14. |           Research Triangle Park, US   1.029757 |
- 15. |         Chicago-Naperville-Elgin, US   .9467019 |
+ 11. |   Philadelphia-Camden-Wilmington, US   1.414966 |
+ 12. |                        Cambridge, GB   1.229443 |
+ 13. |           Research Triangle Park, US   1.161928 |
+ 14. |      Dallas-Fort Worth-Arlington, US   1.066114 |
+ 15. |        Baltimore-Columbia-Towson, US   .9895453 |
      |-------------------------------------------------|
- 16. |                            Seoul, KR   .9335821 |
- 17. |        Baltimore-Columbia-Towson, US   .9127042 |
- 18. |                        Amsterdam, NL   .8588498 |
- 19. |                        Göttingen, DE   .8203419 |
- 20. |                            Paris, FR   .8179253 |
+ 16. |                        Göttingen, DE   .9327914 |
+ 17. |                        Stockholm, SE   .9130285 |
+ 18. |                          Toronto, CA   .8707605 |
+ 19. |                           Berlin, DE   .8642418 |
+ 20. |                            Tokyo, JP   .8602065 |
      +-------------------------------------------------+
 Total articles: 141560
 (0 real changes made)
 (0 real changes made)
 
        +----------------------------+
-       | inst   pat_ad~t       perc |
+       | inst   body_a~t       perc |
        |----------------------------|
-    2. |        8502.379   6.006202 |
+    2. |        8215.997   5.803897 |
        +----------------------------+
-file ../temp/rankings_inst_pat.dta saved
+(file ../temp/rankings_inst_body.dta not found)
+file ../temp/rankings_inst_body.dta saved
 
      +----------------------------------------------------------------+
      |                                                inst       perc |
      |----------------------------------------------------------------|
-  1. |                                  Harvard University   6.280482 |
-  2. |               Massachusetts Institute of Technology   3.789789 |
-  3. |                                 Stanford University   2.960601 |
-  4. |                  University of California, Berkeley   2.139977 |
-  5. |                         Chinese Academy of Sciences    2.03566 |
+  1. |                                  Harvard University   6.237493 |
+  2. |               Massachusetts Institute of Technology    4.37398 |
+  3. |                                 Stanford University   2.884359 |
+  4. |                  University of California, Berkeley   2.461576 |
+  5. |                                     Broad Institute   2.454747 |
      |----------------------------------------------------------------|
-  6. |                                     Broad Institute   1.893306 |
-  7. |             University of California, San Francisco    1.61703 |
-  8. |                       National Institutes of Health    1.61076 |
-  9. |                                Mass General Brigham   1.438139 |
- 10. |                            University of Washington   1.314171 |
+  6. |                         Chinese Academy of Sciences   1.986333 |
+  7. |                                Mass General Brigham   1.975469 |
+  8. |                       National Institutes of Health    1.81752 |
+  9. |             University of California, San Francisco   1.635825 |
+ 10. |                  California Institute of Technology   1.354229 |
      |----------------------------------------------------------------|
- 11. |              Memorial Sloan Kettering Cancer Center   1.113248 |
- 12. |                                   Boston University   1.021285 |
- 13. |                  California Institute of Technology   .9268862 |
- 14. |                        Dana-Farber Cancer Institute   .8219479 |
- 15. |                 University of California, San Diego    .796324 |
+ 11. |                                   Boston University   1.297268 |
+ 12. |              Memorial Sloan Kettering Cancer Center   1.115263 |
+ 13. | The University of Texas Southwestern Medical Center   1.029382 |
+ 14. |                            Johns Hopkins University   .9889762 |
+ 15. |                          University of Pennsylvania     .98313 |
      |----------------------------------------------------------------|
- 16. |                                  Cornell University   .7613001 |
- 17. |                                  Max Planck Society   .7482623 |
- 18. |                          University of Pennsylvania   .7420539 |
- 19. |                                     Yale University   .7238646 |
- 20. |                            Johns Hopkins University   .7036692 |
-     |----------------------------------------------------------------|
- 21. |                  Washington University in St. Louis   .6394964 |
- 22. |                          Scripps Research Institute   .5881201 |
- 23. |                           Wellcome Sanger Institute   .5344042 |
- 24. |                                   Peking University   .5194577 |
- 25. |                              Rockefeller University   .5155069 |
-     |----------------------------------------------------------------|
- 26. |                           DeepMind (United Kingdom)   .5047832 |
- 27. |                                 University of Tokyo   .5023768 |
- 28. |                               University of Chicago   .4955834 |
- 29. |                                Kettering University   .4452231 |
- 30. |                                 Columbia University   .4392199 |
-     |----------------------------------------------------------------|
- 31. |   The University of Texas MD Anderson Cancer Center   .4314927 |
- 32. |                Beth Israel Deaconess Medical Center   .3905733 |
- 33. |               Salk Institute for Biological Studies   .3884286 |
- 34. |                       Weizmann Institute of Science   .3875614 |
- 35. |                                 Leibniz Association   .3854885 |
-     |----------------------------------------------------------------|
- 36. |               University of California, Los Angeles    .363841 |
- 37. |                                     Duke University   .3610652 |
- 38. |                           Regeneron (United States)   .3592437 |
- 39. |                     Vir Biotechnology (Switzerland)   .3574222 |
- 40. |             Icahn School of Medicine at Mount Sinai    .357258 |
-     |----------------------------------------------------------------|
- 41. |                                Karolinska Institute   .3525889 |
- 42. |                                     Kobe University   .3518551 |
- 43. |         University of North Carolina at Chapel Hill   .3491562 |
- 44. | The University of Texas Southwestern Medical Center   .3354463 |
- 45. |                                 New York University   .3319932 |
-     |----------------------------------------------------------------|
- 46. |                    University of Michigan–Ann Arbor   .3299819 |
- 47. |                           Seoul National University    .328422 |
- 48. |                      Massachusetts General Hospital   .3238555 |
- 49. |                             University of Cambridge   .3150354 |
- 50. |                          Boston Children's Hospital   .3087859 |
+ 16. |                            University of Washington   .9487259 |
+ 17. |                                  Cornell University   .9367233 |
+ 18. |                        Dana-Farber Cancer Institute   .8649144 |
+ 19. |                                     Yale University   .7816719 |
+ 20. |                                 Columbia University   .7252285 |
      +----------------------------------------------------------------+
 Total articles: 141560
 (0 real changes made)
@@ -1908,6 +745,6 @@ Total articles: 141560
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-12-14 10:50:07
+Makelog ended: 2023-12-20 23:38:03
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------

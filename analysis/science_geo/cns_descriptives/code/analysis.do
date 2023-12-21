@@ -19,17 +19,17 @@ program main
     global msa_world_name "cities"
     global msa_c_world_name "cities"
     di "OUTPUT START"
-    foreach var in affl_wt cite_affl_wt impact_affl_wt impact_cite_affl_wt pat_adj_wt frnt_adj_wt body_adj_wt {
-        di "CNS: `var'"
+    foreach var in impact_cite_affl_wt body_adj_wt {
+        /*di "CNS: `var'"
         athr_loc, data(newfund) samp(cns) wt_var(`var')
-*        qui trends, data(newfund) samp(cns) wt_var(`var')
+        qui trends, data(newfund) samp(cns) wt_var(`var')*/
         di "ALL: `var'"
         athr_loc, data(all) samp(jrnls) wt_var(`var')
         qui trends, data(all) samp(jrnls) wt_var(`var')
     }
     *calc_broad_hhmi, data(`data') samp(`samp') 
     *top_mesh_terms, data(cns) samp(`samp') 
-    qui output_tables, data(newfund) samp(cns) 
+    *qui output_tables, data(newfund) samp(cns) 
     qui output_tables, data(all) samp(jrnls) 
 end
 
@@ -45,8 +45,8 @@ program athr_loc
     use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear 
     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
     local end 20
-    foreach loc in country msa_c_world inst msa_comb {
-        if "`loc'" == "inst" & inlist("wt_var", "affl_wt", "cite_affl_wt", "impact_affl_wt", "impact_cite_affl_wt") {
+    foreach loc in country msa_c_world inst {
+        if "`loc'" == "inst" & ("`wt_var'" != "pat_adj_wt" & "`wt_var'" != "body_adj_wt") {
             local end 50
         }
         qui gunique pmid 
@@ -74,7 +74,7 @@ program athr_loc
         li `loc' perc in 1/`rank_end'
         di "Total articles: `total'"
         mkmat perc cum_perc in 1/`rank_end', mat(top_`loc'_`samp'`suf')
-        mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , (top_`loc'_`samp'`suf')
+*        mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , (top_`loc'_`samp'`suf')
         qui levelsof `loc' in 1/2
         global top2_`loc'_`data' "`r(levels)'"
         if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "msaworld", "msa_c_world") {
@@ -161,7 +161,7 @@ program trends
     replace msa_world = city if country != "United States"
     qui bys pmid year: gen counter = _n == 1
     qui bys year: egen tot_in_yr = total(counter)
-    foreach loc in country  msa_c_world inst msa_comb {
+    foreach loc in country  msa_c_world inst {
         preserve
         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
             qui keep if country == "United States"
@@ -199,15 +199,15 @@ program trends
         assert tot==100
         qui drop tot
         if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "msa_world" |  "`loc'" == "msa_c_world" | "`loc'" == "msa_comb" {
-            label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places" 
+            label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Remaining top 10" 4 "Remaining places" 
         }
         if "`loc'" == "inst" {
             local proper_1 = strproper(${`loc'_first})
             local proper_2 = strproper(${`loc'_second})
-            label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Rest of the top 10 ${`loc'_name}" 4 "Remaining places" 
+            label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Remaining top 10" 4 "Remaining places" 
         }
         if "`loc'" == "country" {
-            label define rank_grp 1 ${`loc'_first} 2 "United Kingdom" 3 "China" 4 "Rest of the top 10 ${`loc'_name}" 5 "Remaining places" 
+            label define rank_grp 1 ${`loc'_first} 2 "United Kingdom" 3 "China" 4 "Remaining top 10" 5 "Remaining places" 
         }
         label var rank_grp rank_grp
         qui gen group = 1 if rank_grp == "first"
@@ -252,7 +252,7 @@ program trends
         }
 *        qui gen labely_lab = "Missing Info" if group == `last'+3
         qui gen labely_lab = "Everywhere else" if group == `last'+2
-        qui replace labely_lab = "Rest of the top 10 ${`loc'_name}" if group == `last'+1
+        qui replace labely_lab = "Remaining top 10" if group == `last'+1
         qui replace labely_lab = "China" if group == 3 & "`loc'"=="country"
         qui replace labely_lab = ${`loc'_second} if group == 2
         qui replace labely_lab = ${`loc'_second} if group == 2
@@ -271,18 +271,18 @@ program trends
             graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2023, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
               ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
-              graphregion(margin(r+32)) plotregion(margin(zero)) ///
-              legend(off label(1 ${`loc'_first}) label(2 "United Kingdom") label(3 "China") label(4 "Rest of the top 10 ${`loc'_name}") label(5 "Remaining places")  ring(1) pos(6) rows(2))
+              graphregion(margin(r+27)) plotregion(margin(zero)) ///
+              legend(off label(1 ${`loc'_first}) label(2 "United Kingdom") label(3 "China") label(4 "Remaining top 10") label(5 "Remaining places")  ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
         }
-        local w = 32 
-        if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_c_world" | "`loc'" == "msa_comb") local w = 32
+        local w = 27 
+        if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_c_world" | "`loc'" == "msa_comb") local w = 27 
         if "`loc'" != "country" {
             graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2023, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
               ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
               graphregion(margin(r+`w')) plotregion(margin(zero)) ///
-              legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "Rest of the top 10 ${`loc'_name}") label(4 "Remaining places")  ring(1) pos(6) rows(2))
+              legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "Remaining top 10") label(4 "Remaining places")  ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
         }
         restore
@@ -323,17 +323,24 @@ end
 
 program output_tables
     syntax, data(str) samp(str)
+    cap mat if_comb = top_country_jrnls_if \ top_msa_c_world_jrnls_if
+    cap mat body_comb = top_country_jrnls_body \ top_msa_c_world_jrnls_body \ top_inst_jrnls_body
+    cap matrix_to_txt, saving("../output/tables/comb.txt") matrix(comb) title(<tab:comb>) format(%20.4f) replace
     foreach file in top_country top_msa_c_world top_inst {
-        qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.txt") matrix(`file'_`samp'_wt) ///
+        cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.txt") matrix(`file'_`samp'_wt) ///
            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace
-        qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
+        cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
            title(<tab:`file'_`samp'>) format(%20.4f) replace
-        qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.txt") matrix(`file'_`samp') ///
-           title(<tab:`file'_`samp'>) format(%20.4f) replace
-        qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_wt.txt") matrix(`file'_`samp') ///
-           title(<tab:`file'_`samp'>) format(%20.4f) replace
-        qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.txt") matrix(`file'_`samp') ///
-           title(<tab:`file'_`samp'>) format(%20.4f) replace
+        cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.txt") matrix(`file'_`samp'_if) ///
+           title(<tab:`file'_`samp'_if>) format(%20.4f) replace
+        cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_wt.txt") matrix(`file'_`samp'_if_wt) ///
+           title(<tab:`file'_`samp'_if_wt>) format(%20.4f) replace
+        cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.txt") matrix(`file'_`samp'_pat) ///
+           title(<tab:`file'_`samp'_pat>) format(%20.4f) replace
+        cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_frnt.txt") matrix(`file'_`samp'_frnt) ///
+           title(<tab:`file'_`samp'_frnt>) format(%20.4f) replace
+        cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_body.txt") matrix(`file'_`samp'_body) ///
+           title(<tab:`file'_`samp'_body>) format(%20.4f) replace
          }
  end
 ** 
