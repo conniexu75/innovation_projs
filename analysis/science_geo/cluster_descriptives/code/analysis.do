@@ -8,7 +8,7 @@ pause on
 set seed 8975
 global cite_affl_wt_name "Productivity"
 global impact_cite_affl_wt_name "Productivity"
-global pat_adj_wt_name "Paper-to-Patent Citations"
+global body_adj_wt_name "Paper-to-Patent Citations"
 global ln_y_name "Log Productivity"
 global ln_pat_name "Log Paper-to-Patent Citations"
 global msa_size_name "Cluster Size"
@@ -32,8 +32,8 @@ program sample_desc
     gunique athr_id
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
-    gen ln_pat = ln(pat_adj_wt)
-    foreach var in impact_cite_affl_wt msa_size ln_y ln_x pat_adj_wt ln_pat {
+    gen ln_pat = ln(body_adj_wt)
+    foreach var in impact_cite_affl_wt msa_size ln_y ln_x body_adj_wt ln_pat {
         qui sum `var', d
         local N = r(N)
         local mean : dis %3.2f r(mean)
@@ -54,21 +54,29 @@ program sample_desc
         graph export ../output/figures/`var'_dist`samp'.pdf, replace
     }
     preserve
+    keep if inrange(year, 2015,2022)
+    gcollapse (mean) msa_size cluster_shr, by(msa_comb)
+    gsort - msa_size
+    mkmat msa_size in 1/30, mat(top_30clus_`samp')
+    li in 1/30
+    mkmat msa_size in 1/10, mat(top_10clus_`samp')
+    restore
+    preserve
     gen has_patent_cite = pat_wt > 0
     bys athr_id msa_comb: gen athr_cnt = _n == 1
-    gcollapse  (sum) athr_cnt pat_adj_wt cite_affl_wt pat_wt affl_wt impact_cite_affl_wt impact_affl_wt (mean) msa_size has_patent_cite, by(msa_comb)
-    qui reg pat_adj_wt impact_cite_affl_wt 
+    gcollapse  (sum) athr_cnt body_adj_wt cite_affl_wt pat_wt affl_wt impact_cite_affl_wt impact_affl_wt (mean) msa_size has_patent_cite, by(msa_comb)
+    qui reg body_adj_wt impact_cite_affl_wt 
     local coef : dis %3.2f _b[impact_cite_affl_wt]
     local N = e(N)
-    binscatter2 pat_adj_wt impact_cite_affl_wt , xtitle("Productivity", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSA-years) = `N'" ///
+    binscatter2 body_adj_wt impact_cite_affl_wt , xtitle("Productivity", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
     graph export ../output/figures/msa_pat_prod_`samp'.pdf, replace
-    gen ln_pat = ln(pat_adj_wt)
+    gen ln_pat = ln(body_adj_wt)
     gen ln_y = ln(impact_cite_affl_wt)
     qui reg ln_pat ln_y 
     local coef : dis %3.2f _b[ln_y]
     local N = e(N)
-    binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) ytitle("Log Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3)  xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSA-years) = `N'" ///
+    binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) ytitle("Log Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3)  xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
     graph export ../output/figures/msa_log_pat_prod_`samp'.pdf, replace
     
@@ -81,6 +89,7 @@ program sample_desc
     replace msa_lab =  msa_comb  if msa_comb == "New York-Newark-Jersey City, NY-NJ-PA" 
     replace msa_lab =  msa_comb  if msa_comb == "Bay Area, CA" 
     replace msa_lab =  msa_comb  if msa_comb == "Boston-Cambridge-Newton, MA-NH" 
+
 /*    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Great Falls, MT" & year == 2015
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San Diego-Carlsbad, CA" & year == 1973
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San Diego-Carlsbad, CA" & year == 19
@@ -91,17 +100,22 @@ program sample_desc
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 2015 
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 1997 
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2012 */
-    tw scatter cite_affl_wt msa_size ,  mcolor(gs13%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || scatter cite_affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(vsmall)) ytitle("MSA Productivity", size(vsmall))  jitter(5) legend(off)
+    tw scatter impact_cite_affl_wt msa_size , mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || scatter impact_cite_affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(vsmall)) ytitle("MSA Productivity", size(vsmall))  jitter(5) legend(off)
    graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replace
    
-   xtile p_prod = cite_affl_wt, nq(20)
+   xtile p_prod = impact_cite_affl_wt, nq(20)
    replace msa_lab = ""
-   replace msa_lab =  msa_comb if msa_comb == "Flint, MI" 
-   replace msa_lab =  msa_comb if msa_comb == "Lincoln, NE" 
-   replace msa_lab =  msa_comb if msa_comb == "Worcester, MA-CT" 
    replace msa_lab =  msa_comb if msa_comb == "San Diego-Carlsbad, CA" 
    replace msa_lab =  msa_comb if msa_comb == "Bay Area, CA" 
+   replace msa_lab =  msa_comb if msa_comb == "St. Louis, MO-IL" 
+   replace msa_lab =  msa_comb if msa_comb == "Minneapolis-St. Paul-Bloomington, MN-WI" 
+   replace msa_lab =  msa_comb if msa_comb == "Washington-Arlington-Alexandria, DC-VA-MD-WV" 
+   replace msa_lab =  msa_comb if msa_comb == "Los Angeles-Long Beach-Anaheim, CA" 
    replace msa_lab =  msa_comb if msa_comb == "Boston-Cambridge-Newton, MA-NH" 
+   replace msa_lab =  msa_comb if msa_comb == "New York-Newark-Jersey City, NY-NJ-PA" 
+   egen clock = mlabvpos(impact_cite_affl_wt body_adj_wt)
+   replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-NJ-PA","Boston-Cambridge-Newton, MA-NH")
+   replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington, MN-WI", "Washington-Arlington-Alexandria, DC-VA-MD-WV", "San Diego-Carlsbad, CA", "St. Louis, MO-IL", "Bay Area, CA")
    /*replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Flint, MI" & year == 2006
    replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Lincoln, NE" & year == 2005 
    replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Worcester, MA-CT" & year == 2000
@@ -110,13 +124,13 @@ program sample_desc
    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 2015 
    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2015 
    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2000 */
-   qui reg pat_adj_wt impact_cite_affl_wt if pat_adj_wt > 0
+   qui reg body_adj_wt impact_cite_affl_wt 
    local coef : dis %3.2f _b[impact_cite_affl_wt]
    local cons : dis %3.2f _b[_cons]
    local N = e(N)
-   tw scatter pat_adj_wt impact_cite_affl_wt if pat_adj_wt > 0,  mcolor(gs13%50) msize(vsmall) xlabel(0(1000)60000, labsize(vsmall)) ylab(0(1000)60000, labsize(vsmall)) || ///
-      scatter pat_adj_wt impact_cite_affl_wt if pat_adj_wt > 0 & !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
-      (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 60000) lpattern(dash) lcolor(lavender)), xtitle("MSA Productivity", size(vsmall)) ytitle("MSA Paper-to-Patent Citations", size(vsmall)) legend(on order(- "N (MSA-years) = `N'" ///
+   tw scatter body_adj_wt impact_cite_affl_wt , mcolor(gs13%50) msize(vsmall) xlabel(0(5000)60000, labsize(vsmall)) ylab(0(5000)60000, labsize(vsmall)) || ///
+      scatter body_adj_wt impact_cite_affl_wt if !mi(msa_lab) , mlabvp(clock) mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
+      (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 60000) lpattern(dash) lcolor(lavender)), xtitle("MSA Productivity", size(vsmall)) ytitle("MSA Paper-to-Patent Citations", size(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
    graph export ../output/figures/pat_prod_scatter_`samp'.pdf, replace
    /*hashsort p -cite_affl_wt 
@@ -201,14 +215,14 @@ program  maps
     replace msa_comb = "San Francisco-Oakland-Hayward, CA" if msa_comb == "San Francisco-Oakland-Haywerd, CA"
     replace msa_comb = "Macon-Bibb County, GA" if msa_comb == "Macon, GA"
     bys athr_id msa_comb ${time} : gen count = _n == 1
-    keep if inrange(year , 2015,2022)
-    gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt (mean) msa_size , by(msa_comb)
+    keep if inrange(year , 1945,2022)
+    gcollapse (sum) affl_wt impact_cite_affl_wt body_adj_wt (mean) msa_size , by(msa_comb)
     save ../temp/map_samp, replace
     
     use usa_msa, clear
     rename NAME msa_comb
     merge 1:m msa_comb using ../temp/map_samp, assert(1 2 3) keep(1 3) nogen
-    foreach var in cite_affl_wt msa_size pat_adj_wt {
+    foreach var in impact_cite_affl_wt msa_size body_adj_wt {
         xtile `var'_5 = `var', nq(5)
         qui sum `var' 
         local min : dis %3.2f r(min)
@@ -232,15 +246,15 @@ program raw_bs
     use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/athr_panel_full_comb_`samp', clear
     drop if mi(msa_comb) 
     gegen msa = group(msa_comb)
-    gen ln_y = ln(cite_affl_wt)
+    gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
-    gen ln_pat = ln(pat_adj_wt)
+    gen ln_pat = ln(body_adj_wt)
 
     // patented vs productivity
-    qui reg pat_adj_wt cite_affl_wt 
-    local coef : dis %3.2f _b[cite_affl_wt]
+    qui reg body_adj_wt impact_cite_affl_wt 
+    local coef : dis %3.2f _b[impact_cite_affl_wt]
     local N = e(N)
-    binscatter2 pat_adj_wt cite_affl_wt, xtitle("Productivity", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author-years) = `N'" ///
+    binscatter2 body_adj_wt impact_cite_affl_wt, xtitle("Productivity", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author-years) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
     graph export ../output/figures/pat_prod_`samp'.pdf, replace
     qui reg ln_pat ln_y 
@@ -256,7 +270,7 @@ program regression
     syntax, samp(str) 
     use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/athr_panel_full_comb_`samp', clear 
     local reg_eq = cond("`samp'"=="year","ln_y ln_x avg_team_size","ln_y ln_x") 
-    local mat_est  = cond("`samp'"=="year","_b[ln_x] \ _b[avg_team_size]", "_b[ln_x]") 
+    local mat_est  = cond("`samp'"=="year","_b[ln_x] \ _se[ln_x] \ _b[avg_team_size] \ _se[ln_x]", "_b[ln_x] \ _se[ln_x]") 
     bys athr_id msa_comb ${time} : gen count = _n == 1
     replace msa_size = 0.0000000000001 if msa_size == 0
     gegen msa = group(msa_comb)
@@ -264,7 +278,7 @@ program regression
     gegen inst = group(inst_name)
     gegen msa_field = group(msa field)
     gegen year_field = group(year field)
-    gen ln_y = ln(cite_affl_wt)
+    gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
     gen ln_x_cluster = ln(cluster_shr)
     reghdfe `reg_eq', noabsorb
@@ -290,22 +304,24 @@ program regression
             *graph export ../output/figures/final_bs_`samp'.pdf, replace
         }
     }
-    reghdfe `reg_eq', absorb(${time} field field#${time} inst#year inst athr_id) vce(cluster msa)
-    mat coef_`samp' = nullmat(coef_`samp'), (`mat_est' \ e(N))
+    reghdfe `reg_eq', absorb(${time} field field#${time} field#msa inst#year inst athr_id) vce(cluster msa)
+    mat instyr_`samp' = nullmat(instyr_`samp'), (`mat_est' \ e(N))
+    mat coef_`samp' = nullmat(coef_`samp') , instyr_`samp'
     reghdfe `reg_eq', absorb(year msa athr_id field inst) vce(cluster msa)
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
     reghdfe `reg_eq', absorb(year msa athr_id gen_mesh1 gen_mesh2 inst) vce(cluster msa)
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
-    reghdfe `reg_eq', absorb(year msa athr_id qualifier_name1 qualifier_name2 inst) vce(cluster msa)
+    mat alt_spec_`samp' = instyr_`samp' , field_`samp'
+/*    reghdfe `reg_eq', absorb(year msa athr_id qualifier_name1 qualifier_name2 inst) vce(cluster msa)
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
     reghdfe `reg_eq', absorb(year msa athr_id term1 term2 inst) vce(cluster msa)
-    mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
+    mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))*/
         
 end
 
 program output_tables
     syntax, samp(str) 
-    foreach file in top_10clus top_30clus coef field { 
+    foreach file in top_10clus top_30clus coef field alt_spec { 
          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
            title(<tab:`file'_`samp'>) format(%20.4f) replace
     }
