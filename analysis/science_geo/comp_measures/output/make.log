@@ -1,0 +1,453 @@
+--------------------------------------------------------------------------------
+Makelog started: 2023-12-20 23:42:28
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_measures/code
+--------------------------------------------------------------------------------
+External links successfully created!
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_measures/
+> code/analysis.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_measures/code/
+
+. 
+. program main
+  1.     global country_name "countries"
+  2.     global us_state_name "US states"
+  3.     global area_name "US cities"
+  4.     global city_full_name "world cities"
+  5.     global msatitle_name "MSAs"
+  6.     global msa_world_name "metropolitan areas"
+  7.     global msa_c_world_name "metropolitan areas"
+  8.     global inst_name "institutions"
+  9.     comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(cite_affl_wt)
+ 10.     comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(impact_cite_affl_wt)
+ 11. 
+.     comp_vars, samp(all_all_jrnls) var1(pat_adj_wt) var2(frnt_adj_wt)
+ 12.     comp_vars, samp(all_all_jrnls) var1(pat_adj_wt) var2(body_adj_wt)
+ 13.     mat corr_var = corr_uw_wt \ corr_uw_if_wt 
+ 14.     mat corr_pat = corr_pat_frnt \ corr_pat_body 
+ 15.     mat corr_measures = corr_var \ corr_pat
+ 16.     foreach file in corr_var corr_pat corr_measures {
+ 17.         matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`file'
+> ) ///
+>           title(<tab:`file'>) format(%20.4f) replace
+ 18.     }
+ 19. end
+
+. 
+. program comp_vars
+  1.     syntax, samp(str) var1(str) var2(str)
+  2.     local suf1 = ""
+  3.     local suf2 = ""
+  4.     forval i = 1/2 {
+  5.         if "`var`i''" == "affl_wt" local suf`i' "_uw"
+  6.         if "`var`i''" == "cite_affl_wt" local suf`i' "_wt"
+  7.         if "`var`i''" == "impact_affl_wt" local suf`i' "_if"
+  8.         if "`var`i''" == "impact_cite_affl_wt" local suf`i' "_if_wt"
+  9.         if "`var`i''" == "pat_adj_wt" local suf`i' "_pat"
+ 10.         if "`var`i''" == "frnt_adj_wt" local suf`i' "_frnt"
+ 11.         if "`var`i''" == "body_adj_wt" local suf`i' "_body"
+ 12.     }
+ 13.     foreach type in  country msa_c_world inst {
+ 14.         use ../external/cleaned_samps/cleaned_`samp', clear
+ 15.         preserve 
+ 16.         gcollapse (sum) `var1' `var2', by(`type')
+ 17.         drop if mi(`type')
+ 18.         qui sum `var1'
+ 19.         gen share1 = `var1'/round(r(sum)) * 100
+ 20.         qui sum `var2'
+ 21.         gen share2 = `var2'/round(r(sum)) * 100
+ 22.         hashsort -`var1'
+ 23.         gen rank1 = _n
+ 24.         hashsort -`var2'
+ 25.         gen rank2 = _n
+ 26.         // inst labels
+.         cap replace inst = "Caltech" if inst == "california institute tech"
+ 27.         cap replace inst = "CDC" if inst == "cdc"
+ 28.         cap replace inst = "Columbia" if inst == "columbia university"
+ 29.         cap replace inst = "Cornell" if inst == "cornell university"
+ 30.         cap replace inst = "Duke" if inst == "duke university"
+ 31.         cap replace inst = "Harvard" if inst == "Harvard University"
+ 32.         cap replace inst = "JHU" if inst == "johns hopkins university"
+ 33.         cap replace inst = "Rockefeller Univ." if inst == "university the 
+> rockefeller"
+ 34.         cap replace inst = "MIT" if inst == "Massachusetts Institute of Te
+> chnology"
+ 35.         cap replace inst = "Memorial Sloan" if inst == "memorial sloan-ket
+> tering cancer center"
+ 36.         cap replace inst = "MGH" if inst == "massachusetts general hospita
+> l"
+ 37.         cap replace inst = "NYU" if inst == "new York university"
+ 38.         cap replace inst = "Stanford" if inst == "Stanford University"
+ 39.         cap replace inst = "UCL" if inst == "university college london"
+ 40.         cap replace inst = "Berkeley" if inst == "University of California
+> , Berkeley"
+ 41.         cap replace inst = "UCLA" if inst == "university california los an
+> geles"
+ 42.         cap replace inst = "UCSD" if inst == "university california san di
+> ego"
+ 43.         cap replace inst = "UCSF" if inst == "university california san fr
+> ancisco"
+ 44.         cap replace inst = "UChicago" if inst == "university chicago"
+ 45.         cap replace inst = "UMich" if inst == "university michigan"
+ 46.         cap replace inst = "UPenn" if inst == "university pennsylvania"
+ 47.         cap replace inst = "Yale" if inst == "university yale"
+ 48.         cap replace inst = "Harvard" if inst == "university harvard"
+ 49.         cap replace inst = "Stanford" if inst == "university stanford"
+ 50.         cap replace inst = "CAS" if inst == "Chinese Academy of Sciences"
+ 51.         cap replace inst = "Oxford" if inst == "University of Oxford"
+ 52.         cap replace inst = "Cambridge" if inst == "university cambridge"
+ 53.         cap replace inst = "UT Dallas" if inst == "university texas dallas
+> "
+ 54.         cap replace inst = "UMich" if inst == "university michigan ann arb
+> or"
+ 55.         cap replace inst = "Dana Farber" if inst == "dana farber cancer in
+> stitute"
+ 56.         cap replace inst = "Max Planck" if inst == "Max Planck Society"
+ 57.         cap replace inst = "NIH" if inst == "National Institutes of Health
+> "
+ 58.         cap replace inst = "DeepMind" if inst == "deepmind"
+ 59.         cap replace inst = "Brigham and Women's" if inst == "Brigham and W
+> omen's Hospital"
+ 60.         cap replace inst = "Chinese Academy of Medical Sciences" if inst =
+> = "chinese academy med science"
+ 61.         cap replace inst = "Chinese CDC" if inst == "china cdc"
+ 62.         cap replace inst = "Jinyintan Hospital" if inst == "jinyintan hosp
+> ital"
+ 63. 
+.         // shorter us uk cor cities msa
+.         foreach i in  msa_c_world {
+ 64.             cap replace `i' = subinstr(`i', "United States", "US",.)
+ 65.             cap replace `i'= subinstr(`i', "GB", "UK",.)
+ 66.         }
+ 67.         // labeling 
+.         gen lab_share = "" 
+ 68.         replace lab_share = substr(lab_share, 1, strpos(lab_share, ",")-1)
+>  if strpos("`type'", "msa")>0
+ 69.         replace lab_share = `type' if (inlist(rank1, 1, 2, 3,4, 8, 10) | i
+> nlist(rank2, 1, 2, 3,4, 7) | inlist(`type', "DeepMind", "Jinyintan Hospital",
+>  "CDC", "Philadelphia-Camden-Wilmington, US", "Seattle-Tacoma-Bellevue, US", 
+> "Houston-The Woodlands-Sugar Land, US", "San Jose-Sunnyvale-Santa Clara, US")
+>  | inlist(`type', "San Diego-Carlsbad, US", "Oxford, UK", "Washington-Arlingt
+> on-Alexandria, US"))
+ 70.         replace lab_share = "" if inlist(lab_share, "chinese center diseas
+> econtrol and prevent","university washington", "San Diego-La Jolla, US", "Max
+>  Planck" , "Yale", "Cambridge, UK", "Philadelphia-Camden-Wilmington, US", "Ca
+> mbridge, UK") | inlist(lab_share,"Seattle-Tacoma-Bellevue, US", "Houston-The 
+> Woodlands-Sugar Land, US", "Los Angeles-Long Beach-Anaheim, US") | strpos(lab
+> _share, "Karolinska")>0 | strpos(lab_share, "Atlanta")>0
+ 71.         replace lab_share = strproper(lab_share) if inlist(lab_share, "pfi
+> zer", "DeepMind", "Jinyintan Hospital")
+ 72.         egen clock = mlabvpos(rank1 rank2)
+ 73.         cap replace clock = 2 if inlist(lab_share, "Oxford, UK", "San Jose
+> -Sunnyvale-Santa Clara, US")
+ 74.         cap replace clock = 12 if inlist(lab_share, "Seattle, US", "Beijin
+> g, China")
+ 75.         cap replace clock = 6 if inlist(lab_share, "London, UK")
+ 76.         cap replace clock = 9 if inlist(lab_share, "New York-Newark-Jersey
+>  City, US")
+ 77.         cap replace clock = 3 if inlist(lab_share,"Chinese Academy of Medi
+> cal Sciences", "Boston-Cambridge-Newton, US", "Bethesda-DC, US", "Oxford, UK"
+> , "Brigham and Women's", "UCSF", "Berkeley") | inlist(lab_share, "Stanford", 
+> "NIH", "CAS", "MIT") 
+ 78.         cap replace clock = 3 if inlist(lab_share,"Pfizer", "DeepMind", "B
+> eijing, China", "New York-Newark-Jersey City", "San Diego-Carlsbad, US", "San
+>  Francisco-Oakland-Hayward, US") 
+ 79.         cap replace clock = 4 if inlist(lab_share,"CDC", "Jinyintan Hospit
+> al", "Chinese CDC", "Bethesda-DC, US", "Washington-Arlington-Alexandria, US")
+>  
+ 80.            
+.         qui corr share1 share2  if !mi(share1) & !mi(share2)
+ 81.         local corr : di %3.2f r(rho)
+ 82.         mat corr`suf1'`suf2' = nullmat(corr`suf1'`suf2') , r(rho)
+ 83.         local pos = 5
+ 84.         sum share1
+ 85.         local max = r(max)
+ 86.         sum share2
+ 87.         local max = max(r(max),`max')
+ 88.         local skip 1 
+ 89.         gen one = _n
+ 90.         gen zero = _n-1
+ 91.         tw scatter share1 share2 if !mi(share1) & !mi(share2), ///
+>           mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) |
+> | ///
+>           (line zero zero if zero <= `max', lpattern(dash) lcolor(lavender)),
+>  ///
+>           xtitle("`var2'", size(small)) ytitle("`var1'", size(small)) ///
+>           xlabel(0(`skip')`max', labsize(vsmall)) ylabel(0(`skip')`max', labs
+> ize(vsmall)) legend(on order(- "Correlation = `corr'") size(vsmall) pos(`pos'
+> ) ring(0) region(lwidth(none)))
+ 92.         graph export ../output/figures/`type'`suf1'`suf2'.pdf, replace
+ 93.     restore
+ 94.     }
+ 95. end
+
+. ** 
+. main
+(0 observations deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(200 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str14
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |        200          .5    3.278308   .0000945   44.65057
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |        200          .5    3.731237   8.00e-07   51.37331
+file ../output/figures/country_uw_wt.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(4,143 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str36
+(11 real changes made)
+(4 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |      4,143    .0241371    .1552603    .000095   4.208407
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |      4,143    .0241371    .2167455          0   8.399132
+file ../output/figures/msa_c_world_uw_wt.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(17,570 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str46
+(7 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |     17,570    .0056915    .0372147   .0001104   2.157703
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |     17,570    .0056915    .0529606          0   3.353051
+file ../output/figures/inst_uw_wt.pdf saved as PDF format
+(0 observations deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(200 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str14
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |        200          .5    3.278308   .0000945   44.65057
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |        200          .5    4.083635   4.98e-07   56.54243
+file ../output/figures/country_uw_if_wt.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(4,143 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str36
+(12 real changes made)
+(4 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |      4,143    .0241371    .1552603    .000095   4.208407
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |      4,143    .0241371    .2704232          0   11.54766
+file ../output/figures/msa_c_world_uw_if_wt.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(17,570 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str46
+(7 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |     17,570    .0056915    .0372147   .0001104   2.157703
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |     17,570    .0056915    .0650219          0   4.352193
+file ../output/figures/inst_uw_if_wt.pdf saved as PDF format
+(0 observations deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(200 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str14
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |        200          .5     4.40766          0   61.44456
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |        200          .5     4.28503          0   59.68623
+file ../output/figures/country_pat_frnt.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(4,143 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str36
+(11 real changes made)
+(3 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |      4,143    .0241371    .2727544          0   11.44825
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |      4,143    .0241371    .2717048          0   11.97182
+file ../output/figures/msa_c_world_pat_frnt.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(17,570 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str24
+(8 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |     17,570    .0056915    .0687024          0   4.535574
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |     17,570    .0056915    .0657228          0   4.849061
+file ../output/figures/inst_pat_frnt.pdf saved as PDF format
+(0 observations deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(200 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str14
+(6 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |        200          .5     4.40766          0   61.44456
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |        200          .5    4.529773          0    63.0308
+file ../output/figures/country_pat_body.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(4,143 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str36
+(12 real changes made)
+(4 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |      4,143    .0241371    .2727544          0   11.44825
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |      4,143    .0241371    .2778833          0   10.71888
+file ../output/figures/msa_c_world_pat_body.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(17,570 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str24
+(7 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |     17,570    .0056915    .0687024          0   4.535574
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |     17,570    .0056915    .0776708          0    4.46532
+file ../output/figures/inst_pat_body.pdf saved as PDF format
+(file ../output/tables/corr_var.txt not found)
+(file ../output/tables/corr_pat.txt not found)
+(file ../output/tables/corr_measures.txt not found)
+
+. 
+end of do-file
+
+--------------------------------------------------------------------------------
+Makelog ended: 2023-12-20 23:43:21
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_measures/code
+--------------------------------------------------------------------------------

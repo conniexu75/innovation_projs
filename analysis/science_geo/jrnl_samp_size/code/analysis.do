@@ -3,6 +3,7 @@ clear all
 capture log close
 program drop _all
 set scheme modern
+graph set window fontface "Arial Narrow"
 pause on
 set seed 8975
 here, set

@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-11-28 23:56:17
+Makelog started: 2023-12-17 15:50:01
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -38,6 +38,9 @@ Notes:
 . program drop _all
 
 . set scheme modern
+
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
 
 . pause on
 
@@ -365,8 +368,8 @@ file ../temp/cns_counts.dta saved
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                        76,429
-        from master                    76,429  
+    Not matched                        76,438
+        from master                    76,438  
         from using                          0  
 
     Matched                                 0  
@@ -379,18 +382,18 @@ SAMPLE IS : cns
      +---------------------------------------------------+
      | journa~r   num_fund   tot_ar~s   percen~t   order |
      |---------------------------------------------------|
-  1. |  science      37269      98515   37.83079       1 |
-  2. |   nature      60610      74910   80.91042       1 |
-  3. |     cell      14730      15464   95.25349       1 |
+  1. |  science      37267      98515   37.82876       1 |
+  2. |   nature      60608      74910   80.90775       1 |
+  3. |     cell      14725      15464   95.22116       1 |
      +---------------------------------------------------+
 SAMPLE IS  newfund cns all:
-# articles = 112609
-# athr-articles = 205074
-# athr-affl-articles = 205074
+# articles = 112600
+# athr-articles = 205052
+# athr-affl-articles = 186246
 SAMPLE IS  newfund cns last5yrs:
 # articles = 12012
-# athr-articles = 23112
-# athr-affl-articles = 23112
+# athr-articles = 23111
+# athr-affl-articles = 21530
 
     Result                      Number of obs
     -----------------------------------------
@@ -502,8 +505,8 @@ file ../temp/scisub_counts.dta saved
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                         4,179
-        from master                     4,179  
+    Not matched                         4,211
+        from master                     4,211  
         from using                          0  
 
     Matched                                 0  
@@ -516,7 +519,7 @@ SAMPLE IS : scisub
      +---------------------------------------------------------+
      |   journal_abbr   num_fund   tot_ar~s   percen~t   order |
      |---------------------------------------------------------|
-  1. |         neuron       7224       7621   94.79071       0 |
+  1. |         neuron       7197       7621   94.43642       0 |
   2. |      nat_genet       4968       5146     96.541       0 |
   3. |        nat_med       4111       4799   85.66368       0 |
   4. |    nat_biotech       2700       4719   57.21551       0 |
@@ -524,16 +527,16 @@ SAMPLE IS : scisub
      |---------------------------------------------------------|
   6. |   nat_cell_bio       2932       3057   95.91103       0 |
   7. |   nat_chem_bio       2038       2325   87.65591       0 |
-  8. | cell_stem_cell       1519       1638   92.73505       0 |
+  8. | cell_stem_cell       1514       1638   92.42979       0 |
      +---------------------------------------------------------+
 SAMPLE IS  newfund scisub all:
-# articles = 29154
-# athr-articles = 57386
-# athr-affl-articles = 57386
+# articles = 29122
+# athr-articles = 57323
+# athr-affl-articles = 54060
 SAMPLE IS  newfund scisub last5yrs:
 # articles = 9197
 # athr-articles = 18086
-# athr-affl-articles = 18086
+# athr-affl-articles = 17233
 
     Result                      Number of obs
     -----------------------------------------
@@ -645,8 +648,8 @@ file ../temp/demsci_counts.dta saved
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                        38,542
-        from master                    38,542  
+    Not matched                        38,667
+        from master                    38,667  
         from using                          0  
 
     Matched                                 0  
@@ -660,23 +663,23 @@ SAMPLE IS : demsci
      | journa~r   num_fund   tot_ar~s   percen~t   order |
      |---------------------------------------------------|
   1. |     plos     192495     228166    84.3662       0 |
-  2. |      jbc     165478     167698   98.67619       0 |
+  2. |      jbc     165353     167698   98.60165       0 |
   3. |     onco      17660      17859   98.88572       0 |
   4. |    faseb      11696      12146   96.29507       0 |
      +---------------------------------------------------+
 SAMPLE IS  newfund demsci all:
-# articles = 387329
-# athr-articles = 763311
-# athr-affl-articles = 763311
+# articles = 387204
+# athr-articles = 763048
+# athr-affl-articles = 644225
 SAMPLE IS  newfund demsci last5yrs:
 # articles = 120351
 # athr-articles = 239541
-# athr-affl-articles = 239541
+# athr-affl-articles = 228612
 
 . 
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-11-28 23:59:01
+Makelog ended: 2023-12-17 15:51:47
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code
 --------------------------------------------------------------------------------

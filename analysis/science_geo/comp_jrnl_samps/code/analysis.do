@@ -3,6 +3,7 @@ clear all
 capture log close
 program drop _all
 set scheme modern
+graph set window fontface "Arial Narrow"
 pause on
 set seed 8975
 here, set
@@ -41,7 +42,6 @@ program athr_loc
     syntax, data(str) samp(str)  wt_var(str)
     local suf = cond("`wt_var'" == "cite_affl_wt", "_wt", "") 
     use ../external/openalex/cleaned_all_`data'_`samp', clear
-    drop if journal_abbr == "PLoS One"
     foreach loc in country msa_c_world inst { 
         qui gunique pmid //which_athr //if !mi(affiliation)
         local articles = r(unique)
@@ -201,9 +201,9 @@ program comp_samps
                 corr rank`samp1' rank`samp2' if inrange(rank`samp1' , 1,`rank_lmt') & inrange(rank`samp2' ,1,`rank_lmt')
                 local corr :  di %3.2f r(rho)
                 tw scatter rank`samp1' rank`samp2' if inrange(rank`samp1' , 1,`rank_lmt') & inrange(rank`samp2' ,1,`rank_lmt') , ///
-                  mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) || ///
+                  mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) mcolor(gs7) || ///
                   (function y=x ,range(0 `max') lpattern(dash) lcolor(lavender)), ///
-                  xtitle("``cat'_name' Research Rank - ``samp2'_name'", size(small)) ytitle("`cat_name' Research Rank - ``samp1'_name' ", size(small)) ///
+                  xtitle("``cat'_name' Research Rank - ``samp2'_name'", size(vsmall)) ytitle("`cat_name' Research Rank - ``samp1'_name' ", size(vsmall)) ///
                   xlabel(1(1)`rank_lmt', labsize(vsmall)) ylabel(1(1)`rank_lmt', labsize(vsmall)) xsc(reverse) ysc(reverse) legend(on order(- "Correlation = `corr'") size(vsmall) pos(5) ring(0) region(lwidth(none)))
                 *graph export ../output/figures/`samp1'_`samp2'_`cat'_`loc'_rank`suf'.pdf, replace
                 local skip = 5 
@@ -222,9 +222,9 @@ program comp_samps
                     mat corr_`samp2'`suf' = nullmat(corr_`samp2'`suf') , r(rho)
                 }
                 tw scatter share`samp1' share`samp2' if (share`samp1'<=`max') & (share`samp2'<=`max'), ///  //if  (inrange(rank`samp1' , 1,`rank_lmt') |  inrange(rank`samp2' , 1,`rank_lmt')) & (share`samp1'<=`max') & (share`samp2'<=`max'), ///
-                  mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) || ///
+                  mlabel(lab_share) mlabsize(vsmall) mlabcolor(black) mlabvp(clock) mcolor(gs7) || ///
                   (function y=x ,range(0 `max') lpattern(dash) lcolor(lavender)), ///
-                  xtitle("``cat'_name' Research Share (%) - ``samp2'_name'", size(small)) ytitle("``cat'_name' Research Share (%) - ``samp1'_name'", size(small)) ///
+                  xtitle("``cat'_name' Research Share (%) - ``samp2'_name'", size(vsmall)) ytitle("``cat'_name' Research Share (%) - ``samp1'_name'", size(vsmall)) ///
                   xlabel(0(`skip')`max', labsize(vsmall)) ylabel(0(`skip')`max', labsize(vsmall)) legend(on order(- "Correlation = `corr'") size(vsmall) pos(5) ring(0) region(lwidth(none))) 
                 graph export ../output/figures/`samp1'_`samp2'_`cat'_`loc'_share`suf'.pdf, replace
         }

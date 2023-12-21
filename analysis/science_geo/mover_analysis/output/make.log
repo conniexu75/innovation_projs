@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-11-27 00:28:25
+Makelog started: 2023-12-17 13:13:41
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -39,36 +39,45 @@ Notes:
 
 . set scheme modern
 
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
+
 . pause on
 
 . set seed 8975
 
 . global temp "/export/scratch/cxu_sci_geo/movers"
 
-. global y_name "Effective Paper Publications"
+. global y_name "Productivity"
 
-. global ln_y_name "ln(Effective Paper Publications)"
+. global pat_adj_wt_name "Patent-to-Paper Citations"
+
+. global ln_patent_name "Log Patent-to-Paper Citations"
+
+. global ln_y_name "Log Productivity"
 
 . global x_name "Cluster Size"
 
-. global ln_x_name "ln(Cluster Size)"
+. global ln_x_name "Log Cluster Size"
 
 . global time year 
 
 . program main
-  1.     foreach t in year year_firstlast {
+  1.     foreach t in year_firstlast {
   2.         make_movers, samp(`t')
   3.         qui mover_stats, samp(`t')
   4.         output_tables, samp(`t')
-  5.         event_study, samp(`t') timeframe(20) ymax(0.8) ygap(0.1)
+  5.         event_study, samp(`t') timeframe(20) ymax(1) ygap(0.1)
   6.         event_study, samp(`t') timeframe(10) startyr(1945) endyr(1975) yma
-> x(2)
+> x(1) ygap(0.1)
   7.         event_study, samp(`t') timeframe(10) startyr(1955) endyr(1985) yma
-> x(1.8)
+> x(1) ygap(0.1)
   8.         event_study, samp(`t') timeframe(10) startyr(1965) endyr(1995) yma
-> x(1.6)
-  9.         event_study, samp(`t') timeframe(10) startyr(1975) endyr(2005)
- 10.         event_study, samp(`t') timeframe(10) startyr(1985) endyr(2023)
+> x(1) ygap(0.1)
+  9.         event_study, samp(`t') timeframe(10) startyr(1975) endyr(2005) yma
+> x(1) ygap(0.1)
+ 10.         event_study, samp(`t') timeframe(10) startyr(1985) endyr(2023) yma
+> x(1) ygap(0.1)
  11.     }
  12. end
 
@@ -109,120 +118,119 @@ Notes:
 . program mover_stats
   1.     syntax, samp(str)
   2.     use ${temp}/mover_temp_`samp' , clear  
-  3.     gegen msa = group(msa_comb)
-  4.     gen ln_y = ln(cite_affl_wt)
-  5.     gen ln_x = ln(msa_size)
-  6.     rename cite_affl_wt y
-  7.     rename msa_size x
-  8.     foreach var in x y ln_x ln_y {
-  9.         sum `var' if mover == 0
- 10.         mat nonmover = r(mean) \  r(sd) 
- 11.         sum `var' if mover == 1 
- 12.         mat mover = r(mean)\ r(sd)
- 13.         sum `var' if mover == 1 & origin == 1  
- 14.         mat mover_origin = r(mean)\ r(sd) 
- 15.         sum `var' if mover == 1 & dest == 1  
- 16.         mat mover_dest = r(mean)\ r(sd) 
- 17.         sum `var' if mover == 1  & num_moves == 1
- 18.         mat sing_mover = r(mean)\ r(sd)
- 19.         sum `var' if mover == 1  & num_moves == 1 & origin==1
- 20.         mat sing_mover_origin = r(mean)\ r(sd)
- 21.         sum `var' if mover == 1  & num_moves == 1 & dest==1
- 22.         mat sing_mover_dest = r(mean)\ r(sd)
- 23.         mat row = (nonmover, mover , mover_origin, mover_dest, sing_mover,
->  sing_mover_origin, sing_mover_dest)
- 24.         mat stat_`samp' = nullmat(stat_`samp') \ row 
- 25.     }
- 26.     qui gunique athr_id if mover == 0
- 27.     mat N = r(unique)
- 28.     qui gunique athr_id if mover == 1
- 29.     mat N = N, r(unique), r(unique), r(unique)
- 30.     qui gunique athr_id if mover == 1 & num_moves == 1
+  3.     gen patented = pat_wt > 0
+  4.     gegen msa = group(msa_comb)
+  5.     gen ln_y = ln(impact_affl_wt)
+  6.     gen ln_x = ln(msa_size)
+  7.     gen ln_patent = ln(pat_adj_wt)
+  8.     rename impact_affl_wt y
+  9.     rename msa_size x
+ 10.     foreach var in ln_x ln_y {
+ 11.         sum `var' if mover == 0
+ 12.         mat nonmover = r(mean) \  r(sd) 
+ 13.         sum `var' if mover == 1 
+ 14.         mat mover = r(mean)\ r(sd)
+ 15.         sum `var' if mover == 1 & origin == 1  
+ 16.         mat mover_origin = r(mean)\ r(sd) 
+ 17.         sum `var' if mover == 1 & dest == 1  
+ 18.         mat mover_dest = r(mean)\ r(sd) 
+ 19.         sum `var' if mover == 1  & num_moves == 1
+ 20.         mat sing_mover = r(mean)\ r(sd)
+ 21.         sum `var' if mover == 1  & num_moves == 1 & origin==1
+ 22.         mat sing_mover_origin = r(mean)\ r(sd)
+ 23.         sum `var' if mover == 1  & num_moves == 1 & dest==1
+ 24.         mat sing_mover_dest = r(mean)\ r(sd)
+ 25.         mat row = (nonmover, sing_mover, sing_mover_origin, sing_mover_des
+> t)
+ 26.         mat stat_`samp' = nullmat(stat_`samp') \ row 
+ 27.     }
+ 28.     qui gunique athr_id if mover == 0
+ 29.     mat N = r(unique)
+ 30. *    qui gunique athr_id if mover == 1
+. *    mat N = N, r(unique), r(unique), r(unique)
+.     qui gunique athr_id if mover == 1 & num_moves == 1
  31.     mat N = N, r(unique), r(unique), r(unique)
  32.     mat stat_`samp' = nullmat(stat_`samp') \ N
- 33.     gcollapse (mean) msa_y = y msa_x = x msa_ln_y = ln_y msa_ln_x = ln_x (
-> firstnm) msa, by(msa_comb ${time})
- 34.     save ${temp}/msa_`samp'_collapsed, replace
- 35. 
+ 33.     gen ln_affl_wt = ln(affl_wt)
+ 34.     gcollapse (mean) msa_y = y msa_x = x msa_ln_y = ln_y msa_ln_x = ln_x m
+> sa_ln_patent = ln_patent msa_patent = pat_adj_wt msa_patent_rate = patented m
+> sa_affl_wt = affl_wt msa_ln_affl_wt = ln_affl_wt (firstnm) msa, by(msa_comb $
+> {time})
+ 35.     save ${temp}/msa_`samp'_collapsed, replace
+ 36. 
 .     use if mover == 1 & num_moves == 1 using ${temp}/mover_temp_`samp' , clea
 > r  
- 36.     gen ln_y = ln(cite_affl_wt)
- 37.     gen ln_x = ln(msa_size)
- 38.     hashsort athr_id which_place year
- 39.     rename cite_affl_wt y
- 40.     rename msa_size x
- 41.     foreach var in y x  ln_y ln_x {
- 42.         bys athr_id which_place: egen avg_`var' = mean(`var') 
- 43.     }
- 44.     hashsort athr_id which_place -year
- 45.     gduplicates drop athr_id which_place, force
- 46.     merge m:1 msa_comb year using ${temp}/msa_`samp'_collapsed, assert(2 3
+ 37.     gen ln_y = ln(impact_affl_wt)
+ 38.     gen ln_x = ln(msa_size)
+ 39.     gen ln_patent = ln(pat_adj_wt)
+ 40.     gen ln_affl_wt = ln(affl_wt)
+ 41.     gen patented = pat_wt > 0
+ 42.     hashsort athr_id which_place year
+ 43.     rename impact_affl_wt y
+ 44.     rename msa_size x
+ 45.     foreach var in y x  ln_y ln_x ln_patent ln_affl_wt patented {
+ 46.         bys athr_id which_place: egen avg_`var' = mean(`var') 
+ 47.     }
+ 48.     hashsort athr_id which_place -year
+ 49.     gduplicates drop athr_id which_place, force
+ 50.     merge m:1 msa_comb year using ${temp}/msa_`samp'_collapsed, assert(2 3
 > ) keep(3) nogen
- 47.     hashsort athr_id which_place year
- 48.     foreach var in msa_x msa_y msa_ln_y msa_ln_x avg_x avg_y avg_ln_y avg_
-> ln_x {
- 49.         if strpos("`var'", "msa_") > 0 {
- 50.             local type "Destination-Origin Difference in "
- 51.             local stem = subinstr("`var'", "msa_","",.)
- 52.         }
- 53. 
-.         if strpos("`var'", "avg_") > 0 {
- 54.             local type "Change in "
- 55.             local stem = subinstr("`var'", "avg_","",.)
+ 51.     hashsort athr_id which_place year
+ 52.     foreach var in msa_ln_y msa_ln_x msa_ln_patent avg_ln_y avg_ln_x avg_l
+> n_patent {
+ 53.         if strpos("`var'", "msa_") > 0 {
+ 54.             local type "Destination-Origin Difference in"
+ 55.             local stem = subinstr("`var'", "msa_","",.)
  56.         }
- 57.         by athr_id: gen `var'_diff = `var'[_n+1] - `var'
- 58.         qui sum `var'_diff
- 59.         local N = r(N)
- 60.         local mean : dis %3.2f r(mean)
- 61.         local sd : dis %3.2f r(sd)
- 62.         tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) x
-> title("`type' ${`stem'_name}", size(vsmall)) color(teal) xlab(, labsize(vsmal
-> l)) ylab(, labsize(vsmall)) legend(on order(- "N = `N'" ///
+ 57. 
+.         if strpos("`var'", "avg_") > 0 {
+ 58.             local type "Change in"
+ 59.             local stem = subinstr("`var'", "avg_","",.)
+ 60.         }
+ 61.         by athr_id: gen `var'_diff = `var'[_n+1] - `var'
+ 62.         qui sum `var'_diff
+ 63.         local N = r(N)
+ 64.         local mean : dis %3.2f r(mean)
+ 65.         local sd : dis %3.2f r(sd)
+ 66.         tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) x
+> title("`type' ${`stem'_name}", size(vsmall)) color(edkblue) xlab(, labsize(vs
+> mall)) ylab(, labsize(vsmall)) legend(on order(- "N (Movers) = `N'" ///
 >                                                         "Mean = `mean'" ///
 >                                                         "            (`sd')")
->  pos(1) ring(0))
- 63.         graph export ../output/figures/`var'_diff_`samp'.pdf, replace
- 64.     }
- 65.     reg msa_ln_y_diff msa_ln_x_diff
- 66.     local coef : dis %3.2f _b[msa_ln_x_diff]
- 67.     binscatter2 msa_ln_y_diff msa_ln_x_diff,  xlab(, labsize(vsmall)) ylab
-> (, labsize(vsmall)) xtitle("Destination-Origin Difference in ln(Cluster Size)
-> ", size(vsmall)) ytitle("Destination-Origin Difference in  ln(Effective Paper
->  Publcations)", size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) ring
-> (0))
- 68.     graph export ../output/figures/msa_origin_dest_`samp'.pdf , replace
+>  pos(1) ring(0) size(vsmall) region(fcolo(none)))
+ 67.         graph export ../output/figures/`var'_diff_`samp'.pdf, replace
+ 68.     }
  69. 
-.     reg avg_ln_y_diff msa_ln_x_diff 
- 70.     local coef : dis %3.2f _b[msa_ln_x_diff]
- 71.     binscatter2 avg_ln_y_diff msa_ln_y_diff,  xlab(, labsize(vsmall)) ylab
-> (, labsize(vsmall)) xtitle("Destination-Origin Difference in ln(Custer Size)"
-> , size(vsmall)) ytitle("Change in ln(Effective Paper Publication) after Move"
-> , size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) ring(0))
- 72.     graph export ../output/figures/self_on_msa_`samp'.pdf , replace
- 73. 
 .     reg avg_ln_y_diff msa_ln_y_diff 
- 74.     local coef : dis %3.2f _b[msa_ln_y_diff]
- 75.     binscatter2 avg_ln_y_diff msa_ln_y_diff,  xlab(, labsize(vsmall)) ylab
-> (, labsize(vsmall)) xtitle("Destination-Origin Difference in ln(Effective Pap
-> er Publications)", size(vsmall)) ytitle("Change in ln(Effective Paper Publica
-> tion) after Move", size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) r
-> ing(0))
- 76.     graph export ../output/figures/place_effect_desc_`samp'.pdf , replace
- 77.     
-.     reg avg_ln_y_diff avg_ln_x_diff
- 78.     local coef : dis %3.2f _b[avg_ln_x_diff]
- 79.     binscatter2 avg_ln_y_diff avg_ln_x_diff,  xlab(, labsize(vsmall)) ylab
-> (, labsize(vsmall)) xtitle("Change in ln(Effective Paper Publications) after 
-> Move", size(vsmall)) ytitle("Change in ln(Effective Paper Publication) after 
-> Move", size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) ring(0))
- 80.     graph export ../output/figures/self_bs_`samp'.pdf , replace
- 81.     gcontract athr_id avg_ln_y_diff avg_ln_x_diff msa_ln_y_diff msa_ln_x_d
+ 70.     local N = e(N)
+ 71.     local coef : dis %3.2f _b[msa_ln_y_diff]
+ 72.     binscatter2 avg_ln_y_diff msa_ln_y_diff,  mcolor(gs5) lcolor(ebblue) x
+> lab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Dif
+> ference in Log Productivity", size(vsmall)) ytitle("Change in Log Productivit
+> y after Move", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
+>                                                             "Slope = `coef'")
+>  pos(5) ring(0) size(vsmall) region(fcolor(none)))
+ 73.     graph export ../output/figures/place_effect_desc_`samp'.pdf , replace
+ 74.     
+.     reg avg_ln_patent_diff msa_ln_y_diff 
+ 75.     local N = e(N)
+ 76.     local coef : dis %3.2f _b[msa_ln_y_diff]
+ 77.     binscatter2 avg_ln_patent_diff msa_ln_y_diff,  mcolor(gs5) lcolor(ebbl
+> ue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) ytitle("Change in Log Pap
+> er-to-Patent Citations after Move", size(vsmall)) xtitle("Destination-Origin 
+> Difference in Log Productivity", size(vsmall)) legend(on order(- "N (Movers) 
+> = `N'" ///
+>                                                                              
+> "Slope = `coef'") pos(5) ring(0) size(vsmall) region(fcolor(none)))
+ 78.     graph export ../output/figures/place_productivity_patent_bs_`samp'.pdf
+>  , replace
+ 79.     gcontract athr_id avg_ln_y_diff avg_ln_x_diff msa_ln_y_diff msa_ln_x_d
 > iff year
- 82.     drop _freq
- 83.     drop if mi(avg_ln_y_diff)
- 84.     rename year move_year
- 85.     save ../temp/dest_origin_changes, replace
- 86. end
+ 80.     drop _freq
+ 81.     drop if mi(avg_ln_y_diff)
+ 82.     rename year move_year
+ 83.     save ../temp/dest_origin_changes, replace
+ 84. end
 
 . 
 . program event_study 
@@ -231,8 +239,8 @@ Notes:
   2.     cap mat drop _all  
   3.     use if mover == 1 & num_moves == 1 & inrange(year, `startyr', `endyr')
 >   using ${temp}/mover_temp_`samp' , clear  
-  4.     keep athr_id inst field year msa_comb cite_affl_wt msa_size which_plac
-> e inst_id
+  4.     keep athr_id inst field year msa_comb impact_affl_wt msa_size which_pl
+> ace inst_id
   5.     hashsort athr_id year
   6.     by athr_id: gen move = which_place != which_place[_n+1] &  _n != _N
   7.     gen move_year = year if move == 1
@@ -248,7 +256,7 @@ Notes:
  15.     gegen msa = group(msa_comb)
  16.     rename inst inst_name
  17.     gegen inst = group(inst_id)
- 18.     gen ln_y = ln(cite_affl_wt)
+ 18.     gen ln_y = ln(impact_affl_wt)
  19.     gen ln_x = ln(msa_size)
  20.     forval i = 1/`timeframe' {
  21.         gen lag`i' = 1 if rel == -`i'
@@ -268,8 +276,7 @@ Notes:
  35.         local lags lag`i' `lags'
  36.     }
  37.     reghdfe ln_y `lags' treat `leads' if inrange(rel,-`timeframe',`timefra
-> me'), absorb(year msa field field#year msa#field  inst athr_id) vce(cluster m
-> sa)
+> me'), absorb(year field msa field#year field#msa athr_id) vce(cluster msa)
  38.     local normalize = _b[lag1]
  39.     foreach var in `lags' treat `leads' {
  40.         mat row = _b[`var']-`normalize', _se[`var']
@@ -294,16 +301,16 @@ Notes:
  59.     local post_mean : di %3.2f r(mean)
  60.     local end = `timeframe' - 1
  61.     tw rcap ub lb rel if rel != -1,  lcolor(gs10) || scatter b rel, mcolor
-> (lavender) xlab(-`timeframe'(1)`end', angle(45) labsize(vsmall)) ylab(-`ymax'
-> (`ygap')`ymax', labsize(vsmall)) ///
+> (ebblue) xlab(-`timeframe'(1)`end', angle(45) labsize(vsmall)) ylab(-`ymax'(`
+> ygap')`ymax', labsize(vsmall)) ///
 >       yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(purple%50) lpat
 > tern(dash)) plotregion(margin(none)) ///
->       legend(on order(- "Num. Movers = `num_movers'" ///
+>       legend(on order(- "N (Movers) = `num_movers'" ///
 >                                                         "Pre-period mean = `p
 > re_mean'" ///
 >                                                         "Post-period mean = `
-> post_mean'") pos(5) ring(0) size(vsmall)) xtitle("Relative Year to Move", siz
-> e(vsmall)) ytitle("ln(Effective Paper Publications)", size(vsmall))
+> post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relati
+> ve Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
  62.     graph export ../output/figures/es`startyr'_`endyr'_`samp'.pdf, replace
  63.     restore
  64. end
@@ -322,387 +329,381 @@ Notes:
 . ** 
 . main
 (already sorted)
-(445,714 missing values generated)
-(944,936 real changes made)
+(156,297 missing values generated)
+(363,753 real changes made)
 
   num_moves |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |     47,683       76.66       76.66
-          2 |     10,879       17.49       94.15
-          3 |      2,552        4.10       98.25
-          4 |        732        1.18       99.43
-          5 |        227        0.36       99.80
-          6 |         86        0.14       99.93
-          7 |         23        0.04       99.97
-          8 |         11        0.02       99.99
-          9 |          5        0.01      100.00
-         10 |          1        0.00      100.00
-         12 |          1        0.00      100.00
+          1 |     19,189       78.23       78.23
+          2 |      4,106       16.74       94.97
+          3 |        908        3.70       98.67
+          4 |        231        0.94       99.61
+          5 |         63        0.26       99.87
+          6 |         25        0.10       99.97
+          7 |          6        0.02       99.99
+          8 |          2        0.01      100.00
 ------------+-----------------------------------
-      Total |     62,200      100.00
+      Total |     24,530      100.00
 
       mover |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          0 |    367,914       85.54       85.54
-          1 |     62,200       14.46      100.00
+          0 |    156,632       86.46       86.46
+          1 |     24,530       13.54      100.00
 ------------+-----------------------------------
-      Total |    430,114      100.00
+      Total |    181,162      100.00
 
       mover |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          0 |    624,092       66.05       66.05
-          1 |    320,844       33.95      100.00
+          0 |    240,554       66.13       66.13
+          1 |    123,199       33.87      100.00
 ------------+-----------------------------------
-      Total |    944,936      100.00
-(598,168 real changes made)
-(974 real changes made)
+      Total |    363,753      100.00
+(230,784 real changes made)
+(315 real changes made)
 (0 real changes made)
 (already sorted)
-(836,895 missing values generated)
-(19792 real changes made)
-(26185 real changes made)
-file /export/scratch/cxu_sci_geo/movers/mover_temp_year.dta saved
-(154,619 missing values generated)
-(154619 real changes made)
-N = 47,683; 47,683 balanced groups of size 1
+(323,631 missing values generated)
+(7042 real changes made)
+(9528 real changes made)
+file /export/scratch/cxu_sci_geo/movers/mover_temp_year_firstlast.dta saved
+(60,667 missing values generated)
+(60667 real changes made)
+N = 19,189; 19,189 balanced groups of size 1
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                           201,570  
+    Matched                            79,856  
     -----------------------------------------
-(367 missing values generated)
 (1 missing value generated)
-(194,133 missing values generated)
-(196,711 missing values generated)
-(195,328 missing values generated)
-(194,611 missing values generated)
-(196,915 missing values generated)
-(193,778 missing values generated)
-(198,205 missing values generated)
-(193,614 missing values generated)
-(199,071 missing values generated)
-(193,639 missing values generated)
-(199,677 missing values generated)
-(194,226 missing values generated)
-(200,037 missing values generated)
-(194,690 missing values generated)
-(200,397 missing values generated)
-(195,316 missing values generated)
-(200,644 missing values generated)
-(195,794 missing values generated)
-(200,827 missing values generated)
-(196,418 missing values generated)
-(200,954 missing values generated)
-(196,758 missing values generated)
-(201,039 missing values generated)
-(197,249 missing values generated)
-(201,146 missing values generated)
-(197,494 missing values generated)
-(201,218 missing values generated)
-(197,859 missing values generated)
-(201,259 missing values generated)
-(198,151 missing values generated)
-(201,309 missing values generated)
-(198,364 missing values generated)
-(201,349 missing values generated)
-(198,716 missing values generated)
-(201,408 missing values generated)
-(198,916 missing values generated)
-(201,429 missing values generated)
-(199,199 missing values generated)
-(201,434 missing values generated)
-(199,408 missing values generated)
+(77,488 missing values generated)
+(78,553 missing values generated)
+(77,830 missing values generated)
+(77,675 missing values generated)
+(78,353 missing values generated)
+(77,236 missing values generated)
+(78,676 missing values generated)
+(77,013 missing values generated)
+(78,958 missing values generated)
+(76,864 missing values generated)
+(79,164 missing values generated)
+(76,956 missing values generated)
+(79,281 missing values generated)
+(77,098 missing values generated)
+(79,381 missing values generated)
+(77,284 missing values generated)
+(79,486 missing values generated)
+(77,424 missing values generated)
+(79,556 missing values generated)
+(77,619 missing values generated)
+(79,550 missing values generated)
+(77,807 missing values generated)
+(79,617 missing values generated)
+(77,910 missing values generated)
+(79,661 missing values generated)
+(78,040 missing values generated)
+(79,680 missing values generated)
+(78,218 missing values generated)
+(79,734 missing values generated)
+(78,276 missing values generated)
+(79,738 missing values generated)
+(78,402 missing values generated)
+(79,766 missing values generated)
+(78,613 missing values generated)
+(79,778 missing values generated)
+(78,679 missing values generated)
+(79,804 missing values generated)
+(78,775 missing values generated)
+(79,803 missing values generated)
+(78,893 missing values generated)
 lead1   lead5   lead9   lead13  lead17  lag1    lag5    lag9    lag13   lag17
 lead2   lead6   lead10  lead14  lead18  lag2    lag6    lag10   lag14   lag18
 lead3   lead7   lead11  lead15  lead19  lag3    lag7    lag11   lag15   lag19
 lead4   lead8   lead12  lead16  lead20  lag4    lag8    lag12   lag16   lag20
-(196,711 real changes made)
-(4,885 real changes made, 26 to missing)
-(194,611 real changes made)
-(6,984 real changes made, 26 to missing)
-(193,778 real changes made)
-(7,817 real changes made, 26 to missing)
-(193,614 real changes made)
-(7,981 real changes made, 26 to missing)
-(193,639 real changes made)
-(7,956 real changes made, 26 to missing)
-(194,226 real changes made)
-(7,366 real changes made, 26 to missing)
-(194,690 real changes made)
-(6,905 real changes made, 26 to missing)
-(195,316 real changes made)
-(6,279 real changes made, 26 to missing)
-(195,794 real changes made)
-(5,802 real changes made, 26 to missing)
-(196,418 real changes made)
-(5,177 real changes made, 26 to missing)
-(196,758 real changes made)
-(4,838 real changes made, 26 to missing)
-(197,249 real changes made)
-(4,347 real changes made, 26 to missing)
-(197,494 real changes made)
-(4,101 real changes made, 26 to missing)
-(197,859 real changes made)
-(3,737 real changes made, 26 to missing)
-(198,151 real changes made)
-(3,445 real changes made, 26 to missing)
-(198,364 real changes made)
-(3,232 real changes made, 26 to missing)
-(198,716 real changes made)
-(2,880 real changes made, 26 to missing)
-(198,916 real changes made)
-(2,680 real changes made, 26 to missing)
-(199,199 real changes made)
-(2,397 real changes made, 26 to missing)
-(199,408 real changes made)
-(2,188 real changes made, 26 to missing)
-(194,133 real changes made)
-(7,461 real changes made, 26 to missing)
-(195,328 real changes made)
-(6,266 real changes made, 26 to missing)
-(196,915 real changes made)
-(4,678 real changes made, 26 to missing)
-(198,205 real changes made)
-(3,390 real changes made, 26 to missing)
-(199,071 real changes made)
-(2,525 real changes made, 26 to missing)
-(199,677 real changes made)
-(1,919 real changes made, 26 to missing)
-(200,037 real changes made)
-(1,558 real changes made, 26 to missing)
-(200,397 real changes made)
-(1,199 real changes made, 26 to missing)
-(200,644 real changes made)
-(952 real changes made, 26 to missing)
-(200,827 real changes made)
-(769 real changes made, 26 to missing)
-(200,954 real changes made)
-(642 real changes made, 26 to missing)
-(201,039 real changes made)
-(557 real changes made, 26 to missing)
-(201,146 real changes made)
-(450 real changes made, 26 to missing)
-(201,218 real changes made)
-(378 real changes made, 26 to missing)
-(201,259 real changes made)
-(337 real changes made, 26 to missing)
-(201,309 real changes made)
-(287 real changes made, 26 to missing)
-(201,349 real changes made)
-(247 real changes made, 26 to missing)
-(201,408 real changes made)
-(188 real changes made, 26 to missing)
-(201,429 real changes made)
-(167 real changes made, 26 to missing)
-(201,434 real changes made)
-(162 real changes made, 26 to missing)
-(154,185 missing values generated)
-(154,185 real changes made)
-(dropped 4613 singleton observations)
-(MWFE estimator converged in 93 iterations)
+(78,553 real changes made)
+(1,303 real changes made)
+(77,675 real changes made)
+(2,181 real changes made)
+(77,236 real changes made)
+(2,620 real changes made)
+(77,013 real changes made)
+(2,843 real changes made)
+(76,864 real changes made)
+(2,992 real changes made)
+(76,956 real changes made)
+(2,900 real changes made)
+(77,098 real changes made)
+(2,758 real changes made)
+(77,284 real changes made)
+(2,572 real changes made)
+(77,424 real changes made)
+(2,432 real changes made)
+(77,619 real changes made)
+(2,237 real changes made)
+(77,807 real changes made)
+(2,049 real changes made)
+(77,910 real changes made)
+(1,946 real changes made)
+(78,040 real changes made)
+(1,816 real changes made)
+(78,218 real changes made)
+(1,638 real changes made)
+(78,276 real changes made)
+(1,580 real changes made)
+(78,402 real changes made)
+(1,454 real changes made)
+(78,613 real changes made)
+(1,243 real changes made)
+(78,679 real changes made)
+(1,177 real changes made)
+(78,775 real changes made)
+(1,081 real changes made)
+(78,893 real changes made)
+(963 real changes made)
+(77,488 real changes made)
+(2,368 real changes made)
+(77,830 real changes made)
+(2,026 real changes made)
+(78,353 real changes made)
+(1,503 real changes made)
+(78,676 real changes made)
+(1,180 real changes made)
+(78,958 real changes made)
+(898 real changes made)
+(79,164 real changes made)
+(692 real changes made)
+(79,281 real changes made)
+(575 real changes made)
+(79,381 real changes made)
+(475 real changes made)
+(79,486 real changes made)
+(370 real changes made)
+(79,556 real changes made)
+(300 real changes made)
+(79,550 real changes made)
+(306 real changes made)
+(79,617 real changes made)
+(239 real changes made)
+(79,661 real changes made)
+(195 real changes made)
+(79,680 real changes made)
+(176 real changes made)
+(79,734 real changes made)
+(122 real changes made)
+(79,738 real changes made)
+(118 real changes made)
+(79,766 real changes made)
+(90 real changes made)
+(79,778 real changes made)
+(78 real changes made)
+(79,804 real changes made)
+(52 real changes made)
+(79,803 real changes made)
+(53 real changes made)
+(60,667 missing values generated)
+(60,667 real changes made)
+(dropped 1210 singleton observations)
+(MWFE estimator converged in 21 iterations)
 note: lead20 omitted because of collinearity
 
-HDFE Linear regression                            Number of obs   =    176,605
-Absorbing 7 HDFE groups                           F(  40,    224) =      14.16
+HDFE Linear regression                            Number of obs   =     69,580
+Absorbing 6 HDFE groups                           F(  40,    196) =      20.43
 Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.5099
-                                                  Adj R-squared   =     0.3263
-                                                  Within R-sq.    =     0.0021
-Number of clusters (msa)     =        225         Root MSE        =     1.0458
+                                                  R-squared       =     0.6615
+                                                  Adj R-squared   =     0.5307
+                                                  Within R-sq.    =     0.0094
+Number of clusters (msa)     =        197         Root MSE        =     1.5134
 
-                                  (Std. err. adjusted for 225 clusters in msa)
+                                  (Std. err. adjusted for 197 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-       lag20 |   .1131077   .2909016     0.39   0.698    -.4601462    .6863616
-       lag19 |  -.1037491   .2406984    -0.43   0.667     -.578072    .3705738
-       lag18 |   .0695468    .206928     0.34   0.737    -.3382278    .4773215
-       lag17 |  -.1799746   .1642481    -1.10   0.274    -.5036436    .1436945
-       lag16 |  -.0070676   .1738104    -0.04   0.968    -.3495802     .335445
-       lag15 |   -.158236   .1199424    -1.32   0.188    -.3945958    .0781238
-       lag14 |  -.0161876   .1396613    -0.12   0.908    -.2914057    .2590304
-       lag13 |  -.1635185   .1424182    -1.15   0.252    -.4441694    .1171324
-       lag12 |  -.2137935   .1361033    -1.57   0.118    -.4820003    .0544132
-       lag11 |  -.1986272   .1207008    -1.65   0.101    -.4364816    .0392271
-       lag10 |  -.1941526   .1101486    -1.76   0.079    -.4112127    .0229075
-        lag9 |  -.1749806   .1068053    -1.64   0.103    -.3854523     .035491
-        lag8 |  -.1493543   .0898996    -1.66   0.098    -.3265115    .0278029
-        lag7 |  -.2454033    .081819    -3.00   0.003    -.4066367   -.0841698
-        lag6 |  -.1561757   .0883867    -1.77   0.079    -.3303516    .0180002
-        lag5 |  -.2183199   .0810215    -2.69   0.008    -.3779817    -.058658
-        lag4 |  -.2017531   .0667822    -3.02   0.003    -.3333549   -.0701513
-        lag3 |  -.2902039   .0565606    -5.13   0.000    -.4016628    -.178745
-        lag2 |  -.2348238   .0628393    -3.74   0.000    -.3586555   -.1109921
-        lag1 |  -.2328555   .0514399    -4.53   0.000    -.3342236   -.1314874
-       treat |  -.2751513   .0722633    -3.81   0.000    -.4175542   -.1327485
-       lead1 |   -.110172   .0848306    -1.30   0.195    -.2773402    .0569961
-       lead2 |  -.0953781   .0691707    -1.38   0.169    -.2316867    .0409306
-       lead3 |  -.1168556   .0647946    -1.80   0.073    -.2445406    .0108293
-       lead4 |   -.067324    .063572    -1.06   0.291    -.1925997    .0579518
-       lead5 |  -.0769824   .0691102    -1.11   0.267    -.2131716    .0592069
-       lead6 |  -.0767289   .0604196    -1.27   0.205    -.1957924    .0423347
-       lead7 |   -.052118   .0556917    -0.94   0.350    -.1618648    .0576288
-       lead8 |  -.0661289   .0570289    -1.16   0.247    -.1785107    .0462529
-       lead9 |   -.068925   .0536532    -1.28   0.200    -.1746546    .0368047
-      lead10 |  -.0800777   .0466246    -1.72   0.087    -.1719567    .0118012
-      lead11 |  -.0359982   .0503816    -0.71   0.476    -.1352808    .0632844
-      lead12 |   .0075779   .0459145     0.17   0.869    -.0829017    .0980575
-      lead13 |  -.0290033    .044733    -0.65   0.517    -.1171547    .0591481
-      lead14 |  -.0342262   .0433765    -0.79   0.431    -.1197044     .051252
-      lead15 |  -.0244459   .0584473    -0.42   0.676    -.1396228    .0907309
-      lead16 |   .0053197   .0454497     0.12   0.907     -.084244    .0948834
-      lead17 |  -.0584163   .0492384    -1.19   0.237    -.1554459    .0386134
-      lead18 |   -.022144   .0569596    -0.39   0.698    -.1343893    .0901013
-      lead19 |  -.0871202   .0515473    -1.69   0.092    -.1886998    .0144595
+       lag20 |   -.432407    .247815    -1.74   0.083    -.9211331    .0563191
+       lag19 |  -.5121541   .2110407    -2.43   0.016    -.9283562    -.095952
+       lag18 |  -.7143281   .3126761    -2.28   0.023    -1.330969   -.0976867
+       lag17 |  -.3366285   .1797269    -1.87   0.063    -.6910754    .0178184
+       lag16 |  -.8423236   .1892804    -4.45   0.000    -1.215611   -.4690359
+       lag15 |  -.4412801   .1340567    -3.29   0.001    -.7056589   -.1769013
+       lag14 |  -.4360812   .1454625    -3.00   0.003    -.7229538   -.1492086
+       lag13 |   -.573895   .1491731    -3.85   0.000    -.8680854   -.2797046
+       lag12 |    -.54586   .1243111    -4.39   0.000    -.7910191   -.3007009
+       lag11 |  -.4789711   .1160028    -4.13   0.000     -.707745   -.2501971
+       lag10 |  -.4085066   .1169192    -3.49   0.001    -.6390878   -.1779254
+        lag9 |  -.3855523   .1225741    -3.15   0.002    -.6272857   -.1438188
+        lag8 |  -.3368537   .1074492    -3.14   0.002    -.5487587   -.1249487
+        lag7 |   -.294583   .0960158    -3.07   0.002    -.4839396   -.1052264
+        lag6 |  -.3616968   .0760774    -4.75   0.000    -.5117322   -.2116613
+        lag5 |  -.3984318    .080597    -4.94   0.000    -.5573804   -.2394832
+        lag4 |  -.4740299   .0956079    -4.96   0.000    -.6625822   -.2854776
+        lag3 |  -.3791695   .0575184    -6.59   0.000    -.4926038   -.2657351
+        lag2 |  -.3988331   .0555078    -7.19   0.000    -.5083022   -.2893639
+        lag1 |  -.3894925   .0622332    -6.26   0.000    -.5122251   -.2667599
+       treat |  -.4862276   .0529359    -9.19   0.000    -.5906247   -.3818304
+       lead1 |  -.1875289   .0783781    -2.39   0.018    -.3421017   -.0329562
+       lead2 |  -.2495107   .0667249    -3.74   0.000    -.3811017   -.1179197
+       lead3 |    -.19762   .0674719    -2.93   0.004    -.3306842   -.0645558
+       lead4 |  -.1826537   .0624777    -2.92   0.004    -.3058685   -.0594389
+       lead5 |  -.1908725   .0659233    -2.90   0.004    -.3208826   -.0608624
+       lead6 |  -.1495879   .0662851    -2.26   0.025    -.2803114   -.0188643
+       lead7 |  -.1601192   .0599179    -2.67   0.008    -.2782858   -.0419526
+       lead8 |  -.1497129   .0647499    -2.31   0.022    -.2774088   -.0220169
+       lead9 |  -.0817663   .0606594    -1.35   0.179    -.2013951    .0378626
+      lead10 |  -.0514658   .0652247    -0.79   0.431    -.1800982    .0771665
+      lead11 |  -.0488076   .0580532    -0.84   0.402    -.1632968    .0656816
+      lead12 |  -.0410713   .0673067    -0.61   0.542    -.1738095     .091667
+      lead13 |  -.0875016    .062936    -1.39   0.166    -.2116203    .0366171
+      lead14 |  -.0079076   .0569974    -0.14   0.890    -.1203146    .1044993
+      lead15 |   .0059334     .06475     0.09   0.927    -.1217628    .1336296
+      lead16 |  -.0285311   .0648251    -0.44   0.660    -.1563752    .0993131
+      lead17 |  -.0159724   .0628813    -0.25   0.800    -.1399833    .1080385
+      lead18 |   .0407343   .0642307     0.63   0.527    -.0859378    .1674064
+      lead19 |   .0185641   .0709287     0.26   0.794    -.1213174    .1584456
       lead20 |          0  (omitted)
-       _cons |  -2.027761   .0116364  -174.26   0.000    -2.050691    -2.00483
+       _cons |  -2.323209   .0225736  -102.92   0.000    -2.367727    -2.27869
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
 ------------------------------------------------------+
   Absorbed FE | Categories  - Redundant  = Num. Coefs |
 --------------+---------------------------------------|
-         year |        78           0          78     |
-          msa |       225         225           0    *|
+         year |        77           0          77     |
         field |         5           1           4     |
-   field#year |       348          78         270    ?|
-    msa#field |       854         854           0    *|
-         inst |      2248           1        2247    ?|
-      athr_id |     44420          23       44397    ?|
+          msa |       197         197           0    *|
+   field#year |       344          77         267    ?|
+    field#msa |       698         698           0    *|
+      athr_id |     18119           1       18118    ?|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(201,529 observations deleted)
+(79,815 observations deleted)
 (40 missing values generated)
 (40 real changes made)
 (1 observation deleted)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |         19    .0895046    .1081553  -.0573484   .3459632
+           b |         19   -.0711173    .1345411  -.4528311   .0949095
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |         19     .175532    .0353863   .1159999   .2404334
+           b |         19    .2965768     .087209   .1399818   .4302268
 (note:  named style none not found in class margin, default attributes used)
-file ../output/figures/es1945_2023_year.pdf saved as PDF format
-(8,932 missing values generated)
-(4874 real changes made)
-(4,058 missing values generated)
-N = 1,814; 1,814 balanced groups of size 1
+file ../output/figures/es1945_2023_year_firstlast.pdf saved as PDF format
+(6,870 missing values generated)
+(4100 real changes made)
+(2,770 missing values generated)
+N = 1,534; 1,534 balanced groups of size 1
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                             6,648  
+    Matched                             5,634  
     -----------------------------------------
-(19 missing values generated)
 (1 missing value generated)
-(6,328 missing values generated)
-(6,393 missing values generated)
-(6,421 missing values generated)
-(6,271 missing values generated)
-(6,466 missing values generated)
-(6,257 missing values generated)
-(6,515 missing values generated)
-(6,249 missing values generated)
-(6,557 missing values generated)
-(6,265 missing values generated)
-(6,572 missing values generated)
-(6,322 missing values generated)
-(6,588 missing values generated)
-(6,380 missing values generated)
-(6,601 missing values generated)
-(6,436 missing values generated)
-(6,610 missing values generated)
-(6,462 missing values generated)
-(6,616 missing values generated)
-(6,508 missing values generated)
+(5,386 missing values generated)
+(5,445 missing values generated)
+(5,441 missing values generated)
+(5,336 missing values generated)
+(5,500 missing values generated)
+(5,304 missing values generated)
+(5,521 missing values generated)
+(5,282 missing values generated)
+(5,557 missing values generated)
+(5,306 missing values generated)
+(5,578 missing values generated)
+(5,350 missing values generated)
+(5,587 missing values generated)
+(5,391 missing values generated)
+(5,593 missing values generated)
+(5,454 missing values generated)
+(5,606 missing values generated)
+(5,460 missing values generated)
+(5,607 missing values generated)
+(5,518 missing values generated)
 lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
 lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(6,393 real changes made)
-(264 real changes made, 9 to missing)
-(6,271 real changes made)
-(386 real changes made, 9 to missing)
-(6,257 real changes made)
-(400 real changes made, 9 to missing)
-(6,249 real changes made)
-(408 real changes made, 9 to missing)
-(6,265 real changes made)
-(391 real changes made, 9 to missing)
-(6,322 real changes made)
-(334 real changes made, 9 to missing)
-(6,380 real changes made)
-(277 real changes made, 9 to missing)
-(6,436 real changes made)
-(221 real changes made, 9 to missing)
-(6,462 real changes made)
-(195 real changes made, 9 to missing)
-(6,508 real changes made)
-(148 real changes made, 9 to missing)
-(6,328 real changes made)
-(329 real changes made, 9 to missing)
-(6,421 real changes made)
-(235 real changes made, 9 to missing)
-(6,466 real changes made)
-(190 real changes made, 9 to missing)
-(6,515 real changes made)
-(141 real changes made, 9 to missing)
-(6,557 real changes made)
-(100 real changes made, 9 to missing)
-(6,572 real changes made)
-(85 real changes made, 9 to missing)
-(6,588 real changes made)
-(68 real changes made, 9 to missing)
-(6,601 real changes made)
-(56 real changes made, 9 to missing)
-(6,610 real changes made)
-(47 real changes made, 9 to missing)
-(6,616 real changes made)
-(41 real changes made, 9 to missing)
-(4,851 missing values generated)
-(4,851 real changes made)
-(dropped 554 singleton observations)
-(MWFE estimator converged in 131 iterations)
+(5,445 real changes made)
+(189 real changes made)
+(5,336 real changes made)
+(298 real changes made)
+(5,304 real changes made)
+(330 real changes made)
+(5,282 real changes made)
+(352 real changes made)
+(5,306 real changes made)
+(328 real changes made)
+(5,350 real changes made)
+(284 real changes made)
+(5,391 real changes made)
+(243 real changes made)
+(5,454 real changes made)
+(180 real changes made)
+(5,460 real changes made)
+(174 real changes made)
+(5,518 real changes made)
+(116 real changes made)
+(5,386 real changes made)
+(248 real changes made)
+(5,441 real changes made)
+(193 real changes made)
+(5,500 real changes made)
+(134 real changes made)
+(5,521 real changes made)
+(113 real changes made)
+(5,557 real changes made)
+(77 real changes made)
+(5,578 real changes made)
+(56 real changes made)
+(5,587 real changes made)
+(47 real changes made)
+(5,593 real changes made)
+(41 real changes made)
+(5,606 real changes made)
+(28 real changes made)
+(5,607 real changes made)
+(27 real changes made)
+(4,100 missing values generated)
+(4,100 real changes made)
+(dropped 288 singleton observations)
+(MWFE estimator converged in 24 iterations)
 note: lead10 omitted because of collinearity
 
-HDFE Linear regression                            Number of obs   =      5,366
-Absorbing 7 HDFE groups                           F(  20,    103) =       9.86
+HDFE Linear regression                            Number of obs   =      4,704
+Absorbing 6 HDFE groups                           F(  20,    104) =       3.25
 Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.5899
-                                                  Adj R-squared   =     0.2918
-                                                  Within R-sq.    =     0.0160
-Number of clusters (msa)     =        104         Root MSE        =     1.1258
+                                                  R-squared       =     0.7231
+                                                  Adj R-squared   =     0.5525
+                                                  Within R-sq.    =     0.0087
+Number of clusters (msa)     =        105         Root MSE        =     1.2268
 
-                                  (Std. err. adjusted for 104 clusters in msa)
+                                  (Std. err. adjusted for 105 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-       lag10 |  -.5667823   .2521638    -2.25   0.027     -1.06689   -.0666748
-        lag9 |  -.3559811   .3007224    -1.18   0.239    -.9523931    .2404309
-        lag8 |  -.3883258   .3420799    -1.14   0.259    -1.066761     .290109
-        lag7 |  -.2319703   .2714973    -0.85   0.395    -.7704212    .3064806
-        lag6 |  -.2627768   .2964119    -0.89   0.377    -.8506399    .3250864
-        lag5 |  -.0651591    .280331    -0.23   0.817    -.6211296    .4908115
-        lag4 |   .0306695    .199455     0.15   0.878    -.3649024    .4262414
-        lag3 |   .0132444   .2210854     0.06   0.952    -.4252264    .4517151
-        lag2 |   .0950875   .1554881     0.61   0.542    -.2132866    .4034616
-        lag1 |  -.2626332   .1601412    -1.64   0.104    -.5802355    .0549692
-       treat |  -.2212723   .1439266    -1.54   0.127    -.5067168    .0641722
-       lead1 |   .1181946   .1740564     0.68   0.499    -.2270053    .4633944
-       lead2 |   .2305846   .1660617     1.39   0.168    -.0987597    .5599288
-       lead3 |   .0200866   .1705359     0.12   0.906    -.3181312    .3583045
-       lead4 |   .1722492   .1872715     0.92   0.360    -.1991596     .543658
-       lead5 |   .1413115   .1469712     0.96   0.339    -.1501712    .4327942
-       lead6 |   .0526811   .1689806     0.31   0.756    -.2824519    .3878142
-       lead7 |   .1124751   .1510952     0.74   0.458    -.1871865    .4121367
-       lead8 |   .1028455   .1572005     0.65   0.514    -.2089247    .4146156
-       lead9 |   .0443662   .1485642     0.30   0.766    -.2502758    .3390082
+       lag10 |  -.2472426   .3811443    -0.65   0.518    -1.003066    .5085809
+        lag9 |  -.8908346   .3714494    -2.40   0.018    -1.627433   -.1542365
+        lag8 |   .0542851   .3116876     0.17   0.862     -.563803    .6723732
+        lag7 |  -.2412756   .3435879    -0.70   0.484    -.9226232    .4400721
+        lag6 |  -.0613665   .2237587    -0.27   0.784    -.5050884    .3823553
+        lag5 |  -.3242733    .302899    -1.07   0.287    -.9249334    .2763869
+        lag4 |  -.3468894   .1948579    -1.78   0.078    -.7332998    .0395211
+        lag3 |  -.2414571   .2262651    -1.07   0.288    -.6901493    .2072351
+        lag2 |  -.2499674   .1581796    -1.58   0.117    -.5636434    .0637087
+        lag1 |  -.2390236    .154298    -1.55   0.124    -.5450024    .0669551
+       treat |  -.2111754   .1375921    -1.53   0.128    -.4840256    .0616748
+       lead1 |  -.1223445    .154605    -0.79   0.431    -.4289321    .1842431
+       lead2 |  -.1204132   .1282973    -0.94   0.350    -.3748316    .1340053
+       lead3 |  -.1462562   .1326053    -1.10   0.273    -.4092176    .1167051
+       lead4 |  -.1143951   .1601224    -0.71   0.477    -.4319238    .2031336
+       lead5 |  -.0127587   .1553284    -0.08   0.935    -.3207808    .2952633
+       lead6 |  -.0109956   .1504317    -0.07   0.942    -.3093073     .287316
+       lead7 |  -.0720696   .1456205    -0.49   0.622    -.3608406    .2167014
+       lead8 |   .0584265   .1717967     0.34   0.734    -.2822529    .3991059
+       lead9 |   .0301636    .200807     0.15   0.881    -.3680442    .4283714
       lead10 |          0  (omitted)
-       _cons |  -2.839202   .0730505   -38.87   0.000     -2.98408   -2.694323
+       _cons |  -1.535222   .0734502   -20.90   0.000    -1.680877   -1.389568
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -710,143 +711,141 @@ Absorbed degrees of freedom:
   Absorbed FE | Categories  - Redundant  = Num. Coefs |
 --------------+---------------------------------------|
          year |        30           0          30     |
-          msa |       104         104           0    *|
         field |         5           1           4     |
-   field#year |        94          30          64    ?|
-    msa#field |       211         211           0    *|
-         inst |       305           1         304    ?|
-      athr_id |      1533          11        1522    ?|
+          msa |       105         105           0    *|
+   field#year |        90          30          60    ?|
+    field#msa |       202         202           0    *|
+      athr_id |      1374           1        1373    ?|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(6,627 observations deleted)
+(5,613 observations deleted)
 (20 missing values generated)
 (20 real changes made)
 (1 observation deleted)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9    .0701894    .2243645  -.3041491   .3577207
+           b |          9    -.044201    .2607602   -.651811   .2933088
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9    .3731659    .0663283   .2827198   .4932177
+           b |          9    .1822856    .0748106   .0927674   .2974502
 (note:  named style none not found in class margin, default attributes used)
-file ../output/figures/es1945_1975_year.pdf saved as PDF format
-(18,790 missing values generated)
-(10737 real changes made)
-(8,053 missing values generated)
-N = 3,655; 3,655 balanced groups of size 1
+file ../output/figures/es1945_1975_year_firstlast.pdf saved as PDF format
+(13,676 missing values generated)
+(8735 real changes made)
+(4,941 missing values generated)
+N = 2,995; 2,995 balanced groups of size 1
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                            14,348  
+    Matched                            11,730  
     -----------------------------------------
-(17 missing values generated)
-(13,718 missing values generated)
-(13,865 missing values generated)
-(13,897 missing values generated)
-(13,683 missing values generated)
-(14,001 missing values generated)
-(13,667 missing values generated)
-(14,087 missing values generated)
-(13,625 missing values generated)
-(14,160 missing values generated)
-(13,648 missing values generated)
-(14,209 missing values generated)
-(13,723 missing values generated)
-(14,232 missing values generated)
-(13,778 missing values generated)
-(14,257 missing values generated)
-(13,859 missing values generated)
-(14,285 missing values generated)
-(13,879 missing values generated)
-(14,296 missing values generated)
-(13,939 missing values generated)
+(11,252 missing values generated)
+(11,388 missing values generated)
+(11,351 missing values generated)
+(11,218 missing values generated)
+(11,460 missing values generated)
+(11,174 missing values generated)
+(11,514 missing values generated)
+(11,151 missing values generated)
+(11,579 missing values generated)
+(11,169 missing values generated)
+(11,618 missing values generated)
+(11,201 missing values generated)
+(11,643 missing values generated)
+(11,239 missing values generated)
+(11,655 missing values generated)
+(11,310 missing values generated)
+(11,683 missing values generated)
+(11,332 missing values generated)
+(11,683 missing values generated)
+(11,381 missing values generated)
 lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
 lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(13,865 real changes made)
-(492 real changes made, 9 to missing)
-(13,683 real changes made)
-(674 real changes made, 9 to missing)
-(13,667 real changes made)
-(690 real changes made, 9 to missing)
-(13,625 real changes made)
-(732 real changes made, 9 to missing)
-(13,648 real changes made)
-(708 real changes made, 9 to missing)
-(13,723 real changes made)
-(633 real changes made, 9 to missing)
-(13,778 real changes made)
-(579 real changes made, 9 to missing)
-(13,859 real changes made)
-(498 real changes made, 9 to missing)
-(13,879 real changes made)
-(478 real changes made, 9 to missing)
-(13,939 real changes made)
-(417 real changes made, 9 to missing)
-(13,718 real changes made)
-(639 real changes made, 9 to missing)
-(13,897 real changes made)
-(459 real changes made, 9 to missing)
-(14,001 real changes made)
-(355 real changes made, 9 to missing)
-(14,087 real changes made)
-(269 real changes made, 9 to missing)
-(14,160 real changes made)
-(197 real changes made, 9 to missing)
-(14,209 real changes made)
-(148 real changes made, 9 to missing)
-(14,232 real changes made)
-(124 real changes made, 9 to missing)
-(14,257 real changes made)
-(100 real changes made, 9 to missing)
-(14,285 real changes made)
-(72 real changes made, 9 to missing)
-(14,296 real changes made)
-(61 real changes made, 9 to missing)
-(10,711 missing values generated)
-(10,711 real changes made)
-(dropped 806 singleton observations)
-(MWFE estimator converged in 144 iterations)
+(11,388 real changes made)
+(342 real changes made)
+(11,218 real changes made)
+(512 real changes made)
+(11,174 real changes made)
+(556 real changes made)
+(11,151 real changes made)
+(579 real changes made)
+(11,169 real changes made)
+(561 real changes made)
+(11,201 real changes made)
+(529 real changes made)
+(11,239 real changes made)
+(491 real changes made)
+(11,310 real changes made)
+(420 real changes made)
+(11,332 real changes made)
+(398 real changes made)
+(11,381 real changes made)
+(349 real changes made)
+(11,252 real changes made)
+(478 real changes made)
+(11,351 real changes made)
+(379 real changes made)
+(11,460 real changes made)
+(270 real changes made)
+(11,514 real changes made)
+(216 real changes made)
+(11,579 real changes made)
+(151 real changes made)
+(11,618 real changes made)
+(112 real changes made)
+(11,643 real changes made)
+(87 real changes made)
+(11,655 real changes made)
+(75 real changes made)
+(11,683 real changes made)
+(47 real changes made)
+(11,683 real changes made)
+(47 real changes made)
+(8,735 missing values generated)
+(8,735 real changes made)
+(dropped 441 singleton observations)
+(MWFE estimator converged in 22 iterations)
 note: lead10 omitted because of collinearity
 
-HDFE Linear regression                            Number of obs   =     10,963
-Absorbing 7 HDFE groups                           F(  20,    124) =       4.92
-Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.5731
-                                                  Adj R-squared   =     0.3106
-                                                  Within R-sq.    =     0.0112
-Number of clusters (msa)     =        125         Root MSE        =     1.0569
+HDFE Linear regression                            Number of obs   =      9,153
+Absorbing 6 HDFE groups                           F(  20,    124) =       2.34
+Statistics robust to heteroskedasticity           Prob > F        =     0.0024
+                                                  R-squared       =     0.7278
+                                                  Adj R-squared   =     0.5772
+                                                  Within R-sq.    =     0.0051
+Number of clusters (msa)     =        125         Root MSE        =     1.2653
 
                                   (Std. err. adjusted for 125 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-       lag10 |  -.3415217   .2920589    -1.17   0.245     -.919588    .2365446
-        lag9 |  -.6111306   .2788959    -2.19   0.030    -1.163144   -.0591176
-        lag8 |  -.4645576   .2494758    -1.86   0.065    -.9583401    .0292248
-        lag7 |   .0424938   .1651126     0.26   0.797    -.2843103     .369298
-        lag6 |  -.2695442    .225471    -1.20   0.234    -.7158145    .1767262
-        lag5 |  -.1217145   .2176112    -0.56   0.577     -.552428     .308999
-        lag4 |  -.0287446   .1100594    -0.26   0.794     -.246583    .1890937
-        lag3 |  -.1415025   .1408849    -1.00   0.317    -.4203531    .1373481
-        lag2 |  -.0070722   .1003998    -0.07   0.944    -.2057915    .1916472
-        lag1 |  -.2437709    .091187    -2.67   0.009    -.4242555   -.0632863
-       treat |  -.2941115   .0930582    -3.16   0.002    -.4782997   -.1099233
-       lead1 |   .0116459   .1204052     0.10   0.923    -.2266698    .2499616
-       lead2 |   .1438864   .1588877     0.91   0.367    -.1705968    .4583696
-       lead3 |  -.0367205   .0934049    -0.39   0.695    -.2215949    .1481539
-       lead4 |   .0858913   .1221711     0.70   0.483    -.1559196    .3277021
-       lead5 |   .0222485   .0958927     0.23   0.817      -.16755    .2120469
-       lead6 |  -.1149374   .0880616    -1.31   0.194    -.2892359    .0593611
-       lead7 |     .05641   .1005095     0.56   0.576    -.1425264    .2553464
-       lead8 |   .0322178   .1068796     0.30   0.764    -.1793269    .2437624
-       lead9 |  -.0251852   .0871676    -0.29   0.773    -.1977144    .1473439
+       lag10 |  -.2259175   .2064789    -1.09   0.276     -.634597    .1827621
+        lag9 |  -.5792552   .2977271    -1.95   0.054    -1.168541    .0100301
+        lag8 |  -.1480966   .2025465    -0.73   0.466    -.5489928    .2527997
+        lag7 |  -.3173236   .2304887    -1.38   0.171    -.7735254    .1388781
+        lag6 |  -.2764173   .1218307    -2.27   0.025    -.5175544   -.0352802
+        lag5 |  -.3633228   .1293393    -2.81   0.006    -.6193214   -.1073241
+        lag4 |  -.4288966   .1277607    -3.36   0.001    -.6817708   -.1760224
+        lag3 |  -.1765554   .0961198    -1.84   0.069    -.3668034    .0136927
+        lag2 |  -.1774708   .1218939    -1.46   0.148    -.4187329    .0637913
+        lag1 |  -.3323186   .0973827    -3.41   0.001    -.5250662    -.139571
+       treat |  -.2343033   .0951699    -2.46   0.015    -.4226712   -.0459355
+       lead1 |  -.0837506   .1241014    -0.67   0.501    -.3293821    .1618808
+       lead2 |   -.165235    .089723    -1.84   0.068    -.3428218    .0123519
+       lead3 |  -.1402857   .0946933    -1.48   0.141    -.3277102    .0471387
+       lead4 |  -.1421315   .1001121    -1.42   0.158    -.3402814    .0560184
+       lead5 |  -.1327882   .1067387    -1.24   0.216     -.344054    .0784777
+       lead6 |  -.0698253     .10162    -0.69   0.493    -.2709598    .1313092
+       lead7 |  -.1768834   .1041444    -1.70   0.092    -.3830143    .0292475
+       lead8 |  -.0402876   .1001665    -0.40   0.688    -.2385451      .15797
+       lead9 |  -.0487913   .1277283    -0.38   0.703    -.3016014    .2040189
       lead10 |          0  (omitted)
-       _cons |  -2.523986   .0332323   -75.95   0.000    -2.589763    -2.45821
+       _cons |  -1.804414   .0464446   -38.85   0.000     -1.89634   -1.712487
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -854,1129 +853,141 @@ Absorbed degrees of freedom:
   Absorbed FE | Categories  - Redundant  = Num. Coefs |
 --------------+---------------------------------------|
          year |        31           0          31     |
+        field |         5           1           4     |
           msa |       125         125           0    *|
-        field |         5           1           4     |
-   field#year |       128          31          97    ?|
-    msa#field |       343         343           0    *|
-         inst |       437           1         436    ?|
-      athr_id |      3130          10        3120    ?|
+   field#year |       127          31          96    ?|
+    field#msa |       322         322           0    *|
+      athr_id |      2664           1        2663    ?|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(14,327 observations deleted)
+(11,709 observations deleted)
 (20 missing values generated)
 (20 real changes made)
 (1 observation deleted)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9    .0278493     .222628  -.3673597   .2862647
+           b |          9     .033068    .1406563  -.2469366    .184222
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9    .2632661     .074753   .1288335   .3876573
-(note:  named style none not found in class margin, default attributes used)
-file ../output/figures/es1955_1985_year.pdf saved as PDF format
-(36,161 missing values generated)
-(20142 real changes made)
-(16,019 missing values generated)
-N = 6,720; 6,720 balanced groups of size 1
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                            26,832  
-    -----------------------------------------
-(9 missing values generated)
-(25,692 missing values generated)
-(25,871 missing values generated)
-(25,997 missing values generated)
-(25,630 missing values generated)
-(26,189 missing values generated)
-(25,559 missing values generated)
-(26,408 missing values generated)
-(25,562 missing values generated)
-(26,488 missing values generated)
-(25,558 missing values generated)
-(26,606 missing values generated)
-(25,658 missing values generated)
-(26,659 missing values generated)
-(25,788 missing values generated)
-(26,694 missing values generated)
-(25,951 missing values generated)
-(26,729 missing values generated)
-(26,011 missing values generated)
-(26,755 missing values generated)
-(26,103 missing values generated)
-lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
-lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(25,871 real changes made)
-(961 real changes made)
-(25,630 real changes made)
-(1,202 real changes made)
-(25,559 real changes made)
-(1,273 real changes made)
-(25,562 real changes made)
-(1,270 real changes made)
-(25,558 real changes made)
-(1,274 real changes made)
-(25,658 real changes made)
-(1,174 real changes made)
-(25,788 real changes made)
-(1,044 real changes made)
-(25,951 real changes made)
-(881 real changes made)
-(26,011 real changes made)
-(821 real changes made)
-(26,103 real changes made)
-(729 real changes made)
-(25,692 real changes made)
-(1,140 real changes made)
-(25,997 real changes made)
-(835 real changes made)
-(26,189 real changes made)
-(643 real changes made)
-(26,408 real changes made)
-(424 real changes made)
-(26,488 real changes made)
-(344 real changes made)
-(26,606 real changes made)
-(226 real changes made)
-(26,659 real changes made)
-(173 real changes made)
-(26,694 real changes made)
-(138 real changes made)
-(26,729 real changes made)
-(103 real changes made)
-(26,755 real changes made)
-(77 real changes made)
-(20,120 missing values generated)
-(20,120 real changes made)
-(dropped 1280 singleton observations)
-(MWFE estimator converged in 124 iterations)
-note: lead10 omitted because of collinearity
-
-HDFE Linear regression                            Number of obs   =     20,158
-Absorbing 7 HDFE groups                           F(  20,    131) =       3.08
-Statistics robust to heteroskedasticity           Prob > F        =     0.0001
-                                                  R-squared       =     0.5475
-                                                  Adj R-squared   =     0.3021
-                                                  Within R-sq.    =     0.0042
-Number of clusters (msa)     =        132         Root MSE        =     1.0401
-
-                                  (Std. err. adjusted for 132 clusters in msa)
-------------------------------------------------------------------------------
-             |               Robust
-        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-       lag10 |  -.0910115   .3757561    -0.24   0.809    -.8343468    .6523237
-        lag9 |  -.3252711   .2457159    -1.32   0.188    -.8113557    .1608135
-        lag8 |  -.1303838   .2430238    -0.54   0.593    -.6111429    .3503753
-        lag7 |  -.0641406   .2223651    -0.29   0.773    -.5040318    .3757505
-        lag6 |   .0243727   .2419395     0.10   0.920    -.4542414    .5029868
-        lag5 |  -.1578095   .1934362    -0.82   0.416    -.5404725    .2248535
-        lag4 |  -.0512187   .1381485    -0.37   0.711    -.3245093    .2220719
-        lag3 |  -.1270933   .1351131    -0.94   0.349    -.3943792    .1401926
-        lag2 |  -.1207896   .1204464    -1.00   0.318    -.3590614    .1174821
-        lag1 |  -.0795628   .1064705    -0.75   0.456    -.2901868    .1310612
-       treat |  -.2649856   .1118362    -2.37   0.019    -.4862243   -.0437469
-       lead1 |  -.0069905   .1251856    -0.06   0.956    -.2546374    .2406565
-       lead2 |    .003911   .1376816     0.03   0.977    -.2684562    .2762781
-       lead3 |   .0284073   .1048722     0.27   0.787    -.1790549    .2358696
-       lead4 |    .083393   .1134356     0.74   0.464    -.1410098    .3077957
-       lead5 |  -.0345749   .1216282    -0.28   0.777    -.2751845    .2060348
-       lead6 |   -.033398   .0936228    -0.36   0.722    -.2186062    .1518101
-       lead7 |   .0072037   .1314851     0.05   0.956    -.2529052    .2673126
-       lead8 |  -.0221361   .0900892    -0.25   0.806     -.200354    .1560818
-       lead9 |  -.0201986   .1009801    -0.20   0.842    -.2199613    .1795641
-      lead10 |          0  (omitted)
-       _cons |  -2.227372   .0194912  -114.28   0.000     -2.26593   -2.188814
-------------------------------------------------------------------------------
-
-Absorbed degrees of freedom:
-------------------------------------------------------+
-  Absorbed FE | Categories  - Redundant  = Num. Coefs |
---------------+---------------------------------------|
-         year |        31           0          31     |
-          msa |       132         132           0    *|
-        field |         5           1           4     |
-   field#year |       144          31         113    ?|
-    msa#field |       426         426           0    *|
-         inst |       584           1         583    ?|
-      athr_id |      5792          12        5780    ?|
-------------------------------------------------------+
-? = number of redundant parameters may be higher
-* = FE nested within cluster; treated as redundant for DoF computation
-(26,811 observations deleted)
-(20 missing values generated)
-(20 real changes made)
-(1 observation deleted)
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9   -.0363645    .0955969  -.2457083   .1039355
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9    .0801869    .0372202    .044988   .1629558
-(note:  named style none not found in class margin, default attributes used)
-file ../output/figures/es1965_1995_year.pdf saved as PDF format
-(67,536 missing values generated)
-(37121 real changes made)
-(30,415 missing values generated)
-N = 12,253; 12,253 balanced groups of size 1
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                            49,359  
-    -----------------------------------------
-(8 missing values generated)
-(47,236 missing values generated)
-(47,592 missing values generated)
-(47,648 missing values generated)
-(47,113 missing values generated)
-(48,131 missing values generated)
-(46,889 missing values generated)
-(48,510 missing values generated)
-(46,974 missing values generated)
-(48,750 missing values generated)
-(47,086 missing values generated)
-(48,899 missing values generated)
-(47,323 missing values generated)
-(49,014 missing values generated)
-(47,503 missing values generated)
-(49,111 missing values generated)
-(47,778 missing values generated)
-(49,157 missing values generated)
-(47,854 missing values generated)
-(49,209 missing values generated)
-(48,067 missing values generated)
-lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
-lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(47,592 real changes made)
-(1,767 real changes made)
-(47,113 real changes made)
-(2,246 real changes made)
-(46,889 real changes made)
-(2,470 real changes made)
-(46,974 real changes made)
-(2,385 real changes made)
-(47,086 real changes made)
-(2,273 real changes made)
-(47,323 real changes made)
-(2,036 real changes made)
-(47,503 real changes made)
-(1,856 real changes made)
-(47,778 real changes made)
-(1,581 real changes made)
-(47,854 real changes made)
-(1,505 real changes made)
-(48,067 real changes made)
-(1,292 real changes made)
-(47,236 real changes made)
-(2,123 real changes made)
-(47,648 real changes made)
-(1,711 real changes made)
-(48,131 real changes made)
-(1,228 real changes made)
-(48,510 real changes made)
-(849 real changes made)
-(48,750 real changes made)
-(609 real changes made)
-(48,899 real changes made)
-(460 real changes made)
-(49,014 real changes made)
-(345 real changes made)
-(49,111 real changes made)
-(248 real changes made)
-(49,157 real changes made)
-(202 real changes made)
-(49,209 real changes made)
-(150 real changes made)
-(37,112 missing values generated)
-(37,112 real changes made)
-(dropped 2193 singleton observations)
-(MWFE estimator converged in 119 iterations)
-note: lead10 omitted because of collinearity
-
-HDFE Linear regression                            Number of obs   =     37,383
-Absorbing 7 HDFE groups                           F(  20,    157) =       2.37
-Statistics robust to heteroskedasticity           Prob > F        =     0.0017
-                                                  R-squared       =     0.5363
-                                                  Adj R-squared   =     0.3092
-                                                  Within R-sq.    =     0.0016
-Number of clusters (msa)     =        158         Root MSE        =     1.0172
-
-                                  (Std. err. adjusted for 158 clusters in msa)
-------------------------------------------------------------------------------
-             |               Robust
-        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-       lag10 |    .159471    .239587     0.67   0.507    -.3137587    .6327007
-        lag9 |  -.0658678   .1640363    -0.40   0.689    -.3898705    .2581349
-        lag8 |  -.0672401   .1936785    -0.35   0.729    -.4497918    .3153117
-        lag7 |  -.2485227   .1503453    -1.65   0.100    -.5454832    .0484378
-        lag6 |  -.0086261   .1492033    -0.06   0.954    -.3033307    .2860786
-        lag5 |  -.1562057   .1164892    -1.34   0.182     -.386294    .0738826
-        lag4 |  -.1052004   .1178956    -0.89   0.374    -.3380665    .1276657
-        lag3 |  -.1384109   .1374903    -1.01   0.316    -.4099802    .1331584
-        lag2 |  -.1465266   .0940748    -1.56   0.121    -.3323422     .039289
-        lag1 |  -.0118566   .1062548    -0.11   0.911      -.22173    .1980168
-       treat |  -.1668249   .0925431    -1.80   0.073     -.349615    .0159652
-       lead1 |  -.0447095   .0932781    -0.48   0.632    -.2289513    .1395323
-       lead2 |  -.0430544   .0996815    -0.43   0.666    -.2399442    .1538353
-       lead3 |   .0232829   .1054793     0.22   0.826    -.1850588    .2316245
-       lead4 |   .0239406    .106698     0.22   0.823    -.1868081    .2346894
-       lead5 |  -.0117527    .092006    -0.13   0.899    -.1934819    .1699765
-       lead6 |  -.0107021   .1024445    -0.10   0.917    -.2130494    .1916452
-       lead7 |   .0205105   .0926717     0.22   0.825    -.1625336    .2035547
-       lead8 |   .0012061   .0806898     0.01   0.988    -.1581716    .1605838
-       lead9 |  -.0085282   .0950868    -0.09   0.929    -.1963425    .1792862
-      lead10 |          0  (omitted)
-       _cons |  -1.893575   .0061446  -308.17   0.000    -1.905712   -1.881438
-------------------------------------------------------------------------------
-
-Absorbed degrees of freedom:
-------------------------------------------------------+
-  Absorbed FE | Categories  - Redundant  = Num. Coefs |
---------------+---------------------------------------|
-         year |        31           0          31     |
-          msa |       158         158           0    *|
-        field |         5           1           4     |
-   field#year |       151          31         120    ?|
-    msa#field |       544         544           0    *|
-         inst |       812           1         811    ?|
-      athr_id |     10617          14       10603    ?|
-------------------------------------------------------+
-? = number of redundant parameters may be higher
-* = FE nested within cluster; treated as redundant for DoF computation
-(49,338 observations deleted)
-(20 missing values generated)
-(20 real changes made)
-(1 observation deleted)
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9   -.0744911      .11463  -.2366661   .1713276
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9    .0063225    .0260762  -.0328529   .0357972
-(note:  named style none not found in class margin, default attributes used)
-file ../output/figures/es1975_2005_year.pdf saved as PDF format
-(140,168 missing values generated)
-(122182 real changes made)
-(17,986 missing values generated)
-N = 40,746; 40,746 balanced groups of size 1
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                           162,282  
-    -----------------------------------------
-(311 missing values generated)
-(155,922 missing values generated)
-(157,914 missing values generated)
-(156,923 missing values generated)
-(156,041 missing values generated)
-(158,337 missing values generated)
-(155,281 missing values generated)
-(159,459 missing values generated)
-(155,241 missing values generated)
-(160,209 missing values generated)
-(155,288 missing values generated)
-(160,744 missing values generated)
-(155,863 missing values generated)
-(161,046 missing values generated)
-(156,301 missing values generated)
-(161,358 missing values generated)
-(156,858 missing values generated)
-(161,580 missing values generated)
-(157,354 missing values generated)
-(161,718 missing values generated)
-(157,941 missing values generated)
-lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
-lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(157,914 real changes made)
-(4,385 real changes made, 17 to missing)
-(156,041 real changes made)
-(6,257 real changes made, 17 to missing)
-(155,281 real changes made)
-(7,017 real changes made, 17 to missing)
-(155,241 real changes made)
-(7,057 real changes made, 17 to missing)
-(155,288 real changes made)
-(7,011 real changes made, 17 to missing)
-(155,863 real changes made)
-(6,433 real changes made, 17 to missing)
-(156,301 real changes made)
-(5,997 real changes made, 17 to missing)
-(156,858 real changes made)
-(5,440 real changes made, 17 to missing)
-(157,354 real changes made)
-(4,945 real changes made, 17 to missing)
-(157,941 real changes made)
-(4,358 real changes made, 17 to missing)
-(155,922 real changes made)
-(6,375 real changes made, 17 to missing)
-(156,923 real changes made)
-(5,375 real changes made, 17 to missing)
-(158,337 real changes made)
-(3,960 real changes made, 17 to missing)
-(159,459 real changes made)
-(2,840 real changes made, 17 to missing)
-(160,209 real changes made)
-(2,090 real changes made, 17 to missing)
-(160,744 real changes made)
-(1,555 real changes made, 17 to missing)
-(161,046 real changes made)
-(1,253 real changes made, 17 to missing)
-(161,358 real changes made)
-(941 real changes made, 17 to missing)
-(161,580 real changes made)
-(719 real changes made, 17 to missing)
-(161,718 real changes made)
-(581 real changes made, 17 to missing)
-(121,801 missing values generated)
-(121,801 real changes made)
-(dropped 7772 singleton observations)
-(MWFE estimator converged in 94 iterations)
-note: lead10 omitted because of collinearity
-
-HDFE Linear regression                            Number of obs   =    116,814
-Absorbing 7 HDFE groups                           F(  20,    210) =       7.31
-Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.5407
-                                                  Adj R-squared   =     0.3263
-                                                  Within R-sq.    =     0.0011
-Number of clusters (msa)     =        211         Root MSE        =     1.0284
-
-                                  (Std. err. adjusted for 211 clusters in msa)
-------------------------------------------------------------------------------
-             |               Robust
-        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-       lag10 |  -.1095515   .1117128    -0.98   0.328    -.3297737    .1106706
-        lag9 |  -.0195918   .1008007    -0.19   0.846    -.2183028    .1791192
-        lag8 |  -.0381344   .0820759    -0.46   0.643    -.1999326    .1236638
-        lag7 |  -.1654759   .0734892    -2.25   0.025    -.3103469   -.0206049
-        lag6 |  -.0369098   .0768422    -0.48   0.631    -.1883907     .114571
-        lag5 |  -.1022561   .0686445    -1.49   0.138    -.2375767    .0330645
-        lag4 |  -.1542633   .0497025    -3.10   0.002    -.2522431   -.0562835
-        lag3 |   -.232242   .0518052    -4.48   0.000    -.3343669   -.1301171
-        lag2 |  -.1776591   .0486893    -3.65   0.000    -.2736414   -.0816767
-        lag1 |  -.1298352   .0484221    -2.68   0.008    -.2252909   -.0343795
-       treat |  -.1515099    .050755    -2.99   0.003    -.2515646   -.0514552
-       lead1 |  -.0391889   .0656214    -0.60   0.551      -.16855    .0901721
-       lead2 |  -.0503174   .0472157    -1.07   0.288    -.1433948    .0427599
-       lead3 |  -.0406584   .0494748    -0.82   0.412    -.1381893    .0568726
-       lead4 |   .0035625   .0428192     0.08   0.934     -.080848    .0879729
-       lead5 |   .0105447   .0423949     0.25   0.804    -.0730295    .0941189
-       lead6 |   .0281721   .0429709     0.66   0.513    -.0565374    .1128816
-       lead7 |    .003407   .0387418     0.09   0.930    -.0729657    .0797797
-       lead8 |  -.0018346   .0400832    -0.05   0.964    -.0808515    .0771824
-       lead9 |   .0055542   .0439631     0.13   0.900    -.0811115    .0922198
-      lead10 |          0  (omitted)
-       _cons |  -1.928345   .0102476  -188.17   0.000    -1.948547   -1.908144
-------------------------------------------------------------------------------
-
-Absorbed degrees of freedom:
-------------------------------------------------------+
-  Absorbed FE | Categories  - Redundant  = Num. Coefs |
---------------+---------------------------------------|
-         year |        39           0          39     |
-          msa |       211         211           0    *|
-        field |         5           1           4     |
-   field#year |       194          39         155    ?|
-    msa#field |       809         809           0    *|
-         inst |      1825           1        1824    ?|
-      athr_id |     34142          28       34114    ?|
-------------------------------------------------------+
-? = number of redundant parameters may be higher
-* = FE nested within cluster; treated as redundant for DoF computation
-(162,261 observations deleted)
-(20 missing values generated)
-(20 real changes made)
-(1 observation deleted)
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9    .0147148    .0733675  -.1024068   .1102434
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9     .120862    .0272934   .0795178   .1580073
-(note:  named style none not found in class margin, default attributes used)
-file ../output/figures/es1985_2023_year.pdf saved as PDF format
-(already sorted)
-(154,175 missing values generated)
-(360,463 real changes made)
-
-  num_moves |      Freq.     Percent        Cum.
-------------+-----------------------------------
-          1 |     19,011       77.77       77.77
-          2 |      4,076       16.67       94.44
-          3 |        936        3.83       98.27
-          4 |        280        1.15       99.42
-          5 |         98        0.40       99.82
-          6 |         30        0.12       99.94
-          7 |         13        0.05       99.99
-         10 |          1        0.00      100.00
-         11 |          1        0.00      100.00
-------------+-----------------------------------
-      Total |     24,446      100.00
-
-      mover |      Freq.     Percent        Cum.
-------------+-----------------------------------
-          0 |    155,214       86.39       86.39
-          1 |     24,446       13.61      100.00
-------------+-----------------------------------
-      Total |    179,660      100.00
-
-      mover |      Freq.     Percent        Cum.
-------------+-----------------------------------
-          0 |    237,220       65.81       65.81
-          1 |    123,243       34.19      100.00
-------------+-----------------------------------
-      Total |    360,463      100.00
-(227,554 real changes made)
-(333 real changes made)
-(0 real changes made)
-(already sorted)
-(320,320 missing values generated)
-(7427 real changes made)
-(10533 real changes made)
-file /export/scratch/cxu_sci_geo/movers/mover_temp_year_firstlast.dta saved
-(58,990 missing values generated)
-(58990 real changes made)
-N = 19,011; 19,011 balanced groups of size 1
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                            77,681  
-    -----------------------------------------
-(131 missing values generated)
-(1 missing value generated)
-(75,382 missing values generated)
-(76,397 missing values generated)
-(75,715 missing values generated)
-(75,540 missing values generated)
-(76,229 missing values generated)
-(75,110 missing values generated)
-(76,537 missing values generated)
-(74,900 missing values generated)
-(76,822 missing values generated)
-(74,783 missing values generated)
-(77,010 missing values generated)
-(74,849 missing values generated)
-(77,135 missing values generated)
-(75,015 missing values generated)
-(77,224 missing values generated)
-(75,177 missing values generated)
-(77,321 missing values generated)
-(75,338 missing values generated)
-(77,389 missing values generated)
-(75,532 missing values generated)
-(77,390 missing values generated)
-(75,669 missing values generated)
-(77,449 missing values generated)
-(75,788 missing values generated)
-(77,492 missing values generated)
-(75,920 missing values generated)
-(77,508 missing values generated)
-(76,092 missing values generated)
-(77,559 missing values generated)
-(76,177 missing values generated)
-(77,562 missing values generated)
-(76,273 missing values generated)
-(77,592 missing values generated)
-(76,479 missing values generated)
-(77,608 missing values generated)
-(76,554 missing values generated)
-(77,630 missing values generated)
-(76,640 missing values generated)
-(77,626 missing values generated)
-(76,742 missing values generated)
-lead1   lead5   lead9   lead13  lead17  lag1    lag5    lag9    lag13   lag17
-lead2   lead6   lead10  lead14  lead18  lag2    lag6    lag10   lag14   lag18
-lead3   lead7   lead11  lead15  lead19  lag3    lag7    lag11   lag15   lag19
-lead4   lead8   lead12  lead16  lead20  lag4    lag8    lag12   lag16   lag20
-(76,397 real changes made)
-(1,305 real changes made, 21 to missing)
-(75,540 real changes made)
-(2,161 real changes made, 21 to missing)
-(75,110 real changes made)
-(2,592 real changes made, 21 to missing)
-(74,900 real changes made)
-(2,801 real changes made, 21 to missing)
-(74,783 real changes made)
-(2,917 real changes made, 21 to missing)
-(74,849 real changes made)
-(2,850 real changes made, 21 to missing)
-(75,015 real changes made)
-(2,687 real changes made, 21 to missing)
-(75,177 real changes made)
-(2,524 real changes made, 21 to missing)
-(75,338 real changes made)
-(2,363 real changes made, 21 to missing)
-(75,532 real changes made)
-(2,168 real changes made, 21 to missing)
-(75,669 real changes made)
-(2,033 real changes made, 21 to missing)
-(75,788 real changes made)
-(1,914 real changes made, 21 to missing)
-(75,920 real changes made)
-(1,781 real changes made, 21 to missing)
-(76,092 real changes made)
-(1,609 real changes made, 21 to missing)
-(76,177 real changes made)
-(1,525 real changes made, 21 to missing)
-(76,273 real changes made)
-(1,429 real changes made, 21 to missing)
-(76,479 real changes made)
-(1,222 real changes made, 21 to missing)
-(76,554 real changes made)
-(1,148 real changes made, 21 to missing)
-(76,640 real changes made)
-(1,062 real changes made, 21 to missing)
-(76,742 real changes made)
-(960 real changes made, 21 to missing)
-(75,382 real changes made)
-(2,320 real changes made, 21 to missing)
-(75,715 real changes made)
-(1,986 real changes made, 21 to missing)
-(76,229 real changes made)
-(1,472 real changes made, 21 to missing)
-(76,537 real changes made)
-(1,164 real changes made, 21 to missing)
-(76,822 real changes made)
-(880 real changes made, 21 to missing)
-(77,010 real changes made)
-(692 real changes made, 21 to missing)
-(77,135 real changes made)
-(566 real changes made, 21 to missing)
-(77,224 real changes made)
-(478 real changes made, 21 to missing)
-(77,321 real changes made)
-(381 real changes made, 21 to missing)
-(77,389 real changes made)
-(313 real changes made, 21 to missing)
-(77,390 real changes made)
-(312 real changes made, 21 to missing)
-(77,449 real changes made)
-(253 real changes made, 21 to missing)
-(77,492 real changes made)
-(210 real changes made, 21 to missing)
-(77,508 real changes made)
-(194 real changes made, 21 to missing)
-(77,559 real changes made)
-(143 real changes made, 21 to missing)
-(77,562 real changes made)
-(140 real changes made, 21 to missing)
-(77,592 real changes made)
-(110 real changes made, 21 to missing)
-(77,608 real changes made)
-(94 real changes made, 21 to missing)
-(77,630 real changes made)
-(72 real changes made, 21 to missing)
-(77,626 real changes made)
-(76 real changes made, 21 to missing)
-(58,802 missing values generated)
-(58,802 real changes made)
-(dropped 2422 singleton observations)
-(MWFE estimator converged in 122 iterations)
-note: lead20 omitted because of collinearity
-
-HDFE Linear regression                            Number of obs   =     66,441
-Absorbing 7 HDFE groups                           F(  40,    185) =      12.07
-Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.6293
-                                                  Adj R-squared   =     0.4725
-                                                  Within R-sq.    =     0.0065
-Number of clusters (msa)     =        186         Root MSE        =     1.0069
-
-                                  (Std. err. adjusted for 186 clusters in msa)
-------------------------------------------------------------------------------
-             |               Robust
-        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-       lag20 |  -.3715888   .2825974    -1.31   0.190    -.9291166     .185939
-       lag19 |  -.3638309   .2546327    -1.43   0.155     -.866188    .1385263
-       lag18 |  -.6657131   .2825594    -2.36   0.020    -1.223166   -.1082601
-       lag17 |  -.3746547    .299442    -1.25   0.212    -.9654148    .2161055
-       lag16 |  -.3024778   .1890657    -1.60   0.111    -.6754798    .0705241
-       lag15 |  -.3951341   .1267625    -3.12   0.002      -.64522   -.1450482
-       lag14 |  -.0176188   .1625182    -0.11   0.914    -.3382461    .3030084
-       lag13 |  -.2662335   .1705661    -1.56   0.120    -.6027383    .0702712
-       lag12 |  -.5011912   .1502091    -3.34   0.001    -.7975343   -.2048482
-       lag11 |   -.399557   .1624564    -2.46   0.015    -.7200624   -.0790516
-       lag10 |  -.3578161   .1221645    -2.93   0.004    -.5988307   -.1168016
-        lag9 |  -.4136253   .1495682    -2.77   0.006    -.7087039   -.1185468
-        lag8 |  -.4100426   .1457813    -2.81   0.005    -.6976501   -.1224351
-        lag7 |   -.318316   .1018027    -3.13   0.002    -.5191595   -.1174724
-        lag6 |  -.2596256   .1026049    -2.53   0.012    -.4620517   -.0571994
-        lag5 |  -.2309538   .0978832    -2.36   0.019    -.4240646   -.0378431
-        lag4 |  -.2442005   .0722056    -3.38   0.001    -.3866526   -.1017483
-        lag3 |  -.2514027    .054495    -4.61   0.000    -.3589142   -.1438912
-        lag2 |  -.2215032   .0683522    -3.24   0.001    -.3563533   -.0866531
-        lag1 |  -.2522931   .0515833    -4.89   0.000    -.3540602   -.1505259
-       treat |   -.409833   .0697021    -5.88   0.000    -.5473462   -.2723198
-       lead1 |  -.1847141   .0779017    -2.37   0.019    -.3384041   -.0310241
-       lead2 |   -.144371   .0925077    -1.56   0.120    -.3268766    .0381346
-       lead3 |  -.1495485   .0696849    -2.15   0.033    -.2870277   -.0120694
-       lead4 |  -.0898254   .0848369    -1.06   0.291    -.2571976    .0775467
-       lead5 |  -.1190749   .0713785    -1.67   0.097    -.2598954    .0217456
-       lead6 |  -.1247425   .0839063    -1.49   0.139    -.2902787    .0407938
-       lead7 |  -.1309966   .0941019    -1.39   0.166    -.3166475    .0546542
-       lead8 |  -.0925728   .0685795    -1.35   0.179    -.2278712    .0427256
-       lead9 |  -.0660615   .0545711    -1.21   0.228    -.1737232    .0416002
-      lead10 |   -.044361   .0523461    -0.85   0.398    -.1476331    .0589111
-      lead11 |  -.0650201   .0564916    -1.15   0.251    -.1764706    .0464305
-      lead12 |  -.0590127   .0577266    -1.02   0.308    -.1728997    .0548743
-      lead13 |  -.0620597   .0732669    -0.85   0.398    -.2066057    .0824864
-      lead14 |  -.0439126   .0635741    -0.69   0.491    -.1693361    .0815108
-      lead15 |  -.0036747   .0585809    -0.06   0.950    -.1192472    .1118978
-      lead16 |  -.0292184   .0468334    -0.62   0.533    -.1216145    .0631778
-      lead17 |   -.003423   .0621774    -0.06   0.956    -.1260909    .1192449
-      lead18 |  -.0078297   .0791399    -0.10   0.921    -.1639625    .1483031
-      lead19 |  -.0700718   .0890961    -0.79   0.433    -.2458468    .1057032
-      lead20 |          0  (omitted)
-       _cons |   -1.19064   .0113092  -105.28   0.000    -1.212952   -1.168329
-------------------------------------------------------------------------------
-
-Absorbed degrees of freedom:
-------------------------------------------------------+
-  Absorbed FE | Categories  - Redundant  = Num. Coefs |
---------------+---------------------------------------|
-         year |        78           0          78     |
-          msa |       186         186           0    *|
-        field |         5           1           4     |
-   field#year |       346          78         268    ?|
-    msa#field |       678         678           0    *|
-         inst |      1132           1        1131    ?|
-      athr_id |     17385          16       17369    ?|
-------------------------------------------------------+
-? = number of redundant parameters may be higher
-* = FE nested within cluster; treated as redundant for DoF computation
-(77,640 observations deleted)
-(40 missing values generated)
-(40 real changes made)
-(1 observation deleted)
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |         19   -.0827325    .1317126    -.41342   .2346742
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |         19    .1738462    .0525001    .067579   .2488701
-(note:  named style none not found in class margin, default attributes used)
-file ../output/figures/es1945_2023_year_firstlast.pdf saved as PDF format
-(6,826 missing values generated)
-(4110 real changes made)
-(2,716 missing values generated)
-N = 1,540; 1,540 balanced groups of size 1
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                             5,619  
-    -----------------------------------------
-(15 missing values generated)
-(1 missing value generated)
-(5,366 missing values generated)
-(5,430 missing values generated)
-(5,425 missing values generated)
-(5,325 missing values generated)
-(5,491 missing values generated)
-(5,286 missing values generated)
-(5,508 missing values generated)
-(5,270 missing values generated)
-(5,540 missing values generated)
-(5,294 missing values generated)
-(5,559 missing values generated)
-(5,338 missing values generated)
-(5,571 missing values generated)
-(5,374 missing values generated)
-(5,577 missing values generated)
-(5,445 missing values generated)
-(5,589 missing values generated)
-(5,445 missing values generated)
-(5,592 missing values generated)
-(5,504 missing values generated)
-lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
-lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(5,430 real changes made)
-(197 real changes made, 8 to missing)
-(5,325 real changes made)
-(302 real changes made, 8 to missing)
-(5,286 real changes made)
-(341 real changes made, 8 to missing)
-(5,270 real changes made)
-(357 real changes made, 8 to missing)
-(5,294 real changes made)
-(332 real changes made, 8 to missing)
-(5,338 real changes made)
-(288 real changes made, 8 to missing)
-(5,374 real changes made)
-(253 real changes made, 8 to missing)
-(5,445 real changes made)
-(182 real changes made, 8 to missing)
-(5,445 real changes made)
-(182 real changes made, 8 to missing)
-(5,504 real changes made)
-(122 real changes made, 8 to missing)
-(5,366 real changes made)
-(261 real changes made, 8 to missing)
-(5,425 real changes made)
-(202 real changes made, 8 to missing)
-(5,491 real changes made)
-(135 real changes made, 8 to missing)
-(5,508 real changes made)
-(118 real changes made, 8 to missing)
-(5,540 real changes made)
-(87 real changes made, 8 to missing)
-(5,559 real changes made)
-(68 real changes made, 8 to missing)
-(5,571 real changes made)
-(55 real changes made, 8 to missing)
-(5,577 real changes made)
-(50 real changes made, 8 to missing)
-(5,589 real changes made)
-(38 real changes made, 8 to missing)
-(5,592 real changes made)
-(35 real changes made, 8 to missing)
-(4,094 missing values generated)
-(4,094 real changes made)
-(dropped 516 singleton observations)
-(MWFE estimator converged in 134 iterations)
-note: lead10 omitted because of collinearity
-
-HDFE Linear regression                            Number of obs   =      4,444
-Absorbing 7 HDFE groups                           F(  20,     99) =       3.01
-Statistics robust to heteroskedasticity           Prob > F        =     0.0002
-                                                  R-squared       =     0.6012
-                                                  Adj R-squared   =     0.2873
-                                                  Within R-sq.    =     0.0118
-Number of clusters (msa)     =        100         Root MSE        =     1.1235
-
-                                  (Std. err. adjusted for 100 clusters in msa)
-------------------------------------------------------------------------------
-             |               Robust
-        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-       lag10 |  -.3777779    .268094    -1.41   0.162    -.9097346    .1541788
-        lag9 |  -.4316679   .2891962    -1.49   0.139    -1.005496    .1421602
-        lag8 |  -.3151005    .316507    -1.00   0.322     -.943119     .312918
-        lag7 |    -.17856   .2131995    -0.84   0.404    -.6015941     .244474
-        lag6 |  -.0977872   .1905779    -0.51   0.609     -.475935    .2803606
-        lag5 |   .0363912   .1851079     0.20   0.845     -.330903    .4036855
-        lag4 |   .0224915   .1590439     0.14   0.888    -.2930861    .3380692
-        lag3 |   .0713748   .1954789     0.37   0.716    -.3164978    .4592473
-        lag2 |    .029516      .1659     0.18   0.859    -.2996656    .3586976
-        lag1 |  -.1030911    .152197    -0.68   0.500     -.405083    .1989008
-       treat |  -.1615366   .1470248    -1.10   0.275    -.4532658    .1301925
-       lead1 |   .0169284   .1809938     0.09   0.926    -.3422026    .3760594
-       lead2 |   .0646633   .1524308     0.42   0.672    -.2377924    .3671191
-       lead3 |  -.0343435   .1252144    -0.27   0.784    -.2827961    .2141091
-       lead4 |   .0784144   .1556302     0.50   0.615    -.2303897    .3872184
-       lead5 |    .123415   .1499194     0.82   0.412    -.1740576    .4208875
-       lead6 |   .0159238   .1585895     0.10   0.920    -.2987521    .3305997
-       lead7 |   .0300168   .1251942     0.24   0.811    -.2183956    .2784293
-       lead8 |  -.0268761    .154373    -0.17   0.862    -.3331855    .2794334
-       lead9 |   .0600172   .1127249     0.53   0.596    -.1636534    .2836879
-      lead10 |          0  (omitted)
-       _cons |  -2.578651    .093672   -27.53   0.000    -2.764517   -2.392786
-------------------------------------------------------------------------------
-
-Absorbed degrees of freedom:
-------------------------------------------------------+
-  Absorbed FE | Categories  - Redundant  = Num. Coefs |
---------------+---------------------------------------|
-         year |        30           0          30     |
-          msa |       100         100           0    *|
-        field |         5           1           4     |
-   field#year |        91          30          61    ?|
-    msa#field |       198         198           0    *|
-         inst |       275           1         274    ?|
-      athr_id |      1279           8        1271    ?|
-------------------------------------------------------+
-? = number of redundant parameters may be higher
-* = FE nested within cluster; treated as redundant for DoF computation
-(5,598 observations deleted)
-(20 missing values generated)
-(20 real changes made)
-(1 observation deleted)
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9   -.0348111    .1957135  -.3285768   .1744659
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9    .1395532    .0506718   .0687476    .226506
-(note:  named style none not found in class margin, default attributes used)
-file ../output/figures/es1945_1975_year_firstlast.pdf saved as PDF format
-(13,335 missing values generated)
-(8560 real changes made)
-(4,775 missing values generated)
-N = 2,941; 2,941 balanced groups of size 1
-
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                             0
-    Matched                            11,469  
-    -----------------------------------------
-(14 missing values generated)
-(10,996 missing values generated)
-(11,146 missing values generated)
-(11,096 missing values generated)
-(10,970 missing values generated)
-(11,208 missing values generated)
-(10,917 missing values generated)
-(11,256 missing values generated)
-(10,902 missing values generated)
-(11,322 missing values generated)
-(10,927 missing values generated)
-(11,353 missing values generated)
-(10,960 missing values generated)
-(11,381 missing values generated)
-(10,993 missing values generated)
-(11,391 missing values generated)
-(11,070 missing values generated)
-(11,421 missing values generated)
-(11,080 missing values generated)
-(11,422 missing values generated)
-(11,128 missing values generated)
-lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
-lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(11,146 real changes made)
-(331 real changes made, 8 to missing)
-(10,970 real changes made)
-(507 real changes made, 8 to missing)
-(10,917 real changes made)
-(560 real changes made, 8 to missing)
-(10,902 real changes made)
-(575 real changes made, 8 to missing)
-(10,927 real changes made)
-(549 real changes made, 8 to missing)
-(10,960 real changes made)
-(516 real changes made, 8 to missing)
-(10,993 real changes made)
-(484 real changes made, 8 to missing)
-(11,070 real changes made)
-(407 real changes made, 8 to missing)
-(11,080 real changes made)
-(397 real changes made, 8 to missing)
-(11,128 real changes made)
-(348 real changes made, 8 to missing)
-(10,996 real changes made)
-(481 real changes made, 8 to missing)
-(11,096 real changes made)
-(381 real changes made, 8 to missing)
-(11,208 real changes made)
-(268 real changes made, 8 to missing)
-(11,256 real changes made)
-(220 real changes made, 8 to missing)
-(11,322 real changes made)
-(155 real changes made, 8 to missing)
-(11,353 real changes made)
-(124 real changes made, 8 to missing)
-(11,381 real changes made)
-(95 real changes made, 8 to missing)
-(11,391 real changes made)
-(86 real changes made, 8 to missing)
-(11,421 real changes made)
-(56 real changes made, 8 to missing)
-(11,422 real changes made)
-(55 real changes made, 8 to missing)
-(8,542 missing values generated)
-(8,542 real changes made)
-(dropped 763 singleton observations)
-(MWFE estimator converged in 127 iterations)
-note: lead10 omitted because of collinearity
-
-HDFE Linear regression                            Number of obs   =      8,589
-Absorbing 7 HDFE groups                           F(  20,    120) =       5.52
-Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.5921
-                                                  Adj R-squared   =     0.3213
-                                                  Within R-sq.    =     0.0125
-Number of clusters (msa)     =        121         Root MSE        =     1.0482
-
-                                  (Std. err. adjusted for 121 clusters in msa)
-------------------------------------------------------------------------------
-             |               Robust
-        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-       lag10 |  -.3757995   .2319428    -1.62   0.108    -.8350301    .0834312
-        lag9 |  -.7850315   .2404815    -3.26   0.001    -1.261168   -.3088948
-        lag8 |  -.4827544   .2617008    -1.84   0.068    -1.000904     .035395
-        lag7 |  -.4348202   .1830558    -2.38   0.019     -.797258   -.0723824
-        lag6 |  -.3754689   .1718658    -2.18   0.031    -.7157512   -.0351866
-        lag5 |  -.1268862   .1540757    -0.82   0.412    -.4319453    .1781729
-        lag4 |  -.2109057   .1016228    -2.08   0.040    -.4121118   -.0096996
-        lag3 |  -.2136948   .1089956    -1.96   0.052    -.4294985    .0021088
-        lag2 |  -.1538023   .0976619    -1.57   0.118    -.3471661    .0395615
-        lag1 |  -.2196907   .0960724    -2.29   0.024    -.4099073   -.0294741
-       treat |  -.3504983   .0934236    -3.75   0.000    -.5354704   -.1655262
-       lead1 |  -.1458087   .1111067    -1.31   0.192    -.3657922    .0741748
-       lead2 |  -.0803546   .1157659    -0.69   0.489     -.309563    .1488538
-       lead3 |  -.1395368   .0677559    -2.06   0.042    -.2736887   -.0053849
-       lead4 |  -.0380634   .1031145    -0.37   0.713    -.2422229    .1660962
-       lead5 |   -.080763   .0857359    -0.94   0.348    -.2505141    .0889881
-       lead6 |  -.1908603   .1053841    -1.81   0.073    -.3995135     .017793
-       lead7 |  -.1438156   .0735675    -1.95   0.053    -.2894742     .001843
-       lead8 |  -.1855503   .0886676    -2.09   0.038    -.3611061   -.0099946
-       lead9 |  -.0928231   .0632329    -1.47   0.145    -.2180198    .0323736
-      lead10 |          0  (omitted)
-       _cons |  -2.145754    .052231   -41.08   0.000    -2.249168   -2.042341
-------------------------------------------------------------------------------
-
-Absorbed degrees of freedom:
-------------------------------------------------------+
-  Absorbed FE | Categories  - Redundant  = Num. Coefs |
---------------+---------------------------------------|
-         year |        31           0          31     |
-          msa |       121         121           0    *|
-        field |         5           1           4     |
-   field#year |       125          31          94    ?|
-    msa#field |       314         314           0    *|
-         inst |       381           1         380    ?|
-      athr_id |      2473           9        2464    ?|
-------------------------------------------------------+
-? = number of redundant parameters may be higher
-* = FE nested within cluster; treated as redundant for DoF computation
-(11,448 observations deleted)
-(20 missing values generated)
-(20 real changes made)
-(1 observation deleted)
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9   -.1313274    .2066323  -.5653408   .0928045
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-           b |          9    .0977379    .0517955   .0288305   .1816273
+           b |          9    .2212099    .0511023   .1554352    .292031
 (note:  named style none not found in class margin, default attributes used)
 file ../output/figures/es1955_1985_year_firstlast.pdf saved as PDF format
-(22,021 missing values generated)
-(13542 real changes made)
-(8,479 missing values generated)
-N = 4,602; 4,602 balanced groups of size 1
+(22,675 missing values generated)
+(14106 real changes made)
+(8,569 missing values generated)
+N = 4,701; 4,701 balanced groups of size 1
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                            18,117  
+    Matched                            18,807  
     -----------------------------------------
-(8 missing values generated)
-(17,435 missing values generated)
-(17,607 missing values generated)
-(17,598 missing values generated)
-(17,400 missing values generated)
-(17,734 missing values generated)
-(17,283 missing values generated)
-(17,837 missing values generated)
-(17,278 missing values generated)
-(17,907 missing values generated)
-(17,258 missing values generated)
-(17,968 missing values generated)
-(17,278 missing values generated)
-(18,014 missing values generated)
-(17,343 missing values generated)
-(18,032 missing values generated)
-(17,451 missing values generated)
-(18,052 missing values generated)
-(17,500 missing values generated)
-(18,069 missing values generated)
-(17,562 missing values generated)
+(18,089 missing values generated)
+(18,280 missing values generated)
+(18,263 missing values generated)
+(18,071 missing values generated)
+(18,403 missing values generated)
+(17,951 missing values generated)
+(18,508 missing values generated)
+(17,945 missing values generated)
+(18,586 missing values generated)
+(17,900 missing values generated)
+(18,650 missing values generated)
+(17,918 missing values generated)
+(18,695 missing values generated)
+(17,993 missing values generated)
+(18,717 missing values generated)
+(18,106 missing values generated)
+(18,736 missing values generated)
+(18,147 missing values generated)
+(18,754 missing values generated)
+(18,224 missing values generated)
 lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
 lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(17,607 real changes made)
-(510 real changes made)
-(17,400 real changes made)
-(717 real changes made)
-(17,283 real changes made)
-(834 real changes made)
-(17,278 real changes made)
-(839 real changes made)
-(17,258 real changes made)
-(859 real changes made)
-(17,278 real changes made)
-(839 real changes made)
-(17,343 real changes made)
-(774 real changes made)
-(17,451 real changes made)
-(666 real changes made)
-(17,500 real changes made)
-(617 real changes made)
-(17,562 real changes made)
-(555 real changes made)
-(17,435 real changes made)
-(682 real changes made)
-(17,598 real changes made)
-(519 real changes made)
-(17,734 real changes made)
-(383 real changes made)
-(17,837 real changes made)
-(280 real changes made)
-(17,907 real changes made)
-(210 real changes made)
-(17,968 real changes made)
-(149 real changes made)
-(18,014 real changes made)
-(103 real changes made)
-(18,032 real changes made)
-(85 real changes made)
-(18,052 real changes made)
-(65 real changes made)
-(18,069 real changes made)
-(48 real changes made)
-(13,522 missing values generated)
-(13,522 real changes made)
-(dropped 1027 singleton observations)
-(MWFE estimator converged in 154 iterations)
+(18,280 real changes made)
+(527 real changes made)
+(18,071 real changes made)
+(736 real changes made)
+(17,951 real changes made)
+(856 real changes made)
+(17,945 real changes made)
+(862 real changes made)
+(17,900 real changes made)
+(907 real changes made)
+(17,918 real changes made)
+(889 real changes made)
+(17,993 real changes made)
+(814 real changes made)
+(18,106 real changes made)
+(701 real changes made)
+(18,147 real changes made)
+(660 real changes made)
+(18,224 real changes made)
+(583 real changes made)
+(18,089 real changes made)
+(718 real changes made)
+(18,263 real changes made)
+(544 real changes made)
+(18,403 real changes made)
+(404 real changes made)
+(18,508 real changes made)
+(299 real changes made)
+(18,586 real changes made)
+(221 real changes made)
+(18,650 real changes made)
+(157 real changes made)
+(18,695 real changes made)
+(112 real changes made)
+(18,717 real changes made)
+(90 real changes made)
+(18,736 real changes made)
+(71 real changes made)
+(18,754 real changes made)
+(53 real changes made)
+(14,106 missing values generated)
+(14,106 real changes made)
+(dropped 695 singleton observations)
+(MWFE estimator converged in 24 iterations)
 note: lead10 omitted because of collinearity
 
-HDFE Linear regression                            Number of obs   =     13,297
-Absorbing 7 HDFE groups                           F(  20,    121) =       4.32
+HDFE Linear regression                            Number of obs   =     14,210
+Absorbing 6 HDFE groups                           F(  20,    123) =       4.33
 Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.6020
-                                                  Adj R-squared   =     0.3614
-                                                  Within R-sq.    =     0.0096
-Number of clusters (msa)     =        122         Root MSE        =     1.0056
+                                                  R-squared       =     0.7090
+                                                  Adj R-squared   =     0.5609
+                                                  Within R-sq.    =     0.0053
+Number of clusters (msa)     =        124         Root MSE        =     1.3361
 
-                                  (Std. err. adjusted for 122 clusters in msa)
+                                  (Std. err. adjusted for 124 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-       lag10 |  -.6223181   .2320943    -2.68   0.008     -1.08181   -.1628261
-        lag9 |  -.5001208   .3116817    -1.60   0.111    -1.117177    .1169353
-        lag8 |  -.5449925   .1755884    -3.10   0.002     -.892616   -.1973689
-        lag7 |  -.6273726   .1898227    -3.31   0.001    -1.003177   -.2515686
-        lag6 |  -.4996101   .2038823    -2.45   0.016    -.9032489   -.0959713
-        lag5 |  -.4056425   .1538182    -2.64   0.009    -.7101663   -.1011188
-        lag4 |  -.4497441   .0979461    -4.59   0.000    -.6436543   -.2558339
-        lag3 |  -.4142388   .0858519    -4.83   0.000    -.5842052   -.2442724
-        lag2 |  -.3170684   .0865229    -3.66   0.000    -.4883632   -.1457736
-        lag1 |  -.3015916   .0846999    -3.56   0.001    -.4692774   -.1339057
-       treat |  -.4726431   .0867546    -5.45   0.000    -.6443966   -.3008896
-       lead1 |  -.2847651   .0915189    -3.11   0.002    -.4659508   -.1035793
-       lead2 |  -.2130654   .1124187    -1.90   0.060    -.4356279    .0094972
-       lead3 |  -.2583103   .0756398    -3.42   0.001    -.4080594   -.1085613
-       lead4 |   -.141034   .0729834    -1.93   0.056    -.2855239    .0034559
-       lead5 |  -.1349362   .0799475    -1.69   0.094    -.2932134    .0233411
-       lead6 |  -.2626739   .0834201    -3.15   0.002     -.427826   -.0975219
-       lead7 |  -.1836571   .1007792    -1.82   0.071    -.3831762     .015862
-       lead8 |   -.161894   .0740871    -2.19   0.031     -.308569    -.015219
-       lead9 |  -.1540719   .0603295    -2.55   0.012    -.2735101   -.0346337
+       lag10 |   -.344295   .2441989    -1.41   0.161    -.8276718    .1390818
+        lag9 |  -.6753097   .3196139    -2.11   0.037    -1.307966   -.0426535
+        lag8 |  -.0277794   .1968388    -0.14   0.888    -.4174097    .3618509
+        lag7 |  -.3670437   .1858328    -1.98   0.050    -.7348882    .0008009
+        lag6 |  -.2331924    .115856    -2.01   0.046    -.4625222   -.0038626
+        lag5 |  -.4387916   .0947275    -4.63   0.000    -.6262989   -.2512843
+        lag4 |  -.4398956   .1091385    -4.03   0.000    -.6559286   -.2238626
+        lag3 |  -.2102833   .0890485    -2.36   0.020    -.3865494   -.0340172
+        lag2 |  -.2702888   .0987735    -2.74   0.007    -.4658049   -.0747727
+        lag1 |  -.3094995   .0745883    -4.15   0.000    -.4571426   -.1618565
+       treat |  -.3173911   .0664544    -4.78   0.000    -.4489334   -.1858488
+       lead1 |   -.152795   .0879013    -1.74   0.085    -.3267902    .0212003
+       lead2 |  -.1804037    .072861    -2.48   0.015    -.3246276   -.0361799
+       lead3 |  -.1351999   .0675868    -2.00   0.048    -.2689837   -.0014161
+       lead4 |  -.1405905   .0787567    -1.79   0.077    -.2964846    .0153035
+       lead5 |  -.2331754   .0842262    -2.77   0.007     -.399896   -.0664547
+       lead6 |  -.1704743   .0681141    -2.50   0.014    -.3053021   -.0356465
+       lead7 |  -.1098349   .0816798    -1.34   0.181    -.2715151    .0518452
+       lead8 |  -.0341529    .075955    -0.45   0.654    -.1845011    .1161953
+       lead9 |  -.0799388   .0814138    -0.98   0.328    -.2410925    .0812148
       lead10 |          0  (omitted)
-       _cons |  -1.665861   .0386052   -43.15   0.000     -1.74229   -1.589432
+       _cons |  -2.266397   .0223362  -101.47   0.000     -2.31061   -2.222184
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -1984,143 +995,141 @@ Absorbed degrees of freedom:
   Absorbed FE | Categories  - Redundant  = Num. Coefs |
 --------------+---------------------------------------|
          year |        31           0          31     |
-          msa |       122         122           0    *|
         field |         5           1           4     |
+          msa |       124         124           0    *|
    field#year |       135          31         104    ?|
-    msa#field |       379         379           0    *|
-         inst |       468           1         467    ?|
-      athr_id |      3895          11        3884    ?|
+    field#msa |       385         385           0    *|
+      athr_id |      4126           1        4125    ?|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(18,096 observations deleted)
+(18,786 observations deleted)
 (20 missing values generated)
 (20 real changes made)
 (1 observation deleted)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9   -.1851982    .1024008   -.325781  -.0154769
+           b |          9   -.0245982    .1813779  -.3658102   .2817202
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9    .1022129    .0572487   .0168265   .1666554
+           b |          9    .1721034    .0581912   .0763242   .2753466
 (note:  named style none not found in class margin, default attributes used)
 file ../output/figures/es1965_1995_year_firstlast.pdf saved as PDF format
-(33,091 missing values generated)
-(19211 real changes made)
-(13,880 missing values generated)
-N = 6,611; 6,611 balanced groups of size 1
+(34,222 missing values generated)
+(20221 real changes made)
+(14,001 missing values generated)
+N = 6,759; 6,759 balanced groups of size 1
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                            25,809  
+    Matched                            26,980  
     -----------------------------------------
-(7 missing values generated)
-(24,885 missing values generated)
-(25,172 missing values generated)
-(25,032 missing values generated)
-(24,771 missing values generated)
-(25,262 missing values generated)
-(24,614 missing values generated)
-(25,367 missing values generated)
-(24,617 missing values generated)
-(25,489 missing values generated)
-(24,592 missing values generated)
-(25,591 missing values generated)
-(24,667 missing values generated)
-(25,632 missing values generated)
-(24,799 missing values generated)
-(25,668 missing values generated)
-(24,904 missing values generated)
-(25,699 missing values generated)
-(24,972 missing values generated)
-(25,740 missing values generated)
-(25,077 missing values generated)
+(26,004 missing values generated)
+(26,328 missing values generated)
+(26,153 missing values generated)
+(25,912 missing values generated)
+(26,399 missing values generated)
+(25,749 missing values generated)
+(26,512 missing values generated)
+(25,743 missing values generated)
+(26,634 missing values generated)
+(25,700 missing values generated)
+(26,741 missing values generated)
+(25,790 missing values generated)
+(26,785 missing values generated)
+(25,912 missing values generated)
+(26,825 missing values generated)
+(26,039 missing values generated)
+(26,860 missing values generated)
+(26,077 missing values generated)
+(26,904 missing values generated)
+(26,214 missing values generated)
 lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
 lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(25,172 real changes made)
-(637 real changes made)
-(24,771 real changes made)
-(1,038 real changes made)
-(24,614 real changes made)
-(1,195 real changes made)
-(24,617 real changes made)
-(1,192 real changes made)
-(24,592 real changes made)
-(1,217 real changes made)
-(24,667 real changes made)
-(1,142 real changes made)
-(24,799 real changes made)
-(1,010 real changes made)
-(24,904 real changes made)
-(905 real changes made)
-(24,972 real changes made)
-(837 real changes made)
-(25,077 real changes made)
-(732 real changes made)
-(24,885 real changes made)
-(924 real changes made)
-(25,032 real changes made)
-(777 real changes made)
-(25,262 real changes made)
-(547 real changes made)
-(25,367 real changes made)
-(442 real changes made)
-(25,489 real changes made)
-(320 real changes made)
-(25,591 real changes made)
-(218 real changes made)
-(25,632 real changes made)
-(177 real changes made)
-(25,668 real changes made)
-(141 real changes made)
-(25,699 real changes made)
-(110 real changes made)
-(25,740 real changes made)
-(69 real changes made)
-(19,203 missing values generated)
-(19,203 real changes made)
-(dropped 1407 singleton observations)
-(MWFE estimator converged in 115 iterations)
+(26,328 real changes made)
+(652 real changes made)
+(25,912 real changes made)
+(1,068 real changes made)
+(25,749 real changes made)
+(1,231 real changes made)
+(25,743 real changes made)
+(1,237 real changes made)
+(25,700 real changes made)
+(1,280 real changes made)
+(25,790 real changes made)
+(1,190 real changes made)
+(25,912 real changes made)
+(1,068 real changes made)
+(26,039 real changes made)
+(941 real changes made)
+(26,077 real changes made)
+(903 real changes made)
+(26,214 real changes made)
+(766 real changes made)
+(26,004 real changes made)
+(976 real changes made)
+(26,153 real changes made)
+(827 real changes made)
+(26,399 real changes made)
+(581 real changes made)
+(26,512 real changes made)
+(468 real changes made)
+(26,634 real changes made)
+(346 real changes made)
+(26,741 real changes made)
+(239 real changes made)
+(26,785 real changes made)
+(195 real changes made)
+(26,825 real changes made)
+(155 real changes made)
+(26,860 real changes made)
+(120 real changes made)
+(26,904 real changes made)
+(76 real changes made)
+(20,221 missing values generated)
+(20,221 real changes made)
+(dropped 944 singleton observations)
+(MWFE estimator converged in 22 iterations)
 note: lead10 omitted because of collinearity
 
-HDFE Linear regression                            Number of obs   =     18,823
-Absorbing 7 HDFE groups                           F(  20,    137) =       6.40
+HDFE Linear regression                            Number of obs   =     20,134
+Absorbing 6 HDFE groups                           F(  20,    142) =       8.24
 Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.6175
-                                                  Adj R-squared   =     0.3967
-                                                  Within R-sq.    =     0.0069
-Number of clusters (msa)     =        138         Root MSE        =     0.9775
+                                                  R-squared       =     0.7010
+                                                  Adj R-squared   =     0.5519
+                                                  Within R-sq.    =     0.0051
+Number of clusters (msa)     =        143         Root MSE        =     1.4003
 
-                                  (Std. err. adjusted for 138 clusters in msa)
+                                  (Std. err. adjusted for 143 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-       lag10 |  -.3472448   .2545859    -1.36   0.175    -.8506709    .1561813
-        lag9 |  -.2813805   .2729768    -1.03   0.304    -.8211733    .2584123
-        lag8 |  -.5711006   .1800232    -3.17   0.002    -.9270842   -.2151171
-        lag7 |  -.2768472   .1627968    -1.70   0.091    -.5987666    .0450722
-        lag6 |  -.4586223   .2035951    -2.25   0.026    -.8612177   -.0560269
-        lag5 |  -.3021579   .1234458    -2.45   0.016    -.5462636   -.0580522
-        lag4 |  -.4149787    .117806    -3.52   0.001     -.647932   -.1820254
-        lag3 |  -.3075529   .1306161    -2.35   0.020    -.5658373   -.0492685
-        lag2 |  -.0561357   .1125368    -0.50   0.619    -.2786694     .166398
-        lag1 |  -.2256205   .1141692    -1.98   0.050    -.4513822    .0001412
-       treat |  -.3437598    .099807    -3.44   0.001    -.5411213   -.1463982
-       lead1 |  -.1923968   .0884245    -2.18   0.031    -.3672503   -.0175433
-       lead2 |   -.001507   .1129354    -0.01   0.989     -.224829     .221815
-       lead3 |  -.0563109   .0791273    -0.71   0.478    -.2127798     .100158
-       lead4 |   .0294691   .0732448     0.40   0.688    -.1153674    .1743056
-       lead5 |  -.0601993   .0914777    -0.66   0.512    -.2410902    .1206915
-       lead6 |  -.0718819   .0837114    -0.86   0.392    -.2374155    .0936518
-       lead7 |  -.0207465    .104543    -0.20   0.843    -.2274732    .1859802
-       lead8 |  -.0587559    .078832    -0.75   0.457    -.2146408     .097129
-       lead9 |  -.0441369   .0814724    -0.54   0.589     -.205243    .1169692
+       lag10 |  -.0490045   .2215319    -0.22   0.825    -.4869312    .3889223
+        lag9 |   -.350998    .229727    -1.53   0.129    -.8051248    .1031288
+        lag8 |  -.2606699   .1881659    -1.39   0.168    -.6326383    .1112985
+        lag7 |  -.1048106    .148457    -0.71   0.481    -.3982819    .1886608
+        lag6 |  -.4587914   .1589544    -2.89   0.005    -.7730142   -.1445686
+        lag5 |  -.4271158   .1008315    -4.24   0.000    -.6264406   -.2277909
+        lag4 |  -.3857988   .1054906    -3.66   0.000    -.5943339   -.1772638
+        lag3 |  -.2042917   .0791794    -2.58   0.011    -.3608145    -.047769
+        lag2 |  -.3254946   .0971916    -3.35   0.001     -.517624   -.1333652
+        lag1 |   -.279558   .0770837    -3.63   0.000    -.4319379    -.127178
+       treat |   -.358917   .0702303    -5.11   0.000    -.4977491   -.2200849
+       lead1 |  -.1821325   .0831133    -2.19   0.030    -.3464317   -.0178332
+       lead2 |   -.199308   .0742995    -2.68   0.008     -.346184    -.052432
+       lead3 |  -.2249422   .0696597    -3.23   0.002    -.3626462   -.0872382
+       lead4 |  -.1471911   .0741387    -1.99   0.049    -.2937494   -.0006328
+       lead5 |  -.2307475   .0750351    -3.08   0.003    -.3790776   -.0824174
+       lead6 |  -.1971137    .076982    -2.56   0.011    -.3492926   -.0449349
+       lead7 |  -.0880357   .0677714    -1.30   0.196     -.222007    .0459355
+       lead8 |  -.1554068   .0826455    -1.88   0.062    -.3187814    .0079678
+       lead9 |  -.0200692   .0932325    -0.22   0.830    -.2043723    .1642339
       lead10 |          0  (omitted)
-       _cons |  -1.224087    .024138   -50.71   0.000    -1.271818   -1.176356
+       _cons |   -2.38841   .0203966  -117.10   0.000     -2.42873   -2.348089
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -2128,171 +1137,168 @@ Absorbed degrees of freedom:
   Absorbed FE | Categories  - Redundant  = Num. Coefs |
 --------------+---------------------------------------|
          year |        31           0          31     |
-          msa |       138         138           0    *|
         field |         5           1           4     |
-   field#year |       145          31         114    ?|
-    msa#field |       464         464           0    *|
-         inst |       553           1         552    ?|
-      athr_id |      5581          14        5567    ?|
+          msa |       143         143           0    *|
+   field#year |       146          31         115    ?|
+    field#msa |       476         476           0    *|
+      athr_id |      5913           1        5912    ?|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(25,788 observations deleted)
+(26,959 observations deleted)
 (20 missing values generated)
 (20 real changes made)
 (1 observation deleted)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9   -.1094929    .1429276  -.3454801   .1694848
+           b |          9   -.0056615    .1422251  -.1792334   .2305535
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9    .1726798    .0617003   .0332237   .2550896
+           b |          9    .1190084    .0685356   .0488105   .2594888
 (note:  named style none not found in class margin, default attributes used)
 file ../output/figures/es1975_2005_year_firstlast.pdf saved as PDF format
-(48,165 missing values generated)
-(37910 real changes made)
-(10,255 missing values generated)
-N = 14,097; 14,097 balanced groups of size 1
+(49,583 missing values generated)
+(38776 real changes made)
+(10,807 missing values generated)
+N = 14,178; 14,178 balanced groups of size 1
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                            51,747  
+    Matched                            52,954  
     -----------------------------------------
-(94 missing values generated)
-(50,164 missing values generated)
-(50,792 missing values generated)
-(50,376 missing values generated)
-(50,142 missing values generated)
-(50,745 missing values generated)
-(49,803 missing values generated)
-(50,997 missing values generated)
-(49,678 missing values generated)
-(51,190 missing values generated)
-(49,550 missing values generated)
-(51,310 missing values generated)
-(49,640 missing values generated)
-(51,399 missing values generated)
-(49,815 missing values generated)
-(51,470 missing values generated)
-(49,906 missing values generated)
-(51,538 missing values generated)
-(50,073 missing values generated)
-(51,585 missing values generated)
-(50,229 missing values generated)
+(51,317 missing values generated)
+(51,999 missing values generated)
+(51,542 missing values generated)
+(51,325 missing values generated)
+(51,920 missing values generated)
+(50,974 missing values generated)
+(52,181 missing values generated)
+(50,844 missing values generated)
+(52,370 missing values generated)
+(50,694 missing values generated)
+(52,505 missing values generated)
+(50,819 missing values generated)
+(52,586 missing values generated)
+(50,959 missing values generated)
+(52,666 missing values generated)
+(51,077 missing values generated)
+(52,741 missing values generated)
+(51,227 missing values generated)
+(52,791 missing values generated)
+(51,377 missing values generated)
 lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
 lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
-(50,792 real changes made)
-(968 real changes made, 13 to missing)
-(50,142 real changes made)
-(1,617 real changes made, 13 to missing)
-(49,803 real changes made)
-(1,957 real changes made, 13 to missing)
-(49,678 real changes made)
-(2,081 real changes made, 13 to missing)
-(49,550 real changes made)
-(2,209 real changes made, 13 to missing)
-(49,640 real changes made)
-(2,118 real changes made, 13 to missing)
-(49,815 real changes made)
-(1,945 real changes made, 13 to missing)
-(49,906 real changes made)
-(1,853 real changes made, 13 to missing)
-(50,073 real changes made)
-(1,686 real changes made, 13 to missing)
-(50,229 real changes made)
-(1,530 real changes made, 13 to missing)
-(50,164 real changes made)
-(1,596 real changes made, 13 to missing)
-(50,376 real changes made)
-(1,383 real changes made, 13 to missing)
-(50,745 real changes made)
-(1,015 real changes made, 13 to missing)
-(50,997 real changes made)
-(763 real changes made, 13 to missing)
-(51,190 real changes made)
-(570 real changes made, 13 to missing)
-(51,310 real changes made)
-(450 real changes made, 13 to missing)
-(51,399 real changes made)
-(361 real changes made, 13 to missing)
-(51,470 real changes made)
-(290 real changes made, 13 to missing)
-(51,538 real changes made)
-(222 real changes made, 13 to missing)
-(51,585 real changes made)
-(175 real changes made, 13 to missing)
-(37,760 missing values generated)
-(37,760 real changes made)
-(dropped 3592 singleton observations)
-(MWFE estimator converged in 165 iterations)
+(51,999 real changes made)
+(955 real changes made)
+(51,325 real changes made)
+(1,629 real changes made)
+(50,974 real changes made)
+(1,980 real changes made)
+(50,844 real changes made)
+(2,110 real changes made)
+(50,694 real changes made)
+(2,260 real changes made)
+(50,819 real changes made)
+(2,135 real changes made)
+(50,959 real changes made)
+(1,995 real changes made)
+(51,077 real changes made)
+(1,877 real changes made)
+(51,227 real changes made)
+(1,727 real changes made)
+(51,377 real changes made)
+(1,577 real changes made)
+(51,317 real changes made)
+(1,637 real changes made)
+(51,542 real changes made)
+(1,412 real changes made)
+(51,920 real changes made)
+(1,034 real changes made)
+(52,181 real changes made)
+(773 real changes made)
+(52,370 real changes made)
+(584 real changes made)
+(52,505 real changes made)
+(449 real changes made)
+(52,586 real changes made)
+(368 real changes made)
+(52,666 real changes made)
+(288 real changes made)
+(52,741 real changes made)
+(213 real changes made)
+(52,791 real changes made)
+(163 real changes made)
+(38,776 missing values generated)
+(38,776 real changes made)
+(dropped 2604 singleton observations)
+(MWFE estimator converged in 23 iterations)
 note: lead10 omitted because of collinearity
 
-HDFE Linear regression                            Number of obs   =     34,886
-Absorbing 7 HDFE groups                           F(  20,    160) =       6.23
+HDFE Linear regression                            Number of obs   =     36,740
+Absorbing 6 HDFE groups                           F(  20,    174) =      16.86
 Statistics robust to heteroskedasticity           Prob > F        =     0.0000
-                                                  R-squared       =     0.6338
-                                                  Adj R-squared   =     0.4180
-                                                  Within R-sq.    =     0.0036
-Number of clusters (msa)     =        161         Root MSE        =     0.9723
+                                                  R-squared       =     0.7015
+                                                  Adj R-squared   =     0.5434
+                                                  Within R-sq.    =     0.0070
+Number of clusters (msa)     =        175         Root MSE        =     1.5246
 
-                                  (Std. err. adjusted for 161 clusters in msa)
+                                  (Std. err. adjusted for 175 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-       lag10 |  -.2068504   .2157127    -0.96   0.339    -.6328617    .2191609
-        lag9 |  -.1756766   .1771958    -0.99   0.323    -.5256209    .1742677
-        lag8 |  -.3616876   .1843087    -1.96   0.051    -.7256791    .0023039
-        lag7 |  -.2181791   .1087207    -2.01   0.046    -.4328918   -.0034664
-        lag6 |  -.1543726   .1522411    -1.01   0.312    -.4550338    .1462886
-        lag5 |  -.2468756   .1171638    -2.11   0.037    -.4782625   -.0154887
-        lag4 |  -.2644022   .0955131    -2.77   0.006    -.4530311   -.0757732
-        lag3 |  -.2904569     .11164    -2.60   0.010     -.510935   -.0699788
-        lag2 |  -.2730717   .0669217    -4.08   0.000    -.4052354    -.140908
-        lag1 |  -.2367006   .0901638    -2.63   0.009    -.4147652    -.058636
-       treat |  -.3118741   .0740961    -4.21   0.000    -.4582066   -.1655416
-       lead1 |  -.1019727   .1185091    -0.86   0.391    -.3360166    .1320712
-       lead2 |   -.127267   .1099342    -1.16   0.249    -.3443762    .0898422
-       lead3 |  -.0579471   .0834644    -0.69   0.489    -.2227811    .1068869
-       lead4 |  -.0161947   .0694752    -0.23   0.816    -.1534013    .1210119
-       lead5 |   -.041561   .0722066    -0.58   0.566    -.1841618    .1010399
-       lead6 |   .0146089   .0803085     0.18   0.856    -.1439925    .1732104
-       lead7 |  -.0550313   .0791162    -0.70   0.488    -.2112779    .1012153
-       lead8 |   .0578507   .0714271     0.81   0.419    -.0832108    .1989121
-       lead9 |   .0751004   .0696152     1.08   0.282    -.0623827    .2125834
+       lag10 |  -.5221722   .1440086    -3.63   0.000    -.8064007   -.2379438
+        lag9 |  -.3254565   .1440537    -2.26   0.025    -.6097741   -.0411389
+        lag8 |  -.4417055   .1043119    -4.23   0.000     -.647585   -.2358259
+        lag7 |  -.2779636   .0890585    -3.12   0.002    -.4537376   -.1021897
+        lag6 |  -.4428447   .0890225    -4.97   0.000    -.6185477   -.2671418
+        lag5 |  -.3604108   .0818318    -4.40   0.000    -.5219215   -.1989001
+        lag4 |  -.4731315   .1015256    -4.66   0.000    -.6735118   -.2727513
+        lag3 |  -.3894282   .0794651    -4.90   0.000    -.5462678   -.2325886
+        lag2 |  -.4458727   .0753652    -5.92   0.000    -.5946203   -.2971252
+        lag1 |  -.3971002   .0720257    -5.51   0.000    -.5392566   -.2549438
+       treat |  -.4669596   .0569245    -8.20   0.000     -.579311   -.3546081
+       lead1 |  -.2175098   .0878866    -2.47   0.014    -.3909708   -.0440488
+       lead2 |  -.2477312   .0776227    -3.19   0.002    -.4009345   -.0945278
+       lead3 |  -.1815763   .0621541    -2.92   0.004    -.3042494   -.0589032
+       lead4 |  -.1383029   .0740603    -1.87   0.064     -.284475    .0078693
+       lead5 |   -.135124   .0585239    -2.31   0.022    -.2506322   -.0196158
+       lead6 |  -.1160003   .0743586    -1.56   0.121    -.2627612    .0307606
+       lead7 |   -.107843   .0671857    -1.61   0.110    -.2404468    .0247609
+       lead8 |  -.1098102   .0589289    -1.86   0.064    -.2261176    .0064972
+       lead9 |   .0127913   .0740084     0.17   0.863    -.1332786    .1588611
       lead10 |          0  (omitted)
-       _cons |  -.9060213   .0024217  -374.13   0.000    -.9108038   -.9012388
+       _cons |  -2.454051   .0135906  -180.57   0.000    -2.480875   -2.427228
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
 ------------------------------------------------------+
   Absorbed FE | Categories  - Redundant  = Num. Coefs |
 --------------+---------------------------------------|
-         year |        39           0          39     |
-          msa |       161         161           0    *|
+         year |        38           0          38     |
         field |         5           1           4     |
-   field#year |       188          39         149    ?|
-    msa#field |       615         615           0    *|
-         inst |       827           1         826    ?|
-      athr_id |     11142          23       11119    ?|
+          msa |       175         175           0    *|
+   field#year |       187          38         149    ?|
+    field#msa |       641         641           0    *|
+      athr_id |     11695           1       11694    ?|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(51,726 observations deleted)
+(52,933 observations deleted)
 (20 missing values generated)
 (20 real changes made)
 (1 observation deleted)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9   -.0068075    .0632694   -.124987    .082328
+           b |          9    -.011676    .0769651   -.125072   .1191366
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           b |          9    .2086546     .068092   .1094336    .311801
+           b |          9    .2591995    .0751632    .149369   .4098915
 (note:  named style none not found in class margin, default attributes used)
 file ../output/figures/es1985_2023_year_firstlast.pdf saved as PDF format
 
@@ -2300,6 +1306,6 @@ file ../output/figures/es1985_2023_year_firstlast.pdf saved as PDF format
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-11-27 00:42:14
+Makelog ended: 2023-12-17 13:14:37
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------

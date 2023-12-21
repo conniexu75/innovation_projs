@@ -3,25 +3,28 @@ clear all
 capture log close
 program drop _all
 set scheme modern
+graph set window fontface "Arial Narrow"
 pause on
 set seed 8975
 global temp "/export/scratch/cxu_sci_geo/movers"
-global y_name "Effective Paper Publications"
-global ln_y_name "ln(Effective Paper Publications)"
+global y_name "Productivity"
+global pat_adj_wt_name "Patent-to-Paper Citations"
+global ln_patent_name "Log Patent-to-Paper Citations"
+global ln_y_name "Log Productivity"
 global x_name "Cluster Size"
-global ln_x_name "ln(Cluster Size)"
+global ln_x_name "Log Cluster Size"
 global time year 
 program main
-    foreach t in year year_firstlast {
+    foreach t in year_firstlast {
         make_movers, samp(`t')
         qui mover_stats, samp(`t')
         output_tables, samp(`t')
-        event_study, samp(`t') timeframe(20) ymax(0.8) ygap(0.1)
-        event_study, samp(`t') timeframe(10) startyr(1945) endyr(1975) ymax(2)
-        event_study, samp(`t') timeframe(10) startyr(1955) endyr(1985) ymax(1.8)
-        event_study, samp(`t') timeframe(10) startyr(1965) endyr(1995) ymax(1.6)
-        event_study, samp(`t') timeframe(10) startyr(1975) endyr(2005)
-        event_study, samp(`t') timeframe(10) startyr(1985) endyr(2023)
+        event_study, samp(`t') timeframe(20) ymax(1) ygap(0.1)
+        event_study, samp(`t') timeframe(10) startyr(1945) endyr(1975) ymax(1) ygap(0.1)
+        event_study, samp(`t') timeframe(10) startyr(1955) endyr(1985) ymax(1) ygap(0.1)
+        event_study, samp(`t') timeframe(10) startyr(1965) endyr(1995) ymax(1) ygap(0.1)
+        event_study, samp(`t') timeframe(10) startyr(1975) endyr(2005) ymax(1) ygap(0.1)
+        event_study, samp(`t') timeframe(10) startyr(1985) endyr(2023) ymax(1) ygap(0.1)
     }
 end
 
@@ -56,12 +59,14 @@ end
 program mover_stats
     syntax, samp(str)
     use ${temp}/mover_temp_`samp' , clear  
+    gen patented = pat_wt > 0
     gegen msa = group(msa_comb)
-    gen ln_y = ln(cite_affl_wt)
+    gen ln_y = ln(impact_affl_wt)
     gen ln_x = ln(msa_size)
-    rename cite_affl_wt y
+    gen ln_patent = ln(pat_adj_wt)
+    rename impact_affl_wt y
     rename msa_size x
-    foreach var in x y ln_x ln_y {
+    foreach var in ln_x ln_y {
         sum `var' if mover == 0
         mat nonmover = r(mean) \  r(sd) 
         sum `var' if mover == 1 
@@ -76,40 +81,44 @@ program mover_stats
         mat sing_mover_origin = r(mean)\ r(sd)
         sum `var' if mover == 1  & num_moves == 1 & dest==1
         mat sing_mover_dest = r(mean)\ r(sd)
-        mat row = (nonmover, mover , mover_origin, mover_dest, sing_mover, sing_mover_origin, sing_mover_dest)
+        mat row = (nonmover, sing_mover, sing_mover_origin, sing_mover_dest)
         mat stat_`samp' = nullmat(stat_`samp') \ row 
     }
     qui gunique athr_id if mover == 0
     mat N = r(unique)
-    qui gunique athr_id if mover == 1
-    mat N = N, r(unique), r(unique), r(unique)
+*    qui gunique athr_id if mover == 1
+*    mat N = N, r(unique), r(unique), r(unique)
     qui gunique athr_id if mover == 1 & num_moves == 1
     mat N = N, r(unique), r(unique), r(unique)
     mat stat_`samp' = nullmat(stat_`samp') \ N
-    gcollapse (mean) msa_y = y msa_x = x msa_ln_y = ln_y msa_ln_x = ln_x (firstnm) msa, by(msa_comb ${time})
+    gen ln_affl_wt = ln(affl_wt)
+    gcollapse (mean) msa_y = y msa_x = x msa_ln_y = ln_y msa_ln_x = ln_x msa_ln_patent = ln_patent msa_patent = pat_adj_wt msa_patent_rate = patented msa_affl_wt = affl_wt msa_ln_affl_wt = ln_affl_wt (firstnm) msa, by(msa_comb ${time})
     save ${temp}/msa_`samp'_collapsed, replace
 
     use if mover == 1 & num_moves == 1 using ${temp}/mover_temp_`samp' , clear  
-    gen ln_y = ln(cite_affl_wt)
+    gen ln_y = ln(impact_affl_wt)
     gen ln_x = ln(msa_size)
+    gen ln_patent = ln(pat_adj_wt)
+    gen ln_affl_wt = ln(affl_wt)
+    gen patented = pat_wt > 0
     hashsort athr_id which_place year
-    rename cite_affl_wt y
+    rename impact_affl_wt y
     rename msa_size x
-    foreach var in y x  ln_y ln_x {
+    foreach var in y x  ln_y ln_x ln_patent ln_affl_wt patented {
         bys athr_id which_place: egen avg_`var' = mean(`var') 
     }
     hashsort athr_id which_place -year
     gduplicates drop athr_id which_place, force
     merge m:1 msa_comb year using ${temp}/msa_`samp'_collapsed, assert(2 3) keep(3) nogen
     hashsort athr_id which_place year
-    foreach var in msa_x msa_y msa_ln_y msa_ln_x avg_x avg_y avg_ln_y avg_ln_x {
+    foreach var in msa_ln_y msa_ln_x msa_ln_patent avg_ln_y avg_ln_x avg_ln_patent {
         if strpos("`var'", "msa_") > 0 {
-            local type "Destination-Origin Difference in "
+            local type "Destination-Origin Difference in"
             local stem = subinstr("`var'", "msa_","",.)
         }
 
         if strpos("`var'", "avg_") > 0 {
-            local type "Change in "
+            local type "Change in"
             local stem = subinstr("`var'", "avg_","",.)
         }
         by athr_id: gen `var'_diff = `var'[_n+1] - `var'
@@ -117,30 +126,25 @@ program mover_stats
         local N = r(N)
         local mean : dis %3.2f r(mean)
         local sd : dis %3.2f r(sd)
-        tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) xtitle("`type' ${`stem'_name}", size(vsmall)) color(teal) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N = `N'" ///
+        tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) xtitle("`type' ${`stem'_name}", size(vsmall)) color(edkblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (Movers) = `N'" ///
                                                         "Mean = `mean'" ///
-                                                        "            (`sd')") pos(1) ring(0))
+                                                        "            (`sd')") pos(1) ring(0) size(vsmall) region(fcolo(none)))
         graph export ../output/figures/`var'_diff_`samp'.pdf, replace
     }
-    reg msa_ln_y_diff msa_ln_x_diff
-    local coef : dis %3.2f _b[msa_ln_x_diff]
-    binscatter2 msa_ln_y_diff msa_ln_x_diff,  xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Difference in ln(Cluster Size)", size(vsmall)) ytitle("Destination-Origin Difference in  ln(Effective Paper Publcations)", size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) ring(0))
-    graph export ../output/figures/msa_origin_dest_`samp'.pdf , replace
-
-    reg avg_ln_y_diff msa_ln_x_diff 
-    local coef : dis %3.2f _b[msa_ln_x_diff]
-    binscatter2 avg_ln_y_diff msa_ln_y_diff,  xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Difference in ln(Custer Size)", size(vsmall)) ytitle("Change in ln(Effective Paper Publication) after Move", size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) ring(0))
-    graph export ../output/figures/self_on_msa_`samp'.pdf , replace
 
     reg avg_ln_y_diff msa_ln_y_diff 
+    local N = e(N)
     local coef : dis %3.2f _b[msa_ln_y_diff]
-    binscatter2 avg_ln_y_diff msa_ln_y_diff,  xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Difference in ln(Effective Paper Publications)", size(vsmall)) ytitle("Change in ln(Effective Paper Publication) after Move", size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) ring(0))
+    binscatter2 avg_ln_y_diff msa_ln_y_diff,  mcolor(gs5) lcolor(ebblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Difference in Log Productivity", size(vsmall)) ytitle("Change in Log Productivity after Move", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
+                                                            "Slope = `coef'") pos(5) ring(0) size(vsmall) region(fcolor(none)))
     graph export ../output/figures/place_effect_desc_`samp'.pdf , replace
     
-    reg avg_ln_y_diff avg_ln_x_diff
-    local coef : dis %3.2f _b[avg_ln_x_diff]
-    binscatter2 avg_ln_y_diff avg_ln_x_diff,  xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Change in ln(Effective Paper Publications) after Move", size(vsmall)) ytitle("Change in ln(Effective Paper Publication) after Move", size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) ring(0))
-    graph export ../output/figures/self_bs_`samp'.pdf , replace
+    reg avg_ln_patent_diff msa_ln_y_diff 
+    local N = e(N)
+    local coef : dis %3.2f _b[msa_ln_y_diff]
+    binscatter2 avg_ln_patent_diff msa_ln_y_diff,  mcolor(gs5) lcolor(ebblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) ytitle("Change in Log Paper-to-Patent Citations after Move", size(vsmall)) xtitle("Destination-Origin Difference in Log Productivity", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
+                                                                             "Slope = `coef'") pos(5) ring(0) size(vsmall) region(fcolor(none)))
+    graph export ../output/figures/place_productivity_patent_bs_`samp'.pdf , replace
     gcontract athr_id avg_ln_y_diff avg_ln_x_diff msa_ln_y_diff msa_ln_x_diff year
     drop _freq
     drop if mi(avg_ln_y_diff)
@@ -152,7 +156,7 @@ program event_study
     syntax, samp(str) timeframe(int) [startyr(int 1945) endyr(int 2023) ymax(real 1) ygap(real 0.2)] 
     cap mat drop _all  
     use if mover == 1 & num_moves == 1 & inrange(year, `startyr', `endyr')  using ${temp}/mover_temp_`samp' , clear  
-    keep athr_id inst field year msa_comb cite_affl_wt msa_size which_place inst_id
+    keep athr_id inst field year msa_comb impact_affl_wt msa_size which_place inst_id
     hashsort athr_id year
     by athr_id: gen move = which_place != which_place[_n+1] &  _n != _N
     gen move_year = year if move == 1
@@ -166,7 +170,7 @@ program event_study
     gegen msa = group(msa_comb)
     rename inst inst_name
     gegen inst = group(inst_id)
-    gen ln_y = ln(cite_affl_wt)
+    gen ln_y = ln(impact_affl_wt)
     gen ln_x = ln(msa_size)
     forval i = 1/`timeframe' {
         gen lag`i' = 1 if rel == -`i'
@@ -185,7 +189,7 @@ program event_study
         local leads `leads' lead`i'
         local lags lag`i' `lags'
     }
-    reghdfe ln_y `lags' treat `leads' if inrange(rel,-`timeframe',`timeframe'), absorb(year msa field field#year msa#field  inst athr_id) vce(cluster msa)
+    reghdfe ln_y `lags' treat `leads' if inrange(rel,-`timeframe',`timeframe'), absorb(year field msa field#year field#msa athr_id) vce(cluster msa)
     local normalize = _b[lag1]
     foreach var in `lags' treat `leads' {
         mat row = _b[`var']-`normalize', _se[`var']
@@ -209,11 +213,11 @@ program event_study
     sum b if inrange(rel, 1,`timeframe')
     local post_mean : di %3.2f r(mean)
     local end = `timeframe' - 1
-    tw rcap ub lb rel if rel != -1,  lcolor(gs10) || scatter b rel, mcolor(lavender) xlab(-`timeframe'(1)`end', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+    tw rcap ub lb rel if rel != -1,  lcolor(gs10) || scatter b rel, mcolor(ebblue) xlab(-`timeframe'(1)`end', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
       yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(purple%50) lpattern(dash)) plotregion(margin(none)) ///
-      legend(on order(- "Num. Movers = `num_movers'" ///
+      legend(on order(- "N (Movers) = `num_movers'" ///
                                                         "Pre-period mean = `pre_mean'" ///
-                                                        "Post-period mean = `post_mean'") pos(5) ring(0) size(vsmall)) xtitle("Relative Year to Move", size(vsmall)) ytitle("ln(Effective Paper Publications)", size(vsmall))
+                                                        "Post-period mean = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
     graph export ../output/figures/es`startyr'_`endyr'_`samp'.pdf, replace
     restore
 end

@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-11-28 23:55:38
+Makelog started: 2023-12-05 22:06:07
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_w_clinical/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -38,6 +38,9 @@ Notes:
 . program drop _all
 
 . set scheme modern
+
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
 
 . pause on
 
@@ -254,6 +257,6 @@ Notes:
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-11-28 23:55:54
+Makelog ended: 2023-12-05 22:06:20
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_w_clinical/code
 --------------------------------------------------------------------------------
