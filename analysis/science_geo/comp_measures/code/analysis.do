@@ -17,12 +17,12 @@ program main
     global msa_world_name "metropolitan areas"
     global msa_c_world_name "metropolitan areas"
     global inst_name "institutions"
-    comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(cite_affl_wt)
+    comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(impact_affl_wt)
     comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(impact_cite_affl_wt)
 
     comp_vars, samp(all_all_jrnls) var1(pat_adj_wt) var2(frnt_adj_wt)
     comp_vars, samp(all_all_jrnls) var1(pat_adj_wt) var2(body_adj_wt)
-    mat corr_var = corr_uw_wt \ corr_uw_if_wt 
+    mat corr_var = corr_uw_if \ corr_uw_if_wt 
     mat corr_pat = corr_pat_frnt \ corr_pat_body 
     mat corr_measures = corr_var \ corr_pat
     foreach file in corr_var corr_pat corr_measures {

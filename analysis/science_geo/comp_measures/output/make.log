@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-12-20 23:42:28
+Makelog started: 2023-12-21 00:07:17
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_measures/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -59,12 +59,12 @@ not available in non-GUI version
   6.     global msa_world_name "metropolitan areas"
   7.     global msa_c_world_name "metropolitan areas"
   8.     global inst_name "institutions"
-  9.     comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(cite_affl_wt)
+  9.     comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(impact_affl_wt)
  10.     comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(impact_cite_affl_wt)
  11. 
 .     comp_vars, samp(all_all_jrnls) var1(pat_adj_wt) var2(frnt_adj_wt)
  12.     comp_vars, samp(all_all_jrnls) var1(pat_adj_wt) var2(body_adj_wt)
- 13.     mat corr_var = corr_uw_wt \ corr_uw_if_wt 
+ 13.     mat corr_var = corr_uw_if \ corr_uw_if_wt 
  14.     mat corr_pat = corr_pat_frnt \ corr_pat_body 
  15.     mat corr_measures = corr_var \ corr_pat
  16.     foreach file in corr_var corr_pat corr_measures {
@@ -240,15 +240,15 @@ variable lab_share was str1 now str14
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |        200          .5    3.731237   8.00e-07   51.37331
-file ../output/figures/country_uw_wt.pdf saved as PDF format
+      share2 |        200          .5    4.076364   2.08e-06   56.42815
+file ../output/figures/country_uw_if.pdf saved as PDF format
 (1 observation deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
 (4,143 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str36
-(11 real changes made)
+(10 real changes made)
 (4 real changes made)
 (0 real changes made)
 
@@ -258,15 +258,15 @@ variable lab_share was str1 now str36
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |      4,143    .0241371    .2167455          0   8.399132
-file ../output/figures/msa_c_world_uw_wt.pdf saved as PDF format
+      share2 |      4,143    .0241371    .2378349   2.09e-06   8.974401
+file ../output/figures/msa_c_world_uw_if.pdf saved as PDF format
 (1 observation deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
 (17,570 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str46
-(7 real changes made)
+(8 real changes made)
 (0 real changes made)
 (0 real changes made)
 
@@ -276,8 +276,8 @@ variable lab_share was str1 now str46
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |     17,570    .0056915    .0529606          0   3.353051
-file ../output/figures/inst_uw_wt.pdf saved as PDF format
+      share2 |     17,570    .0056915    .0597569   2.27e-06   3.656215
+file ../output/figures/inst_uw_if.pdf saved as PDF format
 (0 observations deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
@@ -448,6 +448,6 @@ file ../output/figures/inst_pat_body.pdf saved as PDF format
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-12-20 23:43:21
+Makelog ended: 2023-12-21 00:07:59
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_measures/code
 --------------------------------------------------------------------------------

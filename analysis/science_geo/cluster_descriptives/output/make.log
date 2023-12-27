@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-12-20 23:28:39
+Makelog started: 2023-12-20 23:52:22
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cluster_descriptives/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -111,58 +111,58 @@ not available in non-GUI version
 >  ///
 >                                                                 "p95 = `p95'"
 > ) pos(1) ring(0) size(vsmall) region(fcolor(none)))
- 19.         graph export ../output/figures/`var'_dist`samp'.pdf, replace
- 20.     }
- 21.     preserve
- 22.     keep if inrange(year, 2015,2022)
- 23.     gcollapse (mean) msa_size cluster_shr, by(msa_comb)
- 24.     gsort - msa_size
- 25.     mkmat msa_size in 1/30, mat(top_30clus_`samp')
- 26.     li in 1/30
- 27.     mkmat msa_size in 1/10, mat(top_10clus_`samp')
- 28.     restore
- 29.     preserve
- 30.     gen has_patent_cite = pat_wt > 0
- 31.     bys athr_id msa_comb: gen athr_cnt = _n == 1
- 32.     gcollapse  (sum) athr_cnt body_adj_wt cite_affl_wt pat_wt affl_wt impa
+ 19.         *graph export ../output/figures/`var'_dist`samp'.pdf, replace
+.     }
+ 20.     preserve
+ 21.     keep if inrange(year, 2015,2022)
+ 22.     gcollapse (mean) msa_size cluster_shr, by(msa_comb)
+ 23.     gsort - msa_size
+ 24.     mkmat msa_size in 1/30, mat(top_30clus_`samp')
+ 25.     li in 1/30
+ 26.     mkmat msa_size in 1/10, mat(top_10clus_`samp')
+ 27.     restore
+ 28.     preserve
+ 29.     gen has_patent_cite = pat_wt > 0
+ 30.     bys athr_id msa_comb: gen athr_cnt = _n == 1
+ 31.     gcollapse  (sum) athr_cnt body_adj_wt cite_affl_wt pat_wt affl_wt impa
 > ct_cite_affl_wt impact_affl_wt (mean) msa_size has_patent_cite, by(msa_comb)
- 33.     qui reg body_adj_wt impact_cite_affl_wt 
- 34.     local coef : dis %3.2f _b[impact_cite_affl_wt]
- 35.     local N = e(N)
- 36.     binscatter2 body_adj_wt impact_cite_affl_wt , xtitle("Productivity", s
+ 32.     qui reg body_adj_wt impact_cite_affl_wt 
+ 33.     local coef : dis %3.2f _b[impact_cite_affl_wt]
+ 34.     local N = e(N)
+ 35.     binscatter2 body_adj_wt impact_cite_affl_wt , xtitle("Productivity", s
 > ize(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue)
 >  mcolor(gs3) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(
 > - "N (MSAs) = `N'" ///
 >                                                                              
 >                                          "Slope = `coef'") pos(5) ring(0) reg
 > ion(fcolor(none)) size(vsmall))
- 37.     graph export ../output/figures/msa_pat_prod_`samp'.pdf, replace
- 38.     gen ln_pat = ln(body_adj_wt)
- 39.     gen ln_y = ln(impact_cite_affl_wt)
- 40.     qui reg ln_pat ln_y 
- 41.     local coef : dis %3.2f _b[ln_y]
- 42.     local N = e(N)
- 43.     binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) yti
+ 36.     *graph export ../output/figures/msa_pat_prod_`samp'.pdf, replace
+.     gen ln_pat = ln(body_adj_wt)
+ 37.     gen ln_y = ln(impact_cite_affl_wt)
+ 38.     qui reg ln_pat ln_y 
+ 39.     local coef : dis %3.2f _b[ln_y]
+ 40.     local N = e(N)
+ 41.     binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) yti
 > tle("Log Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3)
 >   xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSAs)
 >  = `N'" ///
 >                                                                              
 >                                          "Slope = `coef'") pos(5) ring(0) reg
 > ion(fcolor(none)) size(vsmall))
- 44.     graph export ../output/figures/msa_log_pat_prod_`samp'.pdf, replace
- 45.     
+ 42.     *graph export ../output/figures/msa_log_pat_prod_`samp'.pdf, replace
+.     
 .     xtile p  = msa_size, nq(20)
- 46.     gen msa_lab = "" 
- 47.     replace msa_lab =  msa_comb  if msa_comb == "Great Falls, MT" 
- 48.     replace msa_lab =  msa_comb  if msa_comb == "San Diego-Carlsbad, CA" 
- 49.     replace msa_lab =  msa_comb  if msa_comb == "Trenton, NJ" 
- 50.     replace msa_lab =  msa_comb  if msa_comb == "New Haven-Milford , CT" 
- 51.     replace msa_lab =  msa_comb  if msa_comb == "New York-Newark-Jersey Ci
+ 43.     gen msa_lab = "" 
+ 44.     replace msa_lab =  msa_comb  if msa_comb == "Great Falls, MT" 
+ 45.     replace msa_lab =  msa_comb  if msa_comb == "San Diego-Carlsbad, CA" 
+ 46.     replace msa_lab =  msa_comb  if msa_comb == "Trenton, NJ" 
+ 47.     replace msa_lab =  msa_comb  if msa_comb == "New Haven-Milford , CT" 
+ 48.     replace msa_lab =  msa_comb  if msa_comb == "New York-Newark-Jersey Ci
 > ty, NY-NJ-PA" 
- 52.     replace msa_lab =  msa_comb  if msa_comb == "Bay Area, CA" 
- 53.     replace msa_lab =  msa_comb  if msa_comb == "Boston-Cambridge-Newton, 
+ 49.     replace msa_lab =  msa_comb  if msa_comb == "Bay Area, CA" 
+ 50.     replace msa_lab =  msa_comb  if msa_comb == "Boston-Cambridge-Newton, 
 > MA-NH" 
- 54. 
+ 51. 
 . /*    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "G
 > reat Falls, MT" & year == 2015
 >     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San
@@ -188,30 +188,31 @@ not available in non-GUI version
 > affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_l
 > ab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(vsmall)) 
 > ytitle("MSA Productivity", size(vsmall))  jitter(5) legend(off)
- 55.    graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replace
- 56.    
+ 52.    *graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replac
+> e
+.    
 .    xtile p_prod = impact_cite_affl_wt, nq(20)
- 57.    replace msa_lab = ""
- 58.    replace msa_lab =  msa_comb if msa_comb == "San Diego-Carlsbad, CA" 
- 59.    replace msa_lab =  msa_comb if msa_comb == "Bay Area, CA" 
- 60.    replace msa_lab =  msa_comb if msa_comb == "St. Louis, MO-IL" 
- 61.    replace msa_lab =  msa_comb if msa_comb == "Minneapolis-St. Paul-Bloomi
+ 53.    replace msa_lab = ""
+ 54.    replace msa_lab =  msa_comb if msa_comb == "San Diego-Carlsbad, CA" 
+ 55.    replace msa_lab =  msa_comb if msa_comb == "Bay Area, CA" 
+ 56.    replace msa_lab =  msa_comb if msa_comb == "St. Louis, MO-IL" 
+ 57.    replace msa_lab =  msa_comb if msa_comb == "Minneapolis-St. Paul-Bloomi
 > ngton, MN-WI" 
- 62.    replace msa_lab =  msa_comb if msa_comb == "Washington-Arlington-Alexan
+ 58.    replace msa_lab =  msa_comb if msa_comb == "Washington-Arlington-Alexan
 > dria, DC-VA-MD-WV" 
- 63.    replace msa_lab =  msa_comb if msa_comb == "Los Angeles-Long Beach-Anah
+ 59.    replace msa_lab =  msa_comb if msa_comb == "Los Angeles-Long Beach-Anah
 > eim, CA" 
- 64.    replace msa_lab =  msa_comb if msa_comb == "Boston-Cambridge-Newton, MA
+ 60.    replace msa_lab =  msa_comb if msa_comb == "Boston-Cambridge-Newton, MA
 > -NH" 
- 65.    replace msa_lab =  msa_comb if msa_comb == "New York-Newark-Jersey City
+ 61.    replace msa_lab =  msa_comb if msa_comb == "New York-Newark-Jersey City
 > , NY-NJ-PA" 
- 66.    egen clock = mlabvpos(impact_cite_affl_wt body_adj_wt)
- 67.    replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-
+ 62.    egen clock = mlabvpos(impact_cite_affl_wt body_adj_wt)
+ 63.    replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-
 > NJ-PA","Boston-Cambridge-Newton, MA-NH")
- 68.    replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington
+ 64.    replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington
 > , MN-WI", "Washington-Arlington-Alexandria, DC-VA-MD-WV", "San Diego-Carlsbad
 > , CA", "St. Louis, MO-IL", "Bay Area, CA")
- 69.    /*replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "
+ 65.    /*replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "
 > Flint, MI" & year == 2006
 >    replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Linco
 > ln, NE" & year == 2005 
@@ -228,10 +229,10 @@ not available in non-GUI version
 >    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bost
 > on-Cambridge-Newton, MA-NH" & year == 2000 */
 .    qui reg body_adj_wt impact_cite_affl_wt 
- 70.    local coef : dis %3.2f _b[impact_cite_affl_wt]
- 71.    local cons : dis %3.2f _b[_cons]
- 72.    local N = e(N)
- 73.    tw scatter body_adj_wt impact_cite_affl_wt , mcolor(gs13%50) msize(vsma
+ 66.    local coef : dis %3.2f _b[impact_cite_affl_wt]
+ 67.    local cons : dis %3.2f _b[_cons]
+ 68.    local N = e(N)
+ 69.    tw scatter body_adj_wt impact_cite_affl_wt , mcolor(gs13%50) msize(vsma
 > ll) xlabel(0(5000)60000, labsize(vsmall)) ylab(0(5000)60000, labsize(vsmall))
 >  || ///
 >       scatter body_adj_wt impact_cite_affl_wt if !mi(msa_lab) , mlabvp(clock)
@@ -244,8 +245,8 @@ not available in non-GUI version
 >                                                                              
 >                                          "Slope = `coef'") pos(5) ring(0) reg
 > ion(fcolor(none)) size(vsmall))
- 74.    graph export ../output/figures/pat_prod_scatter_`samp'.pdf, replace
- 75.    /*hashsort p -cite_affl_wt 
+ 70.    graph export ../output/figures/pat_prod_scatter_`samp'.pdf, replace
+ 71.    /*hashsort p -cite_affl_wt 
 >    by p: egen mean_msa = mean(msa_size)
 >    by p: egen mean_cite = mean(cite_affl_wt)
 >    hashsort p -cite_affl_wt  
@@ -347,7 +348,7 @@ not available in non-GUI version
  50.     rename NAME msa_comb
  51.     merge 1:m msa_comb using ../temp/map_samp, assert(1 2 3) keep(1 3) nog
 > en
- 52.     foreach var in impact_cite_affl_wt msa_size body_adj_wt {
+ 52.     foreach var in impact_cite_affl_wt {
  53.         xtile `var'_5 = `var', nq(5)
  54.         qui sum `var' 
  55.         local min : dis %3.2f r(min)
@@ -393,19 +394,19 @@ not available in non-GUI version
 >                                                                              
 >                                          "Slope = `coef'") pos(5) ring(0) reg
 > ion(fcolor(none)) size(vsmall))
- 12.     graph export ../output/figures/pat_prod_`samp'.pdf, replace
- 13.     qui reg ln_pat ln_y 
- 14.     local coef : dis %3.2f _b[ln_y]
- 15.     local N = e(N)
- 16.     binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) yti
+ 12.     *graph export ../output/figures/pat_prod_`samp'.pdf, replace
+.     qui reg ln_pat ln_y 
+ 13.     local coef : dis %3.2f _b[ln_y]
+ 14.     local N = e(N)
+ 15.     binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) yti
 > tle("Log Paper-to-Patent Citations", size(vsmall)) xlab(, labsize(vsmall)) yl
 > ab(, labsize(vsmall)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author
 > -years) = `N'" ///
 >                                                                              
 >                                          "Slope = `coef'") pos(5) ring(0) reg
 > ion(fcolor(none)) size(vsmall))
- 17.     graph export ../output/figures/log_pat_prod_`samp'.pdf, replace
- 18. end
+ 16.     *graph export ../output/figures/log_pat_prod_`samp'.pdf, replace
+. end
 
 . 
 . 
@@ -481,7 +482,7 @@ not available in non-GUI version
 . 
 . program output_tables
   1.     syntax, samp(str) 
-  2.     foreach file in top_10clus top_30clus coef field alt_spec { 
+  2.     foreach file in top_10clus top_30clus coef field { 
   3.          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") m
 > atrix(`file'_`samp') ///
 >            title(<tab:`file'_`samp'>) format(%20.4f) replace
@@ -496,13 +497,6 @@ N = 363,753; 181,162 unbalanced groups of sizes 1 to 49
 (2,272 missing values generated)
 (2 missing values generated)
 (278,852 missing values generated)
-file ../output/figures/impact_cite_affl_wt_distyear_firstlast.pdf saved as
-    PDF format
-file ../output/figures/msa_size_distyear_firstlast.pdf saved as PDF format
-file ../output/figures/ln_y_distyear_firstlast.pdf saved as PDF format
-file ../output/figures/ln_x_distyear_firstlast.pdf saved as PDF format
-file ../output/figures/body_adj_wt_distyear_firstlast.pdf saved as PDF format
-file ../output/figures/ln_pat_distyear_firstlast.pdf saved as PDF format
 (291,246 observations deleted)
 
      +--------------------------------------------------------------------+
@@ -544,10 +538,7 @@ file ../output/figures/ln_pat_distyear_firstlast.pdf saved as PDF format
  29. |    Miami-Fort Lauderdale-West Palm Beach, FL   2806.823   .0029722 |
  30. |                           Salt Lake City, UT   2431.213   .0025846 |
      +--------------------------------------------------------------------+
-file ../output/figures/msa_pat_prod_year_firstlast.pdf saved as PDF format
 (99 missing values generated)
-file ../output/figures/msa_log_pat_prod_year_firstlast.pdf saved as PDF
-    format
 (309 missing values generated)
 variable msa_lab was str1 now str15
 (1 real change made)
@@ -559,8 +550,6 @@ variable msa_lab was str22 now str37
 (1 real change made)
 (1 real change made)
 (1 real change made)
-file ../output/figures/cluster_prod_scatter_year_firstlast.pdf saved as PDF
-    format
 (6 real changes made)
 (1 real change made)
 (1 real change made)
@@ -657,14 +646,10 @@ file ../temp/map_samp.dta saved
     -----------------------------------------
 file ../output/figures/impact_cite_affl_wt_map_year_firstlast.pdf saved as
     PDF format
-file ../output/figures/msa_size_map_year_firstlast.pdf saved as PDF format
-file ../output/figures/body_adj_wt_map_year_firstlast.pdf saved as PDF format
 (0 observations deleted)
 (2,272 missing values generated)
 (2 missing values generated)
 (278,852 missing values generated)
-file ../output/figures/pat_prod_year_firstlast.pdf saved as PDF format
-file ../output/figures/log_pat_prod_year_firstlast.pdf saved as PDF format
 (2 real changes made)
 (2,272 missing values generated)
 (2 missing values generated)
@@ -947,6 +932,6 @@ Absorbed degrees of freedom:
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-12-20 23:34:39
+Makelog ended: 2023-12-20 23:57:41
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cluster_descriptives/code
 --------------------------------------------------------------------------------

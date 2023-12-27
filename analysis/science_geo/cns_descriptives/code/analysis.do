@@ -19,7 +19,7 @@ program main
     global msa_world_name "cities"
     global msa_c_world_name "cities"
     di "OUTPUT START"
-    foreach var in impact_cite_affl_wt body_adj_wt {
+    foreach var in impact_affl_wt body_adj_wt {
         /*di "CNS: `var'"
         athr_loc, data(newfund) samp(cns) wt_var(`var')
         qui trends, data(newfund) samp(cns) wt_var(`var')*/
@@ -28,7 +28,7 @@ program main
         qui trends, data(all) samp(jrnls) wt_var(`var')
     }
     *calc_broad_hhmi, data(`data') samp(`samp') 
-    *top_mesh_terms, data(cns) samp(`samp') 
+    top_mesh_terms, data(all) samp(jrnls) 
     *qui output_tables, data(newfund) samp(cns) 
     qui output_tables, data(all) samp(jrnls) 
 end
@@ -292,7 +292,7 @@ end
 program top_mesh_terms
     syntax, data(str) samp(str) 
     foreach mesh in gen_mesh {
-        use ../external/openalex/contracted_`mesh'_`data'_`samp', clear
+        use ../external/mesh/contracted_`mesh'_`data'_`samp', clear
         gunique pmid
         local total_articles = r(unique)
         qui bys pmid: gen wt = 1/_N
@@ -324,8 +324,9 @@ end
 program output_tables
     syntax, data(str) samp(str)
     cap mat if_comb = top_country_jrnls_if \ top_msa_c_world_jrnls_if
+    cap matrix_to_txt, saving("../output/tables/if_comb.txt") matrix(if_comb) title(<tab:if_comb>) format(%20.4f) replace
     cap mat body_comb = top_country_jrnls_body \ top_msa_c_world_jrnls_body \ top_inst_jrnls_body
-    cap matrix_to_txt, saving("../output/tables/comb.txt") matrix(comb) title(<tab:comb>) format(%20.4f) replace
+    cap matrix_to_txt, saving("../output/tables/body_comb.txt") matrix(body_comb) title(<tab:body_comb>) format(%20.4f) replace
     foreach file in top_country top_msa_c_world top_inst {
         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.txt") matrix(`file'_`samp'_wt) ///
            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace

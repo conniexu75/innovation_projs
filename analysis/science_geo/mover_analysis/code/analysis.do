@@ -19,11 +19,11 @@ program main
         make_movers, samp(`t')
         qui mover_stats, samp(`t')
         output_tables, samp(`t')
-        event_study, samp(`t') timeframe(20) ymax(1) ygap(0.1)
-        event_study, samp(`t') timeframe(10) startyr(1945) endyr(1975) ymax(1) ygap(0.1)
-        event_study, samp(`t') timeframe(10) startyr(1955) endyr(1985) ymax(1) ygap(0.1)
-        event_study, samp(`t') timeframe(10) startyr(1965) endyr(1995) ymax(1) ygap(0.1)
-        event_study, samp(`t') timeframe(10) startyr(1975) endyr(2005) ymax(1) ygap(0.1)
+        event_study, samp(`t') timeframe(20) ymax(1) ygap(0.1) 
+        *event_study, samp(`t') timeframe(10) startyr(1945) endyr(1975) ymax(1) ygap(0.1)
+        *event_study, samp(`t') timeframe(10) startyr(1955) endyr(1985) ymax(1) ygap(0.1)
+        *event_study, samp(`t') timeframe(10) startyr(1965) endyr(1995) ymax(1) ygap(0.1)
+        *event_study, samp(`t') timeframe(10) startyr(1975) endyr(2005) ymax(1) ygap(0.1)
         event_study, samp(`t') timeframe(10) startyr(1985) endyr(2023) ymax(1) ygap(0.1)
     }
 end
@@ -61,10 +61,10 @@ program mover_stats
     use ${temp}/mover_temp_`samp' , clear  
     gen patented = pat_wt > 0
     gegen msa = group(msa_comb)
-    gen ln_y = ln(impact_affl_wt)
+    gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
     gen ln_patent = ln(pat_adj_wt)
-    rename impact_affl_wt y
+    rename impact_cite_affl_wt y
     rename msa_size x
     foreach var in ln_x ln_y {
         sum `var' if mover == 0
@@ -96,15 +96,15 @@ program mover_stats
     save ${temp}/msa_`samp'_collapsed, replace
 
     use if mover == 1 & num_moves == 1 using ${temp}/mover_temp_`samp' , clear  
-    gen ln_y = ln(impact_affl_wt)
+    gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
     gen ln_patent = ln(pat_adj_wt)
     gen ln_affl_wt = ln(affl_wt)
     gen patented = pat_wt > 0
     hashsort athr_id which_place year
-    rename impact_affl_wt y
+    rename impact_cite_affl_wt y
     rename msa_size x
-    foreach var in y x  ln_y ln_x ln_patent ln_affl_wt patented {
+    foreach var in y x  ln_x ln_y ln_patent ln_affl_wt patented {
         bys athr_id which_place: egen avg_`var' = mean(`var') 
     }
     hashsort athr_id which_place -year
@@ -144,7 +144,7 @@ program mover_stats
     local coef : dis %3.2f _b[msa_ln_y_diff]
     binscatter2 avg_ln_patent_diff msa_ln_y_diff,  mcolor(gs5) lcolor(ebblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) ytitle("Change in Log Paper-to-Patent Citations after Move", size(vsmall)) xtitle("Destination-Origin Difference in Log Productivity", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
                                                                              "Slope = `coef'") pos(5) ring(0) size(vsmall) region(fcolor(none)))
-    graph export ../output/figures/place_productivity_patent_bs_`samp'.pdf , replace
+    *graph export ../output/figures/place_productivity_patent_bs_`samp'.pdf , replace
     gcontract athr_id avg_ln_y_diff avg_ln_x_diff msa_ln_y_diff msa_ln_x_diff year
     drop _freq
     drop if mi(avg_ln_y_diff)
@@ -156,22 +156,19 @@ program event_study
     syntax, samp(str) timeframe(int) [startyr(int 1945) endyr(int 2023) ymax(real 1) ygap(real 0.2)] 
     cap mat drop _all  
     use if mover == 1 & num_moves == 1 & inrange(year, `startyr', `endyr')  using ${temp}/mover_temp_`samp' , clear  
-    keep athr_id inst field year msa_comb impact_affl_wt msa_size which_place inst_id
+    keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id
     hashsort athr_id year
     by athr_id: gen move = which_place != which_place[_n+1] &  _n != _N
     gen move_year = year if move == 1
     hashsort athr_id move_year
     by athr_id: replace move_year = move_year[_n-1] if mi(move_year) & !mi(move_year[_n-1])
     gen rel = year - move_year
-    gunique athr_id if rel == 0
-    local num_movers = r(unique)
     merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3) nogen
     hashsort athr_id year
     gegen msa = group(msa_comb)
     rename inst inst_name
     gegen inst = group(inst_id)
-    gen ln_y = ln(impact_affl_wt)
-    gen ln_x = ln(msa_size)
+    gen ln_y = ln(impact_cite_affl_wt)
     forval i = 1/`timeframe' {
         gen lag`i' = 1 if rel == -`i'
         gen lead`i' = 1 if rel == `i'
@@ -189,7 +186,11 @@ program event_study
         local leads `leads' lead`i'
         local lags lag`i' `lags'
     }
-    reghdfe ln_y `lags' treat `leads' if inrange(rel,-`timeframe',`timeframe'), absorb(year field msa field#year field#msa athr_id) vce(cluster msa)
+    gunique athr_id 
+    local num_movers = r(unique)
+    bys athr_id: egen l2h_move = max(msa_ln_y_diff > 0)
+    bys athr_id: egen h2l_move = max(msa_ln_y_diff < 0)
+    reghdfe ln_y `lags' treat `leads' if inrange(rel,-`timeframe',`timeframe') , absorb(year field msa field#year field#msa athr_id) vce(cluster msa)
     local normalize = _b[lag1]
     foreach var in `lags' treat `leads' {
         mat row = _b[`var']-`normalize', _se[`var']

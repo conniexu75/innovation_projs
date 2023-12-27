@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-12-20 23:36:59
+Makelog started: 2023-12-26 19:56:44
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -62,7 +62,7 @@ not available in non-GUI version
   8.     global msa_world_name "cities"
   9.     global msa_c_world_name "cities"
  10.     di "OUTPUT START"
- 11.     foreach var in impact_cite_affl_wt body_adj_wt {
+ 11.     foreach var in impact_affl_wt body_adj_wt {
  12.         /*di "CNS: `var'"
 >         athr_loc, data(newfund) samp(cns) wt_var(`var')
 >         qui trends, data(newfund) samp(cns) wt_var(`var')*/
@@ -71,10 +71,10 @@ not available in non-GUI version
  14.         qui trends, data(all) samp(jrnls) wt_var(`var')
  15.     }
  16.     *calc_broad_hhmi, data(`data') samp(`samp') 
-.     *top_mesh_terms, data(cns) samp(`samp') 
-.     *qui output_tables, data(newfund) samp(cns) 
+.     top_mesh_terms, data(all) samp(jrnls) 
+ 17.     *qui output_tables, data(newfund) samp(cns) 
 .     qui output_tables, data(all) samp(jrnls) 
- 17. end
+ 18. end
 
 . 
 . program athr_loc
@@ -412,7 +412,7 @@ not available in non-GUI version
 . program top_mesh_terms
   1.     syntax, data(str) samp(str) 
   2.     foreach mesh in gen_mesh {
-  3.         use ../external/openalex/contracted_`mesh'_`data'_`samp', clear
+  3.         use ../external/mesh/contracted_`mesh'_`data'_`samp', clear
   4.         gunique pmid
   5.         local total_articles = r(unique)
   6.         qui bys pmid: gen wt = 1/_N
@@ -446,69 +446,71 @@ not available in non-GUI version
 . program output_tables
   1.     syntax, data(str) samp(str)
   2.     cap mat if_comb = top_country_jrnls_if \ top_msa_c_world_jrnls_if
-  3.     cap mat body_comb = top_country_jrnls_body \ top_msa_c_world_jrnls_bod
+  3.     cap matrix_to_txt, saving("../output/tables/if_comb.txt") matrix(if_co
+> mb) title(<tab:if_comb>) format(%20.4f) replace
+  4.     cap mat body_comb = top_country_jrnls_body \ top_msa_c_world_jrnls_bod
 > y \ top_inst_jrnls_body
-  4.     cap matrix_to_txt, saving("../output/tables/comb.txt") matrix(comb) ti
-> tle(<tab:comb>) format(%20.4f) replace
-  5.     foreach file in top_country top_msa_c_world top_inst {
-  6.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.t
+  5.     cap matrix_to_txt, saving("../output/tables/body_comb.txt") matrix(bod
+> y_comb) title(<tab:body_comb>) format(%20.4f) replace
+  6.     foreach file in top_country top_msa_c_world top_inst {
+  7.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.t
 > xt") matrix(`file'_`samp'_wt) ///
 >            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace
-  7.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt"
+  8.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt"
 > ) matrix(`file'_`samp') ///
 >            title(<tab:`file'_`samp'>) format(%20.4f) replace
-  8.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.t
+  9.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.t
 > xt") matrix(`file'_`samp'_if) ///
 >            title(<tab:`file'_`samp'_if>) format(%20.4f) replace
-  9.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_w
+ 10.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_w
 > t.txt") matrix(`file'_`samp'_if_wt) ///
 >            title(<tab:`file'_`samp'_if_wt>) format(%20.4f) replace
- 10.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.
+ 11.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.
 > txt") matrix(`file'_`samp'_pat) ///
 >            title(<tab:`file'_`samp'_pat>) format(%20.4f) replace
- 11.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_frnt
+ 12.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_frnt
 > .txt") matrix(`file'_`samp'_frnt) ///
 >            title(<tab:`file'_`samp'_frnt>) format(%20.4f) replace
- 12.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_body
+ 13.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_body
 > .txt") matrix(`file'_`samp'_body) ///
 >            title(<tab:`file'_`samp'_body>) format(%20.4f) replace
- 13.          }
- 14.  end
+ 14.          }
+ 15.  end
 
 . ** 
 . main
 OUTPUT START
-ALL: impact_cite_affl_wt
+ALL: impact_affl_wt
 (107 real changes made)
-(file ../temp/rankings_country_if_wt.dta not found)
-file ../temp/rankings_country_if_wt.dta saved
+(file ../temp/rankings_country_if.dta not found)
+file ../temp/rankings_country_if.dta saved
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   52.03459 |
-  2. |          China   10.19153 |
-  3. | United Kingdom   8.402671 |
-  4. |        Germany   6.004064 |
-  5. |         Canada   2.208723 |
+  1. |  United States   52.16246 |
+  2. |          China   9.338179 |
+  3. | United Kingdom   8.025126 |
+  4. |        Germany   5.668947 |
+  5. |         Canada   2.542314 |
      |---------------------------|
-  6. |          Japan   2.124915 |
-  7. |         France   1.996941 |
-  8. |    Switzerland   1.993463 |
-  9. |      Australia   1.868339 |
- 10. |    Netherlands   1.789174 |
+  6. |          Japan   2.485297 |
+  7. |    Switzerland   2.413446 |
+  8. |         France   2.317665 |
+  9. |    Netherlands   1.839935 |
+ 10. |      Australia   1.611957 |
      |---------------------------|
- 11. |         Sweden   1.285737 |
- 12. |         Israel   1.109549 |
- 13. |          Italy   .9963105 |
- 14. |          Spain   .9719577 |
- 15. |        Denmark   .8694921 |
+ 11. |         Israel   1.280963 |
+ 12. |         Sweden   1.216993 |
+ 13. |          Spain   1.109855 |
+ 14. |    South Korea   1.045529 |
+ 15. |          Italy    1.00291 |
      |---------------------------|
- 16. |    South Korea   .8124731 |
- 17. |        Belgium   .7637787 |
- 18. |        Austria   .6036194 |
- 19. |      Singapore   .5773129 |
- 20. |      Hong Kong   .4749806 |
+ 16. |        Austria    .743035 |
+ 17. |        Belgium   .6598715 |
+ 18. |        Denmark    .593981 |
+ 19. |      Singapore   .5481879 |
+ 20. |          India   .3013424 |
      +---------------------------+
 Total articles: 141560
 (0 real changes made)
@@ -517,37 +519,37 @@ Total articles: 141560
       +--------------------------------+
       | msa_c_~d   impact~t       perc |
       |--------------------------------|
- 113. |            175.2716   .1238144 |
+  59. |            411.4429   .2906491 |
       +--------------------------------+
-(file ../temp/rankings_msa_c_world_if_wt.dta not found)
-file ../temp/rankings_msa_c_world_if_wt.dta saved
+(file ../temp/rankings_msa_c_world_if.dta not found)
+file ../temp/rankings_msa_c_world_if.dta saved
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   10.34697 |
-  2. |                         Bay Area, US   7.851941 |
-  3. |      New York-Newark-Jersey City, US   6.907025 |
-  4. |                          Beijing, CN   5.256803 |
-  5. |                           London, GB   2.676303 |
+  1. |          Boston-Cambridge-Newton, US   9.779922 |
+  2. |                         Bay Area, US   7.342592 |
+  3. |      New York-Newark-Jersey City, US    6.30067 |
+  4. |                          Beijing, CN   4.749757 |
+  5. |  Washington-Arlington-Alexandria, US   2.363936 |
      |-------------------------------------------------|
-  6. |                        Cambridge, GB   2.427696 |
-  7. |               San Diego-Carlsbad, US   2.367885 |
-  8. |   Los Angeles-Long Beach-Anaheim, US    2.08862 |
-  9. |  Washington-Arlington-Alexandria, US   2.020933 |
- 10. |          Seattle-Tacoma-Bellevue, US   1.647797 |
+  6. |                        Cambridge, GB   2.305367 |
+  7. |               San Diego-Carlsbad, US   2.287994 |
+  8. |                           London, GB   2.254483 |
+  9. |   Los Angeles-Long Beach-Anaheim, US   2.119907 |
+ 10. |          Seattle-Tacoma-Bellevue, US   1.543239 |
      |-------------------------------------------------|
- 11. | Houston-The Woodlands-Sugar Land, US   1.544563 |
- 12. |        Baltimore-Columbia-Towson, US    1.43212 |
- 13. |                           Oxford, GB   1.363526 |
- 14. |   Philadelphia-Camden-Wilmington, US   1.350494 |
- 15. |                New Haven-Milford, US   1.324537 |
+ 11. | Houston-The Woodlands-Sugar Land, US   1.483217 |
+ 12. |   Philadelphia-Camden-Wilmington, US    1.45085 |
+ 13. |                New Haven-Milford, US   1.359939 |
+ 14. |           Research Triangle Park, US   1.315857 |
+ 15. |                            Paris, FR   1.277142 |
      |-------------------------------------------------|
- 16. |                        St. Louis, US   1.308731 |
- 17. |           Research Triangle Park, US   1.224769 |
- 18. |                            Paris, FR   1.161713 |
- 19. |                           Ithaca, US   .9370157 |
- 20. |                          Toronto, CA   .9368246 |
+ 16. |                           Oxford, GB   1.114447 |
+ 17. |                          Toronto, CA   1.071306 |
+ 18. |        Baltimore-Columbia-Towson, US   1.037501 |
+ 19. |         Chicago-Naperville-Elgin, US   1.030394 |
+ 20. |                           Ithaca, US   .9532866 |
      +-------------------------------------------------+
 Total articles: 141560
 (0 real changes made)
@@ -556,73 +558,73 @@ Total articles: 141560
        +----------------------------+
        | inst   impact~t       perc |
        |----------------------------|
-    1. |         7156.91   5.055743 |
+    1. |        9176.843   6.482652 |
        +----------------------------+
-(file ../temp/rankings_inst_if_wt.dta not found)
-file ../temp/rankings_inst_if_wt.dta saved
+(file ../temp/rankings_inst_if.dta not found)
+file ../temp/rankings_inst_if.dta saved
 
      +----------------------------------------------------------------+
      |                                                inst       perc |
      |----------------------------------------------------------------|
-  1. |                                  Harvard University   3.807291 |
-  2. |                                 Stanford University   2.906967 |
-  3. |                         Chinese Academy of Sciences   1.932839 |
-  4. |               Massachusetts Institute of Technology   1.770385 |
-  5. |             University of California, San Francisco   1.688061 |
+  1. |                                  Harvard University   3.687127 |
+  2. |                                 Stanford University   3.032335 |
+  3. |             University of California, San Francisco   1.766154 |
+  4. |               Massachusetts Institute of Technology   1.715312 |
+  5. |                         Chinese Academy of Sciences   1.595938 |
      |----------------------------------------------------------------|
-  6. |                       National Institutes of Health   1.366971 |
-  7. |                            Johns Hopkins University   1.245512 |
-  8. |                 University of California, San Diego   1.190953 |
-  9. |                                Mass General Brigham   1.160255 |
- 10. |                  University of California, Berkeley   1.158607 |
+  6. |                       National Institutes of Health   1.532877 |
+  7. |                                  Max Planck Society   1.458607 |
+  8. |                                     Yale University   1.176987 |
+  9. |                 University of California, San Diego   1.138439 |
+ 10. |                                Mass General Brigham   1.089887 |
      |----------------------------------------------------------------|
- 11. |                                  Max Planck Society   1.137298 |
- 12. |                                     Yale University   1.133742 |
- 13. |                                 New York University   1.028731 |
- 14. |                  Washington University in St. Louis   1.024904 |
- 15. |              Memorial Sloan Kettering Cancer Center   1.017536 |
+ 11. |                                 Columbia University   .9848566 |
+ 12. |                          University of Pennsylvania   .9753354 |
+ 13. |                              Rockefeller University   .9407855 |
+ 14. |                                   Boston University    .937872 |
+ 15. |                                  Cornell University   .9202494 |
      |----------------------------------------------------------------|
- 16. |                                   Boston University   .9831016 |
- 17. |                                  Cornell University   .9586104 |
- 18. |                          University of Pennsylvania   .9001213 |
- 19. |                            University of Washington   .8917575 |
- 20. |             Icahn School of Medicine at Mount Sinai   .8730353 |
+ 16. |              Memorial Sloan Kettering Cancer Center   .9019318 |
+ 17. |                  University of California, Berkeley   .8802395 |
+ 18. |                            Johns Hopkins University   .8660749 |
+ 19. |                             University of Cambridge   .8619183 |
+ 20. |                                University of Oxford   .7571538 |
      |----------------------------------------------------------------|
- 21. |                                 Columbia University   .8701859 |
- 22. |                                University of Oxford    .825713 |
- 23. |                             University of Cambridge   .8038968 |
- 24. |                                   Peking University   .7453902 |
- 25. |                              Rockefeller University   .6939558 |
+ 21. |                            University of Washington   .7539535 |
+ 22. |                  Washington University in St. Louis   .7509714 |
+ 23. |                                   Peking University   .7198046 |
+ 24. |                                 New York University   .6876833 |
+ 25. |                       Weizmann Institute of Science   .6784875 |
      |----------------------------------------------------------------|
- 26. |                                     Broad Institute   .6760045 |
- 27. |    Helmholtz Association of German Research Centres   .6482461 |
- 28. |                           Wellcome Sanger Institute   .6392254 |
- 29. |                       Weizmann Institute of Science   .5996952 |
- 30. |                           DeepMind (United Kingdom)   .5966678 |
+ 26. |               University of California, Los Angeles   .6587516 |
+ 27. |             Icahn School of Medicine at Mount Sinai   .6394244 |
+ 28. |                            Medical Research Council   .6157824 |
+ 29. |                                Princeton University   .5582177 |
+ 30. |                        Dana-Farber Cancer Institute   .5504862 |
      |----------------------------------------------------------------|
- 31. |                        Dana-Farber Cancer Institute   .5947618 |
- 32. | The University of Texas Southwestern Medical Center   .5807947 |
- 33. |   The University of Texas MD Anderson Cancer Center   .5775291 |
- 34. |                                Princeton University   .5677081 |
- 35. |                                Karolinska Institute   .5600157 |
+ 31. |                                     Duke University   .5204092 |
+ 32. |                           University College London   .5081586 |
+ 33. |   The University of Texas MD Anderson Cancer Center   .4946045 |
+ 34. |    Helmholtz Association of German Research Centres   .4858078 |
+ 35. | The University of Texas Southwestern Medical Center   .4842179 |
      |----------------------------------------------------------------|
- 36. |                  California Institute of Technology   .5571341 |
- 37. |                            Medical Research Council   .5210508 |
- 38. |               University of California, Los Angeles   .4948495 |
- 39. |                              New York Genome Center   .4915933 |
- 40. |                             Imperial College London   .4691385 |
+ 36. |                  California Institute of Technology   .4782873 |
+ 37. |                               University of Chicago   .4753241 |
+ 38. |                          Baylor College of Medicine   .4700392 |
+ 39. |                                Karolinska Institute   .4526078 |
+ 40. |         University of North Carolina at Chapel Hill   .4507605 |
      |----------------------------------------------------------------|
- 41. |                             University of Hong Kong   .4661032 |
- 42. |         University of North Carolina at Chapel Hill   .4639618 |
- 43. |                            University of Queensland    .458857 |
- 44. |                               University of Chicago   .4486364 |
- 45. |                                 Leibniz Association   .4408221 |
+ 41. |                    University of Michigan–Ann Arbor   .4427162 |
+ 42. |                           Wellcome Sanger Institute    .418442 |
+ 43. |                          Boston Children's Hospital   .4143488 |
+ 44. |                             Northwestern University   .4016656 |
+ 45. |                               University of Toronto   .3985347 |
      |----------------------------------------------------------------|
- 46. |                    University of Michigan–Ann Arbor   .4297154 |
- 47. |                     Technical University of Denmark   .4211297 |
- 48. |                           University College London   .3767803 |
- 49. |                                     Duke University   .3755283 |
- 50. |                          Baylor College of Medicine   .3711893 |
+ 46. |                             Imperial College London   .3981997 |
+ 47. |                          Scripps Research Institute   .3884482 |
+ 48. |      French National Centre for Scientific Research    .386609 |
+ 49. |               Salk Institute for Biological Studies   .3760632 |
+ 50. |                                              Inserm   .3747947 |
      +----------------------------------------------------------------+
 Total articles: 141560
 (0 real changes made)
@@ -740,11 +742,44 @@ file ../temp/rankings_inst_body.dta saved
 Total articles: 141560
 (0 real changes made)
 (0 real changes made)
+N = 1,120,251; 324,925 unbalanced groups of sizes 1 to 18
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+num_gen_mesh |  1,120,251    4.316905    1.764043          1         18
+
+     +-----------------------------------------------------------+
+     |                 gen_mesh   articl~t       perc   cum_perc |
+     |-----------------------------------------------------------|
+  1. |                Receptors   4335.183    1.33421    1.33421 |
+  2. |                      DNA   2893.005    .890361   2.224571 |
+  3. |                      RNA   2797.486   .8609636   3.085535 |
+  4. |                  Neurons   2278.567   .7012594   3.786794 |
+  5. |                    Brain   2172.548   .6686307   4.455425 |
+     |-----------------------------------------------------------|
+  6. |                Neoplasms   1887.862   .5810147   5.036439 |
+  7. |                 Proteins    1866.58   .5744649   5.610905 |
+  8. |    Transcription Factors   1749.101   .5383091   6.149214 |
+  9. |     DNA-Binding Proteins   1411.677   .4344624   6.583676 |
+ 10. |         Breast Neoplasms   1408.975   .4336307   7.017307 |
+     |-----------------------------------------------------------|
+ 11. |       Bacterial Proteins   1376.878   .4237524   7.441059 |
+ 12. |           HIV Infections   1361.522   .4190266   7.860085 |
+ 13. |                Carcinoma   1320.636   .4064434   8.266529 |
+ 14. |         Escherichia coli   1313.117   .4041293   8.670658 |
+ 15. | Saccharomyces cerevisiae   1304.971   .4016221   9.072281 |
+     |-----------------------------------------------------------|
+ 16. |        Membrane Proteins   1282.378   .3946689   9.466949 |
+ 17. |                MicroRNAs   1230.796   .3787938   9.845743 |
+ 18. |            T-Lymphocytes   1214.863   .3738903   10.21963 |
+ 19. |                    Liver   1084.779   .3338552   10.55349 |
+ 20. |        Diabetes Mellitus   1014.214   .3121379   10.86563 |
+     +-----------------------------------------------------------+
 
 . 
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-12-20 23:38:03
+Makelog ended: 2023-12-26 19:58:09
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------

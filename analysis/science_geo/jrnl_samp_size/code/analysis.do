@@ -26,7 +26,7 @@ program main
             mat top_jrnls =  nullmat(top_jrnls) \ top_jrnls_`samp'
             }
     }
-    foreach file in top_jrnls N_samp {
+    foreach file in top_jrnls {
         qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`file') ///
            title(<tab:`file'>) format(%20.4f) replace
          }

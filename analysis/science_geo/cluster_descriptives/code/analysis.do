@@ -51,12 +51,12 @@ program sample_desc
                                                                 "p50 = `p50'" ///
                                                                 "p75 = `p75'" ///
                                                                 "p95 = `p95'") pos(1) ring(0) size(vsmall) region(fcolor(none)))
-        graph export ../output/figures/`var'_dist`samp'.pdf, replace
+        *graph export ../output/figures/`var'_dist`samp'.pdf, replace
     }
     preserve
     keep if inrange(year, 2015,2022)
     gcollapse (mean) msa_size cluster_shr, by(msa_comb)
-    gsort - msa_size
+    gsort -msa_size
     mkmat msa_size in 1/30, mat(top_30clus_`samp')
     li in 1/30
     mkmat msa_size in 1/10, mat(top_10clus_`samp')
@@ -70,7 +70,7 @@ program sample_desc
     local N = e(N)
     binscatter2 body_adj_wt impact_cite_affl_wt , xtitle("Productivity", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
-    graph export ../output/figures/msa_pat_prod_`samp'.pdf, replace
+    *graph export ../output/figures/msa_pat_prod_`samp'.pdf, replace
     gen ln_pat = ln(body_adj_wt)
     gen ln_y = ln(impact_cite_affl_wt)
     qui reg ln_pat ln_y 
@@ -78,7 +78,7 @@ program sample_desc
     local N = e(N)
     binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) ytitle("Log Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3)  xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
-    graph export ../output/figures/msa_log_pat_prod_`samp'.pdf, replace
+    *graph export ../output/figures/msa_log_pat_prod_`samp'.pdf, replace
     
     xtile p  = msa_size, nq(20)
     gen msa_lab = "" 
@@ -101,7 +101,7 @@ program sample_desc
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 1997 
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2012 */
     tw scatter impact_cite_affl_wt msa_size , mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || scatter impact_cite_affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(vsmall)) ytitle("MSA Productivity", size(vsmall))  jitter(5) legend(off)
-   graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replace
+   *graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replace
    
    xtile p_prod = impact_cite_affl_wt, nq(20)
    replace msa_lab = ""
@@ -222,7 +222,7 @@ program  maps
     use usa_msa, clear
     rename NAME msa_comb
     merge 1:m msa_comb using ../temp/map_samp, assert(1 2 3) keep(1 3) nogen
-    foreach var in impact_cite_affl_wt msa_size body_adj_wt {
+    foreach var in impact_cite_affl_wt {
         xtile `var'_5 = `var', nq(5)
         qui sum `var' 
         local min : dis %3.2f r(min)
@@ -256,13 +256,13 @@ program raw_bs
     local N = e(N)
     binscatter2 body_adj_wt impact_cite_affl_wt, xtitle("Productivity", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author-years) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
-    graph export ../output/figures/pat_prod_`samp'.pdf, replace
+    *graph export ../output/figures/pat_prod_`samp'.pdf, replace
     qui reg ln_pat ln_y 
     local coef : dis %3.2f _b[ln_y]
     local N = e(N)
     binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) ytitle("Log Paper-to-Patent Citations", size(vsmall)) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author-years) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
-    graph export ../output/figures/log_pat_prod_`samp'.pdf, replace
+    *graph export ../output/figures/log_pat_prod_`samp'.pdf, replace
 end
 
 
@@ -321,7 +321,7 @@ end
 
 program output_tables
     syntax, samp(str) 
-    foreach file in top_10clus top_30clus coef field alt_spec { 
+    foreach file in top_10clus top_30clus coef field { 
          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
            title(<tab:`file'_`samp'>) format(%20.4f) replace
     }
