@@ -207,8 +207,6 @@ program clean_samps
     drop if has_lancet == 1 | has_london == 1 | has_bmj == 1 | has_jama == 1 | has_editor == 1
     drop is_lancet is_london is_bmj is_jama is_editor has_lancet has_london has_bmj has_jama has_editor
     save ${temp}/cleaned_all_`samp', replace
-
-    //  we don't want to count broad and HHMI if they are affiliated with other institutions. or other funders 
     cap drop author_id 
     cap drop which_athr_counter num_which_athr min_which_athr which_athr2 
     bys pmid athr_id (which_athr which_affl): gen author_id = _n ==1
@@ -216,31 +214,31 @@ program clean_samps
     replace which_athr = which_athr2
     drop which_athr2
     bys pmid which_athr: gen num_affls = _N
-    gen broad_affl = inst == "Broad Institute"
-    gen hhmi_affl = inst == "Howard Hughes Medical Institute"
-    gen funder = (strpos(inst, "Trust")> 0 | strpos(inst, "Foundation")>0 | strpos(inst, "Fund")>0) & !inlist(type, "education", "facility", "healthcare")
-    gen only_broad = num_affls == 1 & broad_affl == 1
-    bys pmid which_athr: egen has_broad_affl = max(broad_affl)
-    replace has_broad_affl = 0 if only_broad == 1
-    drop if inst == "Broad Institute" & only_broad == 0
-    drop if num_affls > 1 & hhmi_affl == 1 & mi(inst)
-    bys pmid which_athr: egen has_hhmi_affl = max(hhmi_affl)
-    drop if num_affls > 1 & hhmi_affl == 1 
-    drop if num_affls > 1 & funder == 1
-    cap drop stateshort
-    cap drop region
-    cap drop inst_id
-    cap drop country_code
+    cap drop region 
+    cap drop inst_id 
     cap drop country
-    cap drop city
-    cap drop us_state
-    cap drop msacode
-    cap drop msatitle 
-    cap drop population
-    cap drop msa_comb
-    cap drop msa_c_world
+    cap drop country_code
+    cap drop city 
+    cap drop inst
+    cap drop new_inst new_id 
     merge m:1 athr_id year using ${year_insts}/filled_in_panel_year, assert(1 2 3) keep(3) nogen
     gduplicates drop pmid athr_id inst_id, force
+    /*
+    foreach var in region inst_id country country_code city inst {
+        rename `var' curr_`var'
+    }
+    keep if which_affl == 1 
+    foreach var in region inst_id country country_code city inst {
+        replace curr_`var' = `var' if _merge == 3 
+    }
+    gduplicates drop pmid athr_id curr_inst_id, force
+    drop region inst_id country country_code city inst
+    foreach var in region inst_id country country_code city inst {
+        rename curr_`var' `var'
+    }
+    drop _merge*/
+    save ${temp}/cleaned_all_`samp'_prewt, replace
+
     // wt_adjust articles 
     qui hashsort pmid which_athr which_affl
     cap drop author_id
@@ -328,6 +326,91 @@ program clean_samps
     qui sum len
     local n = r(max)
     recast str`n' inst, force
+    cap drop n mi_inst has_nonmi_inst population len
+    /*
+    save ${temp}/pre_save, replace
+    import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
+    glevelsof statefull , local(state_names)
+    use ${temp}/pre_save, clear
+    foreach s in `state_names' {
+        replace region = "`s'" if mi(region) & country_code == "US" & strpos(inst, "`s'")>0
+    }
+    replace region = "Pennsylvania" if country_code == "US" & inlist(city, "Pittsburgh" , "Philadelphia", "Radnor", "Swarthmore", "Meadville", "Lancaster" , "Wilkes-Barr")  
+    replace region = "California" if country_code == "US" & inlist(city, "Stanford", "Los Angeles", "San Diego", "La Jolla", "Berkeley", "San Francisco", "Thousand Oaks", "Mountain View", "Sunnyvale")
+    replace region = "California" if country_code == "US" & inlist(city, "Cupertino", "Malibu")
+    replace region = "California" if country_code == "US" & inlist(city, "Novato", "Arcata", "Claremont", "Santa Clara", "Castroville", "Pomona", "Emeryville", "Redwood City", "Santa Barbara")
+    replace region = "California" if country_code == "US" & inlist(city, "San Jose", "South San Francisco", "Pasadena", "Irving", "La Cañada Flintridge", "Duarte", "Menlo Park", "Livermore")
+    replace region = "Massachusetts" if country_code == "US" & inlist(city, "Boston", "Cambridge", "Medford", "Wellesley", "Falmouth", "Woods Hole", "Framingham", "Plymouth", "Worcester")
+    replace region = "Massachusetts" if country_code == "US" & inlist(city, "Amherst", "Amherst Center", "Waltham", "Northampton", "South Hadley", "Andover", "Natick", "Newton")
+    replace region = "Maryland" if country_code == "US" & inlist(city, "Bethesda", "Baltimore", "Silver Spring", "Greenbelt", "Gaithersburg", "Frederick", "Riverdale Park", "Rockville", "Annapolis")
+    replace region = "Maryland" if country_code == "US" & inlist(city, "Towson", "College Park")
+    replace region = "Ohio" if country_code == "US" & inlist(city, "Toledo", "Dayton", "Oxford", "Cleveland", "Ardmore", "Oberlin", "Cincinnati")
+    replace region = "New Jersey" if country_code == "US" & inlist(city, "New Brunswick", "Bridgewater", "Hoboken", "Raritan", "Glassboro", "Whippany", " Woodcliff Lake", "South Plainfield")
+    replace region = "New Jersey" if country_code == "US" & inlist(city, "Montclair", "Princeton")
+    replace region = "Iowa" if country_code == "US" & inlist(city, "Ames", "Des Moines")
+    replace region = "Nevada" if country_code == "US" & inlist(city, "Reno")
+    replace region = "Oklahoma" if country_code == "US" & inlist(city, "Tulsa")
+    replace region = "Arizona" if country_code == "US" & inlist(city, "Phoenix", "Tucson")
+    replace region = "Illinois" if country_code == "US" & inlist(city, "Chicago", "Evanston", "Downers Grove", "Hines")
+    replace region = "New York" if country_code == "US" & inlist(city, "New York", "Ithaca", "Bronx", "Rochester", "Cold Spring Harbor", "Syracuse", "Upton", "Albany", "Manhasset")
+    replace region = "New York" if country_code == "US" & inlist(city, "Binghamton", "Brookville", "Hempstead", "Saranac Lake", "New Hyde Park", "Poughkeepsie", "Buffalo", "Niskayuna")
+    replace region = "Connecticut" if country_code == "US" & inlist(city, "New Haven", "West Haven", "Fairfield", "Stamford")
+    replace region = "Oregon" if country_code == "US" & inlist(city, "Portland")
+    replace region = "Alabama" if country_code == "US" & inlist(city, "Tuskegee")
+    replace region = "District of Columbia" if country_code == "US" & inlist(city, "Washington")
+    replace region = "North Carolina" if country_code == "US" & inlist(city, "Durham", "Asheville", "Chapel Hill")
+    replace region = "South Carolina" if country_code == "US" & inlist(city, "Greenville", "Aiken")
+    replace region = "Wisconsin" if country_code == "US" & inlist(city, "Madison", "Milwaukee")
+    replace region = "Florida" if country_code == "US" & inlist(city, "Coral Gables", "Miami", "Sarasota", "Orlando", "Tampa")
+    replace region = "Maine" if country_code == "US" & inlist(city, "Lewiston")
+    replace region = "Washington" if country_code == "US" & inlist(city, "Seattle", "Richland", "Bothell")
+    replace region = "Colorado" if country_code == "US" & inlist(city, "Denver", "Boulder", "Fort Collins")
+    replace region = "Louisiana" if country_code == "US" & inlist(city, "New Orleans")
+    replace region = "Delaware" if country_code == "US" & inlist(city, "Wilmington")
+    replace region = "Tennessee" if country_code == "US" & inlist(city, "Memphis", "Oak Ridge", "Nashville")
+    replace region = "Georgia" if country_code == "US" & inlist(city, "Atlanta", "Augusta", "Macon", "Decatur")
+    replace region = "Texas" if country_code == "US" & inlist(city, "Houston", "Dallas", "San Antonio", "The Woodlands", "Austin")
+    replace region = "New Mexico" if country_code == "US" & inlist(city, "Los Alamos", "Carlsbad", "Albuquerque", "Santa Fe")
+    replace region = "Michigan" if country_code == "US" & inlist(city, "Ann Arbor", "Detroit", "Flint")
+    replace region = "Rhode Island" if country_code == "US" & inlist(city, "Providence")
+    replace region = "Hawaii" if country_code == "US" & inlist(city, "Honolulu")
+    replace region = "Missouri" if country_code == "US" & inlist(city, "St Louis", "Kirksville")
+    replace region = "Minnesota" if country_code == "US" & inlist(city, "Minneapolis", "Saint Paul")
+    replace region = "Virginia" if country_code == "US" & inlist(city, "Reston", "Williamsburg", "North Laurel", "Arlington", "Richmond", "Harrisonburg", "Front Royal", "Falls Church", "Charlottesville")
+    replace region = "Virginia" if country_code == "US" & inlist(city, "Tysons Corner", "Fairfax")
+    replace region = "New Hampshire" if country_code == "US" & inlist(city, "Hanover")
+    replace region = "Illinois" if country_code == "US" & inlist(city, "Lemont", "North Chicago")
+    replace region = "Utah" if country_code == "US" & inlist(city, "Provo", "Salt Lake City")
+    replace region = "Missouri" if inst_id == "I4210102181"
+    replace region = "New Jersey" if inst_id == "I150569930"
+    replace region = "Maryland" if inst_id == "I166416128"
+    save ${temp}/fill_msa, replace
+
+    import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
+    gcontract stateshort statefull
+    drop _freq
+    drop if mi(stateshort)
+    rename statefull region
+    merge 1:m region using ${temp}/fill_msa, assert(1 2 3) keep(2 3) nogen
+    replace stateshort =  "DC" if region == "District of Columbia"
+    replace stateshort =  "VI" if region == "Virgin Islands, U.S."
+    replace us_state = stateshort if country_code == "US" & mi(us_state)
+    replace city = "Saint Louis" if city == "St Louis"
+    replace city = "Winston Salem" if city == "Winston-Salem"
+    merge m:1 city us_state using ../external/geo/city_msa, assert(1 2 3) keep(1 3) nogen
+    replace msatitle = "Washington-Arlington-Alexandria, DC-VA-MD-WV"  if us_state == "DC"
+    replace msatitle = "New York-Newark-Jersey City, NY-NJ-PA" if city == "The Bronx" & us_state == "NY"
+    replace msatitle = "Miami-Fort Lauderdale-West Palm Beach, FL" if city == "Coral Gables" & us_state == "FL"
+    replace msatitle = "Springfield, MA" if city == "Amherst Center"
+    replace msatitle = "Hartford-West Hartford-East Hartford, CT" if city == "Storrs" & us_state == "CT"
+    replace msatitle = "Tampa-St. Petersburg-Clearwater, FL" if city == "Temple Terrace" & us_state == "FL"
+    replace msatitle = "San Francisco-Oakland-Hayward, CA" if city == "Foster City" & us_state == "CA"
+    replace msa_comb = msatitle if mi(msa_comb)
+    replace  msa_comb = "Research Triangle Park, NC" if msa_comb == "Durham-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | city == "Research Triangle Park" | city == "Res Triangle Park"
+    replace  msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
+    replace msa_c_world = msa_comb if mi(msa_c_world)
+    replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")-1) + ", US" if country == "United States" & !mi(msa_c_world)
+    replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)*/
     save ${output}/cleaned_all_`samp', replace
     preserve
     gcontract id pmid
@@ -335,7 +418,7 @@ program clean_samps
     save ${temp}/pmid_id_xwalk_`samp', replace
     restore
 
-    keep if inrange(pub_date, td(01jan2015), td(31dec2022)) & year >=2015
+    keep if inrange(pub_date, td(01jan2012), td(31dec2022)) & year >=2012
     drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt frnt_wt body_wt frnt_adj_wt body_adj_wt
     qui sum avg_cite_yr
     gen cite_wt = avg_cite_yr/r(sum)

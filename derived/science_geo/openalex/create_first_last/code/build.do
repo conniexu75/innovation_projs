@@ -21,7 +21,7 @@ end
 program create_firstlast 
     syntax, samp(str)
     if "`samp'" == "all_jrnls" {
-        use id pmid which_athr which_affl pub_date year journal_abbr cite_count front_only body_only patent_count athr_id athr_name has_broad_affl has_hhmi_affl stateshort region inst_id country_code country city us_state msacode msatitle population msa_comb msa_c_world inst using ../external/openalex/cleaned_all_`samp', clear
+        use id pmid which_athr which_affl pub_date year journal_abbr cite_count front_only body_only patent_count athr_id athr_name  stateshort region inst_id country_code country city us_state msacode msatitle msa_comb msa_c_world inst using ../external/openalex/cleaned_all_`samp', clear
     }
     if "`samp'" == "clin_med" {
         use  ../external/openalex/cleaned_all_`samp', clear
