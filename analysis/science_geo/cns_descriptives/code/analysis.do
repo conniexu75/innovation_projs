@@ -19,17 +19,17 @@ program main
     global msa_world_name "cities"
     global msa_c_world_name "cities"
     di "OUTPUT START"
-    foreach var in impact_affl_wt body_adj_wt {
-        /*di "CNS: `var'"
+    foreach var in impact_cite_affl_wt body_adj_wt {
+        di "CNS: `var'"
         athr_loc, data(newfund) samp(cns) wt_var(`var')
-        qui trends, data(newfund) samp(cns) wt_var(`var')*/
+        qui trends, data(newfund) samp(cns) wt_var(`var')
         di "ALL: `var'"
         athr_loc, data(all) samp(jrnls) wt_var(`var')
         qui trends, data(all) samp(jrnls) wt_var(`var')
     }
     *calc_broad_hhmi, data(`data') samp(`samp') 
     top_mesh_terms, data(all) samp(jrnls) 
-    *qui output_tables, data(newfund) samp(cns) 
+    qui output_tables, data(newfund) samp(cns) 
     qui output_tables, data(all) samp(jrnls) 
 end
 
@@ -270,7 +270,7 @@ program trends
         if "`loc'" == "country" {
             graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2023, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
-              ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+              ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(3)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
               graphregion(margin(r+27)) plotregion(margin(zero)) ///
               legend(off label(1 ${`loc'_first}) label(2 "United Kingdom") label(3 "China") label(4 "Remaining top 10") label(5 "Remaining places")  ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
@@ -280,7 +280,7 @@ program trends
         if "`loc'" != "country" {
             graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2023, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
-              ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+              ytitle("Share of Worldwide Fundamental Science Research Output", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(`min_year'(3)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
               graphregion(margin(r+`w')) plotregion(margin(zero)) ///
               legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) label(3 "Remaining top 10") label(4 "Remaining places")  ring(1) pos(6) rows(2))
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'.pdf , replace 
@@ -323,7 +323,7 @@ end
 
 program output_tables
     syntax, data(str) samp(str)
-    cap mat if_comb = top_country_jrnls_if \ top_msa_c_world_jrnls_if
+    cap mat if_comb = top_country_jrnls_if_wt \ top_msa_c_world_jrnls_if_wt
     cap matrix_to_txt, saving("../output/tables/if_comb.txt") matrix(if_comb) title(<tab:if_comb>) format(%20.4f) replace
     cap mat body_comb = top_country_jrnls_body \ top_msa_c_world_jrnls_body \ top_inst_jrnls_body
     cap matrix_to_txt, saving("../output/tables/body_comb.txt") matrix(body_comb) title(<tab:body_comb>) format(%20.4f) replace

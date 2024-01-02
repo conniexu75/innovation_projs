@@ -65,6 +65,7 @@ program sample_desc
     gen has_patent_cite = pat_wt > 0
     bys athr_id msa_comb: gen athr_cnt = _n == 1
     gcollapse  (sum) athr_cnt body_adj_wt cite_affl_wt pat_wt affl_wt impact_cite_affl_wt impact_affl_wt (mean) msa_size has_patent_cite, by(msa_comb)
+
     qui reg body_adj_wt impact_cite_affl_wt 
     local coef : dis %3.2f _b[impact_cite_affl_wt]
     local N = e(N)
@@ -208,14 +209,13 @@ program  maps
     save usa_msa_shp_clean.dta, replace
 
     use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/athr_panel_full_`samp', clear
-    bys msa_comb: egen mode = mode(msacode)
-    replace msacode = mode
+*    bys msa_comb: egen mode = mode(msacode)
+*    replace msacode = mode
     merge m:1 msacode using ../external/geo/msas, assert(1 2 3) keep(1 3) nogen
     replace msa_comb = msatitle if !mi(msatitle)
     replace msa_comb = "San Francisco-Oakland-Hayward, CA" if msa_comb == "San Francisco-Oakland-Haywerd, CA"
     replace msa_comb = "Macon-Bibb County, GA" if msa_comb == "Macon, GA"
     bys athr_id msa_comb ${time} : gen count = _n == 1
-    keep if inrange(year , 1945,2022)
     gcollapse (sum) affl_wt impact_cite_affl_wt body_adj_wt (mean) msa_size , by(msa_comb)
     save ../temp/map_samp, replace
     
@@ -281,6 +281,17 @@ program regression
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
     gen ln_x_cluster = ln(cluster_shr)
+    preserve
+    keep if inrange(year, 2015, 2022)
+    keep if inlist(msa_comb, "Ann Arbor, MI", "San Diego-Carlsbad, CA", "Boston-Cambridge-Newton, MA-NH", "Bay Area, CA", "Gainesville, FL")
+    foreach m in "Gainesville, FL" "Ann Arbor, MI" "San Diego-Carlsbad, CA" "Bay Area, CA" "Boston-Cambridge-Newton, MA-NH" {
+        sum impact_cite_affl_wt if msa_comb == "`m'", d
+        mat row = (r(min) , r(p5) , r(p10), r(p25), r(p50) , r(p75), r(p90) , r(p95), r(max), r(mean) , r(sd))
+        sum msa_size if msa_comb == "`m'" 
+        mat row = row , r(mean)
+        mat city_stats_`samp' = nullmat(city_stats_`samp') \ (row)
+    }
+    restore
     reghdfe `reg_eq', noabsorb
     local slope = _b[ln_x]
     if "`samp'" == "year" {
@@ -321,7 +332,7 @@ end
 
 program output_tables
     syntax, samp(str) 
-    foreach file in top_10clus top_30clus coef field { 
+    foreach file in top_10clus top_30clus coef field city_stats { 
          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
            title(<tab:`file'_`samp'>) format(%20.4f) replace
     }
