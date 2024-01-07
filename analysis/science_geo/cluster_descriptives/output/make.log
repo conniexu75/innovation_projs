@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-01-01 23:19:49
+Makelog started: 2024-01-05 12:30:30
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cluster_descriptives/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -422,7 +422,7 @@ not available in non-GUI version
   6.     replace msa_size = 0.0000000000001 if msa_size == 0
   7.     gegen msa = group(msa_comb)
   8.     rename inst inst_name
-  9.     gegen inst = group(inst_name)
+  9.     gegen inst = group(inst_id)
  10.     gegen msa_field = group(msa field)
  11.     gegen year_field = group(year field)
  12.     gen ln_y = ln(impact_cite_affl_wt)
@@ -474,18 +474,18 @@ not available in non-GUI version
  43.             *graph export ../output/figures/final_bs_`samp'.pdf, replace
 .         }
  44.     }
- 45.     reghdfe `reg_eq', absorb(${time} field field#${time} field#msa inst#ye
-> ar inst athr_id) vce(cluster msa)
- 46.     mat instyr_`samp' = nullmat(instyr_`samp'), (`mat_est' \ e(N))
- 47.     mat coef_`samp' = nullmat(coef_`samp') , instyr_`samp'
- 48.     reghdfe `reg_eq', absorb(year msa athr_id field inst) vce(cluster msa)
- 49.     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
- 50.     reghdfe `reg_eq', absorb(year msa athr_id gen_mesh1 gen_mesh2 inst) vc
+ 45. /*    reghdfe `reg_eq', absorb(${time} field field#${time} field#msa inst#
+> year inst athr_id) vce(cluster msa)
+>     mat instyr_`samp' = nullmat(instyr_`samp'), (`mat_est' \ e(N))
+>     mat coef_`samp' = nullmat(coef_`samp') , instyr_`samp'*/
+.     reghdfe `reg_eq', absorb(year msa athr_id field inst) vce(cluster msa)
+ 46.     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
+ 47.     reghdfe `reg_eq', absorb(year msa athr_id gen_mesh1 gen_mesh2 inst) vc
 > e(cluster msa)
- 51.     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
- 52.     mat alt_spec_`samp' = instyr_`samp' , field_`samp'
- 53. /*    reghdfe `reg_eq', absorb(year msa athr_id qualifier_name1 qualifier_
-> name2 inst) vce(cluster msa)
+ 48.     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
+ 49. *    mat alt_spec_`samp' = instyr_`samp' , field_`samp'
+. /*    reghdfe `reg_eq', absorb(year msa athr_id qualifier_name1 qualifier_nam
+> e2 inst) vce(cluster msa)
 >     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
 >     reghdfe `reg_eq', absorb(year msa athr_id term1 term2 inst) vce(cluster m
 > sa)
@@ -506,54 +506,54 @@ not available in non-GUI version
 
 . ** 
 . main
-  363,730
-N = 363,730; 183,645 unbalanced groups of sizes 1 to 48
-(2,258 missing values generated)
-(6 missing values generated)
-(278,868 missing values generated)
-(291,478 observations deleted)
+  367,533
+N = 367,533; 185,374 unbalanced groups of sizes 1 to 48
+(2,295 missing values generated)
+(8 missing values generated)
+(281,639 missing values generated)
+(294,794 observations deleted)
 
-     +----------------------------------------------------------------------+
-     |                                       msa_comb   msa_size   cluste~r |
-     |----------------------------------------------------------------------|
-  1. |          New York-Newark-Jersey City, NY-NJ-PA   21978.48   .0233014 |
-  2. |                 Boston-Cambridge-Newton, MA-NH    20677.6   .0219426 |
-  3. |   Washington-Arlington-Alexandria, DC-VA-MD-WV   18094.24   .0191277 |
-  4. |                                   Bay Area, CA   15336.99   .0163301 |
-  5. |             Los Angeles-Long Beach-Anaheim, CA   8999.559   .0095403 |
-     |----------------------------------------------------------------------|
-  6. |    Philadelphia-Camden-Wilmington, PA-NJ-DE-MD   8001.021   .0084934 |
-  7. |             Chicago-Naperville-Elgin, IL-IN-WI   7282.532   .0077094 |
-  8. |                         San Diego-Carlsbad, CA    6868.58   .0072539 |
-  9. |                     Research Triangle Park, NC    6822.15   .0072228 |
- 10. |           Houston-The Woodlands-Sugar Land, TX   6557.478   .0069142 |
-     |----------------------------------------------------------------------|
- 11. |                    Seattle-Tacoma-Bellevue, WA   6038.397   .0064376 |
- 12. |                  Baltimore-Columbia-Towson, MD   5619.322   .0059394 |
- 13. |              Atlanta-Sandy Springs-Roswell, GA   5147.438   .0054459 |
- 14. |                                  Ann Arbor, MI   3672.315   .0039023 |
- 15. |                                 Pittsburgh, PA   3461.118   .0036592 |
-     |----------------------------------------------------------------------|
- 16. |                               St. Louis, MO-IL   3350.698   .0035691 |
- 17. |                          New Haven-Milford, CT   3255.014   .0034769 |
- 18. |                                    Madison, WI   2869.178   .0030377 |
- 19. |                                     Ithaca, NY   2785.237   .0029631 |
- 20. |        Minneapolis-St. Paul-Bloomington, MN-WI   2733.615   .0028964 |
-     |----------------------------------------------------------------------|
- 21. |        Sacramento--Roseville--Arden-Arcade, CA   2642.459    .002796 |
- 22. |                           Cleveland-Elyria, OH   2568.178   .0026996 |
- 23. |                Dallas-Fort Worth-Arlington, TX   2535.026    .002699 |
- 24. | Nashville-Davidson--Murfreesboro--Franklin, TN   2430.863   .0025687 |
- 25. |                                   Columbus, OH   2355.738   .0025107 |
-     |----------------------------------------------------------------------|
- 26. |                                  Rochester, NY   2282.614   .0024178 |
- 27. |                     Denver-Aurora-Lakewood, CO    2240.55   .0023823 |
- 28. |                                Gainesville, FL   2169.792   .0022994 |
- 29. |                           Cincinnati, OH-KY-IN   1916.382   .0020192 |
- 30. |      Miami-Fort Lauderdale-West Palm Beach, FL   1908.986    .002018 |
-     +----------------------------------------------------------------------+
-(91 missing values generated)
-(303 missing values generated)
+     +-----------------------------------------------------------------------+
+     |                                       msa_comb    msa_size   cluste~r |
+     |-----------------------------------------------------------------------|
+  1. |          New York-Newark-Jersey City, NY-NJ-PA   21968.068   .0233035 |
+  2. |                 Boston-Cambridge-Newton, MA-NH   20632.938      .0219 |
+  3. |   Washington-Arlington-Alexandria, DC-VA-MD-WV   18064.152   .0191008 |
+  4. |                                   Bay Area, CA   15358.969   .0163546 |
+  5. |             Los Angeles-Long Beach-Anaheim, CA   8992.8233   .0095379 |
+     |-----------------------------------------------------------------------|
+  6. |    Philadelphia-Camden-Wilmington, PA-NJ-DE-MD   8007.6526   .0085019 |
+  7. |             Chicago-Naperville-Elgin, IL-IN-WI   7290.9537   .0077198 |
+  8. |                         San Diego-Carlsbad, CA   6881.7731   .0072714 |
+  9. |                     Research Triangle Park, NC   6832.3899    .007235 |
+ 10. |           Houston-The Woodlands-Sugar Land, TX   6536.6355   .0068962 |
+     |-----------------------------------------------------------------------|
+ 11. |                    Seattle-Tacoma-Bellevue, WA   6045.2998   .0064479 |
+ 12. |                  Baltimore-Columbia-Towson, MD   5617.6017   .0059401 |
+ 13. |              Atlanta-Sandy Springs-Roswell, GA     5141.96   .0054418 |
+ 14. |                                  Ann Arbor, MI    3666.932   .0038987 |
+ 15. |                                 Pittsburgh, PA   3499.1498   .0037015 |
+     |-----------------------------------------------------------------------|
+ 16. |                               St. Louis, MO-IL   3339.6528    .003559 |
+ 17. |                          New Haven-Milford, CT    3248.456   .0034725 |
+ 18. |                                    Madison, WI    2872.369   .0030414 |
+ 19. |                                     Ithaca, NY   2786.1415   .0029634 |
+ 20. |        Minneapolis-St. Paul-Bloomington, MN-WI   2761.1962   .0029262 |
+     |-----------------------------------------------------------------------|
+ 21. |        Sacramento--Roseville--Arden-Arcade, CA   2640.6106   .0027964 |
+ 22. |                           Cleveland-Elyria, OH   2563.2336   .0026967 |
+ 23. | Nashville-Davidson--Murfreesboro--Franklin, TN   2485.5318   .0026277 |
+ 24. |                Dallas-Fort Worth-Arlington, TX   2468.1792    .002627 |
+ 25. |                                   Columbus, OH   2349.8801   .0025054 |
+     |-----------------------------------------------------------------------|
+ 26. |                     Denver-Aurora-Lakewood, CO   2238.6043    .002381 |
+ 27. |                                Gainesville, FL   2159.0266   .0022887 |
+ 28. |                           Cincinnati, OH-KY-IN   1942.4211   .0020495 |
+ 29. |      Miami-Fort Lauderdale-West Palm Beach, FL   1907.4023   .0020176 |
+ 30. |            Portland-Vancouver-Hillsboro, OR-WA   1753.3502   .0018468 |
+     +-----------------------------------------------------------------------+
+(83 missing values generated)
+(305 missing values generated)
 variable msa_lab was str1 now str15
 (1 real change made)
 variable msa_lab was str15 now str22
@@ -576,7 +576,7 @@ variable msa_lab was str39 now str44
 (1 real change made)
 (1 real change made)
 (2 real changes made)
-(5 real changes made)
+(4 real changes made)
 file ../output/figures/pat_prod_scatter_year_firstlast.pdf saved as PDF
     format
   (importing .shp file)
@@ -632,166 +632,166 @@ file usa_msa_shp_clean.dta saved
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                         5,235
-        from master                     5,235  
+    Not matched                         5,364
+        from master                     5,364  
         from using                          0  
 
-    Matched                           358,495  
+    Matched                           362,169  
     -----------------------------------------
-(33,532 real changes made)
+(33,938 real changes made)
 (0 real changes made)
-(27 real changes made)
+(26 real changes made)
 (file ../temp/map_samp.dta not found)
 file ../temp/map_samp.dta saved
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                           640
-        from master                       640  
+    Not matched                           638
+        from master                       638  
         from using                          0  
 
-    Matched                               305  
+    Matched                               307  
     -----------------------------------------
 file ../output/figures/impact_cite_affl_wt_map_year_firstlast.pdf saved as
     PDF format
 (0 observations deleted)
-(2,258 missing values generated)
-(6 missing values generated)
-(278,868 missing values generated)
-(6 real changes made)
-(2,258 missing values generated)
-(6 missing values generated)
-(291,478 observations deleted)
-(57,032 observations deleted)
+(2,295 missing values generated)
+(8 missing values generated)
+(281,639 missing values generated)
+(8 real changes made)
+(2,295 missing values generated)
+(8 missing values generated)
+(294,794 observations deleted)
+(57,442 observations deleted)
 
                   (sum) impact_cite_affl_wt
 -------------------------------------------------------------
       Percentiles      Smallest
  1%            0              0
- 5%      .001096              0
-10%      .002192              0       Obs                 672
-25%     .0039821              0       Sum of wgt.         672
+ 5%     .0009203              0
+10%     .0018406              0       Obs                 676
+25%     .0036812              0       Sum of wgt.         676
 
-50%     .0082199                      Mean            .213139
-                        Largest       Std. dev.      1.314297
-75%     .0172162       4.807628
-90%     .0834915       7.193299       Variance       1.727378
-95%     .7348094       21.03561       Skewness       12.70962
-99%      3.82883       21.25325       Kurtosis       194.3949
+50%     .0073625                      Mean           .1656336
+                        Largest       Std. dev.      .9641591
+75%     .0161974       3.637744
+90%     .0657363       4.156103       Variance       .9296028
+95%     .4999015       6.721949       Skewness       14.20298
+99%     3.616452       19.99029       Kurtosis       271.1231
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-    msa_size |        672    2169.792    137.4307       1806       2275
+    msa_size |        676    2159.027     139.369       1786       2263
 
                   (sum) impact_cite_affl_wt
 -------------------------------------------------------------
       Percentiles      Smallest
  1%            0              0
- 5%      .001096              0
-10%     .0023539              0       Obs                 987
-25%     .0054799              0       Sum of wgt.         987
+ 5%     .0012271              0
+10%     .0022087              0       Obs                 985
+25%     .0049587              0       Sum of wgt.         985
 
-50%     .0139739                      Mean            1.06592
-                        Largest       Std. dev.      4.532234
-75%     .1669829       45.84874
-90%     2.146388       48.21935       Variance       20.54114
-95%     4.843875       53.38414       Skewness       8.053288
-99%     20.23916       58.80437       Kurtosis       80.93846
+50%      .012751                      Mean           .9853974
+                        Largest       Std. dev.      4.249258
+75%      .153178       40.60669
+90%     1.861172       44.89216       Variance       18.05619
+95%     4.526474       51.73371       Skewness       8.168456
+99%     19.68128         57.016       Kurtosis       83.87337
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-    msa_size |        987    3672.315    273.1247       3002       3916
+    msa_size |        985    3666.932    273.6121       3004       3915
 
                   (sum) impact_cite_affl_wt
 -------------------------------------------------------------
       Percentiles      Smallest
  1%            0              0
- 5%     .0018788              0
-10%      .003699              0       Obs               2,161
-25%     .0089245              0       Sum of wgt.       2,161
+ 5%     .0016529              0
+10%     .0033058              0       Obs               2,168
+25%     .0081816              0       Sum of wgt.       2,168
 
-50%     .0695762                      Mean           2.067645
-                        Largest       Std. dev.      6.324961
-75%     1.743944       67.04995
-90%     4.835607        67.3098       Variance       40.00513
-95%      9.31208        67.3098       Skewness       9.370194
-99%     32.63284         142.74       Kurtosis       146.0445
+50%     .0548504                      Mean           1.891496
+                        Largest       Std. dev.      5.874408
+75%     1.560341        59.0652
+90%     4.436334        59.0652       Variance       34.50866
+95%     8.508016       64.35387       Skewness       10.23855
+99%     28.63573       141.9804       Kurtosis       179.2067
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-    msa_size |      2,161     6868.58    658.8234       5349       7459
+    msa_size |      2,168    6881.773    658.5043       5337       7464
 
                   (sum) impact_cite_affl_wt
 -------------------------------------------------------------
       Percentiles      Smallest
  1%            0              0
- 5%      .002192              0
-10%     .0037577              0       Obs               4,994
-25%     .0098639              0       Sum of wgt.       4,994
+ 5%     .0018406              0
+10%     .0036812              0       Obs               5,044
+25%     .0089401              0       Sum of wgt.       5,044
 
-50%     .4765732                      Mean           3.085885
-                        Largest       Std. dev.      11.56488
-75%     2.606517       198.9167
-90%     7.505106       225.7791       Variance       133.7466
-95%     13.02773       370.7301       Skewness       18.29525
-99%     34.09951       370.7301       Kurtosis       487.1776
+50%     .3983848                      Mean           2.851947
+                        Largest       Std. dev.      11.01276
+75%     2.308903       181.6684
+90%     6.980129       202.2141       Variance        121.281
+95%     12.07677        368.757       Skewness       19.37246
+99%     32.98954        368.757       Kurtosis       548.6113
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-    msa_size |      4,994    15336.99    796.7044      13224      15964
+    msa_size |      5,044    15358.97    792.5829      13210      15943
 
                   (sum) impact_cite_affl_wt
 -------------------------------------------------------------
       Percentiles      Smallest
  1%            0              0
- 5%     .0018788              0
-10%     .0036533              0       Obs               6,406
-25%     .0094158              0       Sum of wgt.       6,406
+ 5%     .0018406              0
+10%     .0033131              0       Obs               6,424
+25%     .0087429              0       Sum of wgt.       6,424
 
-50%       .40294                      Mean           2.984596
-                        Largest       Std. dev.      8.111266
-75%     2.760162       130.6477
-90%     7.304032       167.9927       Variance       65.79264
-95%     13.53246       167.9927       Skewness       9.575953
-99%     33.89071       200.9847       Kurtosis       157.8431
+50%     .3537764                      Mean           2.793774
+                        Largest       Std. dev.      7.768215
+75%     2.544687        126.395
+90%      6.94017       167.0986       Variance       60.34517
+95%     12.69272       167.0986       Skewness        10.1064
+99%     32.46129       202.1652       Kurtosis       177.0758
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-    msa_size |      6,406     20677.6    1462.379      16913      21724
+    msa_size |      6,424    20632.94    1462.599      16880      21662
 (MWFE estimator converged in 1 iterations)
 
-HDFE Linear regression                            Number of obs   =    361,472
-Absorbing 1 HDFE group                            F(   1, 361470) =   20650.59
+HDFE Linear regression                            Number of obs   =    365,238
+Absorbing 1 HDFE group                            F(   1, 365236) =   19919.31
                                                   Prob > F        =     0.0000
-                                                  R-squared       =     0.0540
-                                                  Adj R-squared   =     0.0540
-                                                  Within R-sq.    =     0.0540
-                                                  Root MSE        =     2.2903
+                                                  R-squared       =     0.0517
+                                                  Adj R-squared   =     0.0517
+                                                  Within R-sq.    =     0.0517
+                                                  Root MSE        =     2.2927
 
 ------------------------------------------------------------------------------
         ln_y | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-        ln_x |   .3863788   .0026887   143.70   0.000      .381109    .3916486
-       _cons |  -6.204955   .0218821  -283.56   0.000    -6.247843   -6.162066
+        ln_x |   .3759362   .0026636   141.14   0.000     .3707156    .3811569
+       _cons |  -6.113987   .0216509  -282.39   0.000    -6.156422   -6.071552
 ------------------------------------------------------------------------------
-(dropped 28 singleton observations)
+(dropped 22 singleton observations)
 (MWFE estimator converged in 7 iterations)
 
-HDFE Linear regression                            Number of obs   =    361,444
-Absorbing 3 HDFE groups                           F(   1,    274) =       3.54
-Statistics robust to heteroskedasticity           Prob > F        =     0.0610
-                                                  R-squared       =     0.1653
-                                                  Adj R-squared   =     0.1644
-                                                  Within R-sq.    =     0.0004
-Number of clusters (msa)     =        275         Root MSE        =     2.1525
+HDFE Linear regression                            Number of obs   =    365,216
+Absorbing 3 HDFE groups                           F(   1,    282) =       3.60
+Statistics robust to heteroskedasticity           Prob > F        =     0.0588
+                                                  R-squared       =     0.1642
+                                                  Adj R-squared   =     0.1634
+                                                  Within R-sq.    =     0.0003
+Number of clusters (msa)     =        283         Root MSE        =     2.1535
 
-                                  (Std. err. adjusted for 275 clusters in msa)
+                                  (Std. err. adjusted for 283 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-        ln_x |   .2152399   .1144096     1.88   0.061    -.0099936    .4404735
-       _cons |  -4.833411   .9169639    -5.27   0.000      -6.6386   -3.028221
+        ln_x |    .203591   .1073019     1.90   0.059    -.0076234    .4148054
+       _cons |  -4.734805   .8587325    -5.51   0.000    -6.425145   -3.044466
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -799,28 +799,28 @@ Absorbed degrees of freedom:
  Absorbed FE | Categories  - Redundant  = Num. Coefs |
 -------------+---------------------------------------|
         year |        78           0          78     |
-         msa |       275         275           0    *|
+         msa |       283         283           0    *|
        field |         5           1           4     |
 -----------------------------------------------------+
 * = FE nested within cluster; treated as redundant for DoF computation
-(dropped 38 singleton observations)
+(dropped 31 singleton observations)
 (MWFE estimator converged in 5 iterations)
 
-HDFE Linear regression                            Number of obs   =    361,434
-Absorbing 4 HDFE groups                           F(   1,    274) =       3.91
-Statistics robust to heteroskedasticity           Prob > F        =     0.0489
-                                                  R-squared       =     0.2117
-                                                  Adj R-squared   =     0.2103
+HDFE Linear regression                            Number of obs   =    365,207
+Absorbing 4 HDFE groups                           F(   1,    282) =       3.96
+Statistics robust to heteroskedasticity           Prob > F        =     0.0477
+                                                  R-squared       =     0.2110
+                                                  Adj R-squared   =     0.2096
                                                   Within R-sq.    =     0.0004
-Number of clusters (msa)     =        275         Root MSE        =     2.0926
+Number of clusters (msa)     =        283         Root MSE        =     2.0932
 
-                                  (Std. err. adjusted for 275 clusters in msa)
+                                  (Std. err. adjusted for 283 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-        ln_x |   .2157716   .1090638     1.98   0.049      .001062    .4304811
-       _cons |   -4.83766   .8741283    -5.53   0.000    -6.558521   -3.116799
+        ln_x |   .2030614   .1021019     1.99   0.048     .0020829    .4040399
+       _cons |  -4.730563   .8171239    -5.79   0.000    -6.338999   -3.122126
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -828,30 +828,62 @@ Absorbed degrees of freedom:
   Absorbed FE | Categories  - Redundant  = Num. Coefs |
 --------------+---------------------------------------|
          year |        78           0          78     |
-          msa |       275         275           0    *|
+          msa |       283         283           0    *|
         field |         5           1           4     |
    field#year |       369          78         291    ?|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(dropped 156 singleton observations)
+(dropped 144 singleton observations)
 (MWFE estimator converged in 6 iterations)
 
-HDFE Linear regression                            Number of obs   =    361,316
-Absorbing 5 HDFE groups                           F(   1,    267) =       3.72
-Statistics robust to heteroskedasticity           Prob > F        =     0.0548
-                                                  R-squared       =     0.2181
-                                                  Adj R-squared   =     0.2146
+HDFE Linear regression                            Number of obs   =    365,094
+Absorbing 5 HDFE groups                           F(   1,    275) =       3.74
+Statistics robust to heteroskedasticity           Prob > F        =     0.0541
+                                                  R-squared       =     0.2175
+                                                  Adj R-squared   =     0.2140
                                                   Within R-sq.    =     0.0003
-Number of clusters (msa)     =        268         Root MSE        =     2.0869
+Number of clusters (msa)     =        276         Root MSE        =     2.0873
+
+                                  (Std. err. adjusted for 276 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |   .1930417   .0998109     1.93   0.054    -.0034487    .3895322
+       _cons |  -4.650462   .7989506    -5.82   0.000    -6.223298   -3.077626
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        78           0          78     |
+          msa |       276         276           0    *|
+        field |         5           1           4     |
+   field#year |       369          78         291    ?|
+    msa#field |       987         987           0    *|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(dropped 1537 singleton observations)
+(MWFE estimator converged in 17 iterations)
+
+HDFE Linear regression                            Number of obs   =    363,701
+Absorbing 6 HDFE groups                           F(   1,    267) =       4.14
+Statistics robust to heteroskedasticity           Prob > F        =     0.0430
+                                                  R-squared       =     0.2656
+                                                  Adj R-squared   =     0.2566
+                                                  Within R-sq.    =     0.0004
+Number of clusters (msa)     =        268         Root MSE        =     2.0302
 
                                   (Std. err. adjusted for 268 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-        ln_x |   .2075945   .1076185     1.93   0.055    -.0042944    .4194834
-       _cons |  -4.772187   .8627281    -5.53   0.000    -6.470803   -3.073571
+        ln_x |   .2634749   .1295506     2.03   0.043     .0084043    .5185456
+       _cons |  -5.211988   1.037182    -5.03   0.000    -7.254085   -3.169892
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -862,28 +894,29 @@ Absorbed degrees of freedom:
           msa |       268         268           0    *|
         field |         5           1           4     |
    field#year |       369          78         291    ?|
-    msa#field |       975         975           0    *|
+    msa#field |       969         969           0    *|
+         inst |      2796        2796           0    *|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(dropped 1545 singleton observations)
-(MWFE estimator converged in 107 iterations)
+(dropped 124323 singleton observations)
+(MWFE estimator converged in 47 iterations)
 
-HDFE Linear regression                            Number of obs   =    359,927
-Absorbing 6 HDFE groups                           F(   1,    263) =       4.32
-Statistics robust to heteroskedasticity           Prob > F        =     0.0386
-                                                  R-squared       =     0.2669
-                                                  Adj R-squared   =     0.2578
-                                                  Within R-sq.    =     0.0004
-Number of clusters (msa)     =        264         Root MSE        =     2.0289
+HDFE Linear regression                            Number of obs   =    240,915
+Absorbing 7 HDFE groups                           F(   1,    227) =       7.79
+Statistics robust to heteroskedasticity           Prob > F        =     0.0057
+                                                  R-squared       =     0.6564
+                                                  Adj R-squared   =     0.5325
+                                                  Within R-sq.    =     0.0002
+Number of clusters (msa)     =        228         Root MSE        =     1.6140
 
-                                  (Std. err. adjusted for 264 clusters in msa)
+                                  (Std. err. adjusted for 228 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-        ln_x |   .2914878   .1402327     2.08   0.039     .0153662    .5676094
-       _cons |  -5.442326   1.124351    -4.84   0.000      -7.6562   -3.228452
+        ln_x |   .1909783   .0684169     2.79   0.006     .0561649    .3257916
+       _cons |  -4.502701   .5492415    -8.20   0.000    -5.584965   -3.420438
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -891,100 +924,33 @@ Absorbed degrees of freedom:
   Absorbed FE | Categories  - Redundant  = Num. Coefs |
 --------------+---------------------------------------|
          year |        78           0          78     |
-          msa |       264         264           0    *|
-        field |         5           1           4     |
-   field#year |       369          78         291    ?|
-    msa#field |       961         961           0    *|
-         inst |      2786           1        2785    ?|
-------------------------------------------------------+
-? = number of redundant parameters may be higher
-* = FE nested within cluster; treated as redundant for DoF computation
-(dropped 123422 singleton observations)
-(MWFE estimator converged in 136 iterations)
-
-HDFE Linear regression                            Number of obs   =    238,050
-Absorbing 7 HDFE groups                           F(   1,    223) =       7.74
-Statistics robust to heteroskedasticity           Prob > F        =     0.0059
-                                                  R-squared       =     0.6579
-                                                  Adj R-squared   =     0.5353
-                                                  Within R-sq.    =     0.0001
-Number of clusters (msa)     =        224         Root MSE        =     1.6102
-
-                                  (Std. err. adjusted for 224 clusters in msa)
-------------------------------------------------------------------------------
-             |               Robust
-        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        ln_x |    .191286   .0687608     2.78   0.006      .055782      .32679
-       _cons |  -4.514923   .5529339    -8.17   0.000    -5.604567   -3.425279
-------------------------------------------------------------------------------
-
-Absorbed degrees of freedom:
-------------------------------------------------------+
-  Absorbed FE | Categories  - Redundant  = Num. Coefs |
---------------+---------------------------------------|
-         year |        78           0          78     |
-          msa |       224         224           0    *|
+          msa |       228         228           0    *|
         field |         5           1           4     |
    field#year |       363          78         285    ?|
-    msa#field |       841         841           0    *|
-         inst |      1854           1        1853    ?|
-      athr_id |     59751         230       59521    ?|
+    msa#field |       852         852           0    *|
+         inst |      1861        1861           0    *|
+      athr_id |     60510           1       60509    ?|
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(dropped 135759 singleton observations)
-(MWFE estimator converged in 145 iterations)
+(dropped 124172 singleton observations)
+(MWFE estimator converged in 45 iterations)
 
-HDFE Linear regression                            Number of obs   =    225,713
-Absorbing 7 HDFE groups                           F(   1,    175) =       0.04
-Statistics robust to heteroskedasticity           Prob > F        =     0.8467
-                                                  R-squared       =     0.6907
-                                                  Adj R-squared   =     0.5422
-                                                  Within R-sq.    =     0.0000
-Number of clusters (msa)     =        176         Root MSE        =     1.6030
-
-                                  (Std. err. adjusted for 176 clusters in msa)
-------------------------------------------------------------------------------
-             |               Robust
-        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
--------------+----------------------------------------------------------------
-        ln_x |   .0757704    .391357     0.19   0.847    -.6966167    .8481575
-       _cons |  -3.555573    3.16202    -1.12   0.262    -9.796176    2.685029
-------------------------------------------------------------------------------
-
-Absorbed degrees of freedom:
-------------------------------------------------------+
-  Absorbed FE | Categories  - Redundant  = Num. Coefs |
---------------+---------------------------------------|
-         year |        78           0          78     |
-        field |         5           1           4     |
-   field#year |       359          78         281    ?|
-    field#msa |       727         727           0    *|
-    inst#year |     15849          79       15770    ?|
-         inst |       998         998           0    ?|
-      athr_id |     56444          75       56369    ?|
-------------------------------------------------------+
-? = number of redundant parameters may be higher
-* = FE nested within cluster; treated as redundant for DoF computation
-(dropped 123248 singleton observations)
-(MWFE estimator converged in 126 iterations)
-
-HDFE Linear regression                            Number of obs   =    238,224
-Absorbing 5 HDFE groups                           F(   1,    237) =       8.75
-Statistics robust to heteroskedasticity           Prob > F        =     0.0034
-                                                  R-squared       =     0.6469
-                                                  Adj R-squared   =     0.5233
+HDFE Linear regression                            Number of obs   =    241,066
+Absorbing 5 HDFE groups                           F(   1,    240) =       7.86
+Statistics robust to heteroskedasticity           Prob > F        =     0.0055
+                                                  R-squared       =     0.6451
+                                                  Adj R-squared   =     0.5202
                                                   Within R-sq.    =     0.0002
-Number of clusters (msa)     =        238         Root MSE        =     1.6308
+Number of clusters (msa)     =        241         Root MSE        =     1.6351
 
-                                  (Std. err. adjusted for 238 clusters in msa)
+                                  (Std. err. adjusted for 241 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-        ln_x |   .1979614   .0669096     2.96   0.003     .0661478     .329775
-       _cons |  -4.568566   .5378716    -8.49   0.000    -5.628186   -3.508946
+        ln_x |   .1915042    .068316     2.80   0.005     .0569287    .3260798
+       _cons |  -4.506848   .5482764    -8.22   0.000    -5.586896     -3.4268
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -992,31 +958,31 @@ Absorbed degrees of freedom:
  Absorbed FE | Categories  - Redundant  = Num. Coefs |
 -------------+---------------------------------------|
         year |        78           0          78     |
-         msa |       238         238           0    *|
-     athr_id |     59806           1       59805     |
+         msa |       241         241           0    *|
+     athr_id |     60555           1       60554     |
        field |         5           1           4    ?|
-        inst |      1880         230        1650    ?|
+        inst |      1881        1881           0    *|
 -----------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
-(dropped 82051 singleton observations)
-(MWFE estimator converged in 146 iterations)
+(dropped 82420 singleton observations)
+(MWFE estimator converged in 69 iterations)
 
-HDFE Linear regression                            Number of obs   =    154,981
-Absorbing 6 HDFE groups                           F(   1,    211) =       3.99
-Statistics robust to heteroskedasticity           Prob > F        =     0.0471
-                                                  R-squared       =     0.6833
-                                                  Adj R-squared   =     0.5194
+HDFE Linear regression                            Number of obs   =    156,058
+Absorbing 6 HDFE groups                           F(   1,    212) =       3.49
+Statistics robust to heteroskedasticity           Prob > F        =     0.0630
+                                                  R-squared       =     0.6822
+                                                  Adj R-squared   =     0.5171
                                                   Within R-sq.    =     0.0001
-Number of clusters (msa)     =        212         Root MSE        =     1.7010
+Number of clusters (msa)     =        213         Root MSE        =     1.7081
 
-                                  (Std. err. adjusted for 212 clusters in msa)
+                                  (Std. err. adjusted for 213 clusters in msa)
 ------------------------------------------------------------------------------
              |               Robust
         ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-        ln_x |   .2223122    .111337     2.00   0.047     .0028368    .4417877
-       _cons |  -4.221531   .9171978    -4.60   0.000    -6.029576   -2.413486
+        ln_x |   .2246656   .1202111     1.87   0.063    -.0122966    .4616278
+       _cons |  -4.229132   .9889292    -4.28   0.000    -6.178526   -2.279738
 ------------------------------------------------------------------------------
 
 Absorbed degrees of freedom:
@@ -1024,11 +990,11 @@ Absorbed degrees of freedom:
  Absorbed FE | Categories  - Redundant  = Num. Coefs |
 -------------+---------------------------------------|
         year |        78           0          78     |
-         msa |       212         212           0    *|
-     athr_id |     38870           1       38869     |
-   gen_mesh1 |      6023         183        5840    ?|
-   gen_mesh2 |      6856         272        6584    ?|
-        inst |      1488         214        1274    ?|
+         msa |       213         213           0    *|
+     athr_id |     39134           1       39133     |
+   gen_mesh1 |      6032         182        5850    ?|
+   gen_mesh2 |      6878         273        6605    ?|
+        inst |      1480        1480           0    *|
 -----------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
@@ -1037,6 +1003,6 @@ Absorbed degrees of freedom:
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2024-01-01 23:25:11
+Makelog ended: 2024-01-05 12:34:10
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cluster_descriptives/code
 --------------------------------------------------------------------------------

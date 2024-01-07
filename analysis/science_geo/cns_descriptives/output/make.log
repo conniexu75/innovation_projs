@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-01-02 00:23:39
+Makelog started: 2024-01-04 23:39:36
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -453,65 +453,79 @@ not available in non-GUI version
 > y \ top_inst_jrnls_body
   5.     cap matrix_to_txt, saving("../output/tables/body_comb.txt") matrix(bod
 > y_comb) title(<tab:body_comb>) format(%20.4f) replace
-  6.     foreach file in top_country top_msa_c_world top_inst {
-  7.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.t
+  6.     cap mat if_comb_cns = top_country_cns_if_wt \ top_msa_c_world_cns_if_w
+> t
+  7.     cap matrix_to_txt, saving("../output/tables/if_comb_cns.txt") matrix(i
+> f_comb_cns) title(<tab:if_comb_cns>) format(%20.4f) replace
+  8.     cap mat body_comb_cns = top_country_cns_body \ top_msa_c_world_cns_bod
+> y \ top_inst_cns_body
+  9.     cap matrix_to_txt, saving("../output/tables/body_comb_cns.txt") matrix
+> (body_comb_cns) title(<tab:body_comb_cns>) format(%20.4f) replace
+ 10.     foreach file in top_country top_msa_c_world top_inst {
+ 11.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.t
 > xt") matrix(`file'_`samp'_wt) ///
 >            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace
-  8.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt"
+ 12.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt"
 > ) matrix(`file'_`samp') ///
 >            title(<tab:`file'_`samp'>) format(%20.4f) replace
-  9.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.t
+ 13.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.t
 > xt") matrix(`file'_`samp'_if) ///
 >            title(<tab:`file'_`samp'_if>) format(%20.4f) replace
- 10.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_w
+ 14.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_w
 > t.txt") matrix(`file'_`samp'_if_wt) ///
 >            title(<tab:`file'_`samp'_if_wt>) format(%20.4f) replace
- 11.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.
+ 15.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.
 > txt") matrix(`file'_`samp'_pat) ///
 >            title(<tab:`file'_`samp'_pat>) format(%20.4f) replace
- 12.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_frnt
+ 16.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_frnt
 > .txt") matrix(`file'_`samp'_frnt) ///
 >            title(<tab:`file'_`samp'_frnt>) format(%20.4f) replace
- 13.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_body
+ 17.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_body
 > .txt") matrix(`file'_`samp'_body) ///
 >            title(<tab:`file'_`samp'_body>) format(%20.4f) replace
- 14.          }
- 15.  end
+ 18.          }
+ 19.  end
 
 . ** 
 . main
 OUTPUT START
 CNS: impact_cite_affl_wt
 (0 real changes made)
+
+     +-------------------------------+
+     | country   impact~t       perc |
+     |-------------------------------|
+ 38. |           3.276711   .0272696 |
+     +-------------------------------+
 (file ../temp/rankings_country_if_wt.dta not found)
 file ../temp/rankings_country_if_wt.dta saved
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   53.56612 |
-  2. |          China   9.832798 |
-  3. | United Kingdom   9.509805 |
-  4. |        Germany   7.141133 |
-  5. |    Switzerland    2.23774 |
+  1. |  United States   53.74723 |
+  2. |          China   9.574364 |
+  3. | United Kingdom   9.508092 |
+  4. |        Germany   7.179984 |
+  5. |    Switzerland   2.241437 |
      |---------------------------|
-  6. |         France   2.075449 |
-  7. |         Canada   1.814391 |
-  8. |          Japan    1.64926 |
-  9. |         Sweden   1.481478 |
- 10. |    Netherlands   1.455531 |
+  6. |         France   2.104558 |
+  7. |         Canada   1.852044 |
+  8. |          Japan   1.675193 |
+  9. |         Sweden   1.490087 |
+ 10. |    Netherlands    1.44676 |
      |---------------------------|
- 11. |      Australia   1.445243 |
- 12. |         Israel   1.310059 |
- 13. |    South Korea   .6981674 |
- 14. |        Austria   .6632201 |
- 15. |        Belgium   .6431359 |
+ 11. |      Australia   1.444235 |
+ 12. |         Israel   1.314401 |
+ 13. |    South Korea   .7080044 |
+ 14. |        Austria    .661643 |
+ 15. |          Spain   .5996491 |
      |---------------------------|
- 16. |          Spain   .5870064 |
- 17. |   South Africa   .4747136 |
- 18. |          Italy   .4445965 |
- 19. |      Singapore    .432875 |
- 20. |        Denmark   .3725843 |
+ 16. |        Belgium   .5816133 |
+ 17. |   South Africa    .482648 |
+ 18. |          Italy   .4362539 |
+ 19. |      Singapore    .393538 |
+ 20. |        Denmark   .3839229 |
      +---------------------------+
 Total articles: 12016
 (0 real changes made)
@@ -520,7 +534,7 @@ Total articles: 12016
      +--------------------------------+
      | msa_c_~d   impact~t       perc |
      |--------------------------------|
- 50. |            38.24783   .3183075 |
+ 45. |             45.9031   .3820165 |
      +--------------------------------+
 (file ../temp/rankings_msa_c_world_if_wt.dta not found)
 file ../temp/rankings_msa_c_world_if_wt.dta saved
@@ -528,29 +542,29 @@ file ../temp/rankings_msa_c_world_if_wt.dta saved
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   11.12719 |
-  2. |                         Bay Area, US   7.530132 |
-  3. |      New York-Newark-Jersey City, US   7.393199 |
-  4. |                          Beijing, CN   4.986041 |
-  5. |                           London, GB   4.082792 |
+  1. |          Boston-Cambridge-Newton, US   11.03132 |
+  2. |                         Bay Area, US   7.466064 |
+  3. |      New York-Newark-Jersey City, US   7.335039 |
+  4. |                          Beijing, CN   4.828453 |
+  5. |                           London, GB   4.069576 |
      |-------------------------------------------------|
-  6. |  Washington-Arlington-Alexandria, US   3.043896 |
-  7. |               San Diego-Carlsbad, US   2.920166 |
-  8. |                           Berlin, DE   2.503063 |
-  9. |                           Munich, DE    2.38134 |
- 10. |          Seattle-Tacoma-Bellevue, US   2.305112 |
+  6. |  Washington-Arlington-Alexandria, US   3.188098 |
+  7. |               San Diego-Carlsbad, US   2.932386 |
+  8. |                           Berlin, DE   2.513546 |
+  9. |                           Munich, DE    2.36359 |
+ 10. |          Seattle-Tacoma-Bellevue, US   2.314081 |
      |-------------------------------------------------|
- 11. |                           Oxford, GB     1.8509 |
- 12. |   Los Angeles-Long Beach-Anaheim, US   1.834991 |
- 13. |                        Cambridge, GB   1.776486 |
- 14. |                            Paris, FR   1.660836 |
- 15. |   Philadelphia-Camden-Wilmington, US   1.314841 |
+ 11. |                           Oxford, GB   1.946516 |
+ 12. |   Los Angeles-Long Beach-Anaheim, US   1.874109 |
+ 13. |                        Cambridge, GB   1.806659 |
+ 14. |                            Paris, FR    1.58431 |
+ 15. |   Philadelphia-Camden-Wilmington, US   1.320005 |
      |-------------------------------------------------|
- 16. |           Research Triangle Park, US   1.200827 |
- 17. |                New Haven-Milford, US   1.183774 |
- 18. | Houston-The Woodlands-Sugar Land, US   1.142956 |
- 19. |                        St. Louis, US   1.020566 |
- 20. |                        Stockholm, SE   1.009276 |
+ 16. |           Research Triangle Park, US   1.196459 |
+ 17. |                New Haven-Milford, US    1.18294 |
+ 18. | Houston-The Woodlands-Sugar Land, US    1.14573 |
+ 19. |                        Stockholm, SE    1.03373 |
+ 20. |                        St. Louis, US   1.017452 |
      +-------------------------------------------------+
 Total articles: 12016
 (0 real changes made)
@@ -561,139 +575,145 @@ file ../temp/rankings_inst_if_wt.dta saved
      +----------------------------------------------------------------+
      |                                                inst       perc |
      |----------------------------------------------------------------|
-  1. |                                  Harvard University    4.47408 |
-  2. |                                 Stanford University   3.377993 |
-  3. |                         Chinese Academy of Sciences   2.748414 |
-  4. |             University of California, San Francisco    1.92065 |
-  5. |                                Mass General Brigham    1.72768 |
+  1. |                                  Harvard University   4.289211 |
+  2. |                                 Stanford University   3.343019 |
+  3. |                         Chinese Academy of Sciences   2.753593 |
+  4. |               Massachusetts Institute of Technology   2.190429 |
+  5. |             University of California, San Francisco   1.919433 |
      |----------------------------------------------------------------|
-  6. |                                  Max Planck Society   1.723483 |
-  7. |                       National Institutes of Health   1.708218 |
-  8. |                            University of Washington   1.581944 |
-  9. |                                 Leibniz Association   1.552515 |
- 10. |                                University of Oxford   1.400559 |
+  6. |                                University of Oxford   1.795851 |
+  7. |                                Mass General Brigham   1.751935 |
+  8. |                                  Max Planck Society   1.701386 |
+  9. |                       National Institutes of Health   1.691454 |
+ 10. |                            University of Washington   1.573256 |
      |----------------------------------------------------------------|
- 11. |                                 Columbia University   1.346219 |
- 12. |               Massachusetts Institute of Technology   1.242235 |
- 13. |                              Rockefeller University   1.233927 |
- 14. |                                     Yale University   1.169754 |
- 15. |                           DeepMind (United Kingdom)   1.152082 |
+ 11. |                                 Leibniz Association   1.565188 |
+ 12. |                                 Columbia University   1.311747 |
+ 13. |                              Rockefeller University   1.228573 |
+ 14. |                                     Yale University    1.16892 |
+ 15. |                           DeepMind (United Kingdom)   1.146986 |
      |----------------------------------------------------------------|
- 16. |                          University of Pennsylvania   1.136294 |
- 17. |              Memorial Sloan Kettering Cancer Center   1.123589 |
- 18. |                  University of California, Berkeley   1.034253 |
- 19. |                 University of California, San Diego   .9844103 |
- 20. |                       Weizmann Institute of Science   .9508678 |
+ 16. |                          University of Pennsylvania   1.135337 |
+ 17. |              Memorial Sloan Kettering Cancer Center   1.123735 |
+ 18. |                  University of California, Berkeley   1.021765 |
+ 19. |                 University of California, San Diego   1.013633 |
+ 20. |                       Weizmann Institute of Science    .947648 |
      |----------------------------------------------------------------|
- 21. |                  Washington University in St. Louis   .9465641 |
- 22. |                                 New York University   .9345412 |
+ 21. |                  Washington University in St. Louis   .9458155 |
+ 22. |                                 New York University   .9398283 |
  23. |                  California Institute of Technology   .9140381 |
- 24. |                                  Cornell University   .8552927 |
- 25. |                        Dana-Farber Cancer Institute   .8247805 |
+ 24. |                                  Cornell University   .8669236 |
+ 25. |                             University of Cambridge   .8559662 |
      |----------------------------------------------------------------|
- 26. |                           Wellcome Sanger Institute   .8092182 |
- 27. |                            Medical Research Council   .8019723 |
- 28. |         La Jolla Institute For Allergy & Immunology   .7996332 |
- 29. |             Icahn School of Medicine at Mount Sinai   .7915218 |
- 30. |                            Johns Hopkins University   .7499041 |
+ 26. |                        Dana-Farber Cancer Institute   .8380932 |
+ 27. |         La Jolla Institute For Allergy & Immunology   .7996332 |
+ 28. |             Icahn School of Medicine at Mount Sinai   .7937473 |
+ 29. |                           Wellcome Sanger Institute   .7914055 |
+ 30. |                            Medical Research Council    .766355 |
      |----------------------------------------------------------------|
- 31. |                                Princeton University   .7108618 |
- 32. |                             University of Cambridge   .7098542 |
- 33. | The University of Texas Southwestern Medical Center   .7003935 |
- 34. |         Whitehead Institute for Biomedical Research   .6416585 |
- 35. |                                     Duke University   .6135249 |
+ 31. |                            Johns Hopkins University   .7485932 |
+ 32. | The University of Texas Southwestern Medical Center   .7344351 |
+ 33. |                                Princeton University   .7105997 |
+ 34. |                               Karolinska Institutet   .6318247 |
+ 35. |    Helmholtz Association of German Research Centres   .6245531 |
      |----------------------------------------------------------------|
- 36. |                               Karolinska Institutet   .6071506 |
- 37. |    Helmholtz Association of German Research Centres    .604656 |
- 38. |   The University of Texas MD Anderson Cancer Center   .5884047 |
- 39. |      French National Centre for Scientific Research   .5861587 |
- 40. |                          Scripps Research Institute   .5842873 |
+ 36. |                               University of Chicago    .607386 |
+ 37. |                                     Duke University   .5985077 |
+ 38. |                          Scripps Research Institute   .5909997 |
+ 39. |   The University of Texas MD Anderson Cancer Center   .5884047 |
+ 40. |                             Imperial College London   .5784256 |
      |----------------------------------------------------------------|
- 41. |                             Imperial College London   .5731673 |
- 42. |                               University of Chicago   .5699008 |
- 43. |         University of North Carolina at Chapel Hill   .5351707 |
- 44. |               University of California, Los Angeles   .5284649 |
- 45. |                          Boston Children's Hospital   .5162472 |
+ 41. |               University of California, Los Angeles   .5407188 |
+ 42. |         University of North Carolina at Chapel Hill   .5367089 |
+ 43. |                          Boston Children's Hospital   .5219193 |
+ 44. |                         The Francis Crick Institute   .5164906 |
+ 45. |                              New York Genome Center   .5103804 |
      |----------------------------------------------------------------|
- 46. |                              New York Genome Center   .5131608 |
- 47. |               St. Jude Children's Research Hospital   .4850833 |
- 48. |                         The Francis Crick Institute   .4833502 |
- 49. |                                   Peking University   .4722989 |
- 50. |                                 Tsinghua University    .470091 |
+ 46. |                                 Tsinghua University   .4836924 |
+ 47. |               St. Jude Children's Research Hospital   .4832435 |
+ 48. |                                   Peking University   .4639399 |
+ 49. |      French National Centre for Scientific Research   .4607461 |
+ 50. |                    University of Michigan–Ann Arbor   .4498198 |
      +----------------------------------------------------------------+
 Total articles: 12016
 (0 real changes made)
 (0 real changes made)
 ALL: impact_cite_affl_wt
 (0 real changes made)
+
+     +-------------------------------+
+     | country   impact~t       perc |
+     |-------------------------------|
+ 48. |           23.52466   .0166164 |
+     +-------------------------------+
 file ../temp/rankings_country_if_wt.dta saved
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   51.91961 |
-  2. |          China   10.02773 |
-  3. | United Kingdom   8.322828 |
-  4. |        Germany    6.08776 |
-  5. |         Canada    2.22561 |
+  1. |  United States   51.78651 |
+  2. |          China   10.14379 |
+  3. | United Kingdom   8.382897 |
+  4. |        Germany   6.051418 |
+  5. |         Canada   2.246084 |
      |---------------------------|
-  6. |          Japan     2.1222 |
-  7. |         France   2.046033 |
-  8. |    Switzerland   1.984514 |
-  9. |      Australia    1.88802 |
- 10. |    Netherlands   1.798959 |
+  6. |          Japan   2.147324 |
+  7. |         France   2.044836 |
+  8. |    Switzerland   1.970186 |
+  9. |      Australia   1.894773 |
+ 10. |    Netherlands    1.79125 |
      |---------------------------|
- 11. |         Sweden   1.287543 |
- 12. |         Israel   1.147501 |
- 13. |          Italy   .9942772 |
- 14. |          Spain   .9789545 |
- 15. |        Denmark   .8705761 |
+ 11. |         Sweden   1.268986 |
+ 12. |         Israel   1.151931 |
+ 13. |          Spain   .9829965 |
+ 14. |          Italy    .981216 |
+ 15. |        Denmark   .8761578 |
      |---------------------------|
- 16. |    South Korea   .8383514 |
- 17. |        Belgium   .7640287 |
- 18. |        Austria    .604597 |
- 19. |      Singapore   .6025958 |
- 20. |      Hong Kong   .5066055 |
+ 16. |    South Korea   .8400415 |
+ 17. |        Belgium   .7620048 |
+ 18. |        Austria   .6033919 |
+ 19. |      Singapore   .5880554 |
+ 20. |      Hong Kong   .4902435 |
      +---------------------------+
-Total articles: 141576
+Total articles: 141575
 (0 real changes made)
 (0 real changes made)
 
       +--------------------------------+
       | msa_c_~d   impact~t       perc |
       |--------------------------------|
-  39. |            687.9316   .4859098 |
+  50. |            533.5727   .3768834 |
       +--------------------------------+
 file ../temp/rankings_msa_c_world_if_wt.dta saved
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   9.977985 |
-  2. |                         Bay Area, US    7.84364 |
-  3. |      New York-Newark-Jersey City, US    6.92943 |
-  4. |                          Beijing, CN   3.881928 |
-  5. |                           London, GB   3.383569 |
+  1. |          Boston-Cambridge-Newton, US   9.936212 |
+  2. |                         Bay Area, US   7.838559 |
+  3. |      New York-Newark-Jersey City, US   6.875523 |
+  4. |                          Beijing, CN   3.943763 |
+  5. |                           London, GB   3.451718 |
      |-------------------------------------------------|
-  6. |               San Diego-Carlsbad, US    2.26947 |
-  7. |  Washington-Arlington-Alexandria, US    2.18373 |
-  8. |   Los Angeles-Long Beach-Anaheim, US   1.848532 |
-  9. |                           Berlin, DE   1.846172 |
- 10. |                        Cambridge, GB   1.716821 |
+  6. |               San Diego-Carlsbad, US   2.286009 |
+  7. |  Washington-Arlington-Alexandria, US   2.248492 |
+  8. |   Los Angeles-Long Beach-Anaheim, US   1.865075 |
+  9. |                           Berlin, DE   1.823236 |
+ 10. |                        Cambridge, GB   1.729088 |
      |-------------------------------------------------|
- 11. |          Seattle-Tacoma-Bellevue, US   1.645231 |
- 12. |                           Munich, DE   1.639479 |
- 13. |                            Paris, FR   1.511096 |
- 14. | Houston-The Woodlands-Sugar Land, US   1.466079 |
- 15. |        Baltimore-Columbia-Towson, US   1.428938 |
+ 11. |          Seattle-Tacoma-Bellevue, US   1.655581 |
+ 12. |                           Munich, DE   1.623368 |
+ 13. | Houston-The Woodlands-Sugar Land, US   1.450128 |
+ 14. |                            Paris, FR   1.419781 |
+ 15. |                           Oxford, GB   1.390454 |
      |-------------------------------------------------|
- 16. |                           Oxford, GB   1.355131 |
- 17. |   Philadelphia-Camden-Wilmington, US   1.351067 |
- 18. |                New Haven-Milford, US   1.304085 |
- 19. |           Research Triangle Park, US   1.204761 |
- 20. |                        St. Louis, US   1.144122 |
+ 16. |        Baltimore-Columbia-Towson, US   1.364052 |
+ 17. |   Philadelphia-Camden-Wilmington, US   1.327415 |
+ 18. |                New Haven-Milford, US   1.306307 |
+ 19. |           Research Triangle Park, US   1.203255 |
+ 20. |                        St. Louis, US   1.138072 |
      +-------------------------------------------------+
-Total articles: 141576
+Total articles: 141575
 (0 real changes made)
 (0 real changes made)
 file ../temp/rankings_inst_if_wt.dta saved
@@ -701,139 +721,145 @@ file ../temp/rankings_inst_if_wt.dta saved
      +----------------------------------------------------------------+
      |                                                inst       perc |
      |----------------------------------------------------------------|
-  1. |                                  Harvard University   3.831129 |
-  2. |                                 Stanford University   3.347644 |
-  3. |                         Chinese Academy of Sciences    1.95838 |
-  4. |             University of California, San Francisco   1.893043 |
-  5. |                                Mass General Brigham    1.57866 |
+  1. |                                  Harvard University   3.650596 |
+  2. |                                 Stanford University   3.337418 |
+  3. |                         Chinese Academy of Sciences   1.976653 |
+  4. |             University of California, San Francisco   1.939162 |
+  5. |               Massachusetts Institute of Technology   1.924289 |
      |----------------------------------------------------------------|
-  6. |               Massachusetts Institute of Technology   1.375117 |
-  7. |                       National Institutes of Health    1.34404 |
-  8. |                                     Yale University   1.252701 |
-  9. |                            Johns Hopkins University   1.235754 |
- 10. |              Memorial Sloan Kettering Cancer Center   1.220001 |
+  6. |                                Mass General Brigham   1.637308 |
+  7. |                       National Institutes of Health   1.338675 |
+  8. |                                University of Oxford   1.329457 |
+  9. |                                     Yale University   1.250089 |
+ 10. |                            Johns Hopkins University   1.242146 |
      |----------------------------------------------------------------|
- 11. |                                  Max Planck Society   1.213634 |
- 12. |                                 Columbia University   1.189221 |
- 13. |                 University of California, San Diego   1.154582 |
- 14. |                                University of Oxford   1.129305 |
- 15. |                                 New York University   1.096868 |
+ 11. |              Memorial Sloan Kettering Cancer Center   1.219771 |
+ 12. |                                  Max Planck Society   1.198454 |
+ 13. |                 University of California, San Diego   1.183239 |
+ 14. |                                 Columbia University   1.169581 |
+ 15. |                                 New York University   1.085032 |
      |----------------------------------------------------------------|
- 16. |                  University of California, Berkeley   1.044479 |
- 17. |                          University of Pennsylvania   1.022455 |
- 18. |                        Dana-Farber Cancer Institute    1.00355 |
- 19. |                            University of Washington   .9767699 |
- 20. |                                  Cornell University   .9276841 |
+ 16. |                  University of California, Berkeley   1.033513 |
+ 17. |                          University of Pennsylvania   1.017712 |
+ 18. |                        Dana-Farber Cancer Institute   .9917283 |
+ 19. |                            University of Washington   .9675289 |
+ 20. |                                  Cornell University   .9398183 |
      |----------------------------------------------------------------|
- 21. |                  Washington University in St. Louis   .9215513 |
- 22. |             Icahn School of Medicine at Mount Sinai   .9070784 |
- 23. |    Helmholtz Association of German Research Centres   .7960317 |
- 24. |   The University of Texas MD Anderson Cancer Center   .7641378 |
- 25. |                            Medical Research Council   .6961389 |
+ 21. |             Icahn School of Medicine at Mount Sinai   .9378434 |
+ 22. |                  Washington University in St. Louis   .9163785 |
+ 23. |                             University of Cambridge   .7947736 |
+ 24. |    Helmholtz Association of German Research Centres    .792034 |
+ 25. |   The University of Texas MD Anderson Cancer Center   .7489877 |
      |----------------------------------------------------------------|
- 26. |                             University of Cambridge    .694642 |
- 27. |                                 Leibniz Association   .6887441 |
- 28. |                               Karolinska Institutet   .6850357 |
- 29. |                           Wellcome Sanger Institute   .6806957 |
- 30. |                       Weizmann Institute of Science   .6590253 |
+ 26. |                                 Leibniz Association    .692737 |
+ 27. |                            Medical Research Council   .6854892 |
+ 28. |                               Karolinska Institutet   .6743323 |
+ 29. |                           Wellcome Sanger Institute   .6657345 |
+ 30. |                       Weizmann Institute of Science   .6602542 |
      |----------------------------------------------------------------|
- 31. |                              Rockefeller University   .6456481 |
- 32. | The University of Texas Southwestern Medical Center   .5993825 |
- 33. |                                     Duke University   .5806722 |
- 34. |                                Princeton University    .579663 |
- 35. |                  California Institute of Technology   .5541939 |
+ 31. |                              Rockefeller University   .6482343 |
+ 32. | The University of Texas Southwestern Medical Center   .6074806 |
+ 33. |                                   Peking University   .5810136 |
+ 34. |                                Princeton University   .5773758 |
+ 35. |                                     Duke University    .577098 |
      |----------------------------------------------------------------|
- 36. |               University of California, Los Angeles   .5538926 |
- 37. |         University of North Carolina at Chapel Hill    .540495 |
- 38. |      French National Centre for Scientific Research   .5258551 |
- 39. |                    University of Michigan–Ann Arbor   .5209904 |
- 40. |                             University of Hong Kong   .5065412 |
+ 36. |               University of California, Los Angeles   .5561543 |
+ 37. |                  California Institute of Technology   .5555534 |
+ 38. |         University of North Carolina at Chapel Hill   .5396642 |
+ 39. |                    University of Michigan–Ann Arbor   .5205523 |
+ 40. |                             Imperial College London   .5192969 |
      |----------------------------------------------------------------|
- 41. |                             Imperial College London   .4942578 |
- 42. |                                   Peking University   .4725555 |
- 43. |                              New York Genome Center   .4605023 |
- 44. |                            University of Queensland   .4518441 |
- 45. |                                              Inserm    .440271 |
+ 41. |                             University of Hong Kong   .4861943 |
+ 42. |                           University College London    .486165 |
+ 43. |                              New York Genome Center   .4594898 |
+ 44. |                            University of Queensland   .4546462 |
+ 45. |                               University of Toronto    .448817 |
      |----------------------------------------------------------------|
- 46. |                           DeepMind (United Kingdom)    .439439 |
- 47. |                               University of Toronto   .4276763 |
- 48. |                          Baylor College of Medicine   .4106075 |
- 49. |                          Boston Children's Hospital   .4075437 |
- 50. |            École Polytechnique Fédérale de Lausanne   .3898239 |
+ 46. |                          Boston Children's Hospital   .4486663 |
+ 47. |                           DeepMind (United Kingdom)   .4375783 |
+ 48. |      French National Centre for Scientific Research    .421384 |
+ 49. |                          Baylor College of Medicine   .4113339 |
+ 50. |            École Polytechnique Fédérale de Lausanne   .3923966 |
      +----------------------------------------------------------------+
-Total articles: 141576
+Total articles: 141575
 (0 real changes made)
 (0 real changes made)
 CNS: body_adj_wt
 (0 real changes made)
+
+     +---------------------------+
+     | country   body_a~t   perc |
+     |---------------------------|
+ 43. |                  0      0 |
+     +---------------------------+
 (file ../temp/rankings_country_body.dta not found)
 file ../temp/rankings_country_body.dta saved
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   64.63504 |
-  2. |          China   11.15688 |
-  3. | United Kingdom   5.637221 |
-  4. |        Germany   4.983561 |
+  1. |  United States   64.08055 |
+  2. |          China    11.7639 |
+  3. | United Kingdom   5.647819 |
+  4. |        Germany   4.886014 |
   5. |    Switzerland   2.298273 |
      |---------------------------|
-  6. |          Japan   1.884629 |
-  7. |         Sweden   1.534205 |
-  8. |    Netherlands   1.301434 |
-  9. |         Canada   .9662256 |
- 10. |      Australia   .9165013 |
+  6. |          Japan   1.917235 |
+  7. |         Sweden   1.729841 |
+  8. |    Netherlands   1.263393 |
+  9. |         Canada   1.059334 |
+ 10. |         France   .9807171 |
      |---------------------------|
- 11. |         France   .8768307 |
+ 11. |      Australia   .8050974 |
  12. |         Israel   .6442409 |
- 13. |      Singapore   .5069333 |
+ 13. |      Singapore   .4435327 |
  14. |        Austria   .3496092 |
- 15. |    South Korea   .2907372 |
+ 15. |          Italy   .2468096 |
      |---------------------------|
- 16. |          Italy   .2563197 |
- 17. |          Spain   .2402884 |
- 18. |        Czechia   .1648416 |
- 19. |      Hong Kong   .1521615 |
- 20. |        Belgium   .1498972 |
+ 16. |          Spain   .2402884 |
+ 17. |    South Korea   .1911076 |
+ 18. |      Hong Kong   .1521615 |
+ 19. |        Belgium   .1209141 |
+ 20. |        Denmark   .1136683 |
      +---------------------------+
 Total articles: 12016
 (0 real changes made)
 (0 real changes made)
 
-     +--------------------------------+
-     | msa_c_~d   body_a~t       perc |
-     |--------------------------------|
- 57. |            25.28161   .2103995 |
-     +--------------------------------+
+     +-------------------------------+
+     | msa_c_~d   body_a~t      perc |
+     |-------------------------------|
+ 55. |            26.26109   .218551 |
+     +-------------------------------+
 (file ../temp/rankings_msa_c_world_body.dta not found)
 file ../temp/rankings_msa_c_world_body.dta saved
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   22.23759 |
-  2. |                         Bay Area, US   10.08668 |
-  3. |      New York-Newark-Jersey City, US   9.119093 |
-  4. |                          Beijing, CN   6.818194 |
-  5. |               San Diego-Carlsbad, US   3.565561 |
+  1. |          Boston-Cambridge-Newton, US   21.16884 |
+  2. |                         Bay Area, US   10.11639 |
+  3. |      New York-Newark-Jersey City, US   9.115199 |
+  4. |                          Beijing, CN   4.355714 |
+  5. |               San Diego-Carlsbad, US   3.576429 |
      |-------------------------------------------------|
-  6. |                           London, GB    2.73456 |
-  7. |                           Berlin, DE   2.236593 |
-  8. |  Washington-Arlington-Alexandria, US   2.171109 |
-  9. |   Los Angeles-Long Beach-Anaheim, US   1.763081 |
- 10. |      Dallas-Fort Worth-Arlington, US   1.754295 |
+  6. |                           London, GB   2.739813 |
+  7. |  Washington-Arlington-Alexandria, US    2.37535 |
+  8. |                           Berlin, DE   2.274633 |
+  9. |                          Chengdu, CN   2.245016 |
+ 10. |      Dallas-Fort Worth-Arlington, US   1.819507 |
      |-------------------------------------------------|
- 11. |           Research Triangle Park, US   1.333587 |
- 12. |          Seattle-Tacoma-Bellevue, US   1.315654 |
- 13. |                        Stockholm, SE   1.269643 |
- 14. | Houston-The Woodlands-Sugar Land, US   1.246819 |
- 15. |                          Nanjing, CN   1.186588 |
+ 11. |   Los Angeles-Long Beach-Anaheim, US   1.731381 |
+ 12. |           Research Triangle Park, US   1.352607 |
+ 13. |          Seattle-Tacoma-Bellevue, US   1.325164 |
+ 14. |                        Stockholm, SE   1.300075 |
+ 15. | Houston-The Woodlands-Sugar Land, US   1.284859 |
      |-------------------------------------------------|
- 16. |                           Munich, DE   1.176535 |
- 17. |   Philadelphia-Camden-Wilmington, US   1.110236 |
- 18. |                        Cambridge, GB   1.049552 |
+ 16. |   Philadelphia-Camden-Wilmington, US   1.103896 |
+ 17. |                        Cambridge, GB   1.037325 |
+ 18. |                           Munich, DE   1.035242 |
  19. |                New Haven-Milford, US   .9396879 |
- 20. |                        Amsterdam, NL   .8524668 |
+ 20. |                         Shenzhen, CN   .8622485 |
      +-------------------------------------------------+
 Total articles: 12016
 (0 real changes made)
@@ -841,178 +867,184 @@ Total articles: 12016
 (file ../temp/rankings_inst_body.dta not found)
 file ../temp/rankings_inst_body.dta saved
 
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University   8.030685 |
-  2. |                  University of California, Berkeley   3.772337 |
-  3. |                                Mass General Brigham   3.492831 |
-  4. |                                 Stanford University   3.014338 |
-  5. |               Massachusetts Institute of Technology    2.96724 |
-     |----------------------------------------------------------------|
-  6. |                         Chinese Academy of Sciences   2.626688 |
-  7. |               McGovern Institute for Brain Research   2.527874 |
-  8. |             University of California, San Francisco   2.334049 |
-  9. |              Memorial Sloan Kettering Cancer Center   2.010434 |
- 10. |                           Minzu University of China   1.930549 |
-     |----------------------------------------------------------------|
- 11. |                       National Institutes of Health   1.716527 |
- 12. |                           Regeneron (United States)   1.711817 |
- 13. |                        Dana-Farber Cancer Institute    1.51446 |
- 14. |                  California Institute of Technology   1.304966 |
- 15. | The University of Texas Southwestern Medical Center   1.257053 |
-     |----------------------------------------------------------------|
- 16. |                                 Leibniz Association   1.228885 |
- 17. |                                 Columbia University   1.218832 |
- 18. |                              Rockefeller University   1.165847 |
- 19. |                            University of Washington    1.13306 |
- 20. |                          Scripps Research Institute   1.065583 |
-     +----------------------------------------------------------------+
+     +------------------------------------------------------------------------+
+     |                                                        inst       perc |
+     |------------------------------------------------------------------------|
+  1. |                       Massachusetts Institute of Technology   6.964921 |
+  2. |                                          Harvard University   6.882229 |
+  3. |                          University of California, Berkeley   3.682942 |
+  4. |                                        Mass General Brigham   3.498084 |
+  5. |                                         Stanford University    2.95456 |
+     |------------------------------------------------------------------------|
+  6. |                                 Chinese Academy of Sciences   2.671068 |
+  7. |                     University of California, San Francisco   2.368919 |
+  8. |                      Memorial Sloan Kettering Cancer Center   2.010434 |
+  9. | West China Second University Hospital of Sichuan University   1.930549 |
+ 10. |                               National Institutes of Health   1.716527 |
+     |------------------------------------------------------------------------|
+ 11. |                                   Regeneron (United States)   1.711817 |
+ 12. |                                Dana-Farber Cancer Institute    1.53982 |
+ 13. |         The University of Texas Southwestern Medical Center   1.333134 |
+ 14. |                          California Institute of Technology   1.304966 |
+ 15. |                                         Leibniz Association   1.228885 |
+     |------------------------------------------------------------------------|
+ 16. |                                         Columbia University   1.216296 |
+ 17. |                                      Rockefeller University   1.187584 |
+ 18. |                                    University of Washington    1.13306 |
+ 19. |                                  Scripps Research Institute   1.065583 |
+ 20. |                                       Karolinska Institutet   .9672219 |
+     +------------------------------------------------------------------------+
 Total articles: 12016
 (0 real changes made)
 (0 real changes made)
 ALL: body_adj_wt
 (0 real changes made)
+
+     +---------------------------+
+     | country   body_a~t   perc |
+     |---------------------------|
+ 56. |                  0      0 |
+     +---------------------------+
 file ../temp/rankings_country_body.dta saved
 
      +---------------------------+
      |        country       perc |
      |---------------------------|
-  1. |  United States   59.70393 |
-  2. |          China   10.33417 |
-  3. | United Kingdom   5.198903 |
-  4. |        Germany   4.777465 |
-  5. |          Japan   3.564629 |
+  1. |  United States    59.5914 |
+  2. |          China   10.50862 |
+  3. | United Kingdom    5.20568 |
+  4. |        Germany   4.697792 |
+  5. |          Japan   3.572648 |
      |---------------------------|
-  6. |    Switzerland   2.092029 |
-  7. |         Canada   1.689475 |
-  8. |    Netherlands   1.425883 |
-  9. |         Sweden   1.317445 |
- 10. |    South Korea   1.303425 |
+  6. |    Switzerland   2.085821 |
+  7. |         Canada   1.710066 |
+  8. |    Netherlands   1.443731 |
+  9. |         Sweden   1.434626 |
+ 10. |    South Korea   1.199798 |
      |---------------------------|
- 11. |      Australia   1.071753 |
- 12. |         France   1.058664 |
+ 11. |         France   1.105588 |
+ 12. |      Australia   1.065027 |
  13. |         Israel   .8454101 |
- 14. |          Italy   .6485047 |
- 15. |        Denmark   .5345832 |
+ 14. |          Italy   .6492808 |
+ 15. |        Denmark   .5436369 |
      |---------------------------|
- 16. |      Singapore   .5148719 |
- 17. |          Spain   .4339575 |
- 18. |         Taiwan   .3883786 |
+ 16. |      Singapore      .4859 |
+ 17. |          Spain   .4306982 |
+ 18. |         Taiwan   .3821703 |
  19. |        Austria   .3647354 |
  20. |   South Africa    .353871 |
      +---------------------------+
-Total articles: 141576
+Total articles: 141575
 (0 real changes made)
 (0 real changes made)
 
-      +--------------------------------+
-      | msa_c_~d   body_a~t       perc |
-      |--------------------------------|
-  38. |            610.4245   .4311638 |
-      +--------------------------------+
+      +-------------------------------+
+      | msa_c_~d   body_a~t      perc |
+      |-------------------------------|
+  45. |            527.2876   .372444 |
+      +-------------------------------+
 file ../temp/rankings_msa_c_world_body.dta saved
 
      +-------------------------------------------------+
      |                          msa_c_world       perc |
      |-------------------------------------------------|
-  1. |          Boston-Cambridge-Newton, US   17.11427 |
-  2. |                         Bay Area, US   9.145288 |
-  3. |      New York-Newark-Jersey City, US   7.436153 |
-  4. |                          Beijing, CN   5.260468 |
-  5. |               San Diego-Carlsbad, US   2.677675 |
+  1. |          Boston-Cambridge-Newton, US   16.49561 |
+  2. |                         Bay Area, US   9.153049 |
+  3. |      New York-Newark-Jersey City, US   7.437033 |
+  4. |                          Beijing, CN   3.761379 |
+  5. |               San Diego-Carlsbad, US   2.698783 |
      |-------------------------------------------------|
-  6. |                           London, GB   2.353449 |
-  7. |   Los Angeles-Long Beach-Anaheim, US   2.224886 |
-  8. |  Washington-Arlington-Alexandria, US   2.030516 |
-  9. | Houston-The Woodlands-Sugar Land, US   1.686267 |
- 10. |                           Berlin, DE   1.620098 |
+  6. |                           London, GB   2.357174 |
+  7. |   Los Angeles-Long Beach-Anaheim, US   2.206779 |
+  8. |  Washington-Arlington-Alexandria, US   2.169581 |
+  9. | Houston-The Woodlands-Sugar Land, US   1.707996 |
+ 10. |                           Berlin, DE   1.641827 |
      |-------------------------------------------------|
- 11. |   Philadelphia-Camden-Wilmington, US   1.490759 |
- 12. |          Seattle-Tacoma-Bellevue, US   1.439541 |
- 13. |           Research Triangle Park, US   1.146304 |
- 14. |      Dallas-Fort Worth-Arlington, US   1.081014 |
- 15. |                        Stockholm, SE   .9722656 |
+ 11. |                          Chengdu, CN   1.486206 |
+ 12. |   Philadelphia-Camden-Wilmington, US   1.476273 |
+ 13. |          Seattle-Tacoma-Bellevue, US   1.444973 |
+ 14. |           Research Triangle Park, US    1.16586 |
+ 15. |        Baltimore-Columbia-Towson, US   1.152098 |
      |-------------------------------------------------|
- 16. |                          Nanjing, CN   .9460357 |
- 17. |        Baltimore-Columbia-Towson, US   .9438628 |
- 18. |                        Cambridge, GB   .9282904 |
- 19. |                           Munich, DE   .9112694 |
- 20. |                          Toronto, CA   .8490316 |
+ 16. |      Dallas-Fort Worth-Arlington, US   1.118263 |
+ 17. |                        Stockholm, SE   .9805951 |
+ 18. |                        Cambridge, GB   .9213061 |
+ 19. |                          Toronto, CA   .8598961 |
+ 20. |         Chicago-Naperville-Elgin, US   .8356321 |
      +-------------------------------------------------+
-Total articles: 141576
+Total articles: 141575
 (0 real changes made)
 (0 real changes made)
 file ../temp/rankings_inst_body.dta saved
 
-     +----------------------------------------------------------------+
-     |                                                inst       perc |
-     |----------------------------------------------------------------|
-  1. |                                  Harvard University    5.75449 |
-  2. |                                 Stanford University   3.053948 |
-  3. |                  University of California, Berkeley   2.888498 |
-  4. |                                Mass General Brigham   2.756469 |
-  5. |               Massachusetts Institute of Technology   2.437726 |
-     |----------------------------------------------------------------|
-  6. |                         Chinese Academy of Sciences   2.091615 |
-  7. |             University of California, San Francisco    1.94091 |
-  8. |               McGovern Institute for Brain Research   1.664332 |
-  9. |              Memorial Sloan Kettering Cancer Center   1.663142 |
- 10. |                       National Institutes of Health   1.543167 |
-     |----------------------------------------------------------------|
- 11. |                        Dana-Farber Cancer Institute   1.459769 |
- 12. |                  California Institute of Technology   1.443318 |
- 13. |                           Minzu University of China   1.243981 |
- 14. |                            University of Washington   1.136629 |
- 15. |                                 Columbia University   1.062234 |
-     |----------------------------------------------------------------|
- 16. |                           Regeneron (United States)   .9778013 |
- 17. |                          University of Pennsylvania   .9266349 |
- 18. |                                     Yale University   .8338214 |
- 19. | The University of Texas Southwestern Medical Center   .7687381 |
- 20. |                               Karolinska Institutet   .7676516 |
-     +----------------------------------------------------------------+
-Total articles: 141576
+     +------------------------------------------------------------------------+
+     |                                                        inst       perc |
+     |------------------------------------------------------------------------|
+  1. |                                          Harvard University   5.163412 |
+  2. |                       Massachusetts Institute of Technology   4.978095 |
+  3. |                                         Stanford University   3.012559 |
+  4. |                          University of California, Berkeley   2.824863 |
+  5. |                                        Mass General Brigham   2.674726 |
+     |------------------------------------------------------------------------|
+  6. |                                 Chinese Academy of Sciences   2.171961 |
+  7. |                     University of California, San Francisco   1.977125 |
+  8. |                      Memorial Sloan Kettering Cancer Center   1.656933 |
+  9. |                               National Institutes of Health   1.543167 |
+ 10. |                                Dana-Farber Cancer Institute   1.473479 |
+     |------------------------------------------------------------------------|
+ 11. |                          California Institute of Technology   1.443318 |
+ 12. | West China Second University Hospital of Sichuan University   1.243981 |
+ 13. |                                    University of Washington   1.136629 |
+ 14. |                                         Columbia University   1.060785 |
+ 15. |                                   Regeneron (United States)   .9778013 |
+     |------------------------------------------------------------------------|
+ 16. |                                  University of Pennsylvania   .9338779 |
+ 17. |                                    Johns Hopkins University   .8422543 |
+ 18. |         The University of Texas Southwestern Medical Center    .812196 |
+ 19. |                                             Yale University   .8116786 |
+ 20. |                                       Karolinska Institutet    .790467 |
+     +------------------------------------------------------------------------+
+Total articles: 141575
 (0 real changes made)
 (0 real changes made)
-N = 1,120,351; 324,958 unbalanced groups of sizes 1 to 18
+N = 1,120,348; 324,957 unbalanced groups of sizes 1 to 18
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-num_gen_mesh |  1,120,351    4.316866    1.764037          1         18
+num_gen_mesh |  1,120,348    4.316869    1.764038          1         18
 
      +-----------------------------------------------------------+
      |                 gen_mesh   articl~t       perc   cum_perc |
      |-----------------------------------------------------------|
-  1. |                Receptors   4335.183   1.334075   1.334075 |
-  2. |                      DNA   2893.005   .8902705   2.224345 |
-  3. |                      RNA   2797.986   .8610301   3.085376 |
-  4. |                  Neurons   2280.934   .7019165   3.787292 |
-  5. |                    Brain   2173.548   .6688704   4.456162 |
+  1. |                Receptors   4335.183   1.334079   1.334079 |
+  2. |                      DNA   2893.005   .8902733   2.224352 |
+  3. |                      RNA   2797.986   .8610327   3.085385 |
+  4. |                  Neurons   2280.934   .7019186   3.787303 |
+  5. |                    Brain   2173.548   .6688725   4.456176 |
      |-----------------------------------------------------------|
-  6. |                Neoplasms   1888.862   .5812634   5.037426 |
-  7. |                 Proteins    1866.58   .5744065   5.611832 |
-  8. |    Transcription Factors   1749.244   .5382984   6.150131 |
-  9. |     DNA-Binding Proteins   1412.177   .4345721   6.584703 |
- 10. |         Breast Neoplasms   1408.975   .4335867    7.01829 |
+  6. |                Neoplasms   1888.862   .5812652   5.037441 |
+  7. |                 Proteins    1866.58   .5744083    5.61185 |
+  8. |    Transcription Factors   1749.244      .5383   6.150149 |
+  9. |     DNA-Binding Proteins   1412.177   .4345735   6.584723 |
+ 10. |         Breast Neoplasms   1408.975    .433588   7.018311 |
      |-----------------------------------------------------------|
- 11. |       Bacterial Proteins   1376.878   .4237094   7.441999 |
- 12. |           HIV Infections   1361.522   .4189841   7.860983 |
- 13. |                Carcinoma   1320.636   .4064022   8.267385 |
- 14. |         Escherichia coli   1313.117   .4040883   8.671474 |
- 15. | Saccharomyces cerevisiae   1304.971   .4015813   9.073054 |
+ 11. |       Bacterial Proteins   1376.878   .4237107   7.442022 |
+ 12. |           HIV Infections   1361.522   .4189854   7.861007 |
+ 13. |                Carcinoma   1320.636   .4064034    8.26741 |
+ 14. |         Escherichia coli   1313.117   .4040895     8.6715 |
+ 15. | Saccharomyces cerevisiae   1304.971   .4015825   9.073083 |
      |-----------------------------------------------------------|
- 16. |        Membrane Proteins   1282.378   .3946288   9.467684 |
- 17. |                MicroRNAs   1230.796   .3787553   9.846439 |
- 18. |            T-Lymphocytes   1214.863   .3738524   10.22029 |
- 19. |                    Liver   1084.779   .3338213   10.55411 |
- 20. |        Diabetes Mellitus   1014.214   .3121062   10.86622 |
+ 16. |        Membrane Proteins   1282.378     .39463   9.467712 |
+ 17. |                MicroRNAs   1230.796   .3787565   9.846469 |
+ 18. |            T-Lymphocytes   1214.863   .3738535   10.22032 |
+ 19. |                    Liver   1084.779   .3338223   10.55414 |
+ 20. |        Diabetes Mellitus   1014.214   .3121072   10.86625 |
      +-----------------------------------------------------------+
 
 . 
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2024-01-02 00:24:56
+Makelog ended: 2024-01-04 23:40:56
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------

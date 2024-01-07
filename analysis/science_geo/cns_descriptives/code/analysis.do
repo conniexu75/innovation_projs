@@ -327,6 +327,10 @@ program output_tables
     cap matrix_to_txt, saving("../output/tables/if_comb.txt") matrix(if_comb) title(<tab:if_comb>) format(%20.4f) replace
     cap mat body_comb = top_country_jrnls_body \ top_msa_c_world_jrnls_body \ top_inst_jrnls_body
     cap matrix_to_txt, saving("../output/tables/body_comb.txt") matrix(body_comb) title(<tab:body_comb>) format(%20.4f) replace
+    cap mat if_comb_cns = top_country_cns_if_wt \ top_msa_c_world_cns_if_wt
+    cap matrix_to_txt, saving("../output/tables/if_comb_cns.txt") matrix(if_comb_cns) title(<tab:if_comb_cns>) format(%20.4f) replace
+    cap mat body_comb_cns = top_country_cns_body \ top_msa_c_world_cns_body \ top_inst_cns_body
+    cap matrix_to_txt, saving("../output/tables/body_comb_cns.txt") matrix(body_comb_cns) title(<tab:body_comb_cns>) format(%20.4f) replace
     foreach file in top_country top_msa_c_world top_inst {
         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.txt") matrix(`file'_`samp'_wt) ///
            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace

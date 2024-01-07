@@ -1,5 +1,685 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-01-02 00:24:49
+Makelog started: 2024-01-04 23:39:38
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code
 --------------------------------------------------------------------------------
 External links successfully created!
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size
+> /code/analysis.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code/
+
+. 
+. program main
+  1.     global country_name "countries"
+  2.     global us_state_name "US states"
+  3.     global area_name "US cities"
+  4.     global city_full_name "world cities"
+  5.     global inst_name "institutions"
+  6.     foreach samp in cns scisub demsci { 
+  7.         get_total_articles, samp(`samp') 
+  8.         di "SAMPLE IS : `samp'"
+  9.         top_jrnls, data(newfund) samp(`samp') 
+ 10.         samp_size, data(newfund) samp(`samp') 
+ 11.         mat N_`samp' = nullmat(N_`samp') \ N_newfund_`samp'
+ 12.         mat N_samp = nullmat(N_samp) \ N_`samp'
+ 13.         mat top_jrnls_`samp' =  nullmat(top_jrnls_`samp') , top_jrnls_`sam
+> p'_N
+ 14.         if "`samp'" != "med" {
+ 15.             mat top_jrnls =  nullmat(top_jrnls) \ top_jrnls_`samp'
+ 16.             }
+ 17.     }
+ 18.     foreach file in top_jrnls {
+ 19.         qui matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`f
+> ile') ///
+>            title(<tab:`file'>) format(%20.4f) replace
+ 20.          }
+ 21. end
+
+. 
+. program get_total_articles 
+  1.     syntax, samp(str) 
+  2.     use if pub_type == "journal-article" using ../external/full_openalex/o
+> penalex_all_jrnls_merged, clear
+  3.     merge m:1 pmid using ../external/pmids/`samp'_all_pmids, assert(1 2 3)
+>  keep(3) keepusing(journal_abbr) nogen
+  4.     replace title = stritrim(title)
+  5.     gen date = date(pub_date, "YMD")
+  6.     format %td date
+  7.     drop pub_date
+  8.     bys pmid: egen min_date = min(date)
+  9.     replace date =min_date
+ 10.     drop min_date 
+ 11.     rename date pub_date
+ 12.     gen year = year(pub_date)
+ 13.     contract title id pmid journal_abbr year
+ 14.     gduplicates drop pmid, force
+ 15.     drop _freq
+ 16.     gisid pmid
+ 17.     drop if mi(title)
+ 18.     gen lower_title = strlower(title)
+ 19.     drop if strpos(lower_title, "economic")>0
+ 20.     drop if strpos(lower_title, "economy")>0
+ 21.     drop if strpos(lower_title, "accountable care")>0 | strpos(title, "ACO
+> s")>0
+ 22.     drop if strpos(lower_title, "public health")>0
+ 23.     drop if strpos(lower_title, "hallmarks")>0
+ 24.     drop if strpos(lower_title, "government")>0
+ 25.     drop if strpos(lower_title, "reform")>0
+ 26.     drop if strpos(lower_title , "equity")>0
+ 27.     drop if strpos(lower_title , "payment")>0
+ 28.     drop if strpos(lower_title , "politics")>0
+ 29.     drop if strpos(lower_title , "policy")>0
+ 30.     drop if strpos(lower_title , "comment")>0
+ 31.     drop if strpos(lower_title , "guideline")>0
+ 32.     drop if strpos(lower_title , "professionals")>0
+ 33.     drop if strpos(lower_title , "physician")>0
+ 34.     drop if strpos(lower_title , "workforce")>0
+ 35.     drop if strpos(lower_title , "medical-education")>0
+ 36.     drop if strpos(lower_title , "medical education")>0
+ 37.     drop if strpos(lower_title , "funding")>0
+ 38.     drop if strpos(lower_title , "conference")>0
+ 39.     drop if strpos(lower_title , "insurance")>0
+ 40.     drop if strpos(lower_title , "fellowship")>0
+ 41.     drop if strpos(lower_title , "ethics")>0
+ 42.     drop if strpos(lower_title , "legislation")>0
+ 43.     drop if strpos(lower_title , "the editor")>0
+ 44.     drop if strpos(lower_title , "response : ")>0
+ 45.     drop if strpos(lower_title , "letters")>0
+ 46.     drop if lower_title == "response"
+ 47.     drop if strpos(lower_title , "this week")>0
+ 48.     drop if strpos(lower_title , "notes")>0
+ 49.     drop if strpos(lower_title , "news ")>0
+ 50.     drop if strpos(lower_title , "a note")>0
+ 51.     drop if strpos(lower_title , "obituary")>0
+ 52.     drop if strpos(lower_title , "review")>0
+ 53.     drop if strpos(lower_title , "perspectives")>0
+ 54.     drop if strpos(lower_title , "scientists")>0
+ 55.     drop if strpos(lower_title , "books")>0
+ 56.     drop if strpos(lower_title , "institution")>0
+ 57.     drop if strpos(lower_title , "meeting")>0
+ 58.     drop if strpos(lower_title , "university")>0
+ 59.     drop if strpos(lower_title , "universities")>0
+ 60.     drop if strpos(lower_title , "journals")>0
+ 61.     drop if strpos(lower_title , "publication")>0
+ 62.     drop if strpos(lower_title , "recent ")>0
+ 63.     drop if strpos(lower_title , "costs")>0
+ 64.     drop if strpos(lower_title , "challenges")>0
+ 65.     drop if strpos(lower_title , "researchers")>0
+ 66.     drop if strpos(lower_title , "perspective")>0
+ 67.     drop if strpos(lower_title , "reply")>0
+ 68.     drop if strpos(lower_title , " war")>0
+ 69.     drop if strpos(lower_title , " news")>0
+ 70.     drop if strpos(lower_title , "a correction")>0
+ 71.     drop if strpos(lower_title , "academia")>0
+ 72.     drop if strpos(lower_title , "society")>0
+ 73.     drop if strpos(lower_title , "academy of")>0
+ 74.     drop if strpos(lower_title , "nomenclature")>0
+ 75.     drop if strpos(lower_title , "teaching")>0
+ 76.     drop if strpos(lower_title , "education")>0
+ 77.     drop if strpos(lower_title , "college")>0
+ 78.     drop if strpos(lower_title , "academics")>0
+ 79.     drop if strpos(lower_title , "political")>0
+ 80.     drop if strpos(lower_title , "association for")>0
+ 81.     drop if strpos(lower_title , "association of")>0
+ 82.     drop if strpos(lower_title , "nuts")>0 & strpos(lower_title, "bolts")>
+> 0
+ 83.     drop if strpos(lower_title , "response by")>0
+ 84.     drop if strpos(lower_title , "societies")>0
+ 85.     drop if strpos(lower_title, "health care")>0
+ 86.     drop if strpos(lower_title, "health-care")>0
+ 87.     drop if strpos(lower_title , "abstracts")>0
+ 88.     drop if strpos(lower_title , "journal club")>0
+ 89.     drop if strpos(lower_title , "curriculum")>0
+ 90.     drop if strpos(lower_title , "women in science")>0
+ 91.     drop if inlist(lower_title, "random samples", "sciencescope", "through
+>  the glass lightly", "equipment", "women in science",  "correction", "the met
+> ric system")
+ 92.     drop if inlist(lower_title, "convocation week","the new format", "seco
+> nd-quarter biotech job picture", "gmo roundup") 
+ 93.     preserve
+ 94.     cap drop _freq
+ 95.     contract lower_title journal_abbr pmid
+ 96.     gduplicates tag lower_title journal_abbr, gen(dup)
+ 97.     keep if dup > 0 & journal_abbr != "jbc"
+ 98.     keep pmid
+ 99.     gduplicates drop
+100.     save ../temp/possible_non_articles_`samp', replace
+101.     restore
+102.     merge 1:1 pmid using ../temp/possible_non_articles_`samp', assert(1 3)
+>  keep(1) nogen
+103.     preserve
+104.     gcontract year journal_abbr, freq(num_articles)
+105.     drop if journal_abbr == "annals"
+106.     save ../temp/`samp'_counts, replace
+107.     restore 
+108.     if "`samp'"!= "med" {
+109.         merge 1:1 pmid using ../external/newfund/list_of_pmids_all_newfund
+> _`samp', assert(1 2 3) keep(1) nogen keepusing(pmid)
+110.         keep pmid year journal_abbr
+111.         save ../output/`samp'_unmatched, replace
+112.     }
+113.     if "`samp'" == "med" {
+114.         preserve
+115.         merge 1:m pmid using ../external/newfund/, assert(1 2 3) keep(1) n
+> ogen keepusing(pmid)
+116.         save ../output/`samp'_unmatched, replace
+117.         restore
+118.         merge 1:m pmid using ../external/pmids/newfund_pmids, assert(1 2 3
+> ) keepusing(pmid cat)
+119.         drop if _merge == 2
+120.         drop if _merge == 3 & !inlist(cat, "fundamental", "diseases")
+121.         drop _merge
+122.         save ../temp/cleaned_all_newfund_med, replace
+123.     }
+124. end
+
+. program top_jrnls
+  1.     syntax, data(str) samp(str) 
+  2.     use ../external/newfund/cleaned_all_`data'_`samp', clear
+  3.     bys pmid: gen pmid_counter = _n == 1
+  4.     preserve
+  5.     gcollapse (sum) pmid_counter, by(journal_abbr year)
+  6.     qui merge 1:1 journal_abbr year using ../temp/`samp'_counts, assert(1 
+> 2 3) keep(2 3) nogen
+  7.     *gen percent_of_tot = pmid_counter/num_articles
+.     gcollapse (sum) num_fund = pmid_counter tot_articles = num_articles, by(j
+> ournal_abbr)
+  8.     gen percent_of_tot = num_fund/tot_articles * 100
+  9.     gen order = 0
+ 10.     replace order = 1 if inlist(journal_abbr, "science","nature","cell")
+ 11.     qui hashsort -order -tot_articles
+ 12.     li 
+ 13.     mkmat num_fund,  mat(top_jrnls_`samp'_N)
+ 14.     mkmat percent_of_tot,  mat(top_jrnls_`data'_`samp')
+ 15.     mat top_jrnls_`samp' = nullmat(top_jrnls_`samp'), top_jrnls_`data'_`sa
+> mp'
+ 16.     restore
+ 17. end 
+
+. 
+. program samp_size
+  1.     syntax, data(str) samp(str) 
+  2.     foreach t in all last5yrs {
+  3.         use ../external/newfund/cleaned_`t'_`data'_`samp', clear
+  4.         di "SAMPLE IS  `data' `samp' `t':"
+  5.         qui gunique pmid
+  6.         di "# articles = " r(unique)
+  7.         mat N_`data'_`samp'_`t' = r(unique)
+  8.         qui gunique pmid which_athr
+  9.         di "# athr-articles = " r(unique)
+ 10.         qui gunique pmid which_athr which_affl if !mi(inst)
+ 11.         di "# athr-affl-articles = " r(unique)
+ 12.         mat N_`data'_`samp' = nullmat(N_`data'_`samp') , N_`data'_`samp'_`
+> t'
+ 13.     }
+ 14. end
+
+. ** 
+. main
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                         1,192,792  
+    -----------------------------------------
+(6 real changes made)
+(320 real changes made)
+
+Duplicates in terms of pmid
+
+(131 observations deleted)
+(2 observations deleted)
+(348 observations deleted)
+(87 observations deleted)
+(0 observations deleted)
+(93 observations deleted)
+(9 observations deleted)
+(259 observations deleted)
+(195 observations deleted)
+(10 observations deleted)
+(11 observations deleted)
+(184 observations deleted)
+(521 observations deleted)
+(71 observations deleted)
+(49 observations deleted)
+(3 observations deleted)
+(30 observations deleted)
+(8 observations deleted)
+(0 observations deleted)
+(38 observations deleted)
+(155 observations deleted)
+(407 observations deleted)
+(29 observations deleted)
+(56 observations deleted)
+(125 observations deleted)
+(64 observations deleted)
+(772 observations deleted)
+(236 observations deleted)
+(101 observations deleted)
+(116 observations deleted)
+(124 observations deleted)
+(555 observations deleted)
+(52 observations deleted)
+(81 observations deleted)
+(41 observations deleted)
+(228 observations deleted)
+(62 observations deleted)
+(700 observations deleted)
+(242 observations deleted)
+(163 observations deleted)
+(608 observations deleted)
+(1,175 observations deleted)
+(217 observations deleted)
+(129 observations deleted)
+(174 observations deleted)
+(443 observations deleted)
+(110 observations deleted)
+(85 observations deleted)
+(130 observations deleted)
+(192 observations deleted)
+(184 observations deleted)
+(759 observations deleted)
+(81 observations deleted)
+(50 observations deleted)
+(42 observations deleted)
+(819 observations deleted)
+(339 observations deleted)
+(254 observations deleted)
+(233 observations deleted)
+(556 observations deleted)
+(212 observations deleted)
+(21 observations deleted)
+(101 observations deleted)
+(115 observations deleted)
+(244 observations deleted)
+(15 observations deleted)
+(44 observations deleted)
+(97 observations deleted)
+(42 observations deleted)
+(5 observations deleted)
+(32 observations deleted)
+(77 observations deleted)
+(27 observations deleted)
+(51 observations deleted)
+(275 observations deleted)
+(25 observations deleted)
+
+Duplicates in terms of lower_title journal_abbr
+(188,889 observations deleted)
+
+Duplicates in terms of all variables
+
+(0 observations are duplicates)
+(file ../temp/possible_non_articles_cns.dta not found)
+file ../temp/possible_non_articles_cns.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       188,889
+        from master                   188,889  
+        from using                          0  
+
+    Matched                                 0  
+    -----------------------------------------
+(0 observations deleted)
+(file ../temp/cns_counts.dta not found)
+file ../temp/cns_counts.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        76,420
+        from master                    76,420  
+        from using                          0  
+
+    Matched                                 0  
+    -----------------------------------------
+(file ../output/cns_unmatched.dta not found)
+file ../output/cns_unmatched.dta saved
+SAMPLE IS : cns
+(3 real changes made)
+
+     +---------------------------------------------------+
+     | journa~r   num_fund   tot_ar~s   percen~t   order |
+     |---------------------------------------------------|
+  1. |  science      37278      98515   37.83992       1 |
+  2. |   nature      60615      74910    80.9171       1 |
+  3. |     cell      14725      15464   95.22116       1 |
+     +---------------------------------------------------+
+SAMPLE IS  newfund cns all:
+# articles = 112618
+# athr-articles = 205089
+# athr-affl-articles = 205089
+SAMPLE IS  newfund cns last5yrs:
+# articles = 12016
+# athr-articles = 23126
+# athr-affl-articles = 23126
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           465,193  
+    -----------------------------------------
+(7 real changes made)
+(17 real changes made)
+
+Duplicates in terms of pmid
+
+(2 observations deleted)
+(4 observations deleted)
+(19 observations deleted)
+(5 observations deleted)
+(0 observations deleted)
+(7 observations deleted)
+(5 observations deleted)
+(10 observations deleted)
+(13 observations deleted)
+(12 observations deleted)
+(2 observations deleted)
+(5 observations deleted)
+(33 observations deleted)
+(10 observations deleted)
+(17 observations deleted)
+(3 observations deleted)
+(7 observations deleted)
+(6 observations deleted)
+(0 observations deleted)
+(1 observation deleted)
+(20 observations deleted)
+(2 observations deleted)
+(2 observations deleted)
+(1 observation deleted)
+(24 observations deleted)
+(9 observations deleted)
+(2 observations deleted)
+(0 observations deleted)
+(4 observations deleted)
+(1 observation deleted)
+(0 observations deleted)
+(1 observation deleted)
+(6 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(19 observations deleted)
+(1 observation deleted)
+(37 observations deleted)
+(1 observation deleted)
+(7 observations deleted)
+(4 observations deleted)
+(15 observations deleted)
+(8 observations deleted)
+(0 observations deleted)
+(5 observations deleted)
+(22 observations deleted)
+(4 observations deleted)
+(46 observations deleted)
+(21 observations deleted)
+(25 observations deleted)
+(25 observations deleted)
+(26 observations deleted)
+(14 observations deleted)
+(0 observations deleted)
+(12 observations deleted)
+(8 observations deleted)
+(0 observations deleted)
+(2 observations deleted)
+(4 observations deleted)
+(21 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(1 observation deleted)
+(3 observations deleted)
+(44 observations deleted)
+(1 observation deleted)
+(8 observations deleted)
+(0 observations deleted)
+(1 observation deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(1 observation deleted)
+(4 observations deleted)
+(0 observations deleted)
+(21 observations deleted)
+
+Duplicates in terms of lower_title journal_abbr
+(33,333 observations deleted)
+
+Duplicates in terms of all variables
+
+(0 observations are duplicates)
+(file ../temp/possible_non_articles_scisub.dta not found)
+file ../temp/possible_non_articles_scisub.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        33,333
+        from master                    33,333  
+        from using                          0  
+
+    Matched                                 0  
+    -----------------------------------------
+(0 observations deleted)
+(file ../temp/scisub_counts.dta not found)
+file ../temp/scisub_counts.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         4,199
+        from master                     4,199  
+        from using                          0  
+
+    Matched                                 0  
+    -----------------------------------------
+(file ../output/scisub_unmatched.dta not found)
+file ../output/scisub_unmatched.dta saved
+SAMPLE IS : scisub
+(0 real changes made)
+
+     +---------------------------------------------------------+
+     |   journal_abbr   num_fund   tot_ar~s   percen~t   order |
+     |---------------------------------------------------------|
+  1. |         neuron       7200       7621   94.47579       0 |
+  2. |      nat_genet       4968       5146     96.541       0 |
+  3. |        nat_med       4111       4799   85.66368       0 |
+  4. |    nat_biotech       2701       4719    57.2367       0 |
+  5. |      nat_neuro       3670       4028   91.11221       0 |
+     |---------------------------------------------------------|
+  6. |   nat_cell_bio       2932       3057   95.91103       0 |
+  7. |   nat_chem_bio       2038       2325   87.65591       0 |
+  8. | cell_stem_cell       1514       1638   92.42979       0 |
+     +---------------------------------------------------------+
+SAMPLE IS  newfund scisub all:
+# articles = 29134
+# athr-articles = 57362
+# athr-affl-articles = 57362
+SAMPLE IS  newfund scisub last5yrs:
+# articles = 9205
+# athr-articles = 18111
+# athr-affl-articles = 18111
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                         3,441,111  
+    -----------------------------------------
+(2 real changes made)
+(77 real changes made)
+
+Duplicates in terms of pmid
+
+(27 observations deleted)
+(0 observations deleted)
+(1,384 observations deleted)
+(67 observations deleted)
+(1 observation deleted)
+(333 observations deleted)
+(28 observations deleted)
+(146 observations deleted)
+(73 observations deleted)
+(86 observations deleted)
+(59 observations deleted)
+(21 observations deleted)
+(318 observations deleted)
+(50 observations deleted)
+(245 observations deleted)
+(222 observations deleted)
+(345 observations deleted)
+(29 observations deleted)
+(0 observations deleted)
+(21 observations deleted)
+(64 observations deleted)
+(35 observations deleted)
+(184 observations deleted)
+(8 observations deleted)
+(42 observations deleted)
+(22 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(11 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(40 observations deleted)
+(63 observations deleted)
+(19 observations deleted)
+(0 observations deleted)
+(572 observations deleted)
+(348 observations deleted)
+(81 observations deleted)
+(15 observations deleted)
+(249 observations deleted)
+(41 observations deleted)
+(472 observations deleted)
+(40 observations deleted)
+(67 observations deleted)
+(95 observations deleted)
+(286 observations deleted)
+(404 observations deleted)
+(270 observations deleted)
+(62 observations deleted)
+(470 observations deleted)
+(4 observations deleted)
+(716 observations deleted)
+(33 observations deleted)
+(9 observations deleted)
+(14 observations deleted)
+(58 observations deleted)
+(0 observations deleted)
+(17 observations deleted)
+(158 observations deleted)
+(618 observations deleted)
+(153 observations deleted)
+(5 observations deleted)
+(130 observations deleted)
+(14 observations deleted)
+(1,996 observations deleted)
+(0 observations deleted)
+(116 observations deleted)
+(36 observations deleted)
+(383 observations deleted)
+(9 observations deleted)
+(8 observations deleted)
+(0 observations deleted)
+(15 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+
+Duplicates in terms of lower_title journal_abbr
+(425,869 observations deleted)
+
+Duplicates in terms of all variables
+
+(0 observations are duplicates)
+(file ../temp/possible_non_articles_demsci.dta not found)
+file ../temp/possible_non_articles_demsci.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       425,869
+        from master                   425,869  
+        from using                          0  
+
+    Matched                                 0  
+    -----------------------------------------
+(0 observations deleted)
+(file ../temp/demsci_counts.dta not found)
+file ../temp/demsci_counts.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        38,665
+        from master                    38,665  
+        from using                          0  
+
+    Matched                                 0  
+    -----------------------------------------
+(file ../output/demsci_unmatched.dta not found)
+file ../output/demsci_unmatched.dta saved
+SAMPLE IS : demsci
+(0 real changes made)
+
+     +---------------------------------------------------+
+     | journa~r   num_fund   tot_ar~s   percen~t   order |
+     |---------------------------------------------------|
+  1. |     plos     192503     228166   84.36971       0 |
+  2. |      jbc     165347     167698   98.59808       0 |
+  3. |     onco      17660      17859   98.88572       0 |
+  4. |    faseb      11696      12146   96.29507       0 |
+     +---------------------------------------------------+
+SAMPLE IS  newfund demsci all:
+# articles = 387206
+# athr-articles = 763040
+# athr-affl-articles = 763040
+SAMPLE IS  newfund demsci last5yrs:
+# articles = 120354
+# athr-articles = 239545
+# athr-affl-articles = 239545
+
+. 
+end of do-file
+
+--------------------------------------------------------------------------------
+Makelog ended: 2024-01-04 23:41:24
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/jrnl_samp_size/code
+--------------------------------------------------------------------------------

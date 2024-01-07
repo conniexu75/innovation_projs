@@ -21,11 +21,11 @@ program main
         sum_stats, samp(`t')
         qui output_tables, samp(`t')
         qui event_study, samp(`t') timeframe(18) ymax(1) ygap(0.1) 
-        *event_study, samp(`t') timeframe(10) startyr(1945) endyr(1975) ymax(1) ygap(0.1)
-        *event_study, samp(`t') timeframe(10) startyr(1955) endyr(1985) ymax(1) ygap(0.1)
-        *event_study, samp(`t') timeframe(10) startyr(1965) endyr(1995) ymax(1) ygap(0.1)
-        *event_study, samp(`t') timeframe(10) startyr(1975) endyr(2005) ymax(1) ygap(0.1)
-        qui event_study, samp(`t') timeframe(10) startyr(1985) endyr(2023) ymax(1) ygap(0.1)
+        qui event_study, samp(`t') timeframe(10) startyr(1945) endyr(1980) ymax(1) ygap(0.1)
+        qui event_study, samp(`t') timeframe(10) startyr(1980) endyr(2000) ymax(1) ygap(0.1)
+        qui event_study, samp(`t') timeframe(10) startyr(1980) endyr(1995) ymax(1) ygap(0.1)
+        qui event_study, samp(`t') timeframe(8) startyr(2000) endyr(2023) ymax(1) ygap(0.1)
+        qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) ymax(1) ygap(0.1)
     }
 end
 
@@ -87,9 +87,10 @@ program make_movers
     save ../temp/mover_xw, replace
     restore
     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(1 3) 
-*   keep if (mover == 0 & _merge == 1) | (mover == 1 & _merge == 3)
-    *bys msa_comb: egen has_mover = max(mover == 1)
-    *drop if has_mover == 0
+    *keep if (mover == 0 & _merge == 1) | (mover == 1 & _merge == 3)
+    bys inst_id year: egen has_mover = max(mover == 1)
+    drop if has_mover == 0
+    gen analysis_cond = mover == 1 & num_moves == 1 & ((mover == 0 & _merge == 1) | (mover == 1 & _merge == 3))
     save ${temp}/mover_temp_`samp' , replace
 end
 
@@ -143,7 +144,7 @@ program  maps
     replace msa_comb = "Macon-Bibb County, GA" if msa_comb == "Macon, GA"
     bys athr_id msa_comb ${time} : gen count = _n == 1
     keep if inrange(year , 1945,2022)
-    gcollapse (sum) affl_wt impact_cite_affl_wt body_adj_wt (mean) msa_size , by(msa_comb)
+    gcollapse (sum) affl_wt impact_cite_affl_wt body_adj_wt (mean) msa_size , by(inst_id)
     save ../temp/map_samp, replace
     
     use usa_msa, clear
@@ -185,7 +186,7 @@ program sum_stats
     bys athr_id inst_id : gen inst_cntr = _n == 1
     bys athr_id : egen num_insts = total(inst_cntr)
     gen life_time_prod = y
-    gcollapse (mean) num_years num_moves avg_team_size x y pat_adj_wt num_insts mover (sum) life_time_prod, by(athr_id)
+    gcollapse (mean) num_years num_moves avg_team_size x y pat_adj_wt num_insts mover (min) analysis_cond (sum) life_time_prod, by(athr_id)
     count
     foreach var in num_years avg_team_size x y life_time_prod num_moves {
         sum `var'
@@ -201,9 +202,9 @@ program sum_stats
         sum `var' if mover == 1 
         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
     }
-     count if mover == 1 & num_moves == 1 
+    count if analysis_cond == 1 
     foreach var in num_years avg_team_size x y life_time_prod {
-        sum `var' if mover == 1 & num_moves == 1
+        sum `var' if analysis_cond == 1  
         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
     }
     restore
@@ -211,7 +212,7 @@ program sum_stats
     gen life_time_prod = y
     bys msa_comb inst_id: gen inst_cntr = _n == 1
     bys msa_comb: egen num_insts = total(inst_cntr)
-    gcollapse (mean) x y num_insts (sum) life_time_prod, by(msa_comb)
+    gcollapse (mean) x y num_insts (sum) life_time_prod, by(inst_id)
     count
     foreach var in num_insts x y life_time_prod {
         qui sum `var' 
@@ -220,10 +221,10 @@ program sum_stats
     restore
     mat stat_`samp' = ind_stats \ city_stats 
     gen ln_affl_wt = ln(affl_wt)
-    gcollapse (mean) msa_y = y msa_x = x msa_ln_y = ln_y msa_ln_x = ln_x msa_ln_patent = ln_patent msa_patent = pat_adj_wt msa_patent_rate = patented msa_affl_wt = affl_wt msa_ln_affl_wt = ln_affl_wt (firstnm) msa , by(msa_comb ${time}) 
+    gcollapse (mean) msa_y = y msa_x = x msa_ln_y = ln_y msa_ln_x = ln_x msa_ln_patent = ln_patent msa_patent = pat_adj_wt msa_patent_rate = patented msa_affl_wt = affl_wt msa_ln_affl_wt = ln_affl_wt (firstnm) msa , by(inst_id ${time}) 
     save ${temp}/msa_`samp'_collapsed, replace
 
-    use if mover == 1 & num_moves == 1 using ${temp}/mover_temp_`samp' , clear  
+    use if analysis_cond == 1  using ${temp}/mover_temp_`samp' , clear  
     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
@@ -242,7 +243,7 @@ program sum_stats
     rename year current_year
     gen year = current_year if which_place == 1
     replace year = move_year if which_place == 2
-    merge m:1 msa_comb year using ${temp}/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen
+    merge m:1 inst_id year using ${temp}/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen
     hashsort athr_id which_place year
     foreach var in msa_ln_y msa_ln_x msa_ln_patent avg_ln_y avg_ln_x avg_ln_patent {
         if strpos("`var'", "msa_") > 0 {
@@ -287,7 +288,7 @@ end
 program event_study 
     syntax, samp(str) timeframe(int) [startyr(int 1945) endyr(int 2023) ymax(real 1) ygap(real 0.2)] 
     cap mat drop _all  
-    use if mover == 1 & num_moves == 1 & inrange(year, `startyr', `endyr')  using ${temp}/mover_temp_`samp' , clear  
+    use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using ${temp}/mover_temp_`samp' , clear  
     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
     keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year
     hashsort athr_id year
@@ -300,7 +301,7 @@ program event_study
     hashsort athr_id year
     gegen msa = group(msa_comb)
     rename inst inst_name
-    gegen inst = group(inst_name)
+    gegen inst = group(inst_id)
     gen ln_y = ln(impact_cite_affl_wt)
     forval i = 1/`timeframe' {
         gen lag`i' = 1 if rel == -`i'
@@ -348,7 +349,7 @@ program event_study
         }
         preserve
         mat drop _all
-        reghdfe ln_y `lags' treat `leads' if `c' , absorb(year field msa field#year field#msa inst_id athr_id) vce(cluster msa)
+        reghdfe ln_y `lags' treat `leads' if `c' , absorb(year field msa field#year field#msa inst athr_id) vce(cluster inst)
         gunique athr_id if `c'
         local num_movers = r(unique)
         local normalize = _b[lag1]

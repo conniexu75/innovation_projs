@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2023-12-21 00:07:17
+Makelog started: 2024-01-04 23:39:50
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_measures/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -224,10 +224,10 @@ not available in non-GUI version
 
 . ** 
 . main
-(0 observations deleted)
+(1 observation deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(200 missing values generated)
+(199 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str14
 (8 real changes made)
@@ -236,16 +236,16 @@ variable lab_share was str1 now str14
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |        200          .5    3.278308   .0000945   44.65057
+      share1 |        199    .5025126    3.285654   .0000945   44.65597
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |        200          .5    4.076364   2.08e-06   56.42815
+      share2 |        199    .5025129    4.076887   2.08e-06   56.28522
 file ../output/figures/country_uw_if.pdf saved as PDF format
 (1 observation deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(4,143 missing values generated)
+(4,040 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str36
 (10 real changes made)
@@ -254,34 +254,34 @@ variable lab_share was str1 now str36
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |      4,143    .0241371    .1552603    .000095   4.208407
+      share1 |      4,040    .0247525    .1582506   .0000954   4.153591
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |      4,143    .0241371    .2378349   2.09e-06   8.974401
+      share2 |      4,040    .0247525    .2414803   2.09e-06   8.787534
 file ../output/figures/msa_c_world_uw_if.pdf saved as PDF format
-(1 observation deleted)
-(note: missing values will be sorted first)
-(note: missing values will be sorted first)
-(17,570 missing values generated)
-(0 real changes made)
-variable lab_share was str1 now str46
-(8 real changes made)
-(0 real changes made)
-(0 real changes made)
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-      share1 |     17,570    .0056915    .0372147   .0001104   2.157703
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-      share2 |     17,570    .0056915    .0597569   2.27e-06   3.656215
-file ../output/figures/inst_uw_if.pdf saved as PDF format
 (0 observations deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(200 missing values generated)
+(19,948 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str46
+(9 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |     19,948     .005013    .0375479   .0000945   2.478836
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |     19,948     .005013    .0561922   2.08e-06    3.46494
+file ../output/figures/inst_uw_if.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(199 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str14
 (8 real changes made)
@@ -290,16 +290,16 @@ variable lab_share was str1 now str14
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |        200          .5    3.278308   .0000945   44.65057
+      share1 |        199    .5025126    3.285654   .0000945   44.65597
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |        200          .5    4.083635   4.98e-07   56.54243
+      share2 |        199    .5025126    4.073555   7.38e-07   56.24022
 file ../output/figures/country_uw_if_wt.pdf saved as PDF format
 (1 observation deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(4,143 missing values generated)
+(4,040 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str36
 (12 real changes made)
@@ -308,70 +308,70 @@ variable lab_share was str1 now str36
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |      4,143    .0241371    .1552603    .000095   4.208407
+      share1 |      4,040    .0247525    .1582506   .0000954   4.153591
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |      4,143    .0241371    .2704232          0   11.54766
+      share2 |      4,040    .0247525    .2713341          0   11.23642
 file ../output/figures/msa_c_world_uw_if_wt.pdf saved as PDF format
-(1 observation deleted)
-(note: missing values will be sorted first)
-(note: missing values will be sorted first)
-(17,570 missing values generated)
-(0 real changes made)
-variable lab_share was str1 now str46
-(7 real changes made)
-(0 real changes made)
-(0 real changes made)
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-      share1 |     17,570    .0056915    .0372147   .0001104   2.157703
-
-    Variable |        Obs        Mean    Std. dev.       Min        Max
--------------+---------------------------------------------------------
-      share2 |     17,570    .0056915    .0650219          0   4.352193
-file ../output/figures/inst_uw_if_wt.pdf saved as PDF format
 (0 observations deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(200 missing values generated)
+(19,948 missing values generated)
 (0 real changes made)
-variable lab_share was str1 now str14
+variable lab_share was str1 now str46
 (8 real changes made)
 (0 real changes made)
 (0 real changes made)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |        200          .5     4.40766          0   61.44456
+      share1 |     19,948     .005013    .0375479   .0000945   2.478836
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |        200          .5     4.28503          0   59.68623
+      share2 |     19,948     .005013    .0619924          0   4.151978
+file ../output/figures/inst_uw_if_wt.pdf saved as PDF format
+(1 observation deleted)
+(note: missing values will be sorted first)
+(note: missing values will be sorted first)
+(199 missing values generated)
+(0 real changes made)
+variable lab_share was str1 now str14
+(7 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share1 |        199    .5025128     4.39521          0   61.09204
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      share2 |        199    .5025128    4.272876          0   59.35165
 file ../output/figures/country_pat_frnt.pdf saved as PDF format
 (1 observation deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(4,143 missing values generated)
+(4,040 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str36
 (11 real changes made)
-(3 real changes made)
+(4 real changes made)
 (0 real changes made)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |      4,143    .0241371    .2727544          0   11.44825
+      share1 |      4,040    .0247525    .2763007          0   11.39202
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |      4,143    .0241371    .2717048          0   11.97182
+      share2 |      4,040    .0247525    .2731003          0   11.83805
 file ../output/figures/msa_c_world_pat_frnt.pdf saved as PDF format
-(1 observation deleted)
+(0 observations deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(17,570 missing values generated)
+(19,948 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str24
 (8 real changes made)
@@ -380,16 +380,16 @@ variable lab_share was str1 now str24
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |     17,570    .0056915    .0687024          0   4.535574
+      share1 |     19,948     .005013    .0623978          0   3.984291
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |     17,570    .0056915    .0657228          0   4.849061
+      share2 |     19,948     .005013    .0601479          0   4.239505
 file ../output/figures/inst_pat_frnt.pdf saved as PDF format
-(0 observations deleted)
+(1 observation deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(200 missing values generated)
+(199 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str14
 (6 real changes made)
@@ -398,16 +398,16 @@ variable lab_share was str1 now str14
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |        200          .5     4.40766          0   61.44456
+      share1 |        199    .5025128     4.39521          0   61.09204
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |        200          .5    4.529773          0    63.0308
+      share2 |        199    .5025127    4.515851          0   62.64508
 file ../output/figures/country_pat_body.pdf saved as PDF format
 (1 observation deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(4,143 missing values generated)
+(4,040 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str36
 (12 real changes made)
@@ -416,29 +416,29 @@ variable lab_share was str1 now str36
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |      4,143    .0241371    .2727544          0   11.44825
+      share1 |      4,040    .0247525    .2763007          0   11.39202
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |      4,143    .0241371    .2778833          0   10.71888
+      share2 |      4,040    .0247525    .2840448          0   10.78838
 file ../output/figures/msa_c_world_pat_body.pdf saved as PDF format
-(1 observation deleted)
+(0 observations deleted)
 (note: missing values will be sorted first)
 (note: missing values will be sorted first)
-(17,570 missing values generated)
+(19,948 missing values generated)
 (0 real changes made)
 variable lab_share was str1 now str24
-(7 real changes made)
+(8 real changes made)
 (0 real changes made)
 (0 real changes made)
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share1 |     17,570    .0056915    .0687024          0   4.535574
+      share1 |     19,948     .005013    .0623978          0   3.984291
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-      share2 |     17,570    .0056915    .0776708          0    4.46532
+      share2 |     19,948     .005013    .0688626          0   3.804627
 file ../output/figures/inst_pat_body.pdf saved as PDF format
 (file ../output/tables/corr_var.txt not found)
 (file ../output/tables/corr_pat.txt not found)
@@ -448,6 +448,6 @@ file ../output/figures/inst_pat_body.pdf saved as PDF format
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2023-12-21 00:07:59
+Makelog ended: 2024-01-04 23:40:32
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/comp_measures/code
 --------------------------------------------------------------------------------

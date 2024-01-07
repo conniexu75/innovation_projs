@@ -275,7 +275,7 @@ program regression
     replace msa_size = 0.0000000000001 if msa_size == 0
     gegen msa = group(msa_comb)
     rename inst inst_name
-    gegen inst = group(inst_name)
+    gegen inst = group(inst_id)
     gegen msa_field = group(msa field)
     gegen year_field = group(year field)
     gen ln_y = ln(impact_cite_affl_wt)
@@ -315,14 +315,14 @@ program regression
             *graph export ../output/figures/final_bs_`samp'.pdf, replace
         }
     }
-    reghdfe `reg_eq', absorb(${time} field field#${time} field#msa inst#year inst athr_id) vce(cluster msa)
+/*    reghdfe `reg_eq', absorb(${time} field field#${time} field#msa inst#year inst athr_id) vce(cluster msa)
     mat instyr_`samp' = nullmat(instyr_`samp'), (`mat_est' \ e(N))
-    mat coef_`samp' = nullmat(coef_`samp') , instyr_`samp'
+    mat coef_`samp' = nullmat(coef_`samp') , instyr_`samp'*/
     reghdfe `reg_eq', absorb(year msa athr_id field inst) vce(cluster msa)
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
     reghdfe `reg_eq', absorb(year msa athr_id gen_mesh1 gen_mesh2 inst) vce(cluster msa)
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
-    mat alt_spec_`samp' = instyr_`samp' , field_`samp'
+*    mat alt_spec_`samp' = instyr_`samp' , field_`samp'
 /*    reghdfe `reg_eq', absorb(year msa athr_id qualifier_name1 qualifier_name2 inst) vce(cluster msa)
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
     reghdfe `reg_eq', absorb(year msa athr_id term1 term2 inst) vce(cluster msa)
