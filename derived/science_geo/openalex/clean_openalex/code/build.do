@@ -35,63 +35,94 @@ program aggregate_insts
             cap append using ${temp}/inst_geo_chars`i'
         }
     }
-    bys inst_id: egen has_parent = max(associated_rel == "parent")
-    bys inst_id: gen num = _N 
-    keep if has_parent == 0  | (has_parent == 1 & associated_rel == "parent" ) | num == 1
-    ds associated* 
-    foreach var in `r(varlist)' {
-        replace `var' = "" if has_parent == 0
-        replace `var' = "" if (strpos(associated, "University")>0 & strpos(associated, "System")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | inlist(associated, "University of London", "Wellcome Trust") | (strpos(associated, "Health")>0 & strpos(associated, "System")>0 & associated_type == "healthcare" & (type == "education" | type == "healthcare")) | (strpos(associated, "Higher")>0 & strpos(associated, "Education")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | strpos(associated, "Ministry of") > 0 | strpos(associated, "Board of")>0 | strpos(associated, "Government of")>0 | (strpos(associated, "Department of")>0 & country != "Russia")
-        replace `var' = "" if country_code != associated_country
+    bys inst_id: gegen has_parent = max(associated_rel == "parent")
+    keep if has_parent == 0  | (has_parent == 1 & associated_rel == "parent" ) 
+    gen new_inst = ""
+    gen new_inst_id = ""
+    foreach var in inst inst_id {
+        replace new_`var' =  `var' if has_parent == 0
+        replace new_`var' = `var' if ((strpos(associated, "Universit")>0|strpos(associated, "College")|strpos(associated, "Higher Education")) & strpos(associated, "System")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | inlist(associated, "University of London", "Wellcome Trust") | (strpos(associated, "Health")>0 & strpos(associated, "System")>0 & associated_type == "healthcare" & (type == "education" | type == "healthcare")) | strpos(associated, "Ministry of") > 0 | strpos(associated, "Board of")>0 | strpos(associated, "Government of")>0 | (strpos(associated, "Department of")>0 & country != "Russia")
+        replace new_`var' = `var' if country_code != associated_country
     }
-    gduplicates drop inst_id associated_id, force
-    replace inst = associated if strpos(associated, "University")>0 & strpos(associated, "System")>0 & associated_type == "education" & (type != "education" & type != "healthcare")
-    replace inst = associated if inlist(associated, "Chinese Academy of Sciences", "Spanish National Research Council", "Max Planck Society", "National Research Council", "National Institutes of Health", "Harvard University")
-    replace inst = associated if inlist(associated, "Leibniz Association", "Aix-Marseille University", "Indian Council of Agricultural Research", "Inserm", "Polish Academy of Sciences", "National Research Institute for Agriculture, Food and Environment") 
-    replace inst = associated if inlist(associated, "Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions")
-    replace inst = associated if inlist(associated, "Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
-    replace inst = associated if inlist(associated, "French National Centre for Scientific Research")
-    replace inst = associated if inlist(associated, "Fraunhofer Society", "Istituti di Ricovero e Cura a Carattere Scientifico",  "Claude Bernard University Lyon 1", "Atomic Energy and Alternative Energies Commission", "Japanese Red Cross Society, Japan") 
-    replace inst = associated if inlist(associated, "Islamic Azad University, Tehran", "National Oceanic and Atmospheric Administratio", "French Institute for Research in Computer Science and Automation", "National Academy of Sciences of Ukraine", "National Institute for Nuclear Physics", "Assistance Publique – Hôpitaux de Paris") 
-    replace inst = associated if inlist(associated, "Medical Research Council", "National Institute for Health Research", "Academia Sinica", "National Scientific and Technical Research Council","Czech Academy of Sciences", "Commonwealth Scientific and Industrial Research Organisation")
-    replace inst = associated if inlist(associated, "Slovak Academy of Sciences", "Indian Council of Medical Research", "Council of Scientific and Industrial Research", "National Institute for Astrophysics", "Bulgarian Academy of Sciences", "Centers for Disease Control and Prevention", "National Institute of Technology")
-    replace inst = associated if inlist(associated, "Helmholtz Association of German Research Centres", "Helios Kliniken", "Shriners Hospitals for Children", "Hungarian Academy of Sciences", "National Agriculture and Food Research Organization", "Australian Research Council")
-    replace inst = associated if inlist(associated, "Agro ParisTech", "Veterans Health Administration", "Institut de Recherche pour le Développement", "Austrian Academy of Sciences", "Institutos Nacionais de Ciência e Tecnologia", "Chinese Academy of Forestry", "Chinese Academy of Tropical Agricultural Sciences")
-    replace inst = associated if inlist(associated, "Instituto de Salud Carlos III", "National Aeronautics and Space Administration", "Ludwig Boltzmann Gesellschaft", "United States Air Force", "Centre Nouvelle Aquitaine-Bordeaux", "RIKEN", "Agricultural Research Council")
-    replace inst = associated if inlist(associated, "Centro Científico Tecnológico - La Plata", "National Research Council Canada", "Royal Netherlands Academy of Arts and Sciences","Defence Research and Development Organisation", "Canadian Institutes of Health Research", "Italian Institute of Technology", "United Nations University")
-    replace inst = associated if inlist(associated, "IBM Research - Thomas J. Watson Research Center", "Délégation Ile-de-France Sud","Grenoble Institute of Technology", "François Rabelais University", "Chinese Academy of Social Sciences", "National Science Foundation" , "Federal University of Toulouse Midi-Pyrénées")
-    replace inst = associated if inlist(associated, "Chinese Center For Disease Control and Prevention", "Johns Hopkins Medicine", "Cancer Research UK", "Centre Hospitalier Universitaire de Bordeaux", "Puglia Salute", "Hospices Civils de Lyon", "Ministry of Science and Technology", "Servicio de Salud de Castilla La Mancha")
-    replace inst = associated if inlist(associated, "Grenoble Alpes University","Arts et Metiers Institute of Technology", "University of Paris-Saclay", "Biomedical Research Council", "Senckenberg Society for Nature Research", "Centre Hospitalier Régional et Universitaire de Lille", "Schön Klinik Roseneck", "ESPCI Paris")
-    replace inst = associated if inlist(associated, "National Academy of Sciences of Armenia", "University of the Philippines System", "Madrid Institute for Advanced Studies", "CGIAR", "Ministry of Science, Technology and Innovation", "Institut Polytechnique de Bordeaux")
+    replace associated = "" if !mi(new_inst)
+    replace associated_id = "" if !mi(new_inst_id)
+    gduplicates drop inst_id new_inst_id, force
+    foreach s in "" "_id" {
+        replace new_inst`s' = associated`s' if strpos(associated, "University")>0 & strpos(associated, "System")>0 & associated_type == "education" & (type != "education" & type != "healthcare")
+        replace new_inst`s' = associated`s' if inlist(associated, "Chinese Academy of Sciences", "Spanish National Research Council", "Max Planck Society", "National Research Council", "National Institutes of Health", "Harvard University")
+        replace new_inst`s' = associated`s' if inlist(associated, "Leibniz Association", "Aix-Marseille University", "Indian Council of Agricultural Research", "Inserm", "Polish Academy of Sciences", "National Research Institute for Agriculture, Food and Environment") 
+        replace new_inst`s' = associated`s' if inlist(associated, "Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions")
+        replace new_inst`s' = associated`s' if inlist(associated, "Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
+        replace new_inst`s' = associated`s' if inlist(associated, "French National Centre for Scientific Research")
+        replace new_inst`s' = associated`s' if inlist(associated, "Fraunhofer Society", "Istituti di Ricovero e Cura a Carattere Scientifico",  "Claude Bernard University Lyon 1", "Atomic Energy and Alternative Energies Commission", "Japanese Red Cross Society, Japan") 
+        replace new_inst`s' = associated`s' if inlist(associated, "Islamic Azad University, Tehran", "National Oceanic and Atmospheric Administratio", "French Institute for Research in Computer Science and Automation", "National Academy of Sciences of Ukraine", "National Institute for Nuclear Physics", "Assistance Publique – Hôpitaux de Paris") 
+        replace new_inst`s' = associated`s' if inlist(associated, "Medical Research Council", "National Institute for Health Research", "Academia Sinica", "National Scientific and Technical Research Council","Czech Academy of Sciences", "Commonwealth Scientific and Industrial Research Organisation")
+        replace new_inst`s' = associated`s' if inlist(associated, "Slovak Academy of Sciences", "Indian Council of Medical Research", "Council of Scientific and Industrial Research", "National Institute for Astrophysics", "Bulgarian Academy of Sciences", "Centers for Disease Control and Prevention", "National Institute of Technology")
+        replace new_inst`s' = associated`s' if inlist(associated, "Helmholtz Association of German Research Centres", "Helios Kliniken", "Shriners Hospitals for Children", "Hungarian Academy of Sciences", "National Agriculture and Food Research Organization", "Australian Research Council")
+        replace new_inst`s' = associated`s' if inlist(associated, "Agro ParisTech", "Veterans Health Administration", "Institut de Recherche pour le Développement", "Austrian Academy of Sciences", "Institutos Nacionais de Ciência e Tecnologia", "Chinese Academy of Forestry", "Chinese Academy of Tropical Agricultural Sciences")
+        replace new_inst`s' = associated`s' if inlist(associated, "Instituto de Salud Carlos III", "National Aeronautics and Space Administration", "Ludwig Boltzmann Gesellschaft", "United States Air Force", "Centre Nouvelle Aquitaine-Bordeaux", "RIKEN", "Agricultural Research Council")
+        replace new_inst`s' = associated`s' if inlist(associated, "Centro Científico Tecnológico - La Plata", "National Research Council Canada", "Royal Netherlands Academy of Arts and Sciences","Defence Research and Development Organisation", "Canadian Institutes of Health Research", "Italian Institute of Technology", "United Nations University")
+        replace new_inst`s' = associated`s' if inlist(associated, "IBM Research - Thomas J. Watson Research Center", "Délégation Ile-de-France Sud","Grenoble Institute of Technology", "François Rabelais University", "Chinese Academy of Social Sciences", "National Science Foundation" , "Federal University of Toulouse Midi-Pyearénées")
+        replace new_inst`s' = associated`s' if inlist(associated, "Chinese Center For Disease Control and Prevention", "Johns Hopkins Medicine", "Cancer Research UK", "Centre Hospitalier Universitaire de Bordeaux", "Puglia Salute", "Hospices Civils de Lyon", "Ministry of Science and Technology", "Servicio de Salud de Castilla La Mancha")
+        replace new_inst`s' = associated`s' if inlist(associated, "Grenoble Alpes University","Arts et Metiers Institute of Technology", "University of Paris-Saclay", "Biomedical Research Council", "Senckenberg Society for Nature Research", "Centre Hospitalier Régional et Universitaire de Lille", "Schön Klinik Roseneck", "ESPCI Paris")
+        replace new_inst`s' = associated`s' if inlist(associated, "National Academy of Sciences of Armenia", "University of the Philippines System", "Madrid Institute for Advanced Studies", "CGIAR", "Ministry of Science, Technology and Innovation", "Institut Polytechnique de Bordeaux")
 
-    replace inst = associated if inlist(associated, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") & country == "Russia"
-    replace inst = associated if inlist(associated, "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences") & country == "Russia" 
-    replace inst = associated if inlist(associated, "Russian Academy")
-    replace inst = associated if strpos(associated, "Agricultural Research Service -")>0
+        replace new_inst`s' = associated`s' if inlist(associated, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") & country == "Russia"
+        replace new_inst`s' = associated`s' if inlist(associated, "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences") & country == "Russia" 
+        replace new_inst`s' = associated`s' if inlist(associated, "Russian Academy")
+        replace new_inst`s' = associated`s' if strpos(associated, "Agricultural Research Service -")>0
+    }
     // merge national institutions together
-    replace associated = "French National Centre for Scientific Research" if inlist(inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions") | inlist(inst,"Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
-    replace associated_id = "I1294671590" if associated =="French National Centre for Scientific Research"
-    replace associated = "Russian Academy" if inlist(inst, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") | inlist(inst, "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences")
-    replace associated_id = "I1313323035" if associated == "Russian Academy"
-    replace associated  = "Agricultural Research Service" if strpos(inst, "Agricultural Research Service - ")>0
-    replace associated_id = "I1312222531" if inst == "Agricultural Research Service"
-    replace associated  = "Max Planck Society" if strpos(inst, "Max Planck")>0
-    replace associated = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
-    replace associated_id = "I4210166203" if associated == "Max Planck Society"
-    replace inst = "Johns Hopkins University" if strpos(inst, "Johns Hopkins")>0
-    replace associated = "Johns Hopkins University" if strpos(associated, "Johns Hopkins")>0
-    replace associated_id = "I145311948" if associated == "Johns Hopkins University"
-    replace inst = "Stanford University" if inlist(inst, "Stanford Medicine", "Stanford Health Care")
-    replace associated = "Stanford University" if inlist(associated, "Stanford Medicine", "Stanford Health Care")
-    replace inst = "Northwestern University" if inlist(inst, "Northwestern Medicine")
-    replace associated = "Northwestern University" if inlist(inst, "Northwestern Medicine")
-    replace associated = "Harvard University" if inlist(inst, "Harvard Global Health Institute", "Harvard Pilgrim Health Care", "Harvard Affiliated Emergency Medicine Residency", "Harvard NeuroDiscovery Center")
-    replace inst = subinstr(inst, " Health System", "", .) if strpos(inst, " Health System")>0 & (strpos(inst, "University")>0 | strpos(inst, "UC")>0)
-    replace inst = subinstr(inst, " Medical System", "", .) if strpos(inst, " Medical System")>0 & (strpos(inst, "University")>0 | strpos(inst, "UC")>0)
+    replace new_inst = "French National Centre for Scientific Research" if inlist(inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions") | inlist(inst,"Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
+    replace new_inst = "French National Centre for Scientific Research" if inlist(new_inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions") | inlist(new_inst,"Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
+    replace new_inst_id = "I1294671590" if new_inst =="French National Centre for Scientific Research"
+    replace new_inst = "Russian Academy" if inlist(inst, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") | inlist(inst, "Russian Academy of Sciences", "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences") & country == "Russia"
+    replace new_inst = "Russian Academy" if inlist(new_inst, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") | inlist(new_inst,"Russian Academy of Sciences", "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences") & country == "Russia"
+    replace new_inst_id = "I1313323035" if new_inst  == "Russian Academy"
+    replace new_inst  = "Agricultural Research Service" if strpos(inst, "Agricultural Research Service - ")>0
+    replace new_inst_id = "I1312222531" if new_inst == "Agricultural Research Service"
+    replace new_inst  = "Max Planck Society" if strpos(inst, "Max Planck")>0
+    replace new_inst  = "Max Planck Society" if strpos(associated, "Max Planck")>0
+    replace new_inst_id = "I149899117" if new_inst == "Max Planck Society"
+    replace new_inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
+    replace new_inst_id = "I48633490" if new_inst == "Mass General Brigham"
+    replace new_inst = "Johns Hopkins University" if strpos(inst, "Johns Hopkins")>0
+    replace new_inst = "Johns Hopkins University" if strpos(associated, "Johns Hopkins")>0
+    replace new_inst_id = "I145311948" if new_inst == "Johns Hopkins University"
+    replace new_inst = "Stanford University" if inlist(inst, "Stanford Medicine", "Stanford Health Care", "Stanford Synchrotron Radiation Lightsource", "Stanford Blood Center")
+    replace new_inst = "Stanford University" if inlist(associated, "Stanford Medicine", "Stanford Health Care")
+    replace new_inst_id = "I97018004" if new_inst == "Stanford University"
+    replace new_inst = "Northwestern University" if inlist(inst, "Northwestern Medicine")
+    replace new_inst = "Northwestern University" if inlist(associated, "Northwestern Medicine")
+    replace new_inst_id = "I111979921" if new_inst == "Northwestern University"
+    replace new_inst = "Harvard University" if inlist(inst, "Harvard Global Health Institute", "Harvard Pilgrim Health Care", "Harvard Affiliated Emergency Medicine Residency", "Harvard NeuroDiscovery Center")
+    replace new_inst_id = "I136199984" if new_inst == "Harvard University"
+    // health systems
+    replace new_inst = "University of Virginia" if strpos(inst, "University of Virginia") > 0 & (strpos(inst, "Hospital") >0 | strpos(inst, "Medical")>0 | strpos(inst, "Health")>0)
+    replace new_inst_id = "I51556381" if new_inst == "University of Virginia"
+    replace new_inst = "University of Missouri" if strpos(inst, "University of Missouri" ) > 0 & (strpos(inst, "Hospital") >0 | strpos(inst, "Medical")>0 | strpos(inst, "Health")>0)
+    replace new_inst_id = "I76835614" if new_inst == "University of Missouri"
+    replace new_inst = "Baylor University" if strpos(inst, "Baylor University Medical Center")>0
+    replace new_inst_id = "I157394403" if new_inst == "Baylor University"
+    replace new_inst = "Columbia University" if strpos(inst, "Columbia University Irving Medical Center")>0
+    replace new_inst_id = "I78577930" if new_inst == "Columbia University"
+    gen edit = 0
+    foreach s in "Health System" "Clinic" "Hospital" "Medical Center" {
+        replace new_inst = subinstr(inst, "`s'", "", .) if (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 & edit == 0 & country_code == "US"
+        replace edit = 1 if  (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 &  country_code == "US"
+    }
+    replace new_inst = strtrim(new_inst)
+    bys new_inst (edit) : replace new_inst_id = new_inst_id[_n-1] if edit == 1 & !mi(new_inst_id[_n-1])  & city == city[_n-1]
+    replace new_inst = associated if !mi(associated) & mi(new_inst) & has_parent == 1 & type == "facility" & associated_type == "education"
+    replace new_inst_id = associated_id if !mi(associated_id) & mi(new_inst_id) & has_parent == 1 & type == "facility" & associated_type == "education"
+    replace new_inst = inst if mi(new_inst)
+    replace new_inst_id = inst_id if mi(new_inst_id)
+    gduplicates tag inst_id, gen(dup)
+    gen diff = inst_id != new_inst_id
+    bys inst_id : gegen has_new = max(diff)
+    drop if dup > 0 & diff == 0 & has_new == 1
     gduplicates drop inst_id, force
-    rename associated new_inst
-    rename associated_id new_id
-    keep inst_id new_inst new_id region city country country_code type inst
+    keep inst_id inst new_inst new_inst_id region city country country_code type 
     drop if mi(inst_id) 
     save ${output}/all_inst_geo_chars, replace
 end
@@ -153,7 +184,7 @@ program clean_samps
     gen date = date(pub_date, "YMD")
     format %td date
     drop pub_date
-    bys pmid: egen min_date = min(date)
+    bys pmid: gegen min_date = min(date)
     replace date =min_date
     drop min_date
     cap drop author_id
@@ -183,7 +214,7 @@ program clean_samps
     replace inst = "Johns Hopkins University" if strpos(raw_affl , "Bloomberg School of Public Health")>0 & inst == "Bloomberg (United States)"
     merge m:1 inst_id using ${output}/all_inst_geo_chars, assert(1 2 3) keep(1 3) nogen 
     replace inst = new_inst if !mi(new_inst)
-    replace inst_id = new_id if !mi(new_inst)
+    replace inst_id = new_inst_id if !mi(new_inst)
     replace inst = "Johns Hopkins University" if  strpos(inst, "Johns Hopkins")>0
     replace inst_id = "I145311948" if inst == "Johns Hopkins University"
     replace inst = "Stanford University" if inlist(inst, "Stanford Medicine", "Stanford Health Care")
@@ -220,7 +251,7 @@ program clean_samps
     cap drop country_code
     cap drop city 
     cap drop inst
-    cap drop new_inst new_id 
+    cap drop new_inst new_inst_id 
     merge m:1 athr_id year using ${year_insts}/filled_in_panel_year, assert(1 2 3) keep(3) nogen
     gduplicates drop pmid athr_id inst_id, force
     /*
@@ -248,7 +279,7 @@ program clean_samps
     drop which_athr2
     bys pmid which_athr: replace num_affls = _N
     assert num_affls == 1
-    bys pmid: egen num_athrs = max(which_athr)
+    bys pmid: gegen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs // this just divides each paper by the # of authors on the paper
     // now give each article a weight based on their ciatation count 
     qui gen years_since_pub = 2022-year+1
@@ -268,7 +299,7 @@ program clean_samps
     gen frnt_wt = avg_frnt_yr/r(sum) 
     qui sum avg_body_yr
     gen body_wt = avg_body_yr/r(sum) 
-    bys journal_abbr: egen tot_cite_N = total(cite_wt)
+    bys journal_abbr: gegen tot_cite_N = total(cite_wt)
     gsort pmid cite_wt
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     gsort pmid pat_wt
@@ -308,7 +339,7 @@ program clean_samps
    
     qui bys pmid: gen pmid_cntr = _n == 1
     qui bys journal_abbr: gen first_jrnl = _n == 1
-    qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+    qui by journal_abbr: gegen jrnl_N = total(pmid_cntr)
     qui sum impact_fctr if first_jrnl == 1
     gen impact_shr = impact_fctr/r(sum) // weight that each journal gets
     gen reweight_N = impact_shr * `articles' // adjust the N of each journal to reflect impact factor
@@ -418,7 +449,7 @@ program clean_samps
     save ${temp}/pmid_id_xwalk_`samp', replace
     restore
 
-    keep if inrange(pub_date, td(01jan2012), td(31dec2022)) & year >=2012
+    keep if inrange(pub_date, td(01jan2015), td(31dec2022)) & year >=2015
     drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt frnt_wt body_wt frnt_adj_wt body_adj_wt
     qui sum avg_cite_yr
     gen cite_wt = avg_cite_yr/r(sum)
@@ -428,7 +459,7 @@ program clean_samps
     gen frnt_wt = avg_frnt_yr/r(sum) 
     qui sum avg_body_yr
     gen body_wt = avg_body_yr/r(sum) 
-    bys journal_abbr: egen tot_cite_N = total(cite_wt)
+    bys journal_abbr: gegen tot_cite_N = total(cite_wt)
     gsort pmid cite_wt
     qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
     gsort pmid pat_wt
@@ -445,7 +476,7 @@ program clean_samps
     qui gen body_adj_wt  = affl_wt * body_wt * `articles'
     
     qui bys journal_abbr: gen first_jrnl = _n == 1
-    qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+    qui by journal_abbr: gegen jrnl_N = total(pmid_cntr)
     qui sum impact_fctr if first_jrnl == 1
     gen impact_shr = impact_fctr/r(sum)
     gen reweight_N = impact_shr * `articles'
@@ -558,10 +589,10 @@ program split_sample
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         gsort pmid pat_wt
         qui bys pmid: replace pat_wt = pat_wt[_n-1] if mi(pat_wt)
-    gsort pmid frnt_wt
-    qui bys pmid: replace frnt_wt = frnt_wt[_n-1] if mi(frnt_wt)
-    gsort pmid body_wt
-    qui bys pmid: replace body_wt = body_wt[_n-1] if mi(body_wt)
+        gsort pmid frnt_wt
+        qui bys pmid: replace frnt_wt = frnt_wt[_n-1] if mi(frnt_wt)
+        gsort pmid body_wt
+        qui bys pmid: replace body_wt = body_wt[_n-1] if mi(body_wt)
         gunique pmid 
         local articles = r(unique)
         qui gen cite_affl_wt = affl_wt * cite_wt * `articles'
@@ -570,7 +601,7 @@ program split_sample
         qui gen body_adj_wt  = affl_wt * body_wt * `articles'
         
         qui bys journal_abbr: gen first_jrnl = _n == 1
-        qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+        qui by journal_abbr: gegen jrnl_N = total(pmid_cntr)
         qui sum impact_fctr if first_jrnl == 1
         gen impact_shr = impact_fctr/r(sum)
         gen reweight_N = impact_shr * `articles'
@@ -602,7 +633,7 @@ program split_sample
         gen frnt_wt = avg_frnt_yr/r(sum) 
         qui sum avg_body_yr
         gen body_wt = avg_body_yr/r(sum) 
-        bys journal_abbr: egen tot_cite_N = total(cite_wt)
+        bys journal_abbr: gegen tot_cite_N = total(cite_wt)
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         gsort pmid pat_wt
@@ -619,7 +650,7 @@ program split_sample
         qui gen body_adj_wt  = affl_wt * body_wt * `articles'
         
         qui bys journal_abbr: gen first_jrnl = _n == 1
-        qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+        qui bys journal_abbr: gegen jrnl_N = total(pmid_cntr)
         qui sum impact_fctr if first_jrnl == 1
         gen impact_shr = impact_fctr/r(sum)
         gen reweight_N = impact_shr * `articles'
@@ -651,7 +682,7 @@ program split_sample
         gen frnt_wt = avg_frnt_yr/r(sum) 
         qui sum avg_body_yr
         gen body_wt = avg_body_yr/r(sum) 
-        bys journal_abbr: egen tot_cite_N = total(cite_wt)
+        bys journal_abbr: gegen tot_cite_N = total(cite_wt)
         gsort pmid cite_wt
         qui bys pmid: replace cite_wt = cite_wt[_n-1] if mi(cite_wt)
         gsort pmid pat_wt
@@ -668,7 +699,7 @@ program split_sample
         qui gen body_adj_wt  = affl_wt * body_wt * `articles'
         
         qui bys journal_abbr: gen first_jrnl = _n == 1
-        qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+        qui bys journal_abbr: gegen jrnl_N = total(pmid_cntr)
         qui sum impact_fctr if first_jrnl == 1
         gen impact_shr = impact_fctr/r(sum)
         gen reweight_N = impact_shr * `articles'

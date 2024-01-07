@@ -131,6 +131,8 @@ program merge_geo
     }
     replace new_inst = strtrim(new_inst)
     bys new_inst (edit) : replace new_inst_id = new_inst_id[_n-1] if edit == 1 & !mi(new_inst_id[_n-1])  & city == city[_n-1]
+    replace new_inst = associated if !mi(associated) & mi(new_inst) & has_parent == 1 & type == "facility" & associated_type == "education"
+    replace new_inst_id = associated_id if !mi(associated_id) & mi(new_inst_id) & has_parent == 1 & type == "facility" & associated_type == "education"
     replace new_inst = inst if mi(new_inst)
     replace new_inst_id = inst_id if mi(new_inst_id)
     gduplicates tag inst_id, gen(dup)
