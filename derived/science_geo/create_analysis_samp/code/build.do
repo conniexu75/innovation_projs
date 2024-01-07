@@ -15,6 +15,7 @@ program main
     foreach t in year { 
         create_mesh_xw, time(`t')
         make_panel, time(`t') firstlast(1)
+        make_panel, time(`t') 
     }
 end
 
@@ -74,18 +75,16 @@ program make_panel
     bys athr_id (year): replace cluster_label = cluster_label[_n-1] if mi(cluster_label) & !mi(cluster_label[_n-1])
     save ../temp/clusters, replace
 
-    use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name impact_fctr using ../external/openalex/cleaned_all_all_jrnls, clear
+    use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name impact_fctr country_code msa_comb msa_c_world inst inst_id msacode using ../external/openalex/cleaned_all_all_jrnls, clear
     local suf = "" 
     if `firstlast' == 1 {
-        use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name impact_fctr using ../external/firstlast/cleaned_all_all_jrnls, clear
+        use id pmid which_athr which_affl pub_date year journal_abbr cite_count athr_id athr_name impact_fctr country_code msa_comb msa_c_world inst inst_id msacode using ../external/firstlast/cleaned_all_all_jrnls, clear
         local suf = "_firstlast" 
     }
     gen qrtr = qofd(pub_date)
-    merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(3) nogen
     merge m:1 athr_id year using ../temp/clusters, assert(1 2 3) keep(3) nogen
     merge m:1 id using ../external/patents/patent_ppr_cnt, assert(1 2 3) keep(1 3) nogen keepusing(patent_count front_only body_only)
     rename cluster_label field
-    gduplicates drop pmid athr_id inst_id, force
 
     bys pmid athr_id (which_athr which_affl): gen author_id = _n == 1
     bys pmid (which_athr which_affl): gen which_athr2 = sum(author_id)
@@ -94,7 +93,7 @@ program make_panel
 
     bys pmid which_athr: gen num_affls = _N
     assert num_affls == 1
-    bys pmid: egen num_athrs = max(which_athr)
+    bys pmid: gegen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs
     local date  date("`c(current_date)'", "DMY")
     if "`time'" == "qrtr" {
@@ -117,7 +116,7 @@ program make_panel
     bys pmid: replace avg_body = . if _n != 1
     sum avg_cite
     gen cite_wt = avg_cite/r(sum)
-    bys journal_abbr: egen tot_cite_N = total(cite_wt)
+    bys journal_abbr: gegen tot_cite_N = total(cite_wt)
     sum avg_pat
     gen pat_wt = avg_pat/r(sum)
     sum avg_frnt
@@ -140,7 +139,7 @@ program make_panel
     qui gen body_adj_wt  = affl_wt * body_wt * `articles'
     qui bys pmid: gen pmid_cntr = _n == 1
     qui bys journal_abbr: gen first_jrnl = _n == 1
-    qui bys journal_abbr: egen jrnl_N = total(pmid_cntr)
+    qui by journal_abbr: gegen jrnl_N = total(pmid_cntr)
     qui sum impact_fctr if first_jrnl == 1
     gen impact_shr = impact_fctr/r(sum)
     gen reweight_N = impact_shr * `articles'
@@ -149,27 +148,17 @@ program make_panel
     gen impact_affl_wt = impact_wt * affl_wt
     gen impact_cite_wt = reweight_N * cite_wt / tot_cite_N * `articles'
     gen impact_cite_affl_wt = impact_cite_wt * affl_wt
-    qui sum affl_wt
-    assert round(r(sum)-`articles') == 0
-    qui sum cite_affl_wt
-    assert round(r(sum)-`articles') == 0
-    qui sum pat_adj_wt
-    assert round(r(sum)-`articles') == 0
-    qui sum impact_affl_wt
-    assert round(r(sum)-`articles') == 0
-    qui sum impact_cite_affl_wt
-    assert round(r(sum)-`articles') == 0
-    qui sum frnt_adj_wt 
-    assert round(r(sum)-`articles') == 0
-    qui sum body_adj_wt 
-    assert round(r(sum)-`articles') == 0
+    foreach v in affl_wt cite_affl_wt pat_adj_wt impact_affl_wt impact_cite_affl_wt frnt_adj_wt body_adj_wt {
+       qui sum `v'
+       assert round(r(sum)-`articles') == 0
+    }
     // restrict to USA
     keep if country_code == "US" & !mi(msa_comb)
 
     preserve
-    gcontract pmid `time' athr_id
+    gcontract pmid `time' athr_id msa_comb
     drop _freq
-    merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time' , assert(1 2 3) keep(3) nogen keepusing(msa_comb)
+*    merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time' , assert(1 2 3) keep(3) nogen keepusing(msa_comb)
     rename athr_id focal_id
     save ${temp}/focal_list, replace
     rename focal_id athr_id 
@@ -191,7 +180,7 @@ program make_panel
 
     // get avg team size
     bys athr_id pmid : gen athr_pmid_cntr = _n == 1
-    bys athr_id `time': egen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
+    bys athr_id `time': gegen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
     preserve
     if "`time'" == "year" {
         gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt frnt_adj_wt body_adj_wt front_only body_only (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
@@ -207,19 +196,19 @@ program make_panel
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     bys athr_id `time': gen name_id = _n == 1
-    bys `time': egen tot_authors = total(name_id)
+    bys `time': gegen tot_authors = total(name_id)
     drop name_id
     bys athr_id msa_comb `time': gen name_id = _n == 1
-    bys msa_comb `time': egen msa_size = total(name_id)
+    bys msa_comb `time': gegen msa_size = total(name_id)
     replace msa_size = msa_size - 1  if msa_size > 1
     replace msa_size = msa_size - num_coauthors_same_msa  
     gen cluster_shr = msa_size/tot_authors
     drop name_id
 
     gen top_15 = !mi(affl_wt)
-    bys athr_id year: egen has_top_15 = max(top_15)
+    bys athr_id year: gegen has_top_15 = max(top_15)
     bys athr_id msa_comb `time': gen name_id = _n == 1 if has_top_15 == 1
-    bys msa_comb `time': egen unbal_msa_size = total(name_id) 
+    bys msa_comb `time': gegen unbal_msa_size = total(name_id) 
     replace unbal_msa_size = unbal_msa_size - 1 if unbal_msa_size > 1
     replace unbal_msa_size = unbal_msa_size - num_coauthors_same_msa 
     drop if mi(cite_affl_wt) | mi(affl_wt) 
@@ -249,19 +238,19 @@ program make_panel
         merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     bys athr_id `time': gen name_id = _n == 1
-    bys `time': egen tot_authors = total(name_id)
+    bys `time': gegen tot_authors = total(name_id)
     drop name_id
     bys athr_id msa_comb `time': gen name_id = _n == 1
-    bys msa_comb `time': egen msa_size = total(name_id)
+    bys msa_comb `time': gegen msa_size = total(name_id)
     replace msa_size = msa_size - 1 
     replace msa_size = msa_size - num_coauthors_same_msa  
     gen cluster_shr = msa_size/tot_authors
     drop name_id
     
     gen top_15 = !mi(affl_wt)
-    bys athr_id year: egen has_top_15 = max(top_15)
+    bys athr_id year: gegen has_top_15 = max(top_15)
     bys athr_id msa_comb `time': gen name_id = _n == 1 if has_top_15 == 1
-    bys msa_comb `time': egen unbal_msa_size = total(name_id) 
+    bys msa_comb `time': gegen unbal_msa_size = total(name_id) 
     replace unbal_msa_size = unbal_msa_size - 1 if unbal_msa_size > 1
     replace unbal_msa_size = unbal_msa_size - num_coauthors_same_msa 
     drop if mi(cite_affl_wt) | mi(affl_wt) 
