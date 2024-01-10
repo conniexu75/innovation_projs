@@ -1,3 +1,4 @@
-./openalex/ | /export/scratch/cxu_sci_geo/create_first_last/
+./fl/ | /export/scratch/cxu_sci_geo/create_first_last/
+./all/ | /export/scratch/cxu_sci_geo/clean_openalex_output/
 ./mesh/  |  /export/scratch/cxu_sci_geo/clean_openalex_output/
 

@@ -1,2 +1,3 @@
 ./samp/ | /export/scratch/cxu_sci_geo/create_panel/output
+./econs_samp/ | /export/home/dor/cxu/derived/openalex/econ_samp/create_analysis_samp/output
 ./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo

@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-01-05 12:30:30
+Makelog started: 2024-01-09 22:20:55
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cluster_descriptives/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -64,7 +64,7 @@ not available in non-GUI version
 
 . 
 . program main
-  1.     foreach s in year_firstlast {
+  1.     foreach s in year year_firstlast {
   2.         sample_desc, samp(`s')
   3.         maps, samp(`s')
   4.         raw_bs, samp(`s')
@@ -76,25 +76,29 @@ not available in non-GUI version
 . 
 . program sample_desc
   1.     syntax, samp(str) 
-  2.     use if !mi(msa_comb) & inrange(year, 1945,2022) using ../external/samp
+  2.     use ../external/econs_samp/athr_panel_full_comb_year.dta, clear
+  3.     gcollapse (mean) msa_size, by(msa_comb)
+  4.     rename msa_size econ_msa_size
+  5.     save ../temp/econs_cluster, replace
+  6.     use if !mi(msa_comb) & inrange(year, 1945,2022) using ../external/samp
 > /athr_panel_full_comb_`samp', clear 
-  3.     count
-  4.     gunique athr_id
-  5.     gen ln_y = ln(impact_cite_affl_wt)
-  6.     gen ln_x = ln(msa_size)
-  7.     gen ln_pat = ln(body_adj_wt)
-  8.     foreach var in impact_cite_affl_wt msa_size ln_y ln_x body_adj_wt ln_p
+  7.     count
+  8.     gunique athr_id
+  9.     gen ln_y = ln(impact_cite_affl_wt)
+ 10.     gen ln_x = ln(msa_size)
+ 11.     gen ln_pat = ln(body_adj_wt)
+ 12.     foreach var in impact_cite_affl_wt msa_size ln_y ln_x body_adj_wt ln_p
 > at {
-  9.         qui sum `var', d
- 10.         local N = r(N)
- 11.         local mean : dis %3.2f r(mean)
- 12.         local sd : dis %3.2f r(sd)
- 13.         local p5 :  dis %3.2f r(p5)
- 14.         local p25 :  dis %3.2f r(p25)
- 15.         local p50 :  dis %3.2f r(p50)
- 16.         local p75 :  dis %3.2f r(p75)
- 17.         local p95 :  dis %3.2f r(p95)
- 18.         tw hist `var', frac ytitle("Share of author-years", size(vsmall)) 
+ 13.         qui sum `var', d
+ 14.         local N = r(N)
+ 15.         local mean : dis %3.2f r(mean)
+ 16.         local sd : dis %3.2f r(sd)
+ 17.         local p5 :  dis %3.2f r(p5)
+ 18.         local p25 :  dis %3.2f r(p25)
+ 19.         local p50 :  dis %3.2f r(p50)
+ 20.         local p75 :  dis %3.2f r(p75)
+ 21.         local p95 :  dis %3.2f r(p95)
+ 22.         tw hist `var', frac ytitle("Share of author-years", size(vsmall)) 
 > xtitle("${`var'_name}", size(vsmall)) color(edkblue) xlab(, labsize(vsmall)) 
 > ylab(, labsize(vsmall)) legend(on order(- "N = `N'" ///
 >                                                                 "Mean = `mean
@@ -111,131 +115,124 @@ not available in non-GUI version
 >  ///
 >                                                                 "p95 = `p95'"
 > ) pos(1) ring(0) size(vsmall) region(fcolor(none)))
- 19.         *graph export ../output/figures/`var'_dist`samp'.pdf, replace
+ 23.         *graph export ../output/figures/`var'_dist`samp'.pdf, replace
 .     }
- 20.     preserve
- 21.     keep if inrange(year, 2015,2022)
- 22.     gcollapse (mean) msa_size cluster_shr, by(msa_comb)
- 23.     gsort -msa_size
- 24.     mkmat msa_size in 1/30, mat(top_30clus_`samp')
- 25.     li in 1/30
- 26.     mkmat msa_size in 1/10, mat(top_10clus_`samp')
- 27.     restore
- 28.     preserve
- 29.     gen has_patent_cite = pat_wt > 0
- 30.     bys athr_id msa_comb: gen athr_cnt = _n == 1
- 31.     gcollapse  (sum) athr_cnt body_adj_wt cite_affl_wt pat_wt affl_wt impa
+ 24.     preserve
+ 25.     keep if inrange(year, 2015,2022)
+ 26.     gcollapse (mean) msa_size cluster_shr, by(msa_comb)
+ 27.     gsort -msa_size
+ 28.     mkmat msa_size in 1/30, mat(top_30clus_`samp')
+ 29.     li in 1/30
+ 30.     mkmat msa_size in 1/10, mat(top_10clus_`samp')
+ 31.     restore
+ 32.     preserve
+ 33.     gen has_patent_cite = pat_wt > 0
+ 34.     bys athr_id msa_comb: gen athr_cnt = _n == 1
+ 35.     gcollapse  (sum) athr_cnt body_adj_wt cite_affl_wt pat_wt affl_wt impa
 > ct_cite_affl_wt impact_affl_wt (mean) msa_size has_patent_cite, by(msa_comb)
- 32. 
+ 36.     merge 1:1 msa_comb using ../temp/econs_cluster, assert(1 2 3) keep(1 3
+> ) nogen
+ 37. 
 .     qui reg body_adj_wt impact_cite_affl_wt 
- 33.     local coef : dis %3.2f _b[impact_cite_affl_wt]
- 34.     local N = e(N)
- 35.     binscatter2 body_adj_wt impact_cite_affl_wt , xtitle("Productivity", s
+ 38.     local coef : dis %3.2f _b[impact_cite_affl_wt]
+ 39.     local N = e(N)
+ 40.     binscatter2 body_adj_wt impact_cite_affl_wt , xtitle("Productivity", s
 > ize(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue)
 >  mcolor(gs3) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(
 > - "N (MSAs) = `N'" ///
 >                                                                              
 >                                          "Slope = `coef'") pos(5) ring(0) reg
 > ion(fcolor(none)) size(vsmall))
- 36.     *graph export ../output/figures/msa_pat_prod_`samp'.pdf, replace
+ 41.     *graph export ../output/figures/msa_pat_prod_`samp'.pdf, replace
 .     gen ln_pat = ln(body_adj_wt)
- 37.     gen ln_y = ln(impact_cite_affl_wt)
- 38.     qui reg ln_pat ln_y 
- 39.     local coef : dis %3.2f _b[ln_y]
- 40.     local N = e(N)
- 41.     binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) yti
+ 42.     gen ln_y = ln(impact_cite_affl_wt)
+ 43.     qui reg ln_pat ln_y 
+ 44.     local coef : dis %3.2f _b[ln_y]
+ 45.     local N = e(N)
+ 46.     binscatter2 ln_pat ln_y , xtitle("Log Productivity", size(vsmall)) yti
 > tle("Log Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3)
 >   xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSAs)
 >  = `N'" ///
 >                                                                              
 >                                          "Slope = `coef'") pos(5) ring(0) reg
 > ion(fcolor(none)) size(vsmall))
- 42.     *graph export ../output/figures/msa_log_pat_prod_`samp'.pdf, replace
+ 47.     *graph export ../output/figures/msa_log_pat_prod_`samp'.pdf, replace
 .     
 .     xtile p  = msa_size, nq(20)
- 43.     gen msa_lab = "" 
- 44.     replace msa_lab =  msa_comb  if msa_comb == "Great Falls, MT" 
- 45.     replace msa_lab =  msa_comb  if msa_comb == "San Diego-Carlsbad, CA" 
- 46.     replace msa_lab =  msa_comb  if msa_comb == "Trenton, NJ" 
- 47.     replace msa_lab =  msa_comb  if msa_comb == "New Haven-Milford , CT" 
- 48.     replace msa_lab =  msa_comb  if msa_comb == "New York-Newark-Jersey Ci
-> ty, NY-NJ-PA" 
- 49.     replace msa_lab =  msa_comb  if msa_comb == "Bay Area, CA" 
- 50.     replace msa_lab =  msa_comb  if msa_comb == "Boston-Cambridge-Newton, 
-> MA-NH" 
- 51. 
-. /*    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "G
-> reat Falls, MT" & year == 2015
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San
->  Diego-Carlsbad, CA" & year == 1973
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San
->  Diego-Carlsbad, CA" & year == 19
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Tre
-> nton, NJ" & year == 2019
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "New
->  Haven-Milford , CT" & year == 2012
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "New
->  York-Newark-Jersey City, NY-NJ-PA" & year == 1996
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay
->  Area, CA" & year == 1997 
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay
->  Area, CA" & year == 2015 
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bos
-> ton-Cambridge-Newton, MA-NH" & year == 1997 
->     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bos
-> ton-Cambridge-Newton, MA-NH" & year == 2012 */
-.     tw scatter impact_cite_affl_wt msa_size , mcolor(gs7%50) msize(vsmall) xl
-> abel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || scatter impact_cite_
-> affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_l
-> ab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(vsmall)) 
-> ytitle("MSA Productivity", size(vsmall))  jitter(5) legend(off)
- 52.    *graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replac
-> e
-.    
-.    xtile p_prod = impact_cite_affl_wt, nq(20)
- 53.    replace msa_lab = ""
- 54.    replace msa_lab =  msa_comb if msa_comb == "San Diego-Carlsbad, CA" 
- 55.    replace msa_lab =  msa_comb if msa_comb == "Bay Area, CA" 
- 56.    replace msa_lab =  msa_comb if msa_comb == "St. Louis, MO-IL" 
- 57.    replace msa_lab =  msa_comb if msa_comb == "Minneapolis-St. Paul-Bloomi
+ 48.     gen msa_lab = "" 
+ 49.    replace msa_lab =  msa_comb if msa_comb == "San Diego-Carlsbad, CA" 
+ 50.    replace msa_lab =  msa_comb if msa_comb == "Bay Area, CA" 
+ 51.    replace msa_lab =  msa_comb if msa_comb == "St. Louis, MO-IL" 
+ 52.    replace msa_lab =  msa_comb if msa_comb == "Minneapolis-St. Paul-Bloomi
 > ngton, MN-WI" 
- 58.    replace msa_lab =  msa_comb if msa_comb == "Washington-Arlington-Alexan
+ 53.    replace msa_lab =  msa_comb if msa_comb == "Washington-Arlington-Alexan
 > dria, DC-VA-MD-WV" 
- 59.    replace msa_lab =  msa_comb if msa_comb == "Los Angeles-Long Beach-Anah
+ 54.    replace msa_lab =  msa_comb if msa_comb == "Los Angeles-Long Beach-Anah
 > eim, CA" 
- 60.    replace msa_lab =  msa_comb if msa_comb == "Boston-Cambridge-Newton, MA
+ 55.    replace msa_lab =  msa_comb if msa_comb == "Boston-Cambridge-Newton, MA
 > -NH" 
- 61.    replace msa_lab =  msa_comb if msa_comb == "New York-Newark-Jersey City
+ 56.    replace msa_lab =  msa_comb if msa_comb == "New York-Newark-Jersey City
 > , NY-NJ-PA" 
- 62.    egen clock = mlabvpos(impact_cite_affl_wt body_adj_wt)
- 63.    replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-
+ 57.     replace msa_lab =  msa_comb  if msa_comb == "New Haven-Milford , CT" 
+ 58.    egen clock = mlabvpos(msa_size econ_msa_size)
+ 59.    replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-
+> NJ-PA","Boston-Cambridge-Newton, MA-NH", "Washington-Arlington-Alexandria, DC
+> -VA-MD-WV")
+ 60.    replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington
+> , MN-WI", "San Diego-Carlsbad, CA", "St. Louis, MO-IL", "Bay Area, CA")
+ 61.     tw scatter impact_cite_affl_wt msa_size , mcolor(gs7%50) msize(vsmall)
+>  xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || scatter impact_ci
+> te_affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(ms
+> a_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(vsmall
+> )) ytitle("MSA Productivity", size(vsmall))  jitter(5) legend(off)
+ 62.    *graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replac
+> e
+.     corr msa_size econ_msa_size 
+ 63.     local slope : dis %3.2f r(rho) 
+ 64.     reg msa_size econ_msa_size
+ 65.     local N = e(N)
+ 66.     tw scatter msa_size econ_msa_size, mcolor(gs7%50) msize(vsmall) xlabel
+> (#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || ///
+>        scatter msa_size econ_msa_size if !mi(msa_lab) , mcolor(ebblue) mlabvp
+> (clock) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
+>        (function y = _b[econ_msa_size]*x + _b[_cons], range(0 900) lpattern(d
+> ash) lcolor(lavender)), ytitle("Fundamental Science Cluster Size", size(vsmal
+> l)) xtitle("Economics Research Cluster Size", size(vsmall))  legend(on order 
+> (- "N (MSAs) = `N'" ///
+>                                                                              
+>                                                                              
+>                     "Correlation = `slope'") pos(5) ring(0) region(fcolor(non
+> e)) size(vsmall) lwidth(none))
+ 67.     graph export ../output/figures/econ_v_ls_`samp'.pdf, replace
+ 68.     drop clock
+ 69.    xtile p_prod = impact_cite_affl_wt, nq(20)
+ 70.    replace msa_lab = ""
+ 71.    replace msa_lab =  msa_comb if msa_comb == "San Diego-Carlsbad, CA" 
+ 72.    replace msa_lab =  msa_comb if msa_comb == "Bay Area, CA" 
+ 73.    replace msa_lab =  msa_comb if msa_comb == "St. Louis, MO-IL" 
+ 74.    replace msa_lab =  msa_comb if msa_comb == "Minneapolis-St. Paul-Bloomi
+> ngton, MN-WI" 
+ 75.    replace msa_lab =  msa_comb if msa_comb == "Washington-Arlington-Alexan
+> dria, DC-VA-MD-WV" 
+ 76.    replace msa_lab =  msa_comb if msa_comb == "Los Angeles-Long Beach-Anah
+> eim, CA" 
+ 77.    replace msa_lab =  msa_comb if msa_comb == "Boston-Cambridge-Newton, MA
+> -NH" 
+ 78.    replace msa_lab =  msa_comb if msa_comb == "New York-Newark-Jersey City
+> , NY-NJ-PA" 
+ 79.    egen clock = mlabvpos(impact_cite_affl_wt body_adj_wt)
+ 80.    replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-
 > NJ-PA","Boston-Cambridge-Newton, MA-NH")
- 64.    replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington
+ 81.    replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington
 > , MN-WI", "Washington-Arlington-Alexandria, DC-VA-MD-WV", "San Diego-Carlsbad
 > , CA", "St. Louis, MO-IL", "Bay Area, CA")
- 65.    /*replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "
-> Flint, MI" & year == 2006
->    replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Linco
-> ln, NE" & year == 2005 
->    replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Worce
-> ster, MA-CT" & year == 2000
->    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San 
-> Diego-Carlsbad, CA" & year == 1989 
->    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay 
-> Area, CA" & year == 1997 
->    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay 
-> Area, CA" & year == 2015 
->    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bost
-> on-Cambridge-Newton, MA-NH" & year == 2015 
->    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bost
-> on-Cambridge-Newton, MA-NH" & year == 2000 */
-.    qui reg body_adj_wt impact_cite_affl_wt 
- 66.    local coef : dis %3.2f _b[impact_cite_affl_wt]
- 67.    local cons : dis %3.2f _b[_cons]
- 68.    local N = e(N)
- 69.    tw scatter body_adj_wt impact_cite_affl_wt , mcolor(gs13%50) msize(vsma
-> ll) xlabel(0(5000)60000, labsize(vsmall)) ylab(0(5000)60000, labsize(vsmall))
->  || ///
+ 82.    qui reg body_adj_wt impact_cite_affl_wt 
+ 83.    local coef : dis %3.2f _b[impact_cite_affl_wt]
+ 84.    local cons : dis %3.2f _b[_cons]
+ 85.    local N = e(N)
+ 86.    tw scatter body_adj_wt impact_cite_affl_wt  , mcolor(gs13%50) msize(vsm
+> all) xlabel(0(5000)60000, labsize(vsmall)) ylab(0(5000)60000, labsize(vsmall)
+> ) || ///
 >       scatter body_adj_wt impact_cite_affl_wt if !mi(msa_lab) , mlabvp(clock)
 >  mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny
 > ) || ///
@@ -246,8 +243,8 @@ not available in non-GUI version
 >                                                                              
 >                                          "Slope = `coef'") pos(5) ring(0) reg
 > ion(fcolor(none)) size(vsmall))
- 70.    graph export ../output/figures/pat_prod_scatter_`samp'.pdf, replace
- 71.    /*hashsort p -cite_affl_wt 
+ 87.    graph export ../output/figures/pat_prod_scatter_`samp'.pdf, replace
+ 88.    /*hashsort p -cite_affl_wt 
 >    by p: egen mean_msa = mean(msa_size)
 >    by p: egen mean_cite = mean(cite_affl_wt)
 >    hashsort p -cite_affl_wt  
@@ -412,85 +409,143 @@ not available in non-GUI version
 . 
 . program regression 
   1.     syntax, samp(str) 
-  2.     use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/sam
-> p/athr_panel_full_comb_`samp', clear 
-  3.     local reg_eq = cond("`samp'"=="year","ln_y ln_x avg_team_size","ln_y l
-> n_x") 
-  4.     local mat_est  = cond("`samp'"=="year","_b[ln_x] \ _se[ln_x] \ _b[avg_
-> team_size] \ _se[ln_x]", "_b[ln_x] \ _se[ln_x]") 
-  5.     bys athr_id msa_comb ${time} : gen count = _n == 1
-  6.     replace msa_size = 0.0000000000001 if msa_size == 0
-  7.     gegen msa = group(msa_comb)
-  8.     rename inst inst_name
-  9.     gegen inst = group(inst_id)
- 10.     gegen msa_field = group(msa field)
- 11.     gegen year_field = group(year field)
- 12.     gen ln_y = ln(impact_cite_affl_wt)
- 13.     gen ln_x = ln(msa_size)
- 14.     gen ln_x_cluster = ln(cluster_shr)
- 15.     preserve
- 16.     keep if inrange(year, 2015, 2022)
- 17.     keep if inlist(msa_comb, "Ann Arbor, MI", "San Diego-Carlsbad, CA", "B
+  2.     use ../external/econs_samp/athr_panel_full_comb_year.dta, clear
+  3.     gcollapse (mean) msa_size, by(msa_comb year)
+  4.     rename msa_size econ_msa_size
+  5.     save ../temp/econ_yr_cluster, replace
+  6. 
+.     use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/a
+> thr_panel_full_comb_`samp', clear 
+  7.     gcollapse (mean) msa_size, by(msa_comb year)
+  8.     merge 1:1 msa_comb year using ../temp/econ_yr_cluster, keep(3) nogen
+  9.     corr msa_size econ_msa_size 
+ 10.     local slope : dis %3.2f r(rho) 
+ 11.     reg msa_size econ_msa_size
+ 12.     local N = e(N)
+ 13.     gen msa_lab = "" 
+ 14.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> San Diego-Carlsbad, CA" & year == 1973
+ 15.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> San Diego-Carlsbad, CA" & year == 19
+ 16.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> Trenton, NJ" & year == 2019
+ 17.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> New Haven-Milford , CT" & year == 2012
+ 18.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> New York-Newark-Jersey City, NY-NJ-PA" & year == 1996
+ 19.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> Bay Area, CA" & year == 1997 
+ 20.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> Bay Area, CA" & year == 2015 
+ 21.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> Boston-Cambridge-Newton, MA-NH" & year == 1997 
+ 22.     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "
+> Boston-Cambridge-Newton, MA-NH" & year == 2012 
+ 23.     tw scatter msa_size econ_msa_size, mcolor(gs7%50) msize(vsmall) xlabel
+> (#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || ///
+>        scatter msa_size econ_msa_size if !mi(msa_lab) , mcolor(ebblue) msize(
+> vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
+>        (function y = _b[econ_msa_size]*x + _b[_cons], range(0 1250) lpattern(
+> dash) lcolor(lavender)), ytitle("Fundamental Science Cluster Size", size(vsma
+> ll)) xtitle("Economics Research Cluster Size", size(vsmall))  legend(on order
+>  (- "N (MSAs) = `N'" ///
+>                                                                              
+>                                                                              
+>                     "Correlation = `slope'") pos(5) ring(0) region(fcolor(non
+> e)) size(vsmall) lwidth(none))
+ 24.     
+.     use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/a
+> thr_panel_full_comb_`samp', clear 
+ 25.     merge m:1 msa_comb year using  ../temp/econ_yr_cluster, assert(1 2 3) 
+> keep(1 3) nogen
+ 26. /*    corr msa_size econ_msa_size 
+>     local slope : dis %3.2f r(rho) 
+>     binscatter2 msa_size econ_msa_size, mcolor(gs5) lcolor(ebblue) xlab(, lab
+> size(vsmall)) ylab(, labsize(vsmall)) ytitle("Fundamental Science Research Cl
+> uster Size", size(vsmall)) xtitle("Economics Research Cluster Size", size(vsm
+> all)) legend(on order(- "Correlation = `slope'") pos(5) ring(0) lwidth(none) 
+> size(vsmall) region(fcolor(none)))
+>     graph export ../output/figures/econ_v_ls.pdf, replace*/
+.     local reg_eq "ln_y ln_x"
+ 27.     local mat_est "_b[ln_x] \ _se[ln_x]"
+ 28. *    local reg_eq = cond("`samp'"=="year","ln_y ln_x avg_team_size","ln_y 
+> ln_x") 
+. *    local mat_est  = cond("`samp'"=="year","_b[ln_x] \ _se[ln_x] \ _b[avg_te
+> am_size] \ _se[ln_x]", "_b[ln_x] \ _se[ln_x]") 
+.     bys athr_id msa_comb ${time} : gen count = _n == 1
+ 29.     replace msa_size = 0.0000000000001 if msa_size == 0
+ 30.     replace econ_msa_size = 0.0000000000001 if econ_msa_size == 0
+ 31.     gegen msa = group(msa_comb)
+ 32.     rename inst inst_name
+ 33.     gegen inst = group(inst_id)
+ 34.     gegen msa_field = group(msa field)
+ 35.     gegen year_field = group(year field)
+ 36.     gen ln_y = ln(impact_cite_affl_wt)
+ 37.     gen ln_x = ln(msa_size)
+ 38.     gen ln_x_econ = ln(econ_msa_size)
+ 39.     preserve
+ 40.     keep if inrange(year, 2015, 2022)
+ 41.     keep if inlist(msa_comb, "Ann Arbor, MI", "San Diego-Carlsbad, CA", "B
 > oston-Cambridge-Newton, MA-NH", "Bay Area, CA", "Gainesville, FL")
- 18.     foreach m in "Gainesville, FL" "Ann Arbor, MI" "San Diego-Carlsbad, CA
+ 42.     foreach m in "Gainesville, FL" "Ann Arbor, MI" "San Diego-Carlsbad, CA
 > " "Bay Area, CA" "Boston-Cambridge-Newton, MA-NH" {
- 19.         sum impact_cite_affl_wt if msa_comb == "`m'", d
- 20.         mat row = (r(min) , r(p5) , r(p10), r(p25), r(p50) , r(p75), r(p90
+ 43.         sum impact_cite_affl_wt if msa_comb == "`m'", d
+ 44.         mat row = (r(min) , r(p5) , r(p10), r(p25), r(p50) , r(p75), r(p90
 > ) , r(p95), r(max), r(mean) , r(sd))
- 21.         sum msa_size if msa_comb == "`m'" 
- 22.         mat row = row , r(mean)
- 23.         mat city_stats_`samp' = nullmat(city_stats_`samp') \ (row)
- 24.     }
- 25.     restore
- 26.     reghdfe `reg_eq', noabsorb
- 27.     local slope = _b[ln_x]
- 28.     if "`samp'" == "year" {
- 29.         binscatter2  ln_y ln_x ,controls(avg_team_size) ytitle("Log Output
+ 45.         sum msa_size if msa_comb == "`m'" 
+ 46.         mat row = row , r(mean)
+ 47.         mat city_stats_`samp' = nullmat(city_stats_`samp') \ (row)
+ 48.     }
+ 49.     restore
+ 50.     reghdfe `reg_eq', noabsorb
+ 51.     local slope = _b[ln_x]
+ 52.     if "`samp'" == "year" {
+ 53.         binscatter2  ln_y ln_x ,controls(avg_team_size) ytitle("Log Output
 > ") xtitle("Log Cluster Size") legend(on order(- "Slope = `slope'") pos(5) rin
 > g(0) lwidth(none))
- 30.         *graph export ../output/figures/bs_`samp'.pdf, replace
+ 54.         *graph export ../output/figures/bs_`samp'.pdf, replace
 .     }
- 31.     if "`samp'" == "year_firstlast" {
- 32.         binscatter2  ln_y ln_x , ytitle("Log Output") xtitle("Log Cluster 
+ 55.     if "`samp'" == "year_firstlast" {
+ 56.         binscatter2  ln_y ln_x , ytitle("Log Output") xtitle("Log Cluster 
 > Size") legend(on order(- "Slope = `slope'") pos(5) ring(0) lwidth(none))
- 33.         *graph export ../output/figures/bs_`samp'.pdf, replace
+ 57.         *graph export ../output/figures/bs_`samp'.pdf, replace
 .     }
- 34.     foreach fe in "${time} msa field" "${time} msa field field#${time}" "$
+ 58.     foreach fe in "${time} msa field" "${time} msa field field#${time}" "$
 > {time} msa field field#${time} msa#field" "${time} msa field field#${time} ms
 > a#field inst" "${time} msa field field#${time} msa#field inst athr_id" {
- 35.         reghdfe `reg_eq', absorb(`fe') vce(cluster msa)
- 36.         mat coef_`samp' = nullmat(coef_`samp'), (`mat_est' \ e(N))
- 37.         local slope : dis %3.2f _b[ln_x]
- 38.         if "`samp'" == "year" {
- 39.             binscatter2  ln_y ln_x ,controls(avg_team_size) absorb(year ms
+ 59.         reghdfe `reg_eq', absorb(`fe') vce(cluster msa)
+ 60.         mat coef_`samp' = nullmat(coef_`samp'), (`mat_est' \ . \ . \e(N))
+ 61.         local slope : dis %3.2f _b[ln_x]
+ 62.         if "`samp'" == "year" {
+ 63.             binscatter2  ln_y ln_x ,controls(avg_team_size) absorb(year ms
 > a field year_field msa_field athr_id) ytitle("Log Output") xtitle("Log Cluste
 > r Size") legend(on order(- "Slope = `slope'") pos(5) ring(0) lwidth(none))
- 40.             *graph export ../output/figures/final_bs_`samp'.pdf, replace
+ 64.             *graph export ../output/figures/final_bs_`samp'.pdf, replace
 .         }
- 41.         if "`samp'" == "year_firstlast" {
- 42.             binscatter2  ln_y ln_x , absorb(year msa field year_field msa_
+ 65.         if "`samp'" == "year_firstlast" {
+ 66.             binscatter2  ln_y ln_x , absorb(year msa field year_field msa_
 > field athr_id) ytitle("Log Output") xtitle("Log Cluster Size") legend(on orde
 > r(- "Slope = `slope'") pos(5) ring(0) lwidth(none))
- 43.             *graph export ../output/figures/final_bs_`samp'.pdf, replace
+ 67.             *graph export ../output/figures/final_bs_`samp'.pdf, replace
 .         }
- 44.     }
- 45. /*    reghdfe `reg_eq', absorb(${time} field field#${time} field#msa inst#
-> year inst athr_id) vce(cluster msa)
->     mat instyr_`samp' = nullmat(instyr_`samp'), (`mat_est' \ e(N))
->     mat coef_`samp' = nullmat(coef_`samp') , instyr_`samp'*/
-.     reghdfe `reg_eq', absorb(year msa athr_id field inst) vce(cluster msa)
- 46.     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
- 47.     reghdfe `reg_eq', absorb(year msa athr_id gen_mesh1 gen_mesh2 inst) vc
+ 68.     }
+ 69.     reghdfe ln_y ln_x_econ, absorb(${time} msa field field#${time} field#m
+> sa inst athr_id) vce(cluster msa)
+ 70.     mat econ_`samp' = nullmat(econ_`samp'), (. \ . \ _b[ln_x_econ] \ _se[l
+> n_x_econ] \ e(N))
+ 71.     mat coef_`samp' = nullmat(coef_`samp') , econ_`samp'
+ 72.     reghdfe `reg_eq', absorb(year msa athr_id field inst) vce(cluster msa)
+ 73.     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
+ 74.     reghdfe `reg_eq', absorb(year msa athr_id gen_mesh1 gen_mesh2 inst) vc
 > e(cluster msa)
- 48.     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
- 49. *    mat alt_spec_`samp' = instyr_`samp' , field_`samp'
+ 75.     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
+ 76. *    mat alt_spec_`samp' = instyr_`samp' , field_`samp'
 . /*    reghdfe `reg_eq', absorb(year msa athr_id qualifier_name1 qualifier_nam
 > e2 inst) vce(cluster msa)
 >     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
 >     reghdfe `reg_eq', absorb(year msa athr_id term1 term2 inst) vce(cluster m
 > sa)
 >     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))*/
-.         
 . end
 
 . 
@@ -506,6 +561,618 @@ not available in non-GUI version
 
 . ** 
 . main
+(file ../temp/econs_cluster.dta not found)
+file ../temp/econs_cluster.dta saved
+  955,986
+N = 955,986; 442,593 unbalanced groups of sizes 1 to 55
+(5,354 missing values generated)
+(23 missing values generated)
+(713,948 missing values generated)
+(676,148 observations deleted)
+
+     +-----------------------------------------------------------------------+
+     |                                       msa_comb    msa_size   cluste~r |
+     |-----------------------------------------------------------------------|
+  1. |          New York-Newark-Jersey City, NY-NJ-PA   21791.882   .0232586 |
+  2. |                 Boston-Cambridge-Newton, MA-NH   20509.192   .0218609 |
+  3. |   Washington-Arlington-Alexandria, DC-VA-MD-WV   17884.909    .019017 |
+  4. |                                   Bay Area, CA    15251.27   .0163757 |
+  5. |             Los Angeles-Long Beach-Anaheim, CA   8935.8093   .0095179 |
+     |-----------------------------------------------------------------------|
+  6. |    Philadelphia-Camden-Wilmington, PA-NJ-DE-MD   7969.3158    .008486 |
+  7. |             Chicago-Naperville-Elgin, IL-IN-WI   7230.0774   .0076902 |
+  8. |                         San Diego-Carlsbad, CA   6791.3344    .007218 |
+  9. |                     Research Triangle Park, NC   6780.4164   .0072127 |
+ 10. |           Houston-The Woodlands-Sugar Land, TX   6464.6565   .0068549 |
+     |-----------------------------------------------------------------------|
+ 11. |                    Seattle-Tacoma-Bellevue, WA   6002.4309    .006461 |
+ 12. |                  Baltimore-Columbia-Towson, MD   5561.7127   .0059096 |
+ 13. |              Atlanta-Sandy Springs-Roswell, GA   5079.1593   .0054206 |
+ 14. |                                  Ann Arbor, MI    3651.214   .0038908 |
+ 15. |                                 Pittsburgh, PA   3477.7776    .003689 |
+     |-----------------------------------------------------------------------|
+ 16. |                               St. Louis, MO-IL   3312.7032   .0035533 |
+ 17. |                          New Haven-Milford, CT   3228.4222   .0034707 |
+ 18. |                                    Madison, WI   2850.0136   .0030256 |
+ 19. |                                     Ithaca, NY   2763.8591   .0029572 |
+ 20. |        Minneapolis-St. Paul-Bloomington, MN-WI   2740.1217   .0029172 |
+     |-----------------------------------------------------------------------|
+ 21. |        Sacramento--Roseville--Arden-Arcade, CA   2633.5534   .0027907 |
+ 22. |                           Cleveland-Elyria, OH   2529.3348   .0026761 |
+ 23. |                Dallas-Fort Worth-Arlington, TX    2459.759   .0026223 |
+ 24. | Nashville-Davidson--Murfreesboro--Franklin, TN   2451.4772   .0026109 |
+ 25. |                                   Columbus, OH     2352.62   .0025019 |
+     |-----------------------------------------------------------------------|
+ 26. |                     Denver-Aurora-Lakewood, CO   2231.8053    .002384 |
+ 27. |                                Gainesville, FL   2161.5037   .0022873 |
+ 28. |                           Cincinnati, OH-KY-IN   1920.2259   .0020359 |
+ 29. |      Miami-Fort Lauderdale-West Palm Beach, FL    1893.297   .0020137 |
+ 30. |            Portland-Vancouver-Hillsboro, OR-WA   1740.6455   .0018398 |
+     +-----------------------------------------------------------------------+
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           129
+        from master                       129  
+        from using                          0  
+
+    Matched                               205  
+    -----------------------------------------
+(68 missing values generated)
+(334 missing values generated)
+variable msa_lab was str1 now str22
+(1 real change made)
+(1 real change made)
+(1 real change made)
+variable msa_lab was str22 now str39
+(1 real change made)
+variable msa_lab was str39 now str44
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(129 missing values generated)
+(3 real changes made)
+(4 real changes made)
+(obs=205)
+
+             | msa_size econ_m~e
+-------------+------------------
+    msa_size |   1.0000
+econ_msa_s~e |   0.9407   1.0000
+
+
+      Source |       SS           df       MS      Number of obs   =       205
+-------------+----------------------------------   F(1, 203)       =   1561.78
+       Model |  1.0486e+09         1  1.0486e+09   Prob > F        =    0.0000
+    Residual |   136296332       203  671410.505   R-squared       =    0.8850
+-------------+----------------------------------   Adj R-squared   =    0.8844
+       Total |  1.1849e+09       204  5808288.55   Root MSE        =     819.4
+
+------------------------------------------------------------------------------
+    msa_size | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+econ_msa_s~e |    24.2563    .613783    39.52   0.000      23.0461    25.46651
+       _cons |   205.6208    60.9668     3.37   0.001     85.41144    325.8302
+------------------------------------------------------------------------------
+file ../output/figures/econ_v_ls_year.pdf saved as PDF format
+(8 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(2 real changes made)
+(4 real changes made)
+file ../output/figures/pat_prod_scatter_year.pdf saved as PDF format
+  (importing .shp file)
+  (importing .dbf file)
+  (creating _ID spatial-unit id)
+  (creating _CX coordinate)
+  (creating _CY coordinate)
+
+  file usa_state_shp.dta created
+  file usa_state.dta     created
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           296,043  (_merge==3)
+    -----------------------------------------
+STATEFP: all characters numeric; replaced as byte
+(9,030 observations deleted)
+(344 observations deleted)
+(116,302 real changes made)
+(116,302 real changes made)
+(310 observations deleted)
+(2,373 real changes made)
+(2,373 real changes made)
+(166,263 real changes made)
+(166,263 real changes made)
+file usa_state_shp_clean.dta saved
+  (importing .shp file)
+  (importing .dbf file)
+  (creating _ID spatial-unit id)
+  (creating _CX coordinate)
+  (creating _CY coordinate)
+
+  file usa_msa_shp.dta created
+  file usa_msa.dta     created
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           408,279  
+    -----------------------------------------
+CBSAFP: all characters numeric; replaced as long
+(5,831 observations deleted)
+(0 observations deleted)
+(7,520 real changes made)
+(7,520 real changes made)
+(310 observations deleted)
+(2,373 real changes made)
+(2,373 real changes made)
+file usa_msa_shp_clean.dta saved
+(variable msatitle was str46, now str50 to accommodate using data's values)
+(variable city was str35, now str42 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        13,138
+        from master                    13,138  
+        from using                          0  
+
+    Matched                           942,848  
+    -----------------------------------------
+(89,421 real changes made)
+(0 real changes made)
+(63 real changes made)
+(file ../temp/map_samp.dta not found)
+file ../temp/map_samp.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           609
+        from master                       609  
+        from using                          0  
+
+    Matched                               336  
+    -----------------------------------------
+file ../output/figures/impact_cite_affl_wt_map_year.pdf saved as PDF format
+(0 observations deleted)
+(5,354 missing values generated)
+(23 missing values generated)
+(713,948 missing values generated)
+(file ../temp/econ_yr_cluster.dta not found)
+file ../temp/econ_yr_cluster.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             4,791  
+    -----------------------------------------
+(obs=4,791)
+
+             | msa_size econ_m~e
+-------------+------------------
+    msa_size |   1.0000
+econ_msa_s~e |   0.9175   1.0000
+
+
+      Source |       SS           df       MS      Number of obs   =     4,791
+-------------+----------------------------------   F(1, 4789)      =  25500.64
+       Model |  3.5322e+10         1  3.5322e+10   Prob > F        =    0.0000
+    Residual |  6.6334e+09     4,789  1385123.74   R-squared       =    0.8419
+-------------+----------------------------------   Adj R-squared   =    0.8419
+       Total |  4.1955e+10     4,790  8758851.92   Root MSE        =    1176.9
+
+------------------------------------------------------------------------------
+    msa_size | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+econ_msa_s~e |   19.33543   .1210817   159.69   0.000     19.09806    19.57281
+       _cons |   98.27671   19.40616     5.06   0.000     60.23173    136.3217
+------------------------------------------------------------------------------
+(4,791 missing values generated)
+variable msa_lab was str1 now str27
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+variable msa_lab was str27 now str42
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       115,239
+        from master                   115,239  
+        from using                          0  
+
+    Matched                           840,747  
+    -----------------------------------------
+(23 real changes made)
+(15 real changes made)
+(5,354 missing values generated)
+(115,239 missing values generated)
+(676,148 observations deleted)
+(215,554 observations deleted)
+
+                  (sum) impact_cite_affl_wt
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%     .0004099              0
+10%     .0006324              0       Obs               2,152
+25%     .0012414              0       Sum of wgt.       2,152
+
+50%     .0031573                      Mean           .0753837
+                        Largest       Std. dev.      .3069587
+75%     .0086071       3.982874
+90%     .1264182       4.064351       Variance       .0942236
+95%     .4634962       4.255985       Skewness       8.129821
+99%     1.596043       4.263004       Kurtosis       89.68721
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    msa_size |      2,152    2161.504    135.0556       1777       2263
+
+                  (sum) impact_cite_affl_wt
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%     .0003689              0
+10%     .0007357              0       Obs               3,893
+25%     .0017917              0       Sum of wgt.       3,893
+
+50%     .0064369                      Mean           .2486674
+                        Largest       Std. dev.      .9698658
+75%     .1631323       11.61052
+90%     .5516986       11.67476       Variance       .9406397
+95%     1.312282       23.72712       Skewness       18.16076
+99%     3.285528       35.06121       Kurtosis       535.7344
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    msa_size |      3,893    3651.214    268.5375       2986       3915
+
+                  (sum) impact_cite_affl_wt
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     .0001135              0
+ 5%     .0006148              0
+10%     .0012296              0       Obs               9,220
+25%     .0038493              0       Sum of wgt.       9,220
+
+50%       .09384                      Mean           .4235313
+                        Largest       Std. dev.      1.074711
+75%     .3937109       15.73828
+90%     1.008646       19.70914       Variance       1.155003
+95%     1.880833       19.70914       Skewness       7.829692
+99%     4.736731       28.25501       Kurtosis       109.3086
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    msa_size |      9,220    6791.334    695.3656       5241       7464
+
+                  (sum) impact_cite_affl_wt
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%     .0005642              0
+10%     .0011066              0       Obs              20,973
+25%     .0038425              0       Sum of wgt.      20,973
+
+50%     .1422741                      Mean           .6230068
+                        Largest       Std. dev.      2.984374
+75%     .5436938       177.0037
+90%     1.424741       183.5394       Variance       8.906485
+95%     2.438325       183.5394       Skewness       44.49388
+99%     6.655577       183.5394       Kurtosis       2619.381
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    msa_size |     20,973    15251.27    879.1029      13101      15943
+
+                  (sum) impact_cite_affl_wt
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     .0001153              0
+ 5%     .0006148              0
+10%     .0011318              0       Obs              28,046
+25%     .0043663              0       Sum of wgt.      28,046
+
+50%     .1558929                      Mean           .5872957
+                        Largest       Std. dev.       1.79885
+75%     .5361844       76.05447
+90%      1.41892       76.05447       Variance       3.235861
+95%     2.388776       76.05845       Skewness        18.3842
+99%     6.788007       91.21262       Kurtosis       640.1793
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    msa_size |     28,046    20509.19     1513.04      16726      21662
+(MWFE estimator converged in 1 iterations)
+
+HDFE Linear regression                            Number of obs   =    950,632
+Absorbing 1 HDFE group                            F(   1, 950630) =   28984.21
+                                                  Prob > F        =     0.0000
+                                                  R-squared       =     0.0296
+                                                  Adj R-squared   =     0.0296
+                                                  Within R-sq.    =     0.0296
+                                                  Root MSE        =     2.3968
+
+------------------------------------------------------------------------------
+        ln_y | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |   .3004377   .0017647   170.25   0.000     .2969789    .3038964
+       _cons |  -6.221941   .0147051  -423.12   0.000    -6.250762   -6.193119
+------------------------------------------------------------------------------
+(dropped 13 singleton observations)
+(MWFE estimator converged in 6 iterations)
+
+HDFE Linear regression                            Number of obs   =    950,619
+Absorbing 3 HDFE groups                           F(   1,    320) =       2.80
+Statistics robust to heteroskedasticity           Prob > F        =     0.0952
+                                                  R-squared       =     0.1408
+                                                  Adj R-squared   =     0.1404
+                                                  Within R-sq.    =     0.0002
+Number of clusters (msa)     =        321         Root MSE        =     2.2558
+
+                                  (Std. err. adjusted for 321 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |   .1853785   .1107865     1.67   0.095    -.0325834    .4033403
+       _cons |  -5.276662    .910188    -5.80   0.000     -7.06737   -3.485954
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+        year |        78           0          78     |
+         msa |       321         321           0    *|
+       field |         5           1           4     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(dropped 24 singleton observations)
+(MWFE estimator converged in 5 iterations)
+
+HDFE Linear regression                            Number of obs   =    950,608
+Absorbing 4 HDFE groups                           F(   1,    320) =       3.20
+Statistics robust to heteroskedasticity           Prob > F        =     0.0746
+                                                  R-squared       =     0.1814
+                                                  Adj R-squared   =     0.1808
+                                                  Within R-sq.    =     0.0002
+Number of clusters (msa)     =        321         Root MSE        =     2.2022
+
+                                  (Std. err. adjusted for 321 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |   .1934556   .1081464     1.79   0.075    -.0193122    .4062233
+       _cons |  -5.343025   .8885015    -6.01   0.000    -7.091067   -3.594983
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        78           0          78     |
+          msa |       321         321           0    *|
+        field |         5           1           4     |
+   field#year |       369          78         291    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(dropped 180 singleton observations)
+(MWFE estimator converged in 7 iterations)
+
+HDFE Linear regression                            Number of obs   =    950,452
+Absorbing 5 HDFE groups                           F(   1,    305) =       3.19
+Statistics robust to heteroskedasticity           Prob > F        =     0.0751
+                                                  R-squared       =     0.1876
+                                                  Adj R-squared   =     0.1860
+                                                  Within R-sq.    =     0.0002
+Number of clusters (msa)     =        306         Root MSE        =     2.1951
+
+                                  (Std. err. adjusted for 306 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |   .1950029   .1091873     1.79   0.075    -.0198528    .4098585
+       _cons |  -5.355838   .8971653    -5.97   0.000    -7.121255   -3.590421
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        78           0          78     |
+          msa |       306         306           0    *|
+        field |         5           1           4     |
+   field#year |       369          78         291    ?|
+    msa#field |      1172        1172           0    *|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(dropped 2135 singleton observations)
+(MWFE estimator converged in 15 iterations)
+
+HDFE Linear regression                            Number of obs   =    948,497
+Absorbing 6 HDFE groups                           F(   1,    301) =       2.88
+Statistics robust to heteroskedasticity           Prob > F        =     0.0907
+                                                  R-squared       =     0.2420
+                                                  Adj R-squared   =     0.2366
+                                                  Within R-sq.    =     0.0002
+Number of clusters (msa)     =        302         Root MSE        =     2.1257
+
+                                  (Std. err. adjusted for 302 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |    .196903   .1160052     1.70   0.091     -.031381     .425187
+       _cons |  -5.369666   .9533025    -5.63   0.000    -7.245648   -3.493684
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        78           0          78     |
+          msa |       302         302           0    *|
+        field |         5           1           4     |
+   field#year |       369          78         291    ?|
+    msa#field |      1159        1159           0    *|
+         inst |      4805        4805           0    *|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(dropped 267801 singleton observations)
+(MWFE estimator converged in 49 iterations)
+
+HDFE Linear regression                            Number of obs   =    682,831
+Absorbing 7 HDFE groups                           F(   1,    265) =       4.01
+Statistics robust to heteroskedasticity           Prob > F        =     0.0462
+                                                  R-squared       =     0.5885
+                                                  Adj R-squared   =     0.4430
+                                                  Within R-sq.    =     0.0001
+Number of clusters (msa)     =        266         Root MSE        =     1.8098
+
+                                  (Std. err. adjusted for 266 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |    .139643   .0697331     2.00   0.046     .0023417    .2769444
+       _cons |  -4.736326   .5758401    -8.23   0.000     -5.87013   -3.602522
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        78           0          78     |
+          msa |       266         266           0    *|
+        field |         5           1           4     |
+   field#year |       364          78         286    ?|
+    msa#field |      1037        1037           0    *|
+         inst |      3423        3423           0    *|
+      athr_id |    173217           1      173216    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(dropped 243981 singleton observations)
+(MWFE estimator converged in 40 iterations)
+
+HDFE Linear regression                            Number of obs   =    592,305
+Absorbing 7 HDFE groups                           F(   1,    140) =       2.36
+Statistics robust to heteroskedasticity           Prob > F        =     0.1264
+                                                  R-squared       =     0.5896
+                                                  Adj R-squared   =     0.4423
+                                                  Within R-sq.    =     0.0000
+Number of clusters (msa)     =        141         Root MSE        =     1.8252
+
+                                  (Std. err. adjusted for 141 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   ln_x_econ |   .0788327   .0512682     1.54   0.126    -.0225273    .1801926
+       _cons |  -3.885166   .2699527   -14.39   0.000    -4.418877   -3.351455
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        77           0          77     |
+          msa |       141         141           0    *|
+        field |         5           1           4     |
+   field#year |       359          77         282    ?|
+    field#msa |       619         619           0    *|
+         inst |      2826        2826           0    *|
+      athr_id |    152565           1      152564    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(dropped 267619 singleton observations)
+(MWFE estimator converged in 48 iterations)
+
+HDFE Linear regression                            Number of obs   =    683,013
+Absorbing 5 HDFE groups                           F(   1,    277) =       4.13
+Statistics robust to heteroskedasticity           Prob > F        =     0.0432
+                                                  R-squared       =     0.5756
+                                                  Adj R-squared   =     0.4271
+                                                  Within R-sq.    =     0.0001
+Number of clusters (msa)     =        278         Root MSE        =     1.8355
+
+                                  (Std. err. adjusted for 278 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |   .1310677   .0645255     2.03   0.043      .004045    .2580904
+       _cons |   -4.66556   .5327568    -8.76   0.000    -5.714327   -3.616794
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+        year |        78           0          78     |
+         msa |       278         278           0    *|
+     athr_id |    173264           1      173263     |
+       field |         5           1           4    ?|
+        inst |      3442        3442           0    *|
+-----------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(dropped 178472 singleton observations)
+(MWFE estimator converged in 55 iterations)
+
+HDFE Linear regression                            Number of obs   =    509,472
+Absorbing 6 HDFE groups                           F(   1,    260) =       1.70
+Statistics robust to heteroskedasticity           Prob > F        =     0.1934
+                                                  R-squared       =     0.6308
+                                                  Adj R-squared   =     0.4751
+                                                  Within R-sq.    =     0.0000
+Number of clusters (msa)     =        261         Root MSE        =     1.8191
+
+                                  (Std. err. adjusted for 261 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        ln_x |   .1115542   .0855555     1.30   0.193    -.0569158    .2800241
+       _cons |  -4.171112   .7178561    -5.81   0.000    -5.584663    -2.75756
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+        year |        78           0          78     |
+         msa |       261         261           0    *|
+     athr_id |    129991           1      129990     |
+   gen_mesh1 |      8508          97        8411    ?|
+   gen_mesh2 |      9578         170        9408    ?|
+        inst |      2951        2951           0    *|
+-----------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+file ../temp/econs_cluster.dta saved
   367,533
 N = 367,533; 185,374 unbalanced groups of sizes 1 to 48
 (2,295 missing values generated)
@@ -552,25 +1219,59 @@ N = 367,533; 185,374 unbalanced groups of sizes 1 to 48
  29. |      Miami-Fort Lauderdale-West Palm Beach, FL   1907.4023   .0020176 |
  30. |            Portland-Vancouver-Hillsboro, OR-WA   1753.3502   .0018468 |
      +-----------------------------------------------------------------------+
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           102
+        from master                       102  
+        from using                          0  
+
+    Matched                               203  
+    -----------------------------------------
 (83 missing values generated)
 (305 missing values generated)
-variable msa_lab was str1 now str15
+variable msa_lab was str1 now str22
 (1 real change made)
-variable msa_lab was str15 now str22
+(1 real change made)
+(1 real change made)
+variable msa_lab was str22 now str39
+(1 real change made)
+variable msa_lab was str39 now str44
+(1 real change made)
+(1 real change made)
 (1 real change made)
 (1 real change made)
 (0 real changes made)
-variable msa_lab was str22 now str37
+(102 missing values generated)
+(3 real changes made)
+(4 real changes made)
+(obs=203)
+
+             | msa_size econ_m~e
+-------------+------------------
+    msa_size |   1.0000
+econ_msa_s~e |   0.9402   1.0000
+
+
+      Source |       SS           df       MS      Number of obs   =       203
+-------------+----------------------------------   F(1, 201)       =   1530.60
+       Model |   790276209         1   790276209   Prob > F        =    0.0000
+    Residual |   103779922       201  516318.021   R-squared       =    0.8839
+-------------+----------------------------------   Adj R-squared   =    0.8833
+       Total |   894056131       202  4426020.45   Root MSE        =    718.55
+
+------------------------------------------------------------------------------
+    msa_size | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+econ_msa_s~e |   21.07079   .5385797    39.12   0.000      20.0088    22.13278
+       _cons |   203.6763   53.75973     3.79   0.000      97.6709    309.6817
+------------------------------------------------------------------------------
+file ../output/figures/econ_v_ls_year_firstlast.pdf saved as PDF format
+(8 real changes made)
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(6 real changes made)
 (1 real change made)
-(1 real change made)
-(1 real change made)
-variable msa_lab was str37 now str39
-(1 real change made)
-variable msa_lab was str39 now str44
 (1 real change made)
 (1 real change made)
 (1 real change made)
@@ -641,7 +1342,6 @@ file usa_msa_shp_clean.dta saved
 (33,938 real changes made)
 (0 real changes made)
 (26 real changes made)
-(file ../temp/map_samp.dta not found)
 file ../temp/map_samp.dta saved
 
     Result                      Number of obs
@@ -658,9 +1358,59 @@ file ../output/figures/impact_cite_affl_wt_map_year_firstlast.pdf saved as
 (2,295 missing values generated)
 (8 missing values generated)
 (281,639 missing values generated)
+file ../temp/econ_yr_cluster.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             4,701  
+    -----------------------------------------
+(obs=4,701)
+
+             | msa_size econ_m~e
+-------------+------------------
+    msa_size |   1.0000
+econ_msa_s~e |   0.9171   1.0000
+
+
+      Source |       SS           df       MS      Number of obs   =     4,701
+-------------+----------------------------------   F(1, 4699)      =  24868.37
+       Model |  3.5135e+10         1  3.5135e+10   Prob > F        =    0.0000
+    Residual |  6.6389e+09     4,699  1412830.42   R-squared       =    0.8411
+-------------+----------------------------------   Adj R-squared   =    0.8410
+       Total |  4.1774e+10     4,700  8888018.33   Root MSE        =    1188.6
+
+------------------------------------------------------------------------------
+    msa_size | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+econ_msa_s~e |   19.32749   .1225609   157.70   0.000     19.08722    19.56777
+       _cons |   104.4033   19.82922     5.27   0.000     65.52871    143.2779
+------------------------------------------------------------------------------
+(4,701 missing values generated)
+variable msa_lab was str1 now str27
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+variable msa_lab was str27 now str42
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        45,267
+        from master                    45,267  
+        from using                          0  
+
+    Matched                           322,266  
+    -----------------------------------------
 (8 real changes made)
+(11 real changes made)
 (2,295 missing values generated)
-(8 missing values generated)
+(45,267 missing values generated)
 (294,794 observations deleted)
 (57,442 observations deleted)
 
@@ -933,6 +1683,40 @@ Absorbed degrees of freedom:
 ------------------------------------------------------+
 ? = number of redundant parameters may be higher
 * = FE nested within cluster; treated as redundant for DoF computation
+(dropped 112021 singleton observations)
+(MWFE estimator converged in 45 iterations)
+
+HDFE Linear regression                            Number of obs   =    208,355
+Absorbing 7 HDFE groups                           F(   1,    126) =       1.37
+Statistics robust to heteroskedasticity           Prob > F        =     0.2437
+                                                  R-squared       =     0.6577
+                                                  Adj R-squared   =     0.5343
+                                                  Within R-sq.    =     0.0000
+Number of clusters (msa)     =        127         Root MSE        =     1.6343
+
+                                  (Std. err. adjusted for 127 clusters in msa)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   ln_x_econ |   .0453717   .0387378     1.17   0.244    -.0312893    .1220326
+       _cons |  -3.095936   .1996682   -15.51   0.000    -3.491074   -2.700798
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        77           0          77     |
+          msa |       127         127           0    *|
+        field |         5           1           4     |
+   field#year |       358          77         281    ?|
+    field#msa |       549         549           0    *|
+         inst |      1527        1527           0    *|
+      athr_id |     52647           1       52646    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
 (dropped 124172 singleton observations)
 (MWFE estimator converged in 45 iterations)
 
@@ -1003,6 +1787,6 @@ Absorbed degrees of freedom:
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2024-01-05 12:34:10
+Makelog ended: 2024-01-09 22:37:13
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cluster_descriptives/code
 --------------------------------------------------------------------------------

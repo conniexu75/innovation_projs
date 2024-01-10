@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-01-04 23:39:36
+Makelog started: 2024-01-08 12:55:12
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -62,200 +62,207 @@ not available in non-GUI version
   8.     global msa_world_name "cities"
   9.     global msa_c_world_name "cities"
  10.     di "OUTPUT START"
- 11.     foreach var in impact_cite_affl_wt body_adj_wt {
- 12.         di "CNS: `var'"
- 13.         athr_loc, data(newfund) samp(cns) wt_var(`var')
- 14.         qui trends, data(newfund) samp(cns) wt_var(`var')
- 15.         di "ALL: `var'"
- 16.         athr_loc, data(all) samp(jrnls) wt_var(`var')
- 17.         qui trends, data(all) samp(jrnls) wt_var(`var')
- 18.     }
- 19.     *calc_broad_hhmi, data(`data') samp(`samp') 
-.     top_mesh_terms, data(all) samp(jrnls) 
- 20.     qui output_tables, data(newfund) samp(cns) 
- 21.     qui output_tables, data(all) samp(jrnls) 
- 22. end
+ 11.     foreach athr_type in first_last all {
+ 12.     if "`athr_type'" == "first_last" local fol "fl"
+ 13.     if "`athr_type'" == "all" local fol "all"
+ 14.         foreach var in impact_cite_affl_wt body_adj_wt {
+ 15.             di "CNS: `var'"
+ 16.             athr_loc, data(newfund) samp(cns) wt_var(`var') fol(`fol')
+ 17.             qui trends, data(newfund) samp(cns) wt_var(`var') fol(`fol')
+ 18.             di "ALL: `var'"
+ 19.             athr_loc, data(all) samp(jrnls) wt_var(`var') fol(`fol')
+ 20.             qui trends, data(all) samp(jrnls) wt_var(`var') fol(`fol')
+ 21.         }
+ 22.         qui output_tables, data(newfund) samp(cns) fol(`fol')
+ 23.         qui output_tables, data(all) samp(jrnls) fol(`fol')
+ 24.     }
+ 25.     top_mesh_terms, data(all) samp(jrnls) 
+ 26. end
 
 . 
 . program athr_loc
-  1.     syntax, data(str) samp(str)  wt_var(str)
-  2.     local suf = ""
-  3.     if "`wt_var'" == "cite_affl_wt" local suf "_wt"
-  4.     if "`wt_var'" == "impact_affl_wt" local suf "_if"
-  5.     if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
-  6.     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
-  7.     if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
-  8.     if "`wt_var'" == "body_adj_wt" local suf "_body"
-  9.     use ../external/openalex/cleaned_last5yrs_`data'_`samp', clear 
- 10.     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts G
+  1.     syntax, data(str) samp(str)  wt_var(str) fol(str)
+  2.     local athr = cond("`fol'" == "fl", "", "_all")
+  3.     local suf = ""
+  4.     if "`wt_var'" == "cite_affl_wt" local suf "_wt"
+  5.     if "`wt_var'" == "impact_affl_wt" local suf "_if"
+  6.     if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
+  7.     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
+  8.     if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
+  9.     if "`wt_var'" == "body_adj_wt" local suf "_body"
+ 10.     use ../external/`fol'/cleaned_last5yrs_`data'_`samp', clear 
+ 11.     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts G
 > eneral Hospital" , "Brigham and Women's Hospital")
- 11.     local end 20
- 12.     foreach loc in country msa_c_world inst {
- 13.         if "`loc'" == "inst" & ("`wt_var'" != "pat_adj_wt" & "`wt_var'" !=
+ 12.     local end 20
+ 13.     foreach loc in country msa_c_world inst {
+ 14.         if "`loc'" == "inst" & ("`wt_var'" != "pat_adj_wt" & "`wt_var'" !=
 >  "body_adj_wt") {
- 14.             local end 50
- 15.         }
- 16.         qui gunique pmid 
- 17.         local articles = r(unique)
- 18.         qui sum `wt_var'
- 19.         local total = round(r(sum))
- 20.         assert `total' == `articles'
- 21.         qui sum `wt_var' if !mi(`loc') 
- 22.         local denom = r(sum) 
- 23.         preserve
- 24.         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
- 25.             qui keep if country == "United States"
- 26.         }
- 27.         collapse (sum) `wt_var', by(`loc')
- 28.         qui hashsort -`wt_var' 
- 29.         qui gen perc = `wt_var' / `total' * 100
- 30.         li if mi(`loc')
- 31.         qui drop if mi(`loc')
- 32.         qui gen cum_perc = sum(perc) 
- 33.         gen rank = _n 
- 34.         save ../temp/rankings_`loc'`suf', replace
- 35.         drop rank
- 36.         qui count
- 37.         local rank_end = min(r(N),`end') 
- 38.         li `loc' perc in 1/`rank_end'
- 39.         di "Total articles: `total'"
- 40.         mkmat perc cum_perc in 1/`rank_end', mat(top_`loc'_`samp'`suf')
- 41. *        mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , 
+ 15.             local end 50
+ 16.         }
+ 17.         qui gunique pmid 
+ 18.         local articles = r(unique)
+ 19.         qui sum `wt_var'
+ 20.         local total = round(r(sum))
+ 21.         assert `total' == `articles'
+ 22.         qui sum `wt_var' if !mi(`loc') 
+ 23.         local denom = r(sum) 
+ 24.         preserve
+ 25.         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
+ 26.             qui keep if country == "United States"
+ 27.         }
+ 28.         collapse (sum) `wt_var', by(`loc')
+ 29.         qui hashsort -`wt_var' 
+ 30.         qui gen perc = `wt_var' / `total' * 100
+ 31.         li if mi(`loc')
+ 32.         qui drop if mi(`loc')
+ 33.         qui gen cum_perc = sum(perc) 
+ 34.         gen rank = _n 
+ 35.         save ../temp/rankings_`loc'`suf'`athr', replace
+ 36.         drop rank
+ 37.         qui count
+ 38.         local rank_end = min(r(N),`end') 
+ 39.         li `loc' perc in 1/`rank_end'
+ 40.         di "Total articles: `total'"
+ 41.         mkmat perc cum_perc in 1/`rank_end', mat(top_`loc'_`samp'`suf'`ath
+> r')
+ 42. *        mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , 
 > (top_`loc'_`samp'`suf')
 .         qui levelsof `loc' in 1/2
- 42.         global top2_`loc'_`data' "`r(levels)'"
- 43.         if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "ms
+ 43.         global top2_`loc'_`data' "`r(levels)'"
+ 44.         if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "ms
 > aworld", "msa_c_world") {
- 44.             qui levelsof `loc' in 1/`rank_end'
- 45.             global `loc'_`data' "`r(levels)'"
- 46.         }
- 47.         qui gen rank_grp = "first" if _n == 1
- 48.         replace `loc' = "harvard university" if `loc' == "university harva
+ 45.             qui levelsof `loc' in 1/`rank_end'
+ 46.             global `loc'_`data' "`r(levels)'"
+ 47.         }
+ 48.         qui gen rank_grp = "first" if _n == 1
+ 49.         replace `loc' = "harvard university" if `loc' == "university harva
 > rd"
- 49.         replace `loc' = "stanford university" if `loc' == "university stan
+ 50.         replace `loc' = "stanford university" if `loc' == "university stan
 > ford"
- 50.         qui levelsof `loc' if _n == 1 
- 51.         global `loc'_first "`r(levels)'"
- 52.         qui levelsof `loc' if _n == 2
- 53. 
+ 51.         qui levelsof `loc' if _n == 1 
+ 52.         global `loc'_first "`r(levels)'"
+ 53.         qui levelsof `loc' if _n == 2
+ 54. 
 .         global `loc'_second "`r(levels)'"
- 54.         qui replace rank_grp = "second" if _n == 2
- 55.         qui replace rank_grp = "china" if `loc' == "China"
- 56.         qui replace rank_grp = "uk" if `loc' == "United Kingdom"
- 57.         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10) & !inl
+ 55.         qui replace rank_grp = "second" if _n == 2
+ 56.         qui replace rank_grp = "china" if `loc' == "China"
+ 57.         qui replace rank_grp = "uk" if `loc' == "United Kingdom"
+ 58.         qui replace rank_grp = "rest of top 10" if inrange(_n,3,10) & !inl
 > ist(rank_grp,"china", "uk")
- 58.         qui replace rank_grp = "remaining" if mi(rank_grp)
- 59.         keep `loc' rank_grp
- 60.         qui save ../temp/`loc'_rank_`data'_`samp'`suf', replace
- 61.         restore
- 62.     }
- 63. end
+ 59.         qui replace rank_grp = "remaining" if mi(rank_grp)
+ 60.         keep `loc' rank_grp
+ 61.         qui save ../temp/`loc'_rank_`data'_`samp'`suf'`athr', replace
+ 62.         restore
+ 63.     }
+ 64. end
 
 . 
 . program calc_broad_hhmi
-  1.    syntax, data(str) samp(str) 
-  2.    use if inrange(year, 1945, 2022) using ../external/openalex/cleaned_las
-> t5yrs_`data'_`samp', clear
-  3.    replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts Ge
+  1.    syntax, data(str) samp(str) fol(str)
+  2.    local athr = cond("`fol'" == "fl", "", "_all")
+  3.    use if inrange(year, 1945, 2022) using ../external/`fol'/cleaned_last5y
+> rs_`data'_`samp', clear
+  4.    replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts Ge
 > neral Hospital" , "Brigham and Women's Hospital")
-  4.    qui gunique pmid which_athr
-  5.    local num_athrs = r(unique)
-  6.    qui gunique pmid which_athr if country == "United States"
-  7.    local num_athrs_US = r(unique)
-  8.    foreach i in broad hhmi {
-  9.        qui gunique pmid which_athr if has_`i'_affl == 1
- 10.        local num_`i' = r(unique)
- 11.        di `num_`i'' " authors of " `num_athrs' " are " "`i' affiliated or 
+  5.    qui gunique pmid which_athr
+  6.    local num_athrs = r(unique)
+  7.    qui gunique pmid which_athr if country == "United States"
+  8.    local num_athrs_US = r(unique)
+  9.    foreach i in broad hhmi {
+ 10.        qui gunique pmid which_athr if has_`i'_affl == 1
+ 11.        local num_`i' = r(unique)
+ 12.        di `num_`i'' " authors of " `num_athrs' " are " "`i' affiliated or 
 > " `num_`i''/`num_athrs'*100 " percent"
- 12.        qui gunique pmid which_athr if has_`i'_affl == 1 & country == "Unit
+ 13.        qui gunique pmid which_athr if has_`i'_affl == 1 & country == "Unit
 > ed States"
- 13.        local num_`i'_US = r(unique)
- 14.        di `num_`i'_US' " US authors of " `num_athrs_US' " are " "`i' affil
+ 14.        local num_`i'_US = r(unique)
+ 15.        di `num_`i'_US' " US authors of " `num_athrs_US' " are " "`i' affil
 > iated or " `num_`i'_US'/`num_athrs_US'*100 " percent"
- 15.        // hhmi has to be us
+ 16.        // hhmi has to be us
 .        preserve
- 16.        keep if country == "United States"
- 17.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Stanfor
+ 17.        keep if country == "United States"
+ 18.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Stanfor
 > d University" 
- 18.        local num_`i'_stanford = r(unique)
- 19.        di `num_`i'_stanford' " stanford authors of " `num_`i'_US' " are " 
+ 19.        local num_`i'_stanford = r(unique)
+ 20.        di `num_`i'_stanford' " stanford authors of " `num_`i'_US' " are " 
 > "`i' affiliated or " `num_`i'_stanford'/`num_`i'_US'*100 " percent"
- 20.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Harvard
+ 21.        qui gunique pmid which_athr if has_`i'_affl == 1 & inst == "Harvard
 >  University" 
- 21.        local num_`i'_harvard = r(unique)
- 22.        di `num_`i'_harvard' " harvard authors of " `num_`i'_US' " are " "`
+ 22.        local num_`i'_harvard = r(unique)
+ 23.        di `num_`i'_harvard' " harvard authors of " `num_`i'_US' " are " "`
 > i' affiliated or " `num_`i'_harvard'/`num_`i'_US'*100 " percent"
- 23.        restore
- 24.        if "`i'" == "broad" {
- 25.            qui count if  inlist(inst, "Harvard University", "Massachusetts
+ 24.        restore
+ 25.        if "`i'" == "broad" {
+ 26.            qui count if  inlist(inst, "Harvard University", "Massachusetts
 >  Institute of Technology", "Boston Children's Hospital", "Dana Farber Cancer 
 > Institute", "Massachusetts General Hospital", "Brigham and Women's Hospital",
 >  "Beth Israel Deaconess Medical Center")
- 26.            if r(N) > 0 {
- 27.                preserve
- 28.                keep if inlist(inst, "Harvard University", "Massachusetts I
+ 27.            if r(N) > 0 {
+ 28.                preserve
+ 29.                keep if inlist(inst, "Harvard University", "Massachusetts I
 > nstitute of Technology", "Boston Children's Hospital", "Dana Farber Cancer In
 > stitute", "Massachusetts General Hospital", "Brigham and Women's Hospital", "
 > Beth Israel Deaconess Medical Center")
- 29.                qui gunique pmid which_athr if has_`i'_affl == 1 
- 30.                local num_athrs_broad = r(unique)
- 31.                qui gunique pmid which_athr if has_`i'_affl == 1 & inst == 
+ 30.                qui gunique pmid which_athr if has_`i'_affl == 1 
+ 31.                local num_athrs_broad = r(unique)
+ 32.                qui gunique pmid which_athr if has_`i'_affl == 1 & inst == 
 > "Harvard University" 
- 32.                local num_`i'_harvard = r(unique)
- 33.                di `num_`i'_harvard' " harvard authors of " `num_athrs_broa
+ 33.                local num_`i'_harvard = r(unique)
+ 34.                di `num_`i'_harvard' " harvard authors of " `num_athrs_broa
 > d' " are " "`i' affiliated or " `num_`i'_harvard'/`num_athrs_broad'*100 " per
 > cent"
- 34.                qui gunique pmid which_athr if has_`i'_affl == 1 & inst == 
+ 35.                qui gunique pmid which_athr if has_`i'_affl == 1 & inst == 
 > "Massachusetts Institute of Technology" 
- 35.                local num_`i'_mit= r(unique)
- 36.                di `num_`i'_mit' " mit authors of " `num_athrs_broad' " are
+ 36.                local num_`i'_mit= r(unique)
+ 37.                di `num_`i'_mit' " mit authors of " `num_athrs_broad' " are
 >  " "`i' affiliated or " `num_`i'_mit'/`num_athrs_broad'*100 " percent"
- 37.                restore 
- 38.            }
- 39.         }
- 40.     }
- 41. end
+ 38.                restore 
+ 39.            }
+ 40.         }
+ 41.     }
+ 42. end
 
 . 
 . program trends
-  1.     syntax, data(str) samp(str)  wt_var(str)
-  2.     local suf = ""
-  3.     if "`wt_var'" == "cite_affl_wt" local suf "_wt"
-  4.     if "`wt_var'" == "impact_affl_wt" local suf "_if"
-  5.     if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
-  6.     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
-  7.     if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
-  8.     if "`wt_var'" == "body_adj_wt" local suf "_body"
-  9.     use if inrange(year, 1945, 2022)  using ../external/openalex/cleaned_a
-> ll_`data'_`samp', clear
- 10.     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts G
+  1.     syntax, data(str) samp(str)  wt_var(str) fol(str)
+  2.     local athr = cond("`fol'" == "fl", "", "_all")
+  3.     local suf = ""
+  4.     if "`wt_var'" == "cite_affl_wt" local suf "_wt"
+  5.     if "`wt_var'" == "impact_affl_wt" local suf "_if"
+  6.     if "`wt_var'" == "impact_cite_affl_wt" local suf "_if_wt"
+  7.     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
+  8.     if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
+  9.     if "`wt_var'" == "body_adj_wt" local suf "_body"
+ 10.     use if inrange(year, 1945, 2022)  using ../external/`fol'/cleaned_all_
+> `data'_`samp', clear
+ 11.     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts G
 > eneral Hospital" , "Brigham and Women's Hospital")
- 11.     cap drop counter
- 12. 
+ 12.     cap drop counter
+ 13. 
 .     gen msa_world = msatitle
- 13.     replace msa_world = city if country != "United States"
- 14.     qui bys pmid year: gen counter = _n == 1
- 15.     qui bys year: egen tot_in_yr = total(counter)
- 16.     foreach loc in country  msa_c_world inst {
- 17.         preserve
- 18.         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
- 19.             qui keep if country == "United States"
- 20.         }
- 21.         replace `loc' = "harvard university" if `loc' == "university harva
+ 14.     replace msa_world = city if country != "United States"
+ 15.     qui bys pmid year: gen counter = _n == 1
+ 16.     qui bys year: egen tot_in_yr = total(counter)
+ 17.     foreach loc in country  msa_c_world inst {
+ 18.         preserve
+ 19.         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
+ 20.             qui keep if country == "United States"
+ 21.         }
+ 22.         replace `loc' = "harvard university" if `loc' == "university harva
 > rd"
- 22.         replace `loc' = "stanford university" if `loc' == "university stan
+ 23.         replace `loc' = "stanford university" if `loc' == "university stan
 > ford"
- 23.         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp'`suf', a
-> ssert(1 3) keep(1 3) nogen
- 24.         if "`loc'" == "inst" {
- 25.             replace `loc' = strproper(`loc')
- 26.         }
- 27.         qui sum year
- 28.         local min_year = max(1945,r(min))
- 29.         qui egen year_bin  = cut(year), at(1945(3)2023) 
- 30.         keep if !mi(`loc')
- 31.         local year_var year_bin
- 32.         
+ 24.         qui merge m:1 `loc' using ../temp/`loc'_rank_`data'_`samp'`suf'`at
+> hr', assert(1 3) keep(1 3) nogen
+ 25.         if "`loc'" == "inst" {
+ 26.             replace `loc' = strproper(`loc')
+ 27.         }
+ 28.         qui sum year
+ 29.         local min_year = max(1945,r(min))
+ 30.         qui egen year_bin  = cut(year), at(1945(3)2023) 
+ 31.         keep if !mi(`loc')
+ 32.         local year_var year_bin
+ 33.         
 .         /*qui bys pmid `year_var': replace counter = _n == 1
 >         qui bys `year_var': egen tot_in_`year_var' = total(counter)
 >         qui replace rank_grp = "remaining" if mi(rank_grp)
@@ -270,110 +277,110 @@ not available in non-GUI version
 >         replace impact_affl_wt = impact_wt * affl_wt*/
 . 
 .         collapse (sum) `wt_var'  (firstnm) `loc'  , by(rank_grp `year_var')
- 33.         bys `year_var': egen tot_in_`year_var' = total(`wt_var')
- 34.         qui gen perc = `wt_var'/tot_in_`year_var' * 100
- 35.         qui bys `year_var': egen tot = sum(perc)
- 36.         save ../temp/trends_`loc'`suf', replace
- 37.         qui replace tot = round(tot)
- 38.         assert tot==100
- 39.         qui drop tot
- 40.         if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "ms
+ 34.         bys `year_var': egen tot_in_`year_var' = total(`wt_var')
+ 35.         qui gen perc = `wt_var'/tot_in_`year_var' * 100
+ 36.         qui bys `year_var': egen tot = sum(perc)
+ 37.         save ../temp/trends_`loc'`suf'`athr', replace
+ 38.         qui replace tot = round(tot)
+ 39.         assert tot==100
+ 40.         qui drop tot
+ 41.         if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "ms
 > a_world" |  "`loc'" == "msa_c_world" | "`loc'" == "msa_comb" {
- 41.             label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Re
+ 42.             label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Re
 > maining top 10" 4 "Remaining places" 
- 42.         }
- 43.         if "`loc'" == "inst" {
- 44.             local proper_1 = strproper(${`loc'_first})
- 45.             local proper_2 = strproper(${`loc'_second})
- 46.             label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Remaini
+ 43.         }
+ 44.         if "`loc'" == "inst" {
+ 45.             local proper_1 = strproper(${`loc'_first})
+ 46.             local proper_2 = strproper(${`loc'_second})
+ 47.             label define rank_grp 1 "`proper_1'" 2 "`proper_2'" 3 "Remaini
 > ng top 10" 4 "Remaining places" 
- 47.         }
- 48.         if "`loc'" == "country" {
- 49.             label define rank_grp 1 ${`loc'_first} 2 "United Kingdom" 3 "C
+ 48.         }
+ 49.         if "`loc'" == "country" {
+ 50.             label define rank_grp 1 ${`loc'_first} 2 "United Kingdom" 3 "C
 > hina" 4 "Remaining top 10" 5 "Remaining places" 
- 50.         }
- 51.         label var rank_grp rank_grp
- 52.         qui gen group = 1 if rank_grp == "first"
- 53.         qui replace group = 2 if rank_grp == "second"  & "`loc'"!= "countr
+ 51.         }
+ 52.         label var rank_grp rank_grp
+ 53.         qui gen group = 1 if rank_grp == "first"
+ 54.         qui replace group = 2 if rank_grp == "second"  & "`loc'"!= "countr
 > y"
- 54.         qui replace group = 2 if rank_grp == "uk" & "`loc'" == "country"
- 55.         qui replace group = 3 if rank_grp == "china" & "`loc'" == "country
+ 55.         qui replace group = 2 if rank_grp == "uk" & "`loc'" == "country"
+ 56.         qui replace group = 3 if rank_grp == "china" & "`loc'" == "country
 > "
- 56.         local last = 2
- 57.         if "`loc'" == "country" local last = 3 
- 58.         qui replace group = `last'+1 if rank_grp == "rest of top 10" 
- 59.         qui replace group = `last'+2 if rank_grp == "remaining"
- 60.         *qui replace group = `last'+3 if rank_grp == "missing"
+ 57.         local last = 2
+ 58.         if "`loc'" == "country" local last = 3 
+ 59.         qui replace group = `last'+1 if rank_grp == "rest of top 10" 
+ 60.         qui replace group = `last'+2 if rank_grp == "remaining"
+ 61.         *qui replace group = `last'+3 if rank_grp == "missing"
 .         qui hashsort `year_var' -group
- 61.         qui bys `year_var': gen stack_perc = sum(perc)
- 62.         keep rank_grp `year_var' `loc' perc group stack_perc
- 63.         local stacklines
- 64.         qui xtset group `year_var' 
- 65.         qui sum group 
- 66.         local max_grp = r(max)
- 67.         qui levelsof group, local(rank_grps)
- 68.         local items = `r(r)'
- 69.         foreach x of local rank_grps {
- 70.            colorpalette carto Teal, intensify(0.85)  n(`items') nograph
- 71.            local stacklines `stacklines' area stack_perc `year_var' if gro
+ 62.         qui bys `year_var': gen stack_perc = sum(perc)
+ 63.         keep rank_grp `year_var' `loc' perc group stack_perc
+ 64.         local stacklines
+ 65.         qui xtset group `year_var' 
+ 66.         qui sum group 
+ 67.         local max_grp = r(max)
+ 68.         qui levelsof group, local(rank_grps)
+ 69.         local items = `r(r)'
+ 70.         foreach x of local rank_grps {
+ 71.            colorpalette carto Teal, intensify(0.85)  n(`items') nograph
+ 72.            local stacklines `stacklines' area stack_perc `year_var' if gro
 > up == `x', fcolor("`r(p`x')'") lcolor(white) lwidth(*0.3) || 
- 72. /*           if `x' == `max_grp' {
+ 73. /*           if `x' == `max_grp' {
 >                local stacklines `stacklines' area stack_perc `year_var' if gr
 > oup == `x', fcolor("dimgray") lcolor(black) lwidth(*0.2) || 
 >            }*/
 .         }
- 73.         qui gen labely = . 
- 74.         qui gen rev_group = -group
- 75.         if "`loc'"=="country" {
- 76.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
+ 74.         qui gen labely = . 
+ 75.         qui gen rev_group = -group
+ 76.         if "`loc'"=="country" {
+ 77.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
 > up == 5
- 77.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] if group == 4
  78.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] + perc[_n-2] if group == 3
+> [_n-1] if group == 4
  79.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] + perc[_n-2] + perc[_n-3] if group == 2
+> [_n-1] + perc[_n-2] if group == 3
  80.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] + perc[_n-3] if group == 2
+ 81.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
 > [_n-1] + perc[_n-2] + perc[_n-3] + perc[_n-4] if group == 1
- 81.         }
- 82.         if "`loc'"!="country" {
- 83.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
+ 82.         }
+ 83.         if "`loc'"!="country" {
+ 84.             qui bys `year_var' (rev_group): replace labely = perc/2 if gro
 > up == 4
- 84.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] if group == 3
  85.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
-> [_n-1] + perc[_n-2] if group == 2
+> [_n-1] if group == 3
  86.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
+> [_n-1] + perc[_n-2] if group == 2
+ 87.             qui bys `year_var' (rev_group): replace labely = perc/2 + perc
 > [_n-1] + perc[_n-2] + perc[_n-3] if group == 1
- 87.         }
- 88. *        qui gen labely_lab = "Missing Info" if group == `last'+3
+ 88.         }
+ 89. *        qui gen labely_lab = "Missing Info" if group == `last'+3
 .         qui gen labely_lab = "Everywhere else" if group == `last'+2
- 89.         qui replace labely_lab = "Remaining top 10" if group == `last'+1
- 90.         qui replace labely_lab = "China" if group == 3 & "`loc'"=="country
+ 90.         qui replace labely_lab = "Remaining top 10" if group == `last'+1
+ 91.         qui replace labely_lab = "China" if group == 3 & "`loc'"=="country
 > "
- 91.         qui replace labely_lab = ${`loc'_second} if group == 2
  92.         qui replace labely_lab = ${`loc'_second} if group == 2
- 93.         qui replace labely_lab = ${`loc'_first} if group == 1
- 94.         qui replace labely_lab = "United Kingdom" if group == 2 & "`loc'"=
+ 93.         qui replace labely_lab = ${`loc'_second} if group == 2
+ 94.         qui replace labely_lab = ${`loc'_first} if group == 1
+ 95.         qui replace labely_lab = "United Kingdom" if group == 2 & "`loc'"=
 > ="country"
- 95.         qui replace labely_lab = strproper(${`loc'_second}) if group == 2 
+ 96.         qui replace labely_lab = strproper(${`loc'_second}) if group == 2 
 > & "`loc'" == "inst"
- 96.         qui replace labely_lab = strproper(${`loc'_first}) if group == 1 &
+ 97.         qui replace labely_lab = strproper(${`loc'_first}) if group == 1 &
 >  "`loc'" == "inst"
- 97.         qui replace labely_lab = subinstr(labely_lab, "United States", "US
+ 98.         qui replace labely_lab = subinstr(labely_lab, "United States", "US
 > ", .)
- 98.         qui replace labely_lab = subinstr(labely_lab, "MA-NH", "US", .) if
+ 99.         qui replace labely_lab = subinstr(labely_lab, "MA-NH", "US", .) if
 >  strpos("`loc'" , "world")>0
- 99.         qui replace labely_lab = subinstr(labely_lab, "NY-NJ-PA", "US", .)
+100.         qui replace labely_lab = subinstr(labely_lab, "NY-NJ-PA", "US", .)
 >  if strpos("`loc'" , "world")>0
-100.         qui replace labely_lab = subinstr(labely_lab, "CA", "US", .) if st
+101.         qui replace labely_lab = subinstr(labely_lab, "CA", "US", .) if st
 > rpos("`loc'" , "world")>0
-101.         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "U
+102.         qui replace labely_lab = subinstr(labely_lab, "United Kingdom", "U
 > K", .)
-102.         qui sum `year_var'
-103.         replace `year_var' = 2023 if `year_var' == r(max)
-104.         if "`loc'" == "country" {
-105.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
+103.         qui sum `year_var'
+104.         replace `year_var' = 2023 if `year_var' == r(max)
+105.         if "`loc'" == "country" {
+106.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
 >  ==2023, ms(smcircle) ///
 >               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) m
 > label(labely_lab)), ///
@@ -384,14 +391,14 @@ not available in non-GUI version
 >               legend(off label(1 ${`loc'_first}) label(2 "United Kingdom") la
 > bel(3 "China") label(4 "Remaining top 10") label(5 "Remaining places")  ring(
 > 1) pos(6) rows(2))
-106.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
-> `suf'.pdf , replace 
-107.         }
-108.         local w = 27 
-109.         if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "m
+107.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
+> `suf'`athr'.pdf , replace 
+108.         }
+109.         local w = 27 
+110.         if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "m
 > sa_c_world" | "`loc'" == "msa_comb") local w = 27 
-110.         if "`loc'" != "country" {
-111.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
+111.         if "`loc'" != "country" {
+112.             graph tw `stacklines' (scatter labely `year_var' if `year_var'
 >  ==2023, ms(smcircle) ///
 >               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) m
 > label(labely_lab)), ///
@@ -401,12 +408,12 @@ not available in non-GUI version
 >               graphregion(margin(r+`w')) plotregion(margin(zero)) ///
 >               legend(off label(1 ${`loc'_first}) label(2 ${`loc'_second}) lab
 > el(3 "Remaining top 10") label(4 "Remaining places")  ring(1) pos(6) rows(2))
-112.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
-> `suf'.pdf , replace 
-113.         }
-114.         restore
-115.     }
-116. end 
+113.             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'
+> `suf'`athr'.pdf , replace 
+114.         }
+115.         restore
+116.     }
+117. end 
 
 .     
 . program top_mesh_terms
@@ -444,47 +451,37 @@ not available in non-GUI version
 
 . 
 . program output_tables
-  1.     syntax, data(str) samp(str)
-  2.     cap mat if_comb = top_country_jrnls_if_wt \ top_msa_c_world_jrnls_if_w
-> t
-  3.     cap matrix_to_txt, saving("../output/tables/if_comb.txt") matrix(if_co
-> mb) title(<tab:if_comb>) format(%20.4f) replace
-  4.     cap mat body_comb = top_country_jrnls_body \ top_msa_c_world_jrnls_bod
-> y \ top_inst_jrnls_body
-  5.     cap matrix_to_txt, saving("../output/tables/body_comb.txt") matrix(bod
-> y_comb) title(<tab:body_comb>) format(%20.4f) replace
-  6.     cap mat if_comb_cns = top_country_cns_if_wt \ top_msa_c_world_cns_if_w
-> t
-  7.     cap matrix_to_txt, saving("../output/tables/if_comb_cns.txt") matrix(i
-> f_comb_cns) title(<tab:if_comb_cns>) format(%20.4f) replace
-  8.     cap mat body_comb_cns = top_country_cns_body \ top_msa_c_world_cns_bod
-> y \ top_inst_cns_body
-  9.     cap matrix_to_txt, saving("../output/tables/body_comb_cns.txt") matrix
-> (body_comb_cns) title(<tab:body_comb_cns>) format(%20.4f) replace
- 10.     foreach file in top_country top_msa_c_world top_inst {
- 11.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt.t
-> xt") matrix(`file'_`samp'_wt) ///
->            title(<tab:`file'_`samp'_wt>) format(%20.4f) replace
- 12.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt"
-> ) matrix(`file'_`samp') ///
->            title(<tab:`file'_`samp'>) format(%20.4f) replace
- 13.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if.t
-> xt") matrix(`file'_`samp'_if) ///
->            title(<tab:`file'_`samp'_if>) format(%20.4f) replace
- 14.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_w
-> t.txt") matrix(`file'_`samp'_if_wt) ///
->            title(<tab:`file'_`samp'_if_wt>) format(%20.4f) replace
- 15.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_pat.
-> txt") matrix(`file'_`samp'_pat) ///
->            title(<tab:`file'_`samp'_pat>) format(%20.4f) replace
- 16.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_frnt
-> .txt") matrix(`file'_`samp'_frnt) ///
->            title(<tab:`file'_`samp'_frnt>) format(%20.4f) replace
- 17.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_body
-> .txt") matrix(`file'_`samp'_body) ///
->            title(<tab:`file'_`samp'_body>) format(%20.4f) replace
- 18.          }
- 19.  end
+  1.     syntax, data(str) samp(str) fol(str)
+  2.     local athr = cond("`fol'" == "fl", "", "_all")
+  3.     cap mat if_comb`athr' = top_country_jrnls_if_wt`athr' \ top_msa_c_worl
+> d_jrnls_if_wt`athr'
+  4.     cap matrix_to_txt, saving("../output/tables/if_comb`athr'.txt") matrix
+> (if_comb`athr') title(<tab:if_comb`athr'>) format(%20.4f) replace
+  5.     cap mat body_comb`athr' = top_country_jrnls_body`athr' \ top_msa_c_wor
+> ld_jrnls_body`athr' \ top_inst_jrnls_body`athr'
+  6.     cap matrix_to_txt, saving("../output/tables/body_comb`athr'.txt") matr
+> ix(body_comb`athr') title(<tab:body_comb`athr'>) format(%20.4f) replace
+  7.     cap mat if_comb_cns`athr' = top_country_cns_if_wt`athr' \ top_msa_c_wo
+> rld_cns_if_wt`athr'
+  8.     cap matrix_to_txt, saving("../output/tables/if_comb_cns`athr'.txt") ma
+> trix(if_comb_cns`athr') title(<tab:if_comb_cns`athr'>) format(%20.4f) replace
+  9.     cap mat body_comb_cns`athr' = top_country_cns_body`athr' \ top_msa_c_w
+> orld_cns_body`athr' \ top_inst_cns_body`athr'
+ 10.     cap matrix_to_txt, saving("../output/tables/body_comb_cns`athr'.txt") 
+> matrix(body_comb_cns`athr') title(<tab:body_comb_cns`athr'>) format(%20.4f) r
+> eplace
+ 11.     foreach file in top_inst {
+ 12.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt`a
+> thr'.txt") matrix(`file'_`samp'_wt`athr') ///
+>            title(<tab:`file'_`samp'_wt`athr'>) format(%20.4f) replace
+ 13.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_if_w
+> t`athr'.txt") matrix(`file'_`samp'_if_wt`athr') ///
+>            title(<tab:`file'_`samp'_if_wt`athr'>) format(%20.4f) replace
+ 14.         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_body
+> `athr'.txt") matrix(`file'_`samp'_body`athr') ///
+>            title(<tab:`file'_`samp'_body`athr'>) format(%20.4f) replace
+ 15.          }
+ 16.  end
 
 . ** 
 . main
@@ -1007,6 +1004,524 @@ file ../temp/rankings_inst_body.dta saved
 Total articles: 141575
 (0 real changes made)
 (0 real changes made)
+CNS: impact_cite_affl_wt
+(0 real changes made)
+
+     +-------------------------------+
+     | country   impact~t       perc |
+     |-------------------------------|
+ 43. |           3.576042   .0297607 |
+     +-------------------------------+
+(file ../temp/rankings_country_if_wt_all.dta not found)
+file ../temp/rankings_country_if_wt_all.dta saved
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States   51.33703 |
+  2. |          China   9.693629 |
+  3. | United Kingdom   9.133947 |
+  4. |        Germany   7.218269 |
+  5. |         France   2.274753 |
+     |---------------------------|
+  6. |    Switzerland   2.257589 |
+  7. |         Canada   2.004529 |
+  8. |          Japan   1.780487 |
+  9. |    Netherlands   1.597832 |
+ 10. |      Australia   1.491143 |
+     |---------------------------|
+ 11. |         Sweden   1.424627 |
+ 12. |         Israel   1.235453 |
+ 13. |          Spain   .8889335 |
+ 14. |        Austria   .7735896 |
+ 15. |    South Korea   .7413359 |
+     |---------------------------|
+ 16. |          Italy   .7332641 |
+ 17. |        Belgium   .7155364 |
+ 18. |   South Africa   .4767362 |
+ 19. |        Denmark    .458831 |
+ 20. |      Singapore   .4336538 |
+     +---------------------------+
+Total articles: 12016
+(0 real changes made)
+(0 real changes made)
+
+      +--------------------------------+
+      | msa_c_~d   impact~t       perc |
+      |--------------------------------|
+  35. |              56.255   .4681674 |
+      +--------------------------------+
+(file ../temp/rankings_msa_c_world_if_wt_all.dta not found)
+file ../temp/rankings_msa_c_world_if_wt_all.dta saved
+
+     +-------------------------------------------------+
+     |                          msa_c_world       perc |
+     |-------------------------------------------------|
+  1. |          Boston-Cambridge-Newton, US    9.94177 |
+  2. |                         Bay Area, US   6.918824 |
+  3. |      New York-Newark-Jersey City, US   6.787493 |
+  4. |                          Beijing, CN   4.227808 |
+  5. |                           London, GB   3.970284 |
+     |-------------------------------------------------|
+  6. |  Washington-Arlington-Alexandria, US   2.908779 |
+  7. |               San Diego-Carlsbad, US    2.79934 |
+  8. |                           Munich, DE   2.184957 |
+  9. |          Seattle-Tacoma-Bellevue, US   2.038654 |
+ 10. |                           Berlin, DE    1.97696 |
+     |-------------------------------------------------|
+ 11. |   Los Angeles-Long Beach-Anaheim, US   1.699341 |
+ 12. |                            Paris, FR   1.602524 |
+ 13. |                        Cambridge, GB   1.537532 |
+ 14. |                           Oxford, GB   1.521473 |
+ 15. |   Philadelphia-Camden-Wilmington, US    1.26416 |
+     |-------------------------------------------------|
+ 16. | Houston-The Woodlands-Sugar Land, US   1.084749 |
+ 17. |           Research Triangle Park, US   1.068007 |
+ 18. |                        St. Louis, US   1.064125 |
+ 19. |                New Haven-Milford, US   1.051855 |
+ 20. |         Chicago-Naperville-Elgin, US   .9840955 |
+     +-------------------------------------------------+
+Total articles: 12016
+(0 real changes made)
+(0 real changes made)
+(file ../temp/rankings_inst_if_wt_all.dta not found)
+file ../temp/rankings_inst_if_wt_all.dta saved
+
+     +----------------------------------------------------------------+
+     |                                                inst       perc |
+     |----------------------------------------------------------------|
+  1. |                                  Harvard University     3.7176 |
+  2. |                                 Stanford University   3.001719 |
+  3. |                         Chinese Academy of Sciences   2.144643 |
+  4. |               Massachusetts Institute of Technology   1.997801 |
+  5. |             University of California, San Francisco   1.645209 |
+     |----------------------------------------------------------------|
+  6. |                                  Max Planck Society   1.597191 |
+  7. |                       National Institutes of Health   1.584121 |
+  8. |                                University of Oxford   1.469285 |
+  9. |                                Mass General Brigham   1.384313 |
+ 10. |                            University of Washington   1.233394 |
+     |----------------------------------------------------------------|
+ 11. |                                 Columbia University   1.130758 |
+ 12. |                           DeepMind (United Kingdom)   1.120834 |
+ 13. |                              Rockefeller University   1.100693 |
+ 14. |                                     Yale University   1.034887 |
+ 15. |                 University of California, San Diego   1.010704 |
+     |----------------------------------------------------------------|
+ 16. |              Memorial Sloan Kettering Cancer Center   1.002488 |
+ 17. |                  Washington University in St. Louis   .9823833 |
+ 18. |                          University of Pennsylvania   .9788771 |
+ 19. |                  University of California, Berkeley    .856525 |
+ 20. |             Icahn School of Medicine at Mount Sinai   .8401805 |
+     |----------------------------------------------------------------|
+ 21. |                       Weizmann Institute of Science   .7466168 |
+ 22. |                             University of Cambridge   .7457212 |
+ 23. |                                  Cornell University   .7455775 |
+ 24. |                            Johns Hopkins University   .7324083 |
+ 25. |                        Dana-Farber Cancer Institute   .6940021 |
+     |----------------------------------------------------------------|
+ 26. |                  California Institute of Technology   .6852477 |
+ 27. | The University of Texas Southwestern Medical Center   .6343631 |
+ 28. |         La Jolla Institute For Allergy & Immunology   .6326761 |
+ 29. |                            Medical Research Council   .6237934 |
+ 30. |                                 New York University   .6203653 |
+     |----------------------------------------------------------------|
+ 31. |                               University of Chicago   .5996383 |
+ 32. |                                Princeton University    .588796 |
+ 33. |                                     Broad Institute   .5870632 |
+ 34. |                              New York Genome Center   .5826209 |
+ 35. |               University of California, Los Angeles   .5756097 |
+     |----------------------------------------------------------------|
+ 36. |                                 Leibniz Association   .5634723 |
+ 37. |    Helmholtz Association of German Research Centres   .5379056 |
+ 38. |         University of North Carolina at Chapel Hill   .5360094 |
+ 39. |                          Scripps Research Institute   .5245525 |
+ 40. |                           Wellcome Sanger Institute   .5157546 |
+     |----------------------------------------------------------------|
+ 41. |   The University of Texas MD Anderson Cancer Center   .5133042 |
+ 42. |                             Imperial College London   .4905843 |
+ 43. |                Charité - Universitätsmedizin Berlin   .4884057 |
+ 44. |                               Karolinska Institutet   .4862524 |
+ 45. |                    University of Michigan–Ann Arbor   .4497897 |
+     |----------------------------------------------------------------|
+ 46. |                           University College London   .4440217 |
+ 47. |                                 Tsinghua University   .4384492 |
+ 48. |               St. Jude Children's Research Hospital   .4315963 |
+ 49. |                                     Duke University   .4149562 |
+ 50. |                          Boston Children's Hospital   .4073538 |
+     +----------------------------------------------------------------+
+Total articles: 12016
+(0 real changes made)
+(0 real changes made)
+ALL: impact_cite_affl_wt
+(0 real changes made)
+
+     +-------------------------------+
+     | country   impact~t       perc |
+     |-------------------------------|
+ 51. |            29.2323   .0206479 |
+     +-------------------------------+
+file ../temp/rankings_country_if_wt_all.dta saved
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States   49.75948 |
+  2. |          China   10.53812 |
+  3. | United Kingdom   8.063907 |
+  4. |        Germany   5.997689 |
+  5. |          Japan   2.330398 |
+     |---------------------------|
+  6. |         France   2.217629 |
+  7. |         Canada   2.195082 |
+  8. |    Switzerland    1.99488 |
+  9. |      Australia   1.922099 |
+ 10. |    Netherlands   1.877142 |
+     |---------------------------|
+ 11. |         Sweden   1.353114 |
+ 12. |          Italy   1.174775 |
+ 13. |         Israel   1.161999 |
+ 14. |    South Korea   1.093465 |
+ 15. |          Spain   1.086109 |
+     |---------------------------|
+ 16. |        Denmark   .8432487 |
+ 17. |        Belgium   .7967041 |
+ 18. |        Austria   .6226922 |
+ 19. |      Singapore    .579109 |
+ 20. |      Hong Kong   .4100826 |
+     +---------------------------+
+Total articles: 141575
+(0 real changes made)
+(0 real changes made)
+
+      +-------------------------------+
+      | msa_c_~d   impact~t      perc |
+      |-------------------------------|
+  38. |            657.0099   .464072 |
+      +-------------------------------+
+file ../temp/rankings_msa_c_world_if_wt_all.dta saved
+
+     +-------------------------------------------------+
+     |                          msa_c_world       perc |
+     |-------------------------------------------------|
+  1. |          Boston-Cambridge-Newton, US   9.056423 |
+  2. |                         Bay Area, US   7.136507 |
+  3. |      New York-Newark-Jersey City, US   6.506926 |
+  4. |                          Beijing, CN   3.788617 |
+  5. |                           London, GB   3.349207 |
+     |-------------------------------------------------|
+  6. |  Washington-Arlington-Alexandria, US   2.298064 |
+  7. |               San Diego-Carlsbad, US   2.192484 |
+  8. |   Los Angeles-Long Beach-Anaheim, US   1.699117 |
+  9. |                           Berlin, DE   1.607581 |
+ 10. |                           Munich, DE   1.569008 |
+     |-------------------------------------------------|
+ 11. |          Seattle-Tacoma-Bellevue, US   1.564688 |
+ 12. |                            Paris, FR   1.525743 |
+ 13. |                        Cambridge, GB   1.516119 |
+ 14. | Houston-The Woodlands-Sugar Land, US   1.323847 |
+ 15. |   Philadelphia-Camden-Wilmington, US   1.284387 |
+     |-------------------------------------------------|
+ 16. |                           Oxford, GB   1.165234 |
+ 17. |                        St. Louis, US   1.152018 |
+ 18. |           Research Triangle Park, US   1.122615 |
+ 19. |        Baltimore-Columbia-Towson, US   1.115659 |
+ 20. |                New Haven-Milford, US   1.052553 |
+     +-------------------------------------------------+
+Total articles: 141575
+(0 real changes made)
+(0 real changes made)
+file ../temp/rankings_inst_if_wt_all.dta saved
+
+     +----------------------------------------------------------------+
+     |                                                inst       perc |
+     |----------------------------------------------------------------|
+  1. |                                  Harvard University   3.062489 |
+  2. |                                 Stanford University   3.002479 |
+  3. |                         Chinese Academy of Sciences   1.764958 |
+  4. |               Massachusetts Institute of Technology   1.662247 |
+  5. |             University of California, San Francisco   1.656385 |
+     |----------------------------------------------------------------|
+  6. |                                Mass General Brigham   1.494676 |
+  7. |                       National Institutes of Health   1.367671 |
+  8. |                                  Max Planck Society   1.121222 |
+  9. |              Memorial Sloan Kettering Cancer Center   1.100725 |
+ 10. |                                University of Oxford   1.092531 |
+     |----------------------------------------------------------------|
+ 11. |                                 Columbia University   1.085946 |
+ 12. |                 University of California, San Diego   1.050611 |
+ 13. |                                     Yale University   1.001609 |
+ 14. |                            Johns Hopkins University   .9858207 |
+ 15. |                  University of California, Berkeley   .9170886 |
+     |----------------------------------------------------------------|
+ 16. |                          University of Pennsylvania   .9057515 |
+ 17. |             Icahn School of Medicine at Mount Sinai   .8880411 |
+ 18. |                  Washington University in St. Louis   .8734264 |
+ 19. |                                 New York University   .8158065 |
+ 20. |                            University of Washington   .8101436 |
+     |----------------------------------------------------------------|
+ 21. |                        Dana-Farber Cancer Institute    .792883 |
+ 22. |                                  Cornell University   .7365454 |
+ 23. |                             University of Cambridge   .7199726 |
+ 24. |    Helmholtz Association of German Research Centres   .6957809 |
+ 25. |   The University of Texas MD Anderson Cancer Center   .6503064 |
+     |----------------------------------------------------------------|
+ 26. | The University of Texas Southwestern Medical Center   .6356977 |
+ 27. |                               Karolinska Institutet    .627675 |
+ 28. |                              Rockefeller University   .6106651 |
+ 29. |               University of California, Los Angeles    .574168 |
+ 30. |                       Weizmann Institute of Science   .5524808 |
+     |----------------------------------------------------------------|
+ 31. |                            Medical Research Council   .5475934 |
+ 32. |                                     Duke University   .5189326 |
+ 33. |                    University of Michigan–Ann Arbor   .5026608 |
+ 34. |         University of North Carolina at Chapel Hill   .5007333 |
+ 35. |                                     Broad Institute   .4950196 |
+     |----------------------------------------------------------------|
+ 36. |                            University of Queensland   .4659074 |
+ 37. |                           DeepMind (United Kingdom)   .4626387 |
+ 38. |                                Princeton University   .4576655 |
+ 39. |                           Wellcome Sanger Institute    .452769 |
+ 40. |                                   Peking University   .4508205 |
+     |----------------------------------------------------------------|
+ 41. |                               University of Chicago   .4487058 |
+ 42. |                           University College London   .4457138 |
+ 43. |                              New York Genome Center   .4452969 |
+ 44. |                  California Institute of Technology    .414898 |
+ 45. |                             Imperial College London   .4130739 |
+     |----------------------------------------------------------------|
+ 46. |                                              Inserm   .4122222 |
+ 47. |                             University of Hong Kong   .4092549 |
+ 48. |                          Baylor College of Medicine   .3858983 |
+ 49. |                               University of Toronto   .3754453 |
+ 50. |      French National Centre for Scientific Research   .3651118 |
+     +----------------------------------------------------------------+
+Total articles: 141575
+(0 real changes made)
+(0 real changes made)
+CNS: body_adj_wt
+(0 real changes made)
+
+     +-------------------------------+
+     | country   body_a~t       perc |
+     |-------------------------------|
+ 53. |           1.397399   .0116295 |
+     +-------------------------------+
+(file ../temp/rankings_country_body_all.dta not found)
+file ../temp/rankings_country_body_all.dta saved
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States   64.64239 |
+  2. |          China   9.233929 |
+  3. | United Kingdom   5.291137 |
+  4. |        Germany   4.769843 |
+  5. |    Switzerland   2.252181 |
+     |---------------------------|
+  6. |          Japan   1.864475 |
+  7. |    Netherlands   1.732747 |
+  8. |         Sweden   1.528144 |
+  9. |         France   1.271572 |
+ 10. |      Australia   1.119814 |
+     |---------------------------|
+ 11. |         Canada   1.090823 |
+ 12. |         Israel   .4989635 |
+ 13. |          Spain   .4757899 |
+ 14. |      Singapore   .4676668 |
+ 15. |          Italy   .4430793 |
+     |---------------------------|
+ 16. |      Hong Kong   .3919232 |
+ 17. |        Austria   .3836907 |
+ 18. |    South Korea   .3162861 |
+ 19. |        Belgium   .2499676 |
+ 20. |        Denmark   .1874323 |
+     +---------------------------+
+Total articles: 12016
+(0 real changes made)
+(0 real changes made)
+
+      +--------------------------------+
+      | msa_c_~d   body_a~t       perc |
+      |--------------------------------|
+  34. |            59.69144   .4967663 |
+      +--------------------------------+
+(file ../temp/rankings_msa_c_world_body_all.dta not found)
+file ../temp/rankings_msa_c_world_body_all.dta saved
+
+     +-------------------------------------------------+
+     |                          msa_c_world       perc |
+     |-------------------------------------------------|
+  1. |          Boston-Cambridge-Newton, US   21.64017 |
+  2. |                         Bay Area, US   9.221746 |
+  3. |      New York-Newark-Jersey City, US   7.725917 |
+  4. |                          Beijing, CN   3.639606 |
+  5. |               San Diego-Carlsbad, US   3.557667 |
+     |-------------------------------------------------|
+  6. |  Washington-Arlington-Alexandria, US   3.499964 |
+  7. |                           London, GB   2.461487 |
+  8. |      Dallas-Fort Worth-Arlington, US   1.755217 |
+  9. |   Los Angeles-Long Beach-Anaheim, US   1.614438 |
+ 10. |                           Berlin, DE   1.489142 |
+     |-------------------------------------------------|
+ 11. |          Seattle-Tacoma-Bellevue, US   1.393245 |
+ 12. |   Philadelphia-Camden-Wilmington, US   1.264235 |
+ 13. | Houston-The Woodlands-Sugar Land, US    1.18273 |
+ 14. |                        Stockholm, SE   1.180508 |
+ 15. |           Research Triangle Park, US   1.071071 |
+     |-------------------------------------------------|
+ 16. |                           Munich, DE   .9763438 |
+ 17. |         Chicago-Naperville-Elgin, US   .9447609 |
+ 18. |                New Haven-Milford, US   .8772523 |
+ 19. |                            Paris, FR   .7837564 |
+ 20. |                        St. Louis, US   .7526507 |
+     +-------------------------------------------------+
+Total articles: 12016
+(0 real changes made)
+(0 real changes made)
+(file ../temp/rankings_inst_body_all.dta not found)
+file ../temp/rankings_inst_body_all.dta saved
+
+     +----------------------------------------------------------------+
+     |                                                inst       perc |
+     |----------------------------------------------------------------|
+  1. |                                  Harvard University   6.753523 |
+  2. |               Massachusetts Institute of Technology    6.48164 |
+  3. |                                Mass General Brigham   3.124422 |
+  4. |                  University of California, Berkeley    2.98461 |
+  5. |                                 Stanford University   2.861687 |
+     |----------------------------------------------------------------|
+  6. |                         Chinese Academy of Sciences    2.08321 |
+  7. |             University of California, San Francisco   1.915001 |
+  8. |                       National Institutes of Health   1.842092 |
+  9. |              Memorial Sloan Kettering Cancer Center   1.793626 |
+ 10. |                                     Broad Institute   1.774287 |
+     |----------------------------------------------------------------|
+ 11. |                        Dana-Farber Cancer Institute   1.503923 |
+ 12. | The University of Texas Southwestern Medical Center   1.288746 |
+ 13. |                           Regeneron (United States)   1.151914 |
+ 14. |                          Scripps Research Institute   1.033845 |
+ 15. |                  California Institute of Technology   1.005292 |
+     |----------------------------------------------------------------|
+ 16. |                            University of Washington   .9959835 |
+ 17. |                              Rockefeller University   .9802379 |
+ 18. |                                 Columbia University   .9712677 |
+ 19. |                          University of Pennsylvania   .9390877 |
+ 20. |       National Center for Biotechnology Information   .8916543 |
+     +----------------------------------------------------------------+
+Total articles: 12016
+(0 real changes made)
+(0 real changes made)
+ALL: body_adj_wt
+(0 real changes made)
+
+     +-------------------------------+
+     | country   body_a~t       perc |
+     |-------------------------------|
+ 60. |           17.33943   .0122475 |
+     +-------------------------------+
+file ../temp/rankings_country_body_all.dta saved
+
+     +---------------------------+
+     |        country       perc |
+     |---------------------------|
+  1. |  United States   58.87149 |
+  2. |          China   9.127309 |
+  3. | United Kingdom   5.086585 |
+  4. |        Germany   4.697664 |
+  5. |          Japan   3.656213 |
+     |---------------------------|
+  6. |    Switzerland   2.126042 |
+  7. |         Canada    1.70906 |
+  8. |    Netherlands   1.651676 |
+  9. |         France   1.469792 |
+ 10. |    South Korea   1.313948 |
+     |---------------------------|
+ 11. |      Australia   1.307361 |
+ 12. |         Sweden   1.295548 |
+ 13. |          Italy   .7937355 |
+ 14. |         Israel   .7829845 |
+ 15. |          Spain   .6950424 |
+     |---------------------------|
+ 16. |        Denmark   .5763648 |
+ 17. |      Singapore   .4817998 |
+ 18. |        Austria   .3815094 |
+ 19. |         Taiwan   .3723097 |
+ 20. |        Belgium   .3323628 |
+     +---------------------------+
+Total articles: 141575
+(0 real changes made)
+(0 real changes made)
+
+      +--------------------------------+
+      | msa_c_~d   body_a~t       perc |
+      |--------------------------------|
+  29. |            844.0441   .5961816 |
+      +--------------------------------+
+file ../temp/rankings_msa_c_world_body_all.dta saved
+
+     +-------------------------------------------------+
+     |                          msa_c_world       perc |
+     |-------------------------------------------------|
+  1. |          Boston-Cambridge-Newton, US   16.35827 |
+  2. |                         Bay Area, US   8.247545 |
+  3. |      New York-Newark-Jersey City, US   6.578499 |
+  4. |                          Beijing, CN   3.197903 |
+  5. |  Washington-Arlington-Alexandria, US   2.911918 |
+     |-------------------------------------------------|
+  6. |               San Diego-Carlsbad, US   2.601863 |
+  7. |   Los Angeles-Long Beach-Anaheim, US   2.193461 |
+  8. |                           London, GB   2.131867 |
+  9. | Houston-The Woodlands-Sugar Land, US   1.527586 |
+ 10. |   Philadelphia-Camden-Wilmington, US   1.507612 |
+     |-------------------------------------------------|
+ 11. |          Seattle-Tacoma-Bellevue, US   1.470533 |
+ 12. |                           Berlin, DE   1.227455 |
+ 13. |      Dallas-Fort Worth-Arlington, US   1.115147 |
+ 14. |           Research Triangle Park, US   1.100872 |
+ 15. |                            Tokyo, JP    .977874 |
+     |-------------------------------------------------|
+ 16. |         Chicago-Naperville-Elgin, US   .9747395 |
+ 17. |        Baltimore-Columbia-Towson, US   .9107389 |
+ 18. |                        Stockholm, SE    .902395 |
+ 19. |                            Paris, FR   .8601429 |
+ 20. |                           Munich, DE   .8301923 |
+     +-------------------------------------------------+
+Total articles: 141575
+(0 real changes made)
+(0 real changes made)
+file ../temp/rankings_inst_body_all.dta saved
+
+     +----------------------------------------------------------------+
+     |                                                inst       perc |
+     |----------------------------------------------------------------|
+  1. |                                  Harvard University   4.871961 |
+  2. |               Massachusetts Institute of Technology   4.492637 |
+  3. |                                 Stanford University   2.559159 |
+  4. |                                Mass General Brigham   2.524679 |
+  5. |                  University of California, Berkeley   2.384957 |
+     |----------------------------------------------------------------|
+  6. |             University of California, San Francisco   1.669991 |
+  7. |                         Chinese Academy of Sciences   1.660351 |
+  8. |                       National Institutes of Health   1.650943 |
+  9. |              Memorial Sloan Kettering Cancer Center   1.545915 |
+ 10. |                        Dana-Farber Cancer Institute   1.263773 |
+     |----------------------------------------------------------------|
+ 11. |                  California Institute of Technology   1.173475 |
+ 12. |                                     Broad Institute   1.162634 |
+ 13. |                                 Columbia University   .9352462 |
+ 14. |                            University of Washington   .9324208 |
+ 15. |                          University of Pennsylvania   .9000553 |
+     |----------------------------------------------------------------|
+ 16. | The University of Texas Southwestern Medical Center   .8120133 |
+ 17. |                          Scripps Research Institute   .7203637 |
+ 18. |                            Johns Hopkins University   .7183734 |
+ 19. |                  Washington University in St. Louis   .6805439 |
+ 20. |                           Regeneron (United States)    .665256 |
+     +----------------------------------------------------------------+
+Total articles: 141575
+(0 real changes made)
+(0 real changes made)
 N = 1,120,348; 324,957 unbalanced groups of sizes 1 to 18
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
@@ -1045,6 +1560,6 @@ num_gen_mesh |  1,120,348    4.316869    1.764038          1         18
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2024-01-04 23:40:56
+Makelog ended: 2024-01-08 13:02:27
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/cns_descriptives/code
 --------------------------------------------------------------------------------

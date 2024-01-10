@@ -1,0 +1,2 @@
+./all/ | /export/scratch/cxu_sci_geo/clean_econs
+

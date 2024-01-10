@@ -16,7 +16,7 @@ global ln_x_name "Log Cluster Size"
 global time year
 
 program main
-    foreach s in year_firstlast {
+    foreach s in year year_firstlast {
         sample_desc, samp(`s')
         maps, samp(`s')
         raw_bs, samp(`s')
@@ -27,6 +27,10 @@ end
 
 program sample_desc
     syntax, samp(str) 
+    use ../external/econs_samp/athr_panel_full_comb_year.dta, clear
+    gcollapse (mean) msa_size, by(msa_comb)
+    rename msa_size econ_msa_size
+    save ../temp/econs_cluster, replace
     use if !mi(msa_comb) & inrange(year, 1945,2022) using ../external/samp/athr_panel_full_comb_`samp', clear 
     count
     gunique athr_id
@@ -65,6 +69,7 @@ program sample_desc
     gen has_patent_cite = pat_wt > 0
     bys athr_id msa_comb: gen athr_cnt = _n == 1
     gcollapse  (sum) athr_cnt body_adj_wt cite_affl_wt pat_wt affl_wt impact_cite_affl_wt impact_affl_wt (mean) msa_size has_patent_cite, by(msa_comb)
+    merge 1:1 msa_comb using ../temp/econs_cluster, assert(1 2 3) keep(1 3) nogen
 
     qui reg body_adj_wt impact_cite_affl_wt 
     local coef : dis %3.2f _b[impact_cite_affl_wt]
@@ -83,27 +88,30 @@ program sample_desc
     
     xtile p  = msa_size, nq(20)
     gen msa_lab = "" 
-    replace msa_lab =  msa_comb  if msa_comb == "Great Falls, MT" 
-    replace msa_lab =  msa_comb  if msa_comb == "San Diego-Carlsbad, CA" 
-    replace msa_lab =  msa_comb  if msa_comb == "Trenton, NJ" 
+   replace msa_lab =  msa_comb if msa_comb == "San Diego-Carlsbad, CA" 
+   replace msa_lab =  msa_comb if msa_comb == "Bay Area, CA" 
+   replace msa_lab =  msa_comb if msa_comb == "St. Louis, MO-IL" 
+   replace msa_lab =  msa_comb if msa_comb == "Minneapolis-St. Paul-Bloomington, MN-WI" 
+   replace msa_lab =  msa_comb if msa_comb == "Washington-Arlington-Alexandria, DC-VA-MD-WV" 
+   replace msa_lab =  msa_comb if msa_comb == "Los Angeles-Long Beach-Anaheim, CA" 
+   replace msa_lab =  msa_comb if msa_comb == "Boston-Cambridge-Newton, MA-NH" 
+   replace msa_lab =  msa_comb if msa_comb == "New York-Newark-Jersey City, NY-NJ-PA" 
     replace msa_lab =  msa_comb  if msa_comb == "New Haven-Milford , CT" 
-    replace msa_lab =  msa_comb  if msa_comb == "New York-Newark-Jersey City, NY-NJ-PA" 
-    replace msa_lab =  msa_comb  if msa_comb == "Bay Area, CA" 
-    replace msa_lab =  msa_comb  if msa_comb == "Boston-Cambridge-Newton, MA-NH" 
-
-/*    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Great Falls, MT" & year == 2015
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San Diego-Carlsbad, CA" & year == 1973
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San Diego-Carlsbad, CA" & year == 19
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Trenton, NJ" & year == 2019
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "New Haven-Milford , CT" & year == 2012
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "New York-Newark-Jersey City, NY-NJ-PA" & year == 1996
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 1997 
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 2015 
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 1997 
-    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2012 */
+   egen clock = mlabvpos(msa_size econ_msa_size)
+   replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-NJ-PA","Boston-Cambridge-Newton, MA-NH", "Washington-Arlington-Alexandria, DC-VA-MD-WV")
+   replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington, MN-WI", "San Diego-Carlsbad, CA", "St. Louis, MO-IL", "Bay Area, CA")
     tw scatter impact_cite_affl_wt msa_size , mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || scatter impact_cite_affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(vsmall)) ytitle("MSA Productivity", size(vsmall))  jitter(5) legend(off)
    *graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replace
-   
+    corr msa_size econ_msa_size 
+    local slope : dis %3.2f r(rho) 
+    reg msa_size econ_msa_size
+    local N = e(N)
+    tw scatter msa_size econ_msa_size, mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || ///
+       scatter msa_size econ_msa_size if !mi(msa_lab) , mcolor(ebblue) mlabvp(clock) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
+       (function y = _b[econ_msa_size]*x + _b[_cons], range(0 900) lpattern(dash) lcolor(lavender)), ytitle("Fundamental Science Cluster Size", size(vsmall)) xtitle("Economics Research Cluster Size", size(vsmall))  legend(on order (- "N (MSAs) = `N'" ///
+                                                                                                                                                                              "Correlation = `slope'") pos(5) ring(0) region(fcolor(none)) size(vsmall) lwidth(none))
+    graph export ../output/figures/econ_v_ls_`samp'.pdf, replace
+    drop clock
    xtile p_prod = impact_cite_affl_wt, nq(20)
    replace msa_lab = ""
    replace msa_lab =  msa_comb if msa_comb == "San Diego-Carlsbad, CA" 
@@ -117,19 +125,11 @@ program sample_desc
    egen clock = mlabvpos(impact_cite_affl_wt body_adj_wt)
    replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-NJ-PA","Boston-Cambridge-Newton, MA-NH")
    replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington, MN-WI", "Washington-Arlington-Alexandria, DC-VA-MD-WV", "San Diego-Carlsbad, CA", "St. Louis, MO-IL", "Bay Area, CA")
-   /*replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Flint, MI" & year == 2006
-   replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Lincoln, NE" & year == 2005 
-   replace msa_lab =  msa_comb + " " + string(${time})  if msa_comb == "Worcester, MA-CT" & year == 2000
-   replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San Diego-Carlsbad, CA" & year == 1989 
-   replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 1997 
-   replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 2015 
-   replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2015 
-   replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2000 */
    qui reg body_adj_wt impact_cite_affl_wt 
    local coef : dis %3.2f _b[impact_cite_affl_wt]
    local cons : dis %3.2f _b[_cons]
    local N = e(N)
-   tw scatter body_adj_wt impact_cite_affl_wt , mcolor(gs13%50) msize(vsmall) xlabel(0(5000)60000, labsize(vsmall)) ylab(0(5000)60000, labsize(vsmall)) || ///
+   tw scatter body_adj_wt impact_cite_affl_wt  , mcolor(gs13%50) msize(vsmall) xlabel(0(5000)60000, labsize(vsmall)) ylab(0(5000)60000, labsize(vsmall)) || ///
       scatter body_adj_wt impact_cite_affl_wt if !mi(msa_lab) , mlabvp(clock) mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
       (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 60000) lpattern(dash) lcolor(lavender)), xtitle("MSA Productivity", size(vsmall)) ytitle("MSA Paper-to-Patent Citations", size(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
@@ -268,11 +268,46 @@ end
 
 program regression 
     syntax, samp(str) 
+    use ../external/econs_samp/athr_panel_full_comb_year.dta, clear
+    gcollapse (mean) msa_size, by(msa_comb year)
+    rename msa_size econ_msa_size
+    save ../temp/econ_yr_cluster, replace
+
     use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/athr_panel_full_comb_`samp', clear 
-    local reg_eq = cond("`samp'"=="year","ln_y ln_x avg_team_size","ln_y ln_x") 
-    local mat_est  = cond("`samp'"=="year","_b[ln_x] \ _se[ln_x] \ _b[avg_team_size] \ _se[ln_x]", "_b[ln_x] \ _se[ln_x]") 
+    gcollapse (mean) msa_size, by(msa_comb year)
+    merge 1:1 msa_comb year using ../temp/econ_yr_cluster, keep(3) nogen
+    corr msa_size econ_msa_size 
+    local slope : dis %3.2f r(rho) 
+    reg msa_size econ_msa_size
+    local N = e(N)
+    gen msa_lab = "" 
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San Diego-Carlsbad, CA" & year == 1973
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "San Diego-Carlsbad, CA" & year == 19
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Trenton, NJ" & year == 2019
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "New Haven-Milford , CT" & year == 2012
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "New York-Newark-Jersey City, NY-NJ-PA" & year == 1996
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 1997 
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 2015 
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 1997 
+    replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2012 
+    tw scatter msa_size econ_msa_size, mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || ///
+       scatter msa_size econ_msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
+       (function y = _b[econ_msa_size]*x + _b[_cons], range(0 1250) lpattern(dash) lcolor(lavender)), ytitle("Fundamental Science Cluster Size", size(vsmall)) xtitle("Economics Research Cluster Size", size(vsmall))  legend(on order (- "N (MSAs) = `N'" ///
+                                                                                                                                                                              "Correlation = `slope'") pos(5) ring(0) region(fcolor(none)) size(vsmall) lwidth(none))
+    
+    use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/athr_panel_full_comb_`samp', clear 
+    merge m:1 msa_comb year using  ../temp/econ_yr_cluster, assert(1 2 3) keep(1 3) nogen
+/*    corr msa_size econ_msa_size 
+    local slope : dis %3.2f r(rho) 
+    binscatter2 msa_size econ_msa_size, mcolor(gs5) lcolor(ebblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) ytitle("Fundamental Science Research Cluster Size", size(vsmall)) xtitle("Economics Research Cluster Size", size(vsmall)) legend(on order(- "Correlation = `slope'") pos(5) ring(0) lwidth(none) size(vsmall) region(fcolor(none)))
+    graph export ../output/figures/econ_v_ls.pdf, replace*/
+    local reg_eq "ln_y ln_x"
+    local mat_est "_b[ln_x] \ _se[ln_x]"
+*    local reg_eq = cond("`samp'"=="year","ln_y ln_x avg_team_size","ln_y ln_x") 
+*    local mat_est  = cond("`samp'"=="year","_b[ln_x] \ _se[ln_x] \ _b[avg_team_size] \ _se[ln_x]", "_b[ln_x] \ _se[ln_x]") 
     bys athr_id msa_comb ${time} : gen count = _n == 1
     replace msa_size = 0.0000000000001 if msa_size == 0
+    replace econ_msa_size = 0.0000000000001 if econ_msa_size == 0
     gegen msa = group(msa_comb)
     rename inst inst_name
     gegen inst = group(inst_id)
@@ -280,7 +315,7 @@ program regression
     gegen year_field = group(year field)
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
-    gen ln_x_cluster = ln(cluster_shr)
+    gen ln_x_econ = ln(econ_msa_size)
     preserve
     keep if inrange(year, 2015, 2022)
     keep if inlist(msa_comb, "Ann Arbor, MI", "San Diego-Carlsbad, CA", "Boston-Cambridge-Newton, MA-NH", "Bay Area, CA", "Gainesville, FL")
@@ -304,7 +339,7 @@ program regression
     }
     foreach fe in "${time} msa field" "${time} msa field field#${time}" "${time} msa field field#${time} msa#field" "${time} msa field field#${time} msa#field inst" "${time} msa field field#${time} msa#field inst athr_id" {
         reghdfe `reg_eq', absorb(`fe') vce(cluster msa)
-        mat coef_`samp' = nullmat(coef_`samp'), (`mat_est' \ e(N))
+        mat coef_`samp' = nullmat(coef_`samp'), (`mat_est' \ . \ . \e(N))
         local slope : dis %3.2f _b[ln_x]
         if "`samp'" == "year" {
             binscatter2  ln_y ln_x ,controls(avg_team_size) absorb(year msa field year_field msa_field athr_id) ytitle("Log Output") xtitle("Log Cluster Size") legend(on order(- "Slope = `slope'") pos(5) ring(0) lwidth(none))
@@ -315,9 +350,9 @@ program regression
             *graph export ../output/figures/final_bs_`samp'.pdf, replace
         }
     }
-/*    reghdfe `reg_eq', absorb(${time} field field#${time} field#msa inst#year inst athr_id) vce(cluster msa)
-    mat instyr_`samp' = nullmat(instyr_`samp'), (`mat_est' \ e(N))
-    mat coef_`samp' = nullmat(coef_`samp') , instyr_`samp'*/
+    reghdfe ln_y ln_x_econ, absorb(${time} msa field field#${time} field#msa inst athr_id) vce(cluster msa)
+    mat econ_`samp' = nullmat(econ_`samp'), (. \ . \ _b[ln_x_econ] \ _se[ln_x_econ] \ e(N))
+    mat coef_`samp' = nullmat(coef_`samp') , econ_`samp'
     reghdfe `reg_eq', absorb(year msa athr_id field inst) vce(cluster msa)
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
     reghdfe `reg_eq', absorb(year msa athr_id gen_mesh1 gen_mesh2 inst) vce(cluster msa)
@@ -327,7 +362,6 @@ program regression
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))
     reghdfe `reg_eq', absorb(year msa athr_id term1 term2 inst) vce(cluster msa)
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))*/
-        
 end
 
 program output_tables

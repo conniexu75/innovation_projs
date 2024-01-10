@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-01-07 11:55:26
+Makelog started: 2024-01-09 21:09:51
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -65,7 +65,7 @@ not available in non-GUI version
 . global time year 
 
 . program main
-  1.     foreach t in year_firstlast {
+  1.     foreach t in year year_firstlast {
   2.         qui make_movers, samp(`t')
   3.         sum_stats, samp(`t')
   4.         qui output_tables, samp(`t')
@@ -89,7 +89,8 @@ not available in non-GUI version
   2.     use ${${time}_insts}/filled_in_panel_${time}, clear
   3.     keep if country_code == "US"
   4.     hashsort athr_id year
-  5.     gen place_count =  1 if msa_comb != msa_comb[_n-1]
+  5.     gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_com
+> b[_n-1]
   6.     bys athr_id: egen num_moves = total(place_count)
   7.     bys athr_id (year): gen which_place = sum(place_count)
   8.     bys athr_id: gen athr_counter =  _n == 1
@@ -102,10 +103,11 @@ not available in non-GUI version
  14.     drop if num_moves <= 0
  15.     save ../temp/movers, replace
  16.     
-.     use if !mi(msa_comb) using ../external/samp/athr_panel_full_comb_`samp', 
-> clear 
+.     use if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_ful
+> l_comb_`samp', clear 
  17.     hashsort athr_id year
- 18.     gen place_count =  1 if msa_comb != msa_comb[_n-1]
+ 18.     gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_com
+> b[_n-1]
  19.     bys athr_id: egen num_moves = total(place_count)
  20.     bys athr_id (year): gen which_place = sum(place_count)
  21.     bys athr_id: gen athr_counter =  _n == 1
@@ -149,99 +151,12 @@ not available in non-GUI version
  56.     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(1 3) 
  57.     *keep if (mover == 0 & _merge == 1) | (mover == 1 & _merge == 3)
 .     bys inst_id year: egen has_mover = max(mover == 1)
- 58.     drop if has_mover == 0
+ 58. *    bys msa_comb year: egen has_mover = max(mover == 1)
+.     drop if has_mover == 0
  59.     gen analysis_cond = mover == 1 & num_moves == 1 & ((mover == 0 & _merg
 > e == 1) | (mover == 1 & _merge == 3))
  60.     save ${temp}/mover_temp_`samp' , replace
  61. end
-
-. 
-. program  maps
-  1.     syntax, samp(str) 
-  2.     spshape2dta ../external/geo/cb_2018_us_state_500k.shp, replace saving(
-> usa_state)
-  3.     use usa_state_shp, clear
-  4.     merge m:1 _ID using usa_state
-  5.     destring STATEFP, replace
-  6.     drop if STATEFP > 56
-  7.     // alaska
-.     drop if _X > 0 & !mi(_X) & STATEFP == 2  
-  8.     geo2xy _Y _X if STATEFP ==2, proj(mercator) replace
-  9.     replace _Y = _Y / 5 +1200000 if STATEFP == 2 
- 10.     replace _X = _X / 5 - 2000000  if STATEFP == 2 
- 11.     drop if _X < -160 & !mi(_X) & _ID == 43  // small islands to the west
- 12.     geo2xy _Y _X if _ID == 43, proj(mercator) replace
- 13.     replace _Y = _Y  + 800000 if _ID == 43
- 14.     replace _X = _X  - 1200000 if _ID == 43
- 15.     geo2xy _Y _X if !inlist(_ID, 28,43), replace proj(mercator)
- 16.     replace _X = _X + 53500 if !inlist(_ID, 28,43)
- 17.     replace _Y = _Y - 3100 if !inlist(_ID, 28,43)
- 18.     drop _CX- _merge
- 19.     sort _ID shape_order
- 20.     save usa_state_shp_clean.dta, replace
- 21.     
-.     spshape2dta ../external/geo/cb_2018_us_cbsa_500k.shp, replace saving(usa_
-> msa)
- 22.     use usa_msa_shp, clear
- 23.     merge m:1 _ID using usa_msa, nogen
- 24.     destring CBSAFP, replace
- 25.     gen state = strtrim(substr(NAME, strpos(NAME, ",")+1, 3))
- 26.     drop if inlist(state, "PR")
- 27.     // alaska
-.     drop if _X > 0 & !mi(_X) & state == "AK" 
- 28.     geo2xy _Y _X if state == "AK" , proj(mercator) replace
- 29.     replace _Y = _Y / 5 + 1200000 if state == "AK"
- 30.     replace _X = _X / 5 - 1705000 if state == "AK" 
- 31.     drop if _X < -160 & !mi(_X) & state == "HI"  // small islands to the w
-> est
- 32.     geo2xy _Y _X if state == "HI", proj(mercator) replace
- 33.     replace _Y = _Y + 800000 if state == "HI" 
- 34.     replace _X = _X  - 1200000 if state == "HI" 
- 35.     geo2xy _Y _X if !inlist(state, "AK", "HI"), replace proj(mercator)
- 36.     sort _ID shape_order
- 37.     save usa_msa_shp_clean.dta, replace
- 38. 
-.     use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/a
-> thr_panel_full_`samp', clear
- 39.     bys msa_comb: egen mode = mode(msacode)
- 40.     replace msacode = mode
- 41.     merge m:1 msacode using ../external/geo/msas, assert(1 2 3) keep(1 3) 
-> nogen
- 42.     replace msa_comb = msatitle if !mi(msatitle)
- 43.     replace msa_comb = "Macon-Bibb County, GA" if msa_comb == "Macon, GA"
- 44.     bys athr_id msa_comb ${time} : gen count = _n == 1
- 45.     keep if inrange(year , 1945,2022)
- 46.     gcollapse (sum) affl_wt impact_cite_affl_wt body_adj_wt (mean) msa_siz
-> e , by(inst_id)
- 47.     save ../temp/map_samp, replace
- 48.     
-.     use usa_msa, clear
- 49.     rename NAME msa_comb
- 50.     merge 1:m msa_comb using ../temp/map_samp, assert(1 2 3) keep(1 3) nog
-> en
- 51.     foreach var in impact_cite_affl_wt {
- 52.         xtile `var'_5 = `var', nq(5)
- 53.         qui sum `var' 
- 54.         local min : dis %3.2f r(min)
- 55.         local max : dis %3.2f r(max)
- 56.         _pctile `var',percentiles(20 40 60 80)
- 57.         local p20: dis %3.2f r(r1)
- 58.         local p40: dis %3.2f r(r2)
- 59.         local p60: dis %3.2f r(r3)
- 60.         local p80: dis %3.2f r(r4)
- 61.         colorpalette carto Teal, n(5) nograph 
- 62.         spmap  `var'_5 using usa_msa_shp_clean,  id(_ID)  fcolor(`r(p)'%50
-> ) clnumber(5) ///
->           ocolor(white ..) osize(0.15 ..) ndfcolor(gs13) ndocolor(white ..) n
-> dsize(0.15 ..) ndlabel("No data") ///
->           polygon(data("usa_state_shp_clean") ocolor(gs2) osize(0.2) fcolor(e
-> ggshell%20)) ///
->           legend(label(2 "Min-p20: `min'-`p20'") label(3 "p20-p40: `p20'-`p40
-> '") label(4 "p40-p60: `p40'-`p60'") label(5 "p60-p80: `p60'-`p80'") label(6 "
-> p80-Max: `p80'-`max'") pos(4) size(2)) legtitle("${`var'_name}")
- 63.         graph export ../output/figures/`var'_map_`samp'.pdf, replace
- 64.     }
- 65. end
 
 . 
 . program sum_stats
@@ -510,6 +425,198 @@ not available in non-GUI version
 
 . ** 
 . main
+(4,705 missing values generated)
+(7 missing values generated)
+(512,656 missing values generated)
+  418,619
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |    418,619    2.201536    2.685996          1         55
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |    418,619     10.8037    11.74516          1        100
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |    418,619    7273.927    6904.515          0      23038
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |    418,619    .2444103    .9604253          0   176.5879
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |    418,619    .6621793    3.160427          0   415.3675
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_moves |    418,619    .1879919    .6220192         -1         16
+  352,102
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |    352,102    1.659374    1.730931          1         48
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |    352,102    10.95873     12.2006          1        100
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |    352,102    7388.291    7179.482          0      23038
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |    352,102    .2325704    .9883268          0   176.5879
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |    352,102    .4445208     2.24332          0   274.6264
+  66,517
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |     66,517    5.071425    4.444389          2         55
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |     66,517    9.983068    8.911749          1        100
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |     66,517    6668.549    5170.846   10.66667   22480.75
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |     66,517    .3070835    .7936859   .0000615   67.67683
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |     66,517    1.814336    5.885887    .000123   415.3675
+  49,380
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |     49,380    4.120697    3.509834          2         53
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |     49,380    10.03632    8.989577          1        100
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |     49,380    6718.045    5325.559   10.66667   22480.75
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |     49,380    .2938596    .7577443   .0000615   67.67683
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |     49,380    1.390526    4.627894    .000123   327.3783
+  4,134
+file /export/scratch/cxu_sci_geo/movers/msa_year_collapsed.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           203,480  
+    -----------------------------------------
+(682 missing values generated)
+(3 missing values generated)
+(106,327 missing values generated)
+(3 missing values generated)
+(310 missing values generated)
+(60,615 missing values generated)
+(note: missing values will be sorted first)
+
+Duplicates in terms of athr_id which_place
+
+(104,720 observations deleted)
+(49,380 missing values generated)
+(49,380 real changes made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            94,031  
+    -----------------------------------------
+(49,394 missing values generated)
+file ../output/figures/msa_ln_y_diff_year.pdf saved as PDF format
+(49,382 missing values generated)
+file ../output/figures/msa_ln_x_diff_year.pdf saved as PDF format
+(53,558 missing values generated)
+file ../output/figures/msa_ln_patent_diff_year.pdf saved as PDF format
+(49,645 missing values generated)
+file ../output/figures/avg_ln_y_diff_year.pdf saved as PDF format
+(49,382 missing values generated)
+file ../output/figures/avg_ln_x_diff_year.pdf saved as PDF format
+(78,563 missing values generated)
+file ../output/figures/avg_ln_patent_diff_year.pdf saved as PDF format
+
+      Source |       SS           df       MS      Number of obs   =    44,383
+-------------+----------------------------------   F(1, 44381)     =   4096.78
+       Model |  26378.3814         1  26378.3814   Prob > F        =    0.0000
+    Residual |  285760.573    44,381  6.43880428   R-squared       =    0.0845
+-------------+----------------------------------   Adj R-squared   =    0.0845
+       Total |  312138.954    44,382  7.03300784   Root MSE        =    2.5375
+
+------------------------------------------------------------------------------
+avg_ln_y_d~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+msa_ln_y_d~f |    .531112   .0082978    64.01   0.000     .5148481    .5473759
+       _cons |  -.2565486    .012059   -21.27   0.000    -.2801845   -.2329128
+------------------------------------------------------------------------------
+file ../output/figures/place_effect_desc_year.pdf saved as PDF format
+
+      Source |       SS           df       MS      Number of obs   =    15,468
+-------------+----------------------------------   F(1, 15466)     =    161.22
+       Model |  430.844223         1  430.844223   Prob > F        =    0.0000
+    Residual |  41331.7604    15,466  2.67242729   R-squared       =    0.0103
+-------------+----------------------------------   Adj R-squared   =    0.0103
+       Total |  41762.6046    15,467  2.70011021   Root MSE        =    1.6348
+
+------------------------------------------------------------------------------
+avg_ln_pat~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+msa_ln_y_d~f |   .1181063   .0093018    12.70   0.000     .0998737    .1363389
+       _cons |  -.2847952   .0132022   -21.57   0.000    -.3106732   -.2589173
+------------------------------------------------------------------------------
+(49,645 observations deleted)
+(file ../temp/dest_origin_changes.dta not found)
+file ../temp/dest_origin_changes.dta saved
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
 (1,741 missing values generated)
 (203,779 missing values generated)
   167,987
@@ -671,7 +778,6 @@ msa_ln_y_d~f |   .1680897   .0156565    10.74   0.000     .1373967    .1987826
        _cons |   .0536801   .0221663     2.42   0.015     .0102254    .0971348
 ------------------------------------------------------------------------------
 (19,817 observations deleted)
-(file ../temp/dest_origin_changes.dta not found)
 file ../temp/dest_origin_changes.dta saved
 (note:  named style none not found in class margin, default attributes used)
 (note:  named style none not found in class margin, default attributes used)
@@ -708,6 +814,6 @@ file ../temp/dest_origin_changes.dta saved
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2024-01-07 11:58:45
+Makelog ended: 2024-01-09 21:19:03
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------

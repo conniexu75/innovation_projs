@@ -16,7 +16,7 @@ global x_name "Cluster Size"
 global ln_x_name "Log Cluster Size"
 global time year 
 program main
-    foreach t in year_firstlast {
+    foreach t in year year_firstlast {
         qui make_movers, samp(`t')
         sum_stats, samp(`t')
         qui output_tables, samp(`t')
@@ -34,7 +34,7 @@ program make_movers
     use ${${time}_insts}/filled_in_panel_${time}, clear
     keep if country_code == "US"
     hashsort athr_id year
-    gen place_count =  1 if msa_comb != msa_comb[_n-1]
+    gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_comb[_n-1]
     bys athr_id: egen num_moves = total(place_count)
     bys athr_id (year): gen which_place = sum(place_count)
     bys athr_id: gen athr_counter =  _n == 1
@@ -46,9 +46,9 @@ program make_movers
     drop if num_moves <= 0
     save ../temp/movers, replace
     
-    use if !mi(msa_comb) using ../external/samp/athr_panel_full_comb_`samp', clear 
+    use if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_full_comb_`samp', clear 
     hashsort athr_id year
-    gen place_count =  1 if msa_comb != msa_comb[_n-1]
+    gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_comb[_n-1]
     bys athr_id: egen num_moves = total(place_count)
     bys athr_id (year): gen which_place = sum(place_count)
     bys athr_id: gen athr_counter =  _n == 1
@@ -77,7 +77,7 @@ program make_movers
     bys athr_id: egen max_year = max(year)
     gcontract athr_id min_year max_year
     drop _freq
-    save ../temp/single_movers, replace
+    save ../temp/single_movers_`samp', replace
     merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
     keep if move_year >= min_year & move_year <= max_year
     gcontract athr_id move_year
@@ -89,84 +89,10 @@ program make_movers
     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(1 3) 
     *keep if (mover == 0 & _merge == 1) | (mover == 1 & _merge == 3)
     bys inst_id year: egen has_mover = max(mover == 1)
+*    bys msa_comb year: egen has_mover = max(mover == 1)
     drop if has_mover == 0
     gen analysis_cond = mover == 1 & num_moves == 1 & ((mover == 0 & _merge == 1) | (mover == 1 & _merge == 3))
     save ${temp}/mover_temp_`samp' , replace
-end
-
-program  maps
-    syntax, samp(str) 
-    spshape2dta ../external/geo/cb_2018_us_state_500k.shp, replace saving(usa_state)
-    use usa_state_shp, clear
-    merge m:1 _ID using usa_state
-    destring STATEFP, replace
-    drop if STATEFP > 56
-    // alaska
-    drop if _X > 0 & !mi(_X) & STATEFP == 2  
-    geo2xy _Y _X if STATEFP ==2, proj(mercator) replace
-    replace _Y = _Y / 5 +1200000 if STATEFP == 2 
-    replace _X = _X / 5 - 2000000  if STATEFP == 2 
-    drop if _X < -160 & !mi(_X) & _ID == 43  // small islands to the west
-    geo2xy _Y _X if _ID == 43, proj(mercator) replace
-    replace _Y = _Y  + 800000 if _ID == 43
-    replace _X = _X  - 1200000 if _ID == 43
-    geo2xy _Y _X if !inlist(_ID, 28,43), replace proj(mercator)
-    replace _X = _X + 53500 if !inlist(_ID, 28,43)
-    replace _Y = _Y - 3100 if !inlist(_ID, 28,43)
-    drop _CX- _merge
-    sort _ID shape_order
-    save usa_state_shp_clean.dta, replace
-    
-    spshape2dta ../external/geo/cb_2018_us_cbsa_500k.shp, replace saving(usa_msa)
-    use usa_msa_shp, clear
-    merge m:1 _ID using usa_msa, nogen
-    destring CBSAFP, replace
-    gen state = strtrim(substr(NAME, strpos(NAME, ",")+1, 3))
-    drop if inlist(state, "PR")
-    // alaska
-    drop if _X > 0 & !mi(_X) & state == "AK" 
-    geo2xy _Y _X if state == "AK" , proj(mercator) replace
-    replace _Y = _Y / 5 + 1200000 if state == "AK"
-    replace _X = _X / 5 - 1705000 if state == "AK" 
-    drop if _X < -160 & !mi(_X) & state == "HI"  // small islands to the west
-    geo2xy _Y _X if state == "HI", proj(mercator) replace
-    replace _Y = _Y + 800000 if state == "HI" 
-    replace _X = _X  - 1200000 if state == "HI" 
-    geo2xy _Y _X if !inlist(state, "AK", "HI"), replace proj(mercator)
-    sort _ID shape_order
-    save usa_msa_shp_clean.dta, replace
-
-    use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/athr_panel_full_`samp', clear
-    bys msa_comb: egen mode = mode(msacode)
-    replace msacode = mode
-    merge m:1 msacode using ../external/geo/msas, assert(1 2 3) keep(1 3) nogen
-    replace msa_comb = msatitle if !mi(msatitle)
-    replace msa_comb = "Macon-Bibb County, GA" if msa_comb == "Macon, GA"
-    bys athr_id msa_comb ${time} : gen count = _n == 1
-    keep if inrange(year , 1945,2022)
-    gcollapse (sum) affl_wt impact_cite_affl_wt body_adj_wt (mean) msa_size , by(inst_id)
-    save ../temp/map_samp, replace
-    
-    use usa_msa, clear
-    rename NAME msa_comb
-    merge 1:m msa_comb using ../temp/map_samp, assert(1 2 3) keep(1 3) nogen
-    foreach var in impact_cite_affl_wt {
-        xtile `var'_5 = `var', nq(5)
-        qui sum `var' 
-        local min : dis %3.2f r(min)
-        local max : dis %3.2f r(max)
-        _pctile `var',percentiles(20 40 60 80)
-        local p20: dis %3.2f r(r1)
-        local p40: dis %3.2f r(r2)
-        local p60: dis %3.2f r(r3)
-        local p80: dis %3.2f r(r4)
-        colorpalette carto Teal, n(5) nograph 
-        spmap  `var'_5 using usa_msa_shp_clean,  id(_ID)  fcolor(`r(p)'%50) clnumber(5) ///
-          ocolor(white ..) osize(0.15 ..) ndfcolor(gs13) ndocolor(white ..) ndsize(0.15 ..) ndlabel("No data") ///
-          polygon(data("usa_state_shp_clean") ocolor(gs2) osize(0.2) fcolor(eggshell%20)) ///
-          legend(label(2 "Min-p20: `min'-`p20'") label(3 "p20-p40: `p20'-`p40'") label(4 "p40-p60: `p40'-`p60'") label(5 "p60-p80: `p60'-`p80'") label(6 "p80-Max: `p80'-`max'") pos(4) size(2)) legtitle("${`var'_name}")
-        graph export ../output/figures/`var'_map_`samp'.pdf, replace
-    }
 end
 
 program sum_stats
