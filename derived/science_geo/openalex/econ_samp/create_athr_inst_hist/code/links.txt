@@ -1,0 +1,4 @@
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
+./pprs/ | /export/scratch/cxu_sci_geo/scrape_econ_inst/
+./top4/ | /export/home/dor/cxu/derived/openalex/econ_samp/scrape_econs/output
+./athrs/ | /export/home/dor/cxu/derived/openalex/econ_samp/get_all_pprs/output

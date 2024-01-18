@@ -1,0 +1,3 @@
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
+./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/econ_samp/scrape_econs/output/
+

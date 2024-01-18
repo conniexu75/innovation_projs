@@ -1,0 +1,841 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/econ_s
+> amp/create_athr_inst_hist/code/build.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. pause on
+
+. set seed 8975
+
+. set maxvar 120000
+
+
+. global temp "/export/scratch/cxu_sci_geo/create_econ_inst_hist/temp"
+
+. global output "/export/scratch/cxu_sci_geo/create_econ_inst_hist"
+
+. 
+. program main
+  1.     *append
+.     *merge_geo
+.     clean_panel, time(year)
+  2.     *clean_panel, time(qrtr)
+.     *convert_year_to_qrtr
+. end
+
+. 
+. program append
+  1.     qui {
+  2.         forval i = 1/782 {
+  3.             import delimited ../external/pprs/openalex_authors`i', stringc
+> ols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
+  4.             gen date = date(pub_date, "YMD")
+  5.             format date %td
+  6.             gen qrtr = qofd(date)
+  7.             gcontract athr_id  qrtr inst_id, freq(num_times)
+  8.             drop if mi(inst_id)
+  9.             fmerge m:1 athr_id using ../external/athrs/list_of_athrs, asse
+> rt(1 2 3) keep(3) nogen
+ 10.             save ${temp}/ppr`i', replace
+ 11.         }
+ 12.     }
+ 13.     clear
+ 14.     forval i = 1/782 {
+ 15.         di "`i'"
+ 16.         append using ${temp}/ppr`i'
+ 17.     }
+ 18.     drop if athr_id == "A9999999999"
+ 19.     gcollapse (sum) num_times, by(athr_id inst_id qrtr)
+ 20.     save ${temp}/appended_pprs, replace
+ 21. end
+
+. 
+. program merge_geo
+  1.     forval i = 1/10 {
+  2.         import delimited ../external/pprs/inst_geo_chars`i', stringcols(_a
+> ll) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
+  3.         compress, nocoalesce
+  4.         save ${temp}/inst_geo_chars`i', replace
+  5.     }
+  6.     clear
+  7.     count
+  8.     forval i = 1/10 {
+  9.         di "`i'"
+ 10.         append using ${temp}/inst_geo_chars`i'
+ 11.         count
+ 12.     }
+ 13.     bys inst_id: gegen has_parent = max(associated_rel == "parent")
+ 14.     keep if has_parent == 0  | (has_parent == 1 & associated_rel == "paren
+> t" ) 
+ 15.     gen new_inst = ""
+ 16.     gen new_inst_id = ""
+ 17.     foreach var in inst inst_id {
+ 18.         replace new_`var' =  `var' if has_parent == 0
+ 19.         replace new_`var' = `var' if ((strpos(associated, "Universit")>0|s
+> trpos(associated, "College")|strpos(associated, "Higher Education")) & strpos
+> (associated, "System")>0 & associated_type == "education" & (type == "educati
+> on" | type == "healthcare")) | inlist(associated, "University of London", "We
+> llcome Trust") | (strpos(associated, "Health")>0 & strpos(associated, "System
+> ")>0 & associated_type == "healthcare" & (type == "education" | type == "heal
+> thcare")) | strpos(associated, "Ministry of") > 0 | strpos(associated, "Board
+>  of")>0 | strpos(associated, "Government of")>0 | (strpos(associated, "Depart
+> ment of")>0 & country != "Russia")
+ 20.         replace new_`var' = `var' if country_code != associated_country
+ 21.     }
+ 22.     replace associated = "" if !mi(new_inst)
+ 23.     replace associated_id = "" if !mi(new_inst_id)
+ 24.     gduplicates drop inst_id new_inst_id, force
+ 25.     foreach s in "" "_id" {
+ 26.         replace new_inst`s' = associated`s' if strpos(associated, "Univers
+> ity")>0 & strpos(associated, "System")>0 & associated_type == "education" & (
+> type != "education" & type != "healthcare")
+ 27.         replace new_inst`s' = associated`s' if inlist(associated, "Chinese
+>  Academy of Sciences", "Spanish National Research Council", "Max Planck Socie
+> ty", "National Research Council", "National Institutes of Health", "Harvard U
+> niversity")
+ 28.         replace new_inst`s' = associated`s' if inlist(associated, "Leibniz
+>  Association", "Aix-Marseille University", "Indian Council of Agricultural Re
+> search", "Inserm", "Polish Academy of Sciences", "National Research Institute
+>  for Agriculture, Food and Environment") 
+ 29.         replace new_inst`s' = associated`s' if inlist(associated, "Institu
+> t des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Hum
+> aines et Sociales", "Institut National des Sciences de l'Univers", "Institut 
+> des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environn
+> ement", "Institut de Physique", "Institut National des Sciences Mathématiques
+>  et de leurs Interactions")
+ 30.         replace new_inst`s' = associated`s' if inlist(associated, "Institu
+> t National de Physique Nucléaire et de Physique des Particules", "Institut de
+> s Sciences de l'Information et de leurs Interactions")
+ 31.         replace new_inst`s' = associated`s' if inlist(associated, "French 
+> National Centre for Scientific Research")
+ 32.         replace new_inst`s' = associated`s' if inlist(associated, "Fraunho
+> fer Society", "Istituti di Ricovero e Cura a Carattere Scientifico",  "Claude
+>  Bernard University Lyon 1", "Atomic Energy and Alternative Energies Commissi
+> on", "Japanese Red Cross Society, Japan") 
+ 33.         replace new_inst`s' = associated`s' if inlist(associated, "Islamic
+>  Azad University, Tehran", "National Oceanic and Atmospheric Administratio", 
+> "French Institute for Research in Computer Science and Automation", "National
+>  Academy of Sciences of Ukraine", "National Institute for Nuclear Physics", "
+> Assistance Publique – Hôpitaux de Paris") 
+ 34.         replace new_inst`s' = associated`s' if inlist(associated, "Medical
+>  Research Council", "National Institute for Health Research", "Academia Sinic
+> a", "National Scientific and Technical Research Council","Czech Academy of Sc
+> iences", "Commonwealth Scientific and Industrial Research Organisation")
+ 35.         replace new_inst`s' = associated`s' if inlist(associated, "Slovak 
+> Academy of Sciences", "Indian Council of Medical Research", "Council of Scien
+> tific and Industrial Research", "National Institute for Astrophysics", "Bulga
+> rian Academy of Sciences", "Centers for Disease Control and Prevention", "Nat
+> ional Institute of Technology")
+ 36.         replace new_inst`s' = associated`s' if inlist(associated, "Helmhol
+> tz Association of German Research Centres", "Helios Kliniken", "Shriners Hosp
+> itals for Children", "Hungarian Academy of Sciences", "National Agriculture a
+> nd Food Research Organization", "Australian Research Council")
+ 37.         replace new_inst`s' = associated`s' if inlist(associated, "Agro Pa
+> risTech", "Veterans Health Administration", "Institut de Recherche pour le Dé
+> veloppement", "Austrian Academy of Sciences", "Institutos Nacionais de Ciênci
+> a e Tecnologia", "Chinese Academy of Forestry", "Chinese Academy of Tropical 
+> Agricultural Sciences")
+ 38.         replace new_inst`s' = associated`s' if inlist(associated, "Institu
+> to de Salud Carlos III", "National Aeronautics and Space Administration", "Lu
+> dwig Boltzmann Gesellschaft", "United States Air Force", "Centre Nouvelle Aqu
+> itaine-Bordeaux", "RIKEN", "Agricultural Research Council")
+ 39.         replace new_inst`s' = associated`s' if inlist(associated, "Centro 
+> Científico Tecnológico - La Plata", "National Research Council Canada", "Roya
+> l Netherlands Academy of Arts and Sciences","Defence Research and Development
+>  Organisation", "Canadian Institutes of Health Research", "Italian Institute 
+> of Technology", "United Nations University")
+ 40.         replace new_inst`s' = associated`s' if inlist(associated, "IBM Res
+> earch - Thomas J. Watson Research Center", "Délégation Ile-de-France Sud","Gr
+> enoble Institute of Technology", "François Rabelais University", "Chinese Aca
+> demy of Social Sciences", "National Science Foundation" , "Federal University
+>  of Toulouse Midi-Pyearénées")
+ 41.         replace new_inst`s' = associated`s' if inlist(associated, "Chinese
+>  Center For Disease Control and Prevention", "Johns Hopkins Medicine", "Cance
+> r Research UK", "Centre Hospitalier Universitaire de Bordeaux", "Puglia Salut
+> e", "Hospices Civils de Lyon", "Ministry of Science and Technology", "Servici
+> o de Salud de Castilla La Mancha")
+ 42.         replace new_inst`s' = associated`s' if inlist(associated, "Grenobl
+> e Alpes University","Arts et Metiers Institute of Technology", "University of
+>  Paris-Saclay", "Biomedical Research Council", "Senckenberg Society for Natur
+> e Research", "Centre Hospitalier Régional et Universitaire de Lille", "Schön 
+> Klinik Roseneck", "ESPCI Paris")
+ 43.         replace new_inst`s' = associated`s' if inlist(associated, "Nationa
+> l Academy of Sciences of Armenia", "University of the Philippines System", "M
+> adrid Institute for Advanced Studies", "CGIAR", "Ministry of Science, Technol
+> ogy and Innovation", "Institut Polytechnique de Bordeaux")
+ 44. 
+.         replace new_inst`s' = associated`s' if inlist(associated, "Department
+>  of Biological Sciences", "Department of Chemistry and Material Sciences", "D
+> epartment of Energy, Engineering, Mechanics and Control Processes","Departmen
+> t of Agricultural Sciences", "Division of Historical and Philological Science
+> s", "Department of Mathematical Sciences", "Department of Physiological Scien
+> ces") & country == "Russia"
+ 45.         replace new_inst`s' = associated`s' if inlist(associated, "Departm
+> ent of Earth Sciences", "Physical Sciences Division", "Department of Global I
+> ssues and International Relations", "Department of Medical Sciences", "Depart
+> ment of Social Sciences") & country == "Russia" 
+ 46.         replace new_inst`s' = associated`s' if inlist(associated, "Russian
+>  Academy")
+ 47.         replace new_inst`s' = associated`s' if strpos(associated, "Agricul
+> tural Research Service -")>0
+ 48.     }
+ 49.     // merge national institutions together
+.     replace new_inst = "French National Centre for Scientific Research" if in
+> list(inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institu
+> t des Sciences Humaines et Sociales", "Institut National des Sciences de l'Un
+> ivers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Éc
+> ologie et Environnement", "Institut de Physique", "Institut National des Scie
+> nces Mathématiques et de leurs Interactions") | inlist(inst,"Institut Nationa
+> l de Physique Nucléaire et de Physique des Particules", "Institut des Science
+> s de l'Information et de leurs Interactions")
+ 50.     replace new_inst = "French National Centre for Scientific Research" if
+>  inlist(new_inst,"Institut des Sciences Biologiques", "Institut de Chimie", "
+> Institut des Sciences Humaines et Sociales", "Institut National des Sciences 
+> de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Inst
+> itut Écologie et Environnement", "Institut de Physique", "Institut National d
+> es Sciences Mathématiques et de leurs Interactions") | inlist(new_inst,"Insti
+> tut National de Physique Nucléaire et de Physique des Particules", "Institut 
+> des Sciences de l'Information et de leurs Interactions")
+ 51.     replace new_inst_id = "I1294671590" if new_inst =="French National Cen
+> tre for Scientific Research"
+ 52.     replace new_inst = "Russian Academy" if inlist(inst, "Department of Bi
+> ological Sciences", "Department of Chemistry and Material Sciences", "Departm
+> ent of Energy, Engineering, Mechanics and Control Processes","Department of A
+> gricultural Sciences", "Division of Historical and Philological Sciences", "D
+> epartment of Mathematical Sciences", "Department of Physiological Sciences") 
+> | inlist(inst, "Russian Academy of Sciences", "Department of Earth Sciences",
+>  "Physical Sciences Division", "Department of Global Issues and International
+>  Relations", "Department of Medical Sciences", "Department of Social Sciences
+> ") & country == "Russia"
+ 53.     replace new_inst = "Russian Academy" if inlist(new_inst, "Department o
+> f Biological Sciences", "Department of Chemistry and Material Sciences", "Dep
+> artment of Energy, Engineering, Mechanics and Control Processes","Department 
+> of Agricultural Sciences", "Division of Historical and Philological Sciences"
+> , "Department of Mathematical Sciences", "Department of Physiological Science
+> s") | inlist(new_inst,"Russian Academy of Sciences", "Department of Earth Sci
+> ences", "Physical Sciences Division", "Department of Global Issues and Intern
+> ational Relations", "Department of Medical Sciences", "Department of Social S
+> ciences") & country == "Russia"
+ 54.     replace new_inst_id = "I1313323035" if new_inst  == "Russian Academy"
+ 55.     replace new_inst  = "Agricultural Research Service" if strpos(inst, "A
+> gricultural Research Service - ")>0
+ 56.     replace new_inst_id = "I1312222531" if new_inst == "Agricultural Resea
+> rch Service"
+ 57.     replace new_inst  = "Max Planck Society" if strpos(inst, "Max Planck")
+> >0
+ 58.     replace new_inst  = "Max Planck Society" if strpos(associated, "Max Pl
+> anck")>0
+ 59.     replace new_inst_id = "I149899117" if new_inst == "Max Planck Society"
+ 60.     replace new_inst = "Mass General Brigham" if inlist(inst, "Massachuset
+> ts General Hospital" , "Brigham and Women's Hospital")
+ 61.     replace new_inst_id = "I48633490" if new_inst == "Mass General Brigham
+> "
+ 62.     replace new_inst = "Johns Hopkins University" if strpos(inst, "Johns H
+> opkins")>0
+ 63.     replace new_inst = "Johns Hopkins University" if strpos(associated, "J
+> ohns Hopkins")>0
+ 64.     replace new_inst_id = "I145311948" if new_inst == "Johns Hopkins Unive
+> rsity"
+ 65.     replace new_inst = "Brown University" if strpos(inst, "Brown Universit
+> y") >0 
+ 66.     replace new_inst_id = "I27804330" if new_inst == "Brown University"
+ 67.     replace new_inst = "Stanford University" if inlist(inst, "Stanford Med
+> icine", "Stanford Health Care", "Stanford Synchrotron Radiation Lightsource",
+>  "Stanford Blood Center")
+ 68.     replace new_inst = "Stanford University" if inlist(associated, "Stanfo
+> rd Medicine", "Stanford Health Care")
+ 69.     replace new_inst_id = "I97018004" if new_inst == "Stanford University"
+ 70.     replace new_inst = "Northwestern University" if inlist(inst, "Northwes
+> tern Medicine")
+ 71.     replace new_inst = "Northwestern University" if inlist(associated, "No
+> rthwestern Medicine")
+ 72.     replace new_inst_id = "I111979921" if new_inst == "Northwestern Univer
+> sity"
+ 73.     replace new_inst = "Harvard University" if inlist(inst, "Harvard Globa
+> l Health Institute", "Harvard Pilgrim Health Care", "Harvard Affiliated Emerg
+> ency Medicine Residency", "Harvard NeuroDiscovery Center")
+ 74.     replace new_inst_id = "I136199984" if new_inst == "Harvard University"
+ 75.     // health systems
+.     replace new_inst = "University of Virginia" if strpos(inst, "University o
+> f Virginia") > 0 & (strpos(inst, "Hospital") >0 | strpos(inst, "Medical")>0 |
+>  strpos(inst, "Health")>0)
+ 76.     replace new_inst_id = "I51556381" if new_inst == "University of Virgin
+> ia"
+ 77.     replace new_inst = "University of Missouri" if strpos(inst, "Universit
+> y of Missouri" ) > 0 & (strpos(inst, "Hospital") >0 | strpos(inst, "Medical")
+> >0 | strpos(inst, "Health")>0)
+ 78.     replace new_inst_id = "I76835614" if new_inst == "University of Missou
+> ri"
+ 79.     replace new_inst = "Baylor University" if strpos(inst, "Baylor Univers
+> ity Medical Center")>0
+ 80.     replace new_inst_id = "I157394403" if new_inst == "Baylor University"
+ 81.     replace new_inst = "Columbia University" if strpos(inst, "Columbia Uni
+> versity Irving Medical Center")>0
+ 82.     replace new_inst_id = "I78577930" if new_inst == "Columbia University"
+ 83.     gen edit = 0
+ 84.     foreach s in "Health System" "Clinic" "Hospital" "Medical Center" {
+ 85.         replace new_inst = subinstr(inst, "`s'", "", .) if (strpos(inst, "
+> University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 & edit == 0 
+> & country_code == "US"
+ 86.         replace edit = 1 if  (strpos(inst, "University")>0 | strpos(inst, 
+> "UC")>0) & strpos(inst, "`s'") > 0 &  country_code == "US"
+ 87.     }
+ 88.     replace new_inst = strtrim(new_inst)
+ 89.     bys new_inst (edit) : replace new_inst_id = new_inst_id[_n-1] if edit 
+> == 1 & !mi(new_inst_id[_n-1])  & city == city[_n-1]
+ 90.     replace new_inst = associated if !mi(associated) & mi(new_inst) & has_
+> parent == 1 & type == "facility" & associated_type == "education"
+ 91.     replace new_inst_id = associated_id if !mi(associated_id) & mi(new_ins
+> t_id) & has_parent == 1 & type == "facility" & associated_type == "education"
+ 92.     replace new_inst = inst if mi(new_inst)
+ 93.     replace new_inst_id = inst_id if mi(new_inst_id)
+ 94.     gduplicates tag inst_id, gen(dup)
+ 95.     gen diff = inst_id != new_inst_id
+ 96.     bys inst_id : gegen has_new = max(diff)
+ 97.     drop if dup > 0 & diff == 0 & has_new == 1
+ 98.     gduplicates drop inst_id, force
+ 99.     keep inst_id inst new_inst new_inst_id region city country country_cod
+> e type 
+100.     drop if mi(inst_id) 
+101.     save ${temp}/all_inst_chars, replace
+102. end 
+
+. 
+. program clean_panel
+  1.     syntax, time(str)
+  2.     use ${temp}/appended_pprs, clear
+  3.     gen year = yofd(dofq(qrtr))
+  4.     drop if mi(`time')
+  5.     if "`time'" == "year" {
+  6.         gcollapse (sum) num_times, by(athr_id inst_id `time')
+  7.     }
+  8.     fmerge m:1 inst_id using ${temp}/all_inst_chars, assert(1 2 3) keep(3)
+>  nogen
+  9.     replace inst_id = new_inst_id 
+ 10.     replace inst = new_inst 
+ 11.     gen broad_affl = inst == "Broad Institute"
+ 12.     gen hhmi_affl = inst == "Howard Hughes Medical Institute"
+ 13.     gen funder = (strpos(inst, "Trust")> 0 | strpos(inst, "Foundation")>0 
+> | strpos(inst, "Fund")>0) & !inlist(type, "education", "facility", "healthcar
+> e") | inlist(inst, "American Economic Association", "Hoover Institution", "Ce
+> nter for Economic and Policy Research", "National Bureau of Economic Research
+> ", "Abdul Latif Jameel Poverty Action Lab", "Institute for Fiscal Studies")
+ 14.     gduplicates tag athr_id inst_id `time', gen(dup_entry)
+ 15.     bys athr_id inst_id `time': gegen tot_times = sum(num_times) 
+ 16.     replace num_times = tot_times
+ 17.     drop if dup_entry > 0 & mi(new_inst)
+ 18.     bys athr_id `time': gen num_affls = _N 
+ 19.     drop if num_affls > 1 & (funder == 1 | broad_affl == 1 | hhmi_affl == 
+> 1)
+ 20.     drop if inst == "Howard Hughes Medical Institute"
+ 21.     drop if inst_id == "I1344073410"
+ 22.     drop if inst == "National Bureau of Economic Research"
+ 23. 
+.     drop new_inst new_inst_id dup_entry tot_times type
+ 24.     gsort athr_id inst_id `time' country city
+ 25.     gduplicates drop athr_id inst_id `time', force
+ 26. 
+.     // keep inst with the largest num_times in a  year
+.     cap drop N
+ 27.     bys athr_id `time' : gen N = _N 
+ 28.     bys athr_id `time': gegen max_num_times = max(num_times)
+ 29.     drop if num_times != max_num_times & N <= 10
+ 30.     drop max_num_times
+ 31.     gunique athr_id `time' 
+ 32.     local N = r(unique)
+ 33.     // imputation process
+.     foreach loc in inst_id inst_id inst_id inst_id inst_id {
+ 34.         cap drop has_mult 
+ 35.         cap drop same_as_after 
+ 36.         cap drop same_as_before 
+ 37.         cap drop has_before has_after 
+ 38.         cap drop N
+ 39.         bys athr_id `time' : gen N = _N 
+ 40.         if "`time'" == "year" local range 5 
+ 41.         if "`time'" == "qrtr" local range 20 
+ 42.         // if there are mult in a  but sandwiched by the same, then choose
+>  that one 
+.         bys athr_id `time': gen has_mult = _N > 1
+ 43.         bys athr_id `loc' (`time'): gen same_as_after = `time'[_n+1]-`time
+> ' <= `range' & has_mult[_n+1]==0
+ 44.         by athr_id `loc' (`time'): gen same_as_before = `time' - `time'[_n
+> -1] <= `range'  & has_mult[_n-1]==0
+ 45.         gen sandwiched = has_mult == 1 & same_as_after == 1 & same_as_befo
+> re == 1
+ 46.         bys athr_id `time': gegen has_sandwich = max(sandwiched)
+ 47.         drop if has_sandwich ==1 & sandwiched == 0 & N<=10 
+ 48.         drop sandwiched has_sandwich
+ 49.         bys athr_id `time': replace has_mult = _N > 1
+ 50.        
+.         // now we prioritize the  before
+.         bys athr_id `loc' (`time'): replace same_as_after = `time'[_n+1]-`tim
+> e' <= `range' & has_mult[_n+1]==0
+ 51.         by athr_id `loc' (`time'): replace same_as_before = `time' - `time
+> '[_n-1] <= `range'  & has_mult[_n-1]==0
+ 52.         bys athr_id `time': gegen has_before = max(same_as_before)
+ 53.         drop if has_mult == 1 & has_before == 1 & same_as_before == 0  & N
+> <=10
+ 54.         bys athr_id `time': replace has_mult = _N > 1
+ 55.         // now do same for the `time' after 
+.         bys athr_id `loc' (`time'): replace same_as_after = `time'[_n+1]-`tim
+> e' <= `range' & has_mult[_n+1]==0
+ 56.         by athr_id `loc' (`time'): replace same_as_before = `time' - `time
+> '[_n-1] <= `range'  & has_mult[_n-1]==0
+ 57.         bys athr_id `time': gegen has_after = max(same_as_after)
+ 58.         drop if has_mult == 1 & has_after == 1 & same_as_after == 0  & N <
+> = 10
+ 59.         bys athr_id `time': replace has_mult = _N > 1
+ 60.     }
+ 61.     cap drop N
+ 62.     bys athr_id `time' : gen N = _N 
+ 63.     // if there are sandwiched insts no mater what the `time' gap is
+.     hashsort athr_id `time'
+ 64.     gen prev_inst = inst_id[_n-1]
+ 65.     gen post_inst = inst_id[_n+1]
+ 66. 
+.     gen sandwich = prev_inst == post_inst & prev_inst != inst_id if athr_id[_
+> n-1] == athr_id[_n+1] & athr[_n-1] == athr_id 
+ 67.     replace inst_id = prev_inst if sandwich == 1 & sandwich[_n-1] != 1  & 
+> N <=10 
+ 68.     replace inst = inst[_n-1] if sandwich == 1 & sandwich[_n-1] != 1  & N 
+> <=10 
+ 69.     drop sandwich prev_inst post_inst
+ 70. 
+.     hashsort athr_id `time'
+ 71.     gen prev_inst = inst_id[_n-1]
+ 72.     gen post_inst = inst_id[_n+1]
+ 73. 
+.     gen sandwich = prev_inst == post_inst & prev_inst != inst_id if athr_id[_
+> n-1] == athr_id[_n+1] & athr[_n-1] == athr_id 
+ 74.     replace inst_id = prev_inst if sandwich == 1 & sandwich[_n-1] != 1  & 
+> N<=10
+ 75.     replace inst = inst[_n-1] if sandwich == 1 & sandwich[_n-1] != 1 & N<=
+> 10
+ 76.     drop sandwich
+ 77.     
+.     bys athr_id: gegen modal_inst = mode(inst_id)
+ 78.     by athr_id `time': replace has_mult = _N > 1
+ 79.     gen mode_match = inst_id == modal_inst
+ 80.     bys athr_id `time': gegen has_mode_match = max(mode_match)
+ 81.     gen mode_yr = year if mode_match == 1
+ 82.     bys athr_id : gegen min_mode_yr = min(mode_yr) 
+ 83.     by athr_id : egen max_mode_yr = max(mode_yr) 
+ 84.     drop if has_mult == 1 & has_mode_match == 1 & mode_match == 0 & inrang
+> e(year, min_mode_yr, max_mode_yr) & N <= 10
+ 85. 
+.     gen rand = rnormal(0,1)
+ 86.     gsort athr_id `time' rand
+ 87.     gduplicates drop athr_id `time', force
+ 88.     gunique athr_id `time'
+ 89.     assert r(unique) == `N'
+ 90.     drop if mi(`time')
+ 91.     gisid athr_id `time'
+ 92.     keep athr_id inst_id `time' num_times inst country_code country city r
+> egion broad_affl hhmi_affl
+ 93. 
+.     // do some final cleaning
+.     cap gen year  = yofd(dofq(qrtr))
+ 94.     drop if !inrange(year, 1945, 2023) 
+ 95.     save ${temp}/athr_panel, replace
+ 96.     
+.     import delimited using ../external/geo/us_cities_states_counties.csv, cle
+> ar varnames(1)
+ 97.     glevelsof statefull , local(state_names)
+ 98.     use ${temp}/athr_panel, clear
+ 99.     foreach s in `state_names' {
+100.         replace region = "`s'" if mi(region) & country_code == "US" & strp
+> os(inst, "`s'")>0
+101.     }
+102.     replace region = "Pennsylvania" if country_code == "US" & inlist(city,
+>  "Pittsburgh" , "Philadelphia", "Radnor", "Swarthmore", "Meadville", "Lancast
+> er" , "Wilkes-Barr") 
+103.     replace region = "California" if country_code == "US" & inlist(city, "
+> Stanford", "Los Angeles", "San Diego", "La Jolla", "Berkeley", "San Francisco
+> ", "Thousand Oaks", "Mountain View", "Sunnyvale")
+104.     replace region = "California" if country_code == "US" & inlist(city, "
+> Cupertino", "Malibu")
+105.     replace region = "California" if country_code == "US" & inlist(city, "
+> Novato", "Arcata", "Claremont", "Santa Clara", "Castroville", "Pomona", "Emer
+> yville", "Redwood City", "Santa Barbara")
+106.     replace region = "California" if country_code == "US" & inlist(city, "
+> San Jose", "South San Francisco", "Pasadena", "Irving", "La Cañada Flintridge
+> ", "Duarte", "Menlo Park", "Livermore")
+107.     replace region = "Massachusetts" if country_code == "US" & inlist(city
+> , "Boston", "Cambridge", "Medford", "Wellesley", "Falmouth", "Woods Hole", "F
+> ramingham", "Plymouth", "Worcester")
+108.     replace region = "Massachusetts" if country_code == "US" & inlist(city
+> , "Amherst", "Amherst Center", "Waltham", "Northampton", "South Hadley", "And
+> over", "Natick", "Newton")
+109.     replace region = "Maryland" if country_code == "US" & inlist(city, "Be
+> thesda", "Baltimore", "Silver Spring", "Greenbelt", "Gaithersburg", "Frederic
+> k", "Riverdale Park", "Rockville", "Annapolis")
+110.     replace region = "Maryland" if country_code == "US" & inlist(city, "To
+> wson", "College Park")
+111.     replace region = "Ohio" if country_code == "US" & inlist(city, "Toledo
+> ", "Dayton", "Oxford", "Cleveland", "Ardmore", "Oberlin", "Cincinnati")
+112.     replace region = "New Jersey" if country_code == "US" & inlist(city, "
+> New Brunswick", "Bridgewater", "Hoboken", "Raritan", "Glassboro", "Whippany",
+>  " Woodcliff Lake", "South Plainfield")
+113.     replace region = "New Jersey" if country_code == "US" & inlist(city, "
+> Montclair", "Princeton")
+114.     replace region = "Iowa" if country_code == "US" & inlist(city, "Ames",
+>  "Des Moines")
+115.     replace region = "Nevada" if country_code == "US" & inlist(city, "Reno
+> ")
+116.     replace region = "Oklahoma" if country_code == "US" & inlist(city, "Tu
+> lsa")
+117.     replace region = "Arizona" if country_code == "US" & inlist(city, "Pho
+> enix", "Tucson")
+118.     replace region = "Illinois" if country_code == "US" & inlist(city, "Ch
+> icago", "Evanston", "Downers Grove", "Hines")
+119.     replace region = "New York" if country_code == "US" & inlist(city, "Ne
+> w York", "Ithaca", "Bronx", "Rochester", "Cold Spring Harbor", "Syracuse", "U
+> pton", "Albany", "Manhasset")
+120.     replace region = "New York" if country_code == "US" & inlist(city, "Bi
+> nghamton", "Brookville", "Hempstead", "Saranac Lake", "New Hyde Park", "Pough
+> keepsie", "Buffalo", "Niskayuna")
+121.     replace region = "Connecticut" if country_code == "US" & inlist(city, 
+> "New Haven", "West Haven", "Fairfield", "Stamford")
+122.     replace region = "Oregon" if country_code == "US" & inlist(city, "Port
+> land")
+123.     replace region = "Alabama" if country_code == "US" & inlist(city, "Tus
+> kegee")
+124.     replace region = "District of Columbia" if country_code == "US" & inli
+> st(city, "Washington")
+125.     replace region = "North Carolina" if country_code == "US" & inlist(cit
+> y, "Durham", "Asheville", "Chapel Hill")
+126.     replace region = "South Carolina" if country_code == "US" & inlist(cit
+> y, "Greenville", "Aiken")
+127.     replace region = "Wisconsin" if country_code == "US" & inlist(city, "M
+> adison", "Milwaukee")
+128.     replace region = "Florida" if country_code == "US" & inlist(city, "Cor
+> al Gables", "Miami", "Sarasota", "Orlando", "Tampa")
+129.     replace region = "Maine" if country_code == "US" & inlist(city, "Lewis
+> ton")
+130.     replace region = "Washington" if country_code == "US" & inlist(city, "
+> Seattle", "Richland", "Bothell")
+131.     replace region = "Colorado" if country_code == "US" & inlist(city, "De
+> nver", "Boulder", "Fort Collins")
+132.     replace region = "Louisiana" if country_code == "US" & inlist(city, "N
+> ew Orleans")
+133.     replace region = "Delaware" if country_code == "US" & inlist(city, "Wi
+> lmington")
+134.     replace region = "Tennessee" if country_code == "US" & inlist(city, "M
+> emphis", "Oak Ridge", "Nashville")
+135.     replace region = "Georgia" if country_code == "US" & inlist(city, "Atl
+> anta", "Augusta", "Macon", "Decatur")
+136.     replace region = "Texas" if country_code == "US" & inlist(city, "Houst
+> on", "Dallas", "San Antonio", "The Woodlands", "Austin")
+137.     replace region = "New Mexico" if country_code == "US" & inlist(city, "
+> Los Alamos", "Carlsbad", "Albuquerque", "Santa Fe")
+138.     replace region = "Michigan" if country_code == "US" & inlist(city, "An
+> n Arbor", "Detroit", "Flint")
+139.     replace region = "Rhode Island" if country_code == "US" & inlist(city,
+>  "Providence")
+140.     replace region = "Hawaii" if country_code == "US" & inlist(city, "Hono
+> lulu")
+141.     replace region = "Missouri" if country_code == "US" & inlist(city, "St
+>  Louis", "Kirksville")
+142.     replace region = "Minnesota" if country_code == "US" & inlist(city, "M
+> inneapolis", "Saint Paul") 
+143.     replace region = "Minnesota" if country_code == "US" & inlist(city, "R
+> ochester") & strpos(inst, "Mayo Clinic")>0 
+144.     replace region = "Virginia" if country_code == "US" & inlist(city, "Re
+> ston", "Williamsburg", "North Laurel", "Arlington", "Richmond", "Harrisonburg
+> ", "Front Royal", "Falls Church", "Charlottesville")
+145.     replace region = "Virginia" if country_code == "US" & inlist(city, "Ty
+> sons Corner", "Fairfax")
+146.     replace region = "New Hampshire" if country_code == "US" & inlist(city
+> , "Hanover")
+147.     replace region = "Illinois" if country_code == "US" & inlist(city, "Le
+> mont", "North Chicago")
+148.     replace region = "Utah" if country_code == "US" & inlist(city, "Provo"
+> , "Salt Lake City")
+149.     replace region = "Missouri" if inst_id == "I4210102181"
+150.     replace region = "New Jersey" if inst_id == "I150569930"
+151.     replace region = "Maryland" if inst_id == "I166416128"
+152.     save ${temp}/athr_panel, replace
+153. 
+.     import delimited using ../external/geo/us_cities_states_counties.csv, cle
+> ar varnames(1)
+154.     gcontract stateshort statefull
+155.     drop _freq
+156.     drop if mi(stateshort)
+157.     rename statefull region
+158.     merge 1:m region using ${temp}/athr_panel, assert(1 2 3) keep(2 3) nog
+> en
+159.     replace stateshort =  "DC" if region == "District of Columbia"
+160.     replace stateshort =  "VI" if region == "Virgin Islands, U.S."
+161.     gen us_state = stateshort if country_code == "US"
+162.     replace city = "Saint Louis" if city == "St Louis"
+163.     replace city = "Winston Salem" if city == "Winston-Salem"
+164.     merge m:1 city us_state using ../external/geo/city_msa, assert(1 2 3) 
+> keep(1 3) nogen
+165.     replace msatitle = "Washington-Arlington-Alexandria, DC-VA-MD-WV"  if 
+> us_state == "DC"
+166.     replace msatitle = "New York-Newark-Jersey City, NY-NJ-PA" if city == 
+> "The Bronx" & us_state == "NY"
+167.     replace msatitle = "Miami-Fort Lauderdale-West Palm Beach, FL" if city
+>  == "Coral Gables" & us_state == "FL"
+168.     replace msatitle = "Springfield, MA" if city == "Amherst Center"
+169.     replace msatitle = "Hartford-West Hartford-East Hartford, CT" if city 
+> == "Storrs" & us_state == "CT"
+170.     replace msatitle = "Tampa-St. Petersburg-Clearwater, FL" if city == "T
+> emple Terrace" & us_state == "FL"
+171.     replace msatitle = "San Francisco-Oakland-Hayward, CA" if city == "Fos
+> ter City" & us_state == "CA"
+172.     gen msa_comb = msatitle
+173.     replace  msa_comb = "Research Triangle Park, NC" if msa_comb == "Durha
+> m-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | 
+> city == "Research Triangle Park" | city == "Res Triangle Park"
+174.     replace  msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-
+> Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
+175.     gen msa_c_world = msa_comb
+176.     replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")
+> -1) + ", US" if country == "United States" & !mi(msa_c_world)
+177.     replace msa_c_world = city + ", " + country_code if country_code != "U
+> S" & !mi(city) & !mi(country_code)
+178.     compress, nocoalesce
+179.     // if there are sandwiched msas no mater what the `time' gap is
+.     hashsort athr_id `time'
+180.     gen prev_msa = msa_comb[_n-1]
+181.     gen post_msa = msa_comb[_n+1]
+182.     gen sandwich = prev_msa == post_msa & prev_msa != msa_comb if athr_id[
+> _n-1] == athr_id[_n+1] & athr[_n-1] == athr_id
+183.     replace msa_comb = prev_msa if sandwich == 1
+184.     drop sandwich prev_msa post_msa
+185.     save ${temp}/athr_panel, replace
+186. 
+.     replace athr_id = subinstr(athr_id, "A", "", .)
+187.     destring athr_id, replace
+188.     tsset athr_id `time'
+189.     tsfill
+190.     foreach var in inst_id {
+191.         bys athr_id (`time'): replace  `var' = `var'[_n-1] if mi(`var') & 
+> !mi(`var'[_n-1])
+192.     }
+193.     tostring athr_id, replace
+194.     replace athr_id = "A" + athr_id
+195.     keep athr_id inst_id year broad_affl hhmi_affl
+196.     fmerge m:1 inst_id using ${temp}/all_inst_chars, assert(1 2 3) keep(3)
+>  nogen
+197.     drop new_inst new_inst_id type 
+198.     foreach s in `state_names' {
+199.         replace region = "`s'" if mi(region) & country_code == "US" & strp
+> os(inst, "`s'")>0
+200.     }
+201.     replace region = "Pennsylvania" if country_code == "US" & inlist(city,
+>  "Pittsburgh" , "Philadelphia", "Radnor", "Swarthmore", "Meadville", "Lancast
+> er" , "Wilkes-Barr") 
+202.     replace region = "California" if country_code == "US" & inlist(city, "
+> Stanford", "Los Angeles", "San Diego", "La Jolla", "Berkeley", "San Francisco
+> ", "Thousand Oaks", "Mountain View", "Sunnyvale")
+203.     replace region = "California" if country_code == "US" & inlist(city, "
+> Cupertino", "Malibu")
+204.     replace region = "California" if country_code == "US" & inlist(city, "
+> Novato", "Arcata", "Claremont", "Santa Clara", "Castroville", "Pomona", "Emer
+> yville", "Redwood City", "Santa Barbara")
+205.     replace region = "California" if country_code == "US" & inlist(city, "
+> San Jose", "South San Francisco", "Pasadena", "Irving", "La Cañada Flintridge
+> ", "Duarte", "Menlo Park", "Livermore")
+206.     replace region = "Massachusetts" if country_code == "US" & inlist(city
+> , "Boston", "Cambridge", "Medford", "Wellesley", "Falmouth", "Woods Hole", "F
+> ramingham", "Plymouth", "Worcester")
+207.     replace region = "Massachusetts" if country_code == "US" & inlist(city
+> , "Amherst", "Amherst Center", "Waltham", "Northampton", "South Hadley", "And
+> over", "Natick", "Newton")
+208.     replace region = "Maryland" if country_code == "US" & inlist(city, "Be
+> thesda", "Baltimore", "Silver Spring", "Greenbelt", "Gaithersburg", "Frederic
+> k", "Riverdale Park", "Rockville", "Annapolis")
+209.     replace region = "Maryland" if country_code == "US" & inlist(city, "To
+> wson", "College Park")
+210.     replace region = "Ohio" if country_code == "US" & inlist(city, "Toledo
+> ", "Dayton", "Oxford", "Cleveland", "Ardmore", "Oberlin", "Cincinnati")
+211.     replace region = "New Jersey" if country_code == "US" & inlist(city, "
+> New Brunswick", "Bridgewater", "Hoboken", "Raritan", "Glassboro", "Whippany",
+>  " Woodcliff Lake", "South Plainfield")
+212.     replace region = "New Jersey" if country_code == "US" & inlist(city, "
+> Montclair", "Princeton")
+213.     replace region = "Iowa" if country_code == "US" & inlist(city, "Ames",
+>  "Des Moines")
+214.     replace region = "Nevada" if country_code == "US" & inlist(city, "Reno
+> ")
+215.     replace region = "Oklahoma" if country_code == "US" & inlist(city, "Tu
+> lsa")
+216.     replace region = "Arizona" if country_code == "US" & inlist(city, "Pho
+> enix", "Tucson")
+217.     replace region = "Illinois" if country_code == "US" & inlist(city, "Ch
+> icago", "Evanston", "Downers Grove", "Hines")
+218.     replace region = "New York" if country_code == "US" & inlist(city, "Ne
+> w York", "Ithaca", "Bronx", "Rochester", "Cold Spring Harbor", "Syracuse", "U
+> pton", "Albany", "Manhasset")
+219.     replace region = "New York" if country_code == "US" & inlist(city, "Bi
+> nghamton", "Brookville", "Hempstead", "Saranac Lake", "New Hyde Park", "Pough
+> keepsie", "Buffalo", "Niskayuna")
+220.     replace region = "Connecticut" if country_code == "US" & inlist(city, 
+> "New Haven", "West Haven", "Fairfield", "Stamford")
+221.     replace region = "Oregon" if country_code == "US" & inlist(city, "Port
+> land")
+222.     replace region = "Alabama" if country_code == "US" & inlist(city, "Tus
+> kegee")
+223.     replace region = "District of Columbia" if country_code == "US" & inli
+> st(city, "Washington")
+224.     replace region = "North Carolina" if country_code == "US" & inlist(cit
+> y, "Durham", "Asheville", "Chapel Hill")
+225.     replace region = "South Carolina" if country_code == "US" & inlist(cit
+> y, "Greenville", "Aiken")
+226.     replace region = "Wisconsin" if country_code == "US" & inlist(city, "M
+> adison", "Milwaukee")
+227.     replace region = "Florida" if country_code == "US" & inlist(city, "Cor
+> al Gables", "Miami", "Sarasota", "Orlando", "Tampa")
+228.     replace region = "Maine" if country_code == "US" & inlist(city, "Lewis
+> ton")
+229.     replace region = "Washington" if country_code == "US" & inlist(city, "
+> Seattle", "Richland", "Bothell")
+230.     replace region = "Colorado" if country_code == "US" & inlist(city, "De
+> nver", "Boulder", "Fort Collins")
+231.     replace region = "Louisiana" if country_code == "US" & inlist(city, "N
+> ew Orleans")
+232.     replace region = "Delaware" if country_code == "US" & inlist(city, "Wi
+> lmington")
+233.     replace region = "Tennessee" if country_code == "US" & inlist(city, "M
+> emphis", "Oak Ridge", "Nashville")
+234.     replace region = "Georgia" if country_code == "US" & inlist(city, "Atl
+> anta", "Augusta", "Macon", "Decatur")
+235.     replace region = "Texas" if country_code == "US" & inlist(city, "Houst
+> on", "Dallas", "San Antonio", "The Woodlands", "Austin")
+236.     replace region = "New Mexico" if country_code == "US" & inlist(city, "
+> Los Alamos", "Carlsbad", "Albuquerque", "Santa Fe")
+237.     replace region = "Michigan" if country_code == "US" & inlist(city, "An
+> n Arbor", "Detroit", "Flint")
+238.     replace region = "Rhode Island" if country_code == "US" & inlist(city,
+>  "Providence")
+239.     replace region = "Hawaii" if country_code == "US" & inlist(city, "Hono
+> lulu")
+240.     replace region = "Missouri" if country_code == "US" & inlist(city, "St
+>  Louis", "Kirksville")
+241.     replace region = "Minnesota" if country_code == "US" & inlist(city, "M
+> inneapolis", "Saint Paul")
+242.     replace region = "Minnesota" if country_code == "US" & inlist(city, "R
+> ochester") & strpos(inst, "Mayo Clinic")>0 
+243.     replace region = "Virginia" if country_code == "US" & inlist(city, "Re
+> ston", "Williamsburg", "North Laurel", "Arlington", "Richmond", "Harrisonburg
+> ", "Front Royal", "Falls Church", "Charlottesville")
+244.     replace region = "Virginia" if country_code == "US" & inlist(city, "Ty
+> sons Corner", "Fiarfax")
+245.     replace region = "New Hampshire" if country_code == "US" & inlist(city
+> , "Hanover")
+246.     replace region = "Illinois" if country_code == "US" & inlist(city, "Le
+> mont", "North Chicago")
+247.     replace region = "Utah" if country_code == "US" & inlist(city, "Provo"
+> , "Salt Lake City")
+248.     replace region = "Missouri" if inst_id == "I4210102181"
+249.     replace region = "New Jersey" if inst_id == "I150569930"
+250.     replace region = "Maryland" if inst_id == "I166416128"
+251.     compress, nocoalesce
+252.     save ${temp}/pre_fill_msa_`time', replace
+253. 
+.     import delimited using ../external/geo/us_cities_states_counties.csv, cle
+> ar varnames(1)
+254.     gcontract stateshort statefull
+255.     drop _freq
+256.     drop if mi(stateshort)
+257.     rename statefull region
+258.     merge 1:m region using ${temp}/pre_fill_msa_`time', assert(1 2 3) keep
+> (2 3) nogen
+259.     replace stateshort =  "DC" if region == "District of Columbia"
+260.     replace stateshort =  "VI" if region == "Virgin Islands, U.S."
+261.     gen us_state = stateshort if country_code == "US"
+262.     replace city = "Saint Louis" if city == "St Louis"
+263.     replace city = "Winston Salem" if city == "Winston-Salem"
+264.     merge m:1 city us_state using ../external/geo/city_msa, assert(1 2 3) 
+> keep(1 3) nogen
+265.     replace msatitle = "Washington-Arlington-Alexandria, DC-VA-MD-WV"  if 
+> us_state == "DC"
+266.     replace msatitle = "New York-Newark-Jersey City, NY-NJ-PA" if city == 
+> "The Bronx" & us_state == "NY"
+267.     replace msatitle = "Miami-Fort Lauderdale-West Palm Beach, FL" if city
+>  == "Coral Gables" & us_state == "FL"
+268.     replace msatitle = "Springfield, MA" if city == "Amherst Center"
+269.     replace msatitle = "Hartford-West Hartford-East Hartford, CT" if city 
+> == "Storrs" & us_state == "CT"
+270.     replace msatitle = "Tampa-St. Petersburg-Clearwater, FL" if city == "T
+> emple Terrace" & us_state == "FL"
+271.     replace msatitle = "San Francisco-Oakland-Hayward, CA" if city == "Fos
+> ter City" & us_state == "CA"
+272.     gen msa_comb = msatitle
+273.     replace  msa_comb = "Research Triangle Park, NC" if msa_comb == "Durha
+> m-Chapel Hill, NC" | msa_comb == "Raleigh, NC" | city == "Res Triangle Pk" | 
+> city == "Research Triangle Park" | city == "Res Triangle Park"
+274.     replace  msa_comb = "Bay Area, CA" if inlist(msa_comb, "San Francisco-
+> Oakland-Hayward, CA", "San Jose-Sunnyvale-Santa Clara, CA")
+275.     replace msa_comb = "Rochester, MN" if strpos(inst, "Mayo Clinic") > 0 
+> & city == "Rochester" 
+276.     gen msa_c_world = msa_comb
+277.     replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")
+> -1) + ", US" if country == "United States" & !mi(msa_c_world)
+278.     replace msa_c_world = city + ", " + country_code if country_code != "U
+> S" & !mi(city) & !mi(country_code)
+279.     compress, nocoalesce
+280.     save ${output}/filled_in_panel_`time', replace
+281. end
+
+. 
+. program convert_year_to_qrtr
+  1.     use ${temp}/appended_pprs, clear
+  2.     gen year = yofd(dofq(qrtr))
+  3.     keep if inrange(year, 1945, 2023)
+  4.     drop if mi(qrtr) | mi(year)
+  5.     gcontract athr_id qrtr year
+  6.     drop _freq
+  7.     merge m:1 athr_id year using ${output}/filled_in_panel_year, keep(1 3)
+>  keepusing(country country_code city inst_id inst msatitle msa_comb msacode) 
+> nogen
+  8.     replace athr_id = subinstr(athr_id, "A", "", .)
+  9.     destring athr_id, replace
+ 10.     tsset athr_id qrtr 
+ 11.     tsfill
+ 12.     tostring athr_id, replace
+ 13.     replace athr_id = "A" + athr_id
+ 14.     replace year = yofd(dofq(qrtr)) 
+ 15.     foreach var in inst_id inst country_code country city msatitle msa_com
+> b msatitle msacode {
+ 16.         bys athr_id (qrtr) : replace  `var' = `var'[_n-1] if mi(`var') & !
+> mi(`var'[_n-1])
+ 17.     }
+ 18.     save ${output}/filled_in_panel_qrtr, replace
+ 19. end
+
+. main
+(0 observations deleted)

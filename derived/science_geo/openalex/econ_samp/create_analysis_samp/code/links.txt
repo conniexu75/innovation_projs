@@ -1,0 +1,3 @@
+./openalex/ | /export/scratch/cxu_sci_geo/clean_econs
+./insts/ | /export/scratch/cxu_sci_geo/create_econ_inst_hist
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
