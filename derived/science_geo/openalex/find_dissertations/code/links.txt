@@ -1,0 +1,3 @@
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
+./pprs/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/scrape_athr_inst_hist/output/
+./athrs/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/gather_author_pprs/output/
