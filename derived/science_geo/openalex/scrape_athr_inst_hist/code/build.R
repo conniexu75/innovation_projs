@@ -12,13 +12,13 @@ pmid_file <- read_dta('../external/ids/list_of_works.dta')
 nr <- nrow(pmid_file)
 split_pmid <- split(pmid_file, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 num_file <- length(split_pmid)
-for (q in 3499:3500) {
+for (q in 4328:4328) {
     print(q)
    ## pull open alex data from pmids
    works_from_pmids <- oa_fetch(
      entity = "works",
      mailto = "conniexu@g.harvard.edu",
-     id  = split_pmid[[q]] %>% pull(id),
+     id  = split_pmid[[q]] %>% filter(id != "id") %>% pull(id),
      output = "list"
    )
    ## pull open_alex author ids associated with each author for each paper
@@ -31,6 +31,18 @@ for (q in 3499:3500) {
        }
        if (length(works_from_pmids[[i]][["publication_date"]])==0) {
          pub_date <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), "") %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["type"]])!=0) {
+         pub_type <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), works_from_pmids[[i]][["type"]]) %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["type"]])==0) {
+         pub_type <- replicate(n=length(works_from_pmids[[i]][["type"]]), "") %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["type_crossref"]])!=0) {
+         pub_type_crossref <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), works_from_pmids[[i]][["type_crossref"]]) %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["type_crossref"]])==0) {
+         pub_type_crossref <- replicate(n=length(works_from_pmids[[i]][["type_crossref"]]), "") %>% data.frame
        }
        which_athr <- ave(1:length(works_from_pmids[[i]][["authorships"]]), ids, FUN = seq_along) %>% data.frame
        N_athrs <- length(works_from_pmids[[i]][["authorships"]])
@@ -65,10 +77,10 @@ for (q in 3499:3500) {
            append(athr_name,as.character(works_from_pmids[[i]][["authorships"]][[j]][["author"]][["display_name"]]))
          }
        }) %>% data.frame %>% t()
-       cbind(ids, pub_date, which_athr, athr_id, athr_name, raw_affl, num_affls)
+       cbind(ids, pub_date,pub_type,pub_type_crossref, which_athr, athr_id, athr_name, raw_affl, num_affls)
      }
    }) %>% bind_rows()
-   colnames(au_ids) <- c("id", "pub_date", "which_athr","athr_id", "athr_name", "raw_affl", "num_affls")
+   colnames(au_ids) <- c("id", "pub_date","pub_type", "pub_type_crossref", "which_athr","athr_id", "athr_name", "raw_affl", "num_affls")
    au_ids <- au_ids %>%
      mutate(num_affls = replace(num_affls, num_affls == 0, 1)) %>%
      uncount(num_affls)
