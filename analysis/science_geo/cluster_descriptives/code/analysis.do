@@ -14,13 +14,16 @@ global ln_pat_name "Log Paper-to-Patent Citations"
 global msa_size_name "Cluster Size"
 global ln_x_name "Log Cluster Size"
 global time year
+global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
+
 
 program main
-    foreach s in year year_firstlast {
+    foreach s in year_firstlast {
         sample_desc, samp(`s')
         maps, samp(`s')
         raw_bs, samp(`s')
         regression, samp(`s')
+        firm_externalities, samp(`s')
         output_tables, samp(`s')
     }
 end
@@ -340,6 +343,9 @@ program regression
     foreach fe in "${time} msa field" "${time} msa field field#${time}" "${time} msa field field#${time} msa#field" "${time} msa field field#${time} msa#field inst" "${time} msa field field#${time} msa#field inst athr_id" {
         reghdfe `reg_eq', absorb(`fe') vce(cluster msa)
         mat coef_`samp' = nullmat(coef_`samp'), (`mat_est' \ . \ . \e(N))
+        if "`fe'" == "${time} msa field field#${time} msa#field inst athr_id" {
+            global final_elasticity = _b[ln_x]
+        }
         local slope : dis %3.2f _b[ln_x]
         if "`samp'" == "year" {
             binscatter2  ln_y ln_x ,controls(avg_team_size) absorb(year msa field year_field msa_field athr_id) ytitle("Log Output") xtitle("Log Cluster Size") legend(on order(- "Slope = `slope'") pos(5) ring(0) lwidth(none))
@@ -364,13 +370,145 @@ program regression
     mat field_`samp' = nullmat(field_`samp'), (`mat_est' \ e(N))*/
 end
 
+program firm_externalities
+    syntax, samp(str)
+    // create clusters 
+    use if !mi(msa_comb) & !mi(inst_id) using ${year_insts}/filled_in_panel_year, clear
+    bys inst_id msa_comb year athr_id: gen count = _n == 1
+    bys inst_id msa_comb year : egen inst_athrs = total(count) 
+    drop count 
+    bys msa_comb year athr_id: gen count = _n == 1
+    bys msa_comb year : egen msa_size = total(count) 
+    drop count
+    bys inst_id msa_comb year: gen count = _n == 1
+    bys msa_comb year: gegen num_insts = total(count)
+    contract msa_comb inst_id inst year inst_athrs msa_size
+    bys msa_comb year: egen sum_insts = total(inst_athrs)
+    assert sum_insts == msa_size
+    drop sum_insts _freq
+    save ../temp/inst_cluster_size, replace
+
+    use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/athr_panel_full_comb_`samp', clear 
+    drop msa_size
+    merge m:1 inst_id msa_comb year  using ../temp/inst_cluster_size , assert(2 3) keep(3) nogen
+    contract inst_id inst msa_comb year msa_size inst_athrs 
+    gisid inst_id msa_comb year
+    drop _freq
+    gen wo_inst_cluster = msa_size - inst_athrs
+    gen ln_wo_inst = ln(wo_inst_cluster)
+    gen ln_cluster_diff = ln(msa_size) - ln_wo_inst 
+    gen firm_elasticity = ln_cluster_diff * ${final_elasticity}
+    drop if mi(firm_elasticity)
+    bys msa_comb year: gen num_insts = _N
+    drop if num_insts == 1 
+    // pick a year and report some top ones . t = 2018
+    preserve
+    keep if year == 2018
+    gsort -inst_athrs
+    li msa_comb inst inst_athrs msa_size firm_elasticity in 1/10
+    mkmat firm_elasticity in 1/10, mat(inst_elasticities_`samp')
+    sum firm_elasticity
+    restore
+    bys msa_comb year: egen tot_firm_elasticity = total(firm_elasticity)
+    gen perc = firm_elasticity/tot_firm_elasticity*100
+    bys msa_comb year: egen tot = sum(perc)
+    assert round(tot) == 100
+    drop tot
+    keep if inlist(msa_comb, "Boston-Cambridge-Newton, MA-NH", "Bay Area, CA", "Washington-Arlington-Alexandria, DC-VA-MD-WV", "Baltimore-Columbia-Towson, MD")
+    glevelsof msa_comb, local(city)
+    hashsort msa_comb year -perc
+    gen group = 1 if msa_comb == "Baltimore-Columbia-Towson, MD" & inst == "Johns Hopkins University"
+    replace group = 2 if msa_comb == "Baltimore-Columbia-Towson, MD" & inst == "University of Maryland, Baltimore"
+    replace group = 3 if msa_comb == "Baltimore-Columbia-Towson, MD" & mi(group)
+    replace group = 1 if msa_comb == "Boston-Cambridge-Newton, MA-NH" & inst == "Harvard University"
+    replace group = 2 if msa_comb == "Boston-Cambridge-Newton, MA-NH" & inst == "Mass General Brigham"
+    replace group = 3 if msa_comb == "Boston-Cambridge-Newton, MA-NH" & inst == "Massachusetts Institute of Technology"
+    replace group = 4 if msa_comb == "Boston-Cambridge-Newton, MA-NH" & mi(group)
+    replace group = 1 if msa_comb == "Bay Area, CA" & inst == "Stanford University"
+    replace group = 2 if msa_comb == "Bay Area, CA" & inst == "University of California, San Francisco"
+    replace group = 3 if msa_comb == "Bay Area, CA" & inst == "University of California, Berkeley"
+    replace group = 4 if msa_comb == "Bay Area, CA" & mi(group)
+    replace group = 1 if msa_comb == "Washington-Arlington-Alexandria, DC-VA-MD-WV" & inst == "National Institutes of Health"
+    replace group = 2 if msa_comb == "Washington-Arlington-Alexandria, DC-VA-MD-WV" & inst == "National Aeronautics and Space Administration"
+    replace group = 3 if msa_comb == "Washington-Arlington-Alexandria, DC-VA-MD-WV" & mi(group)
+    replace inst = "UCSF" if inst == "University of California, San Francisco"
+    replace inst = "UC Berkeley" if inst == "University of California, Berkeley"
+    replace inst = "MIT" if inst == "Massachusetts Institute of Technology"
+    foreach c in `city' {
+        if "`c'" == "Boston-Cambridge-Newton, MA-NH" local suf "bos"
+        if "`c'" == "Bay Area, CA" local suf "bay"
+        if "`c'" == "Washington-Arlington-Alexandria, DC-VA-MD-WV" local suf "dc"
+        if "`c'" == "Baltimore-Columbia-Towson, MD" local suf "balt"
+        preserve
+        keep if msa_comb == "`c'"
+        collapse (sum) perc (firstnm) inst inst_id, by(msa_comb year group)
+        hashsort msa_comb year -group
+        bys year: gen stack_perc = sum(perc)
+        local stacklines
+        qui xtset group year
+        sum group
+        local max_grp = r(max)
+        qui levelsof group, local(rank_grps)
+        local items = `r(r)'
+        foreach x of local rank_grps {
+            colorpalette carto Teal, intensify(0.85)  n(`items') nograph
+            local stacklines `stacklines' area stack_perc year if group == `x', fcolor("`r(p`x')'") lcolor(white) lwidth(*0.3) ||
+        }
+        gen labely = . 
+        gen rev_group = -group
+        if `max_grp' == 4 {
+             qui bys year (rev_group): replace labely = perc/2 if group == 4
+             qui bys year (rev_group): replace labely = perc/2 + perc[_n-1] if group == 3
+             qui bys year (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] if group == 2
+             qui bys year (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] + perc[_n-3] if group == 1
+        }
+        if `max_grp' == 3 {
+             qui bys year (rev_group): replace labely = perc/2 if group == 3
+             qui bys year (rev_group): replace labely = perc/2 + perc[_n-1] if group == 2
+             qui bys year (rev_group): replace labely = perc/2 + perc[_n-1] + perc[_n-2] if group == 1
+        }
+        gen labely_lab = "Everywhere else" if group == `max_grp'
+        replace labely_lab = inst if mi(labely_lab)
+        local w = 27
+        graph tw `stacklines' (scatter labely year if year == 2022, ms(smcircle) ///
+          msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
+          ytitle("Relative Productivity Spillover Effect in Cluster", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(1945(2)2022, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+          graphregion(margin(r+27)) plotregion(margin(zero)) ///
+          legend(off)
+        qui graph export ../output/figures/elasticity_trend_`suf'.pdf , replace
+        restore
+    }
+    hashsort inst_id year
+    tw line firm_elasticity year if inst == "Harvard University", xlab(1945(5)2022, angle(45) labsize(vsmall)) ylab(0.04(0.02)0.16, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("Harvard University Productivity Externality", size(vsmall))
+    graph export ../output/figures/harvard_elasticity_trend.pdf, replace 
+    tw line firm_elasticity year if inst == "Massachusetts Institute of Technology", xlab(1945(5)2022, angle(45) labsize(vsmall)) ylab(0.01(0.01)0.05, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("MIT Productivity Externality", size(vsmall))
+    graph export ../output/figures/mit_elasticity_trend.pdf, replace 
+    tw line firm_elasticity year if inst == "Mass General Brigham", xlab(1945(5)2022, angle(45) labsize(vsmall)) ylab(0.01(0.01)0.05, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("MGH Productivity Externality", size(vsmall))
+    graph export ../output/figures/mgh_elasticity_trend.pdf, replace 
+    
+    hashsort inst_id year
+    tw line firm_elasticity year if inst == "Stanford University", xlab(1945(5)2022, angle(45) labsize(vsmall)) ylab(0.04(0.01)0.08, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("Stanford University Productivity Externality", size(vsmall))
+    graph export ../output/figures/stanford_elasticity_trend.pdf, replace 
+
+    hashsort inst_id year
+    tw line firm_elasticity year if inst == "National Institutes of Health", xlab(1945(5)2022, angle(45) labsize(vsmall)) ylab(0.02(0.02)0.12, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("NIH Productivity Externality", size(vsmall))
+    graph export ../output/figures/nih_elasticity_trend.pdf, replace 
+
+    hashsort inst_id year
+    tw line firm_elasticity year if inst == "Johns Hopkins University", xlab(1945(5)2022, angle(45) labsize(vsmall)) ylab(0.20(0.02)0.30, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("Johns Hopkins University Productivity Externality", size(vsmall))
+    graph export ../output/figures/jhu_elasticity_trend.pdf, replace 
+
+    hashsort inst_id year
+    tw line firm_elasticity year if inst == "University of Michigan–Ann Arbor", xlab(1945(5)2022, angle(45) labsize(vsmall)) ylab(0.50(0.05)0.80, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("University of Michigan-Ann Arbor Productivity Externality", size(vsmall))
+    graph export ../output/figures/umich_elasticity_trend.pdf, replace 
+end
+
 program output_tables
     syntax, samp(str) 
-    foreach file in top_10clus top_30clus coef field city_stats { 
+    foreach file in top_10clus top_30clus coef field city_stats inst_elasticities { 
          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
            title(<tab:`file'_`samp'>) format(%20.4f) replace
     }
-
 end
 ** 
 main

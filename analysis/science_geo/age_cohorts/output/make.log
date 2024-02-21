@@ -1,0 +1,1304 @@
+--------------------------------------------------------------------------------
+Makelog started: 2024-02-19 02:03:38
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/age_cohorts/code
+--------------------------------------------------------------------------------
+External links successfully created!
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/age_cohorts/co
+> de/analysis.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
+
+. pause on
+
+. set seed 8975
+
+. global temp "/export/scratch/cxu_sci_geo/age_cohort"
+
+. global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
+
+. global y_name "Productivity"
+
+. global pat_adj_wt_name "Patent-to-Paper Citations"
+
+. global ln_patent_name "Log Patent-to-Paper Citations"
+
+. global ln_y_name "Log Productivity"
+
+. global x_name "Cluster Size"
+
+. global ln_x_name "Log Cluster Size"
+
+. global time year 
+
+. 
+. program main
+  1.     foreach t in year_firstlast {
+  2.         find_age, samp(`t')
+  3.         make_movers, samp(`t')
+  4.         sum_stats, samp(`t')
+  5.         qui output_tables, samp(`t')
+  6.         event_studies, samp(`t')
+  7.     }
+  8. end
+
+. 
+. program find_age
+  1.     syntax, samp(str)
+  2.     // find your publishing birth year first
+.     use ${${time}_insts}/filled_in_panel_all_${time}, clear
+  3.     gcontract athr_id year
+  4.     drop _freq 
+  5.     bys athr_id : gen year_rank = _n
+  6.     by athr_id: egen first_yr = min(year)
+  7.     by athr_id: gen second_yr = year if year_rank == 2
+  8.     by athr_id: egen last_yr = max(year)
+  9.     hashsort athr_id second_yr
+ 10.     by athr_id: replace second_yr = second_yr[_n-1] if mi(second_yr)
+ 11.     keep if year_rank == 1 
+ 12.     gen first_second_diff = second_yr - first_yr
+ 13.     replace first_yr = second_yr if  first_second_diff >= 10 & !mi(first_s
+> econd_diff)
+ 14.     gisid athr_id 
+ 15.     gcontract athr_id first_yr last_yr
+ 16.     drop _freq
+ 17.     // find your pubishing in the top 15 birthday
+.     merge 1:m athr_id using ../external/samp/athr_panel_full_comb_`samp', ass
+> ert(1 3) keep(3) nogen 
+ 18.     bys athr_id: egen first_yr_in_top15 = min(year)
+ 19.     gcontract athr_id first_yr last_yr first_yr_in_top15
+ 20.     drop _freq
+ 21.     merge 1:1 athr_id using ../external/dissertation/appended_pprs, assert
+> (1 2 3) keep(1 3) nogen
+ 22.     gunique athr_id 
+ 23.     local N_athrs = r(unique)
+ 24.     gunique athr_id if !mi(phd_year)
+ 25.     di "% of US authors with disseration year: " r(unique)/`N_athrs'*100
+ 26.     gunique athr_id if dissertation_tag == 1  
+ 27.     di "% of US authors with disseration tag: " r(unique)/`N_athrs'*100
+ 28.     gunique athr_id if dissertation_tag == 0 & strpos(lwr_title, "disserta
+> tion")>0 | strpos(lwr_title, "thesis")>0  
+ 29.     di "% of US authors with disseration title " r(unique)/`N_athrs'*100
+ 30.     compress, nocoalesce
+ 31.     gen publishing_age= 2023-first_yr + 1 
+ 32.     gen publishing_lifespan= last_yr-first_yr + 1 
+ 33.     gen post_phd = phd_year - first_yr + 1
+ 34.     gen top15_post_phd = phd_year - first_yr_in_top15 + 1
+ 35.     gen top15_pub_diff = first_yr_in_top15 - first_yr
+ 36.     gen post_phd_lifespan = last_yr - phd_year + 1  
+ 37.     gegen publishing_lifespan99 = pctile(publishing_lifespan), p(99)
+ 38.     gegen post_phd_lifespan99 = pctile(post_phd_lifespan), p(99)
+ 39.     gen windsorize = publishing_lifespan >= publishing_lifespan99 | (post_
+> phd_lifespan >= post_phd_lifespan99 & !mi(phd_year))
+ 40.     foreach var in first_yr last_yr first_yr_in_top15 phd_year publishing_
+> age publishing_lifespan post_phd top15_post_phd post_phd_lifespan {
+ 41.         replace `var' = . if windsorize == 1  
+ 42.     }
+ 43.     gen cohort_bin = floor(phd_year/10)*10
+ 44.     replace cohort_bin = cohort_bin + 5 if phd_year >= cohort_bin+5
+ 45.     preserve
+ 46.     merge 1:m athr_id using ../external/samp/athr_panel_full_comb_`samp', 
+> assert(1 3) keep(3) nogen 
+ 47.     gen age = year - first_yr + 1 + 25  
+ 48.     gcollapse (mean) impact_cite_affl_wt, by(age)
+ 49.     tw scatter impact_cite_affl_wt age if age <= 85 , xtitle("Age (based o
+> n first publication)", size(small))  ytitle("Average Productivity")
+ 50.     graph export ../output/figures/productivity_pub_age.pdf, replace
+ 51.     restore
+ 52.     preserve
+ 53.     merge 1:m athr_id using ../external/samp/athr_panel_full_comb_`samp', 
+> assert(1 3) keep(3) nogen 
+ 54.     gen age = year - phd_year + 1 + 28  
+ 55.     gcollapse (mean) impact_cite_affl_wt, by(age)
+ 56.     tw scatter impact_cite_affl_wt age if age <= 85 , xtitle("Age (based o
+> n PhD)", size(small))  ytitle("Average Productivity")
+ 57.     graph export ../output/figures/productivity_phd_age.pdf, replace
+ 58.     restore
+ 59.     save ../temp/age_`samp', replace
+ 60. end
+
+. 
+. program make_movers
+  1.     syntax, samp(str)
+  2.     use ${${time}_insts}/filled_in_panel_${time}, clear
+  3.     keep if country_code == "US"
+  4.     hashsort athr_id year
+  5.     gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_com
+> b[_n-1]
+  6.     bys athr_id: egen num_moves = total(place_count)
+  7.     bys athr_id (year): gen which_place = sum(place_count)
+  8.     bys athr_id: gen athr_counter =  _n == 1
+  9.     replace num_moves = num_moves-1
+ 10.     bys athr_id (year) : gen move_year = year if place_count == 1  & _n !=
+>  1
+ 11.     gcontract athr_id move_year num_moves 
+ 12.     drop _freq
+ 13.     drop if mi(move_year)
+ 14.     drop if num_moves <= 0
+ 15.     save ../temp/movers, replace
+ 16.     
+.     use if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_ful
+> l_comb_`samp', clear 
+ 17.     hashsort athr_id year
+ 18.     gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_com
+> b[_n-1]
+ 19.     bys athr_id: egen num_moves = total(place_count)
+ 20.     bys athr_id (year): gen which_place = sum(place_count)
+ 21.     bys athr_id: gen athr_counter =  _n == 1
+ 22.     replace num_moves = num_moves-1
+ 23.     gen mover = num_moves > 0 
+ 24.     tab num_moves if athr_counter == 1 & mover == 1
+ 25.     tab mover if athr_counter == 1
+ 26.     bys athr_id year: gen athr_year_counter =  _n == 1
+ 27.     tab mover if athr_year_counter == 1
+ 28.     replace which_place = 0 if mover == 0
+ 29.     replace which_place = 1 if which_place == 0 & mover == 1
+ 30.     bys athr_id: egen min_which_place =min(which_place)
+ 31.     replace which_place = which_place + 1 if mover == 1 & min_which_place 
+> == 0
+ 32.     drop min_which_place
+ 33.     hashsort athr_id year 
+ 34.     bys athr_id (year): gen origin = 1 if which_place == 1
+ 35.     gen dest = place_count == 1 & origin != 1 & mover == 1
+ 36.     bys athr_id (year): replace origin = 1 if mover == 1 & place_count[_n+
+> 1] == 1 & mi(origin) 
+ 37.     hashsort athr_id which_place origin
+ 38.     bys athr_id which_place:  replace origin = origin[_n-1] if mi(origin) 
+> & !mi(origin[_n-1])
+ 39. 
+.     preserve
+ 40.     keep if mover == 1 & num_moves == 1 
+ 41.     gcontract athr_id year
+ 42.     drop _freq
+ 43.     bys athr_id: egen min_year = min(year)
+ 44.     bys athr_id: egen max_year = max(year)
+ 45.     gcontract athr_id min_year max_year
+ 46.     drop _freq
+ 47.     save ../temp/single_movers_`samp', replace
+ 48.     merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
+ 49.     keep if move_year >= min_year & move_year <= max_year
+ 50.     gcontract athr_id move_year 
+ 51.     drop _freq
+ 52.     bys athr_id: gen N = _n 
+ 53.     keep if N == 1
+ 54.     save ../temp/mover_xw, replace
+ 55.     restore
+ 56. 
+.     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(1 3) 
+ 57.     bys inst_id year: egen has_mover = max(mover == 1)
+ 58.     drop if has_mover == 0
+ 59.     gen analysis_cond = mover == 1 & num_moves == 1 & ((mover == 0 & _merg
+> e == 1) | (mover == 1 & _merge == 3))
+ 60.     drop _merge
+ 61.     save ${temp}/mover_temp_`samp' , replace
+ 62. end
+
+. 
+. program sum_stats
+  1.     syntax, samp(str)
+  2.     use ${temp}/mover_temp_`samp' , clear  
+  3.     merge m:1 athr_id using ../temp/age_`samp', assert(2 3) keep(3) nogen
+  4.     // plot stats at the author level
+.     preserve
+  5.     gcontract athr_id analysis_cond publishing_age publishing_lifespan pos
+> t_phd top15_post_phd phd_year first_yr first_yr_in_top15 last_yr top15_pub_di
+> ff post_phd_lifespan
+  6.     drop _freq
+  7.     gisid athr_id
+  8.     corr first_yr phd_year
+  9.     local n = r(N)
+ 10.     local corr: di %3.2f r(rho) 
+ 11.     binscatter2 first_yr phd_year, xtitle("PhD Graduation Year", size(smal
+> l)) ytitle("Publishing Birth Year", size(small)) legend(on  order(- "N = `n'"
+>  "corr. = `corr'") pos(11) ring(0) region(fcolor(none)) size(small)) xlab(194
+> 5(5)2022, labsize(small)) ylab(1945(5)2022, labsize(small))
+ 12.     graph export ../output/figures/bs_phd_pub_yr.pdf, replace 
+ 13.     gisid athr_id 
+ 14.     local gap 5
+ 15.     local pos 10
+ 16.     foreach var in phd_year first_yr publishing_age post_phd top15_post_ph
+> d first_yr_in_top15 top15_pub_diff {
+ 17.         sum `var', d
+ 18.         local min_year = r(min)
+ 19.         local max_year = r(max)
+ 20.         qui sum `var' if analysis_cond == 1 , d
+ 21.         local mover_mean: di %3.2f r(mean)
+ 22.         local mover_med: di %3.2f r(p50)
+ 23.         local mover_N = r(N)
+ 24.         qui sum `var' if analysis_cond == 0 , d
+ 25.         local nonmover_mean: di %3.2f r(mean)
+ 26.         local nonmover_med: di %3.2f r(p50)
+ 27.         local nonmover_N = r(N)
+ 28.         if "`var'" == "phd_year" local xtit = "PhD Graduation Year"
+ 29.         if "`var'" == "first_yr" {
+ 30.             local xtit = "Publishing Birth Year"
+ 31.             local gap = 10
+ 32.         }
+ 33.         if "`var'" == "first_yr_in_top15" {
+ 34.             local xtit = "Top 15 First/Last Author Publishing Birth Year"
+ 35.             local gap = 4 
+ 36.             local pos = 11
+ 37.         }
+ 38.         if "`var'" == "publishing_age" {
+ 39.             local xtit = "Publishing Age (2023-Publishing Birth Year)"
+ 40.             local gap = 10
+ 41.             local pos = 1
+ 42.         }
+ 43.         if "`var'" == "post_phd" {
+ 44.             local xtit = "PhD Graduation Year - Publishing Birth Year"
+ 45.             local gap = 10
+ 46.         }
+ 47.         if "`var'" == "top15_post_phd" {
+ 48.             local xtit = "PhD Graduation Year - Top 15 First/Last Author P
+> ublishing Birth Year"
+ 49.             local gap = 10
+ 50.         }
+ 51.         if "`var'" == "top15_pub_diff" {
+ 52.             local xtit = "Years it Takes to Publish in the Top 15"
+ 53.             local gap = 10
+ 54.             local pos = 1
+ 55.         }
+ 56.         tw hist `var' if analysis_cond == 1 , frac color(eltgreen%60) xlin
+> e(`mover_mean', lcolor(eltgreen) lpattern(dash)) || ///
+>            hist `var' if analysis_cond == 0, frac color(dkorange%60)  xline(`
+> nonmover_mean', lcolor(dkorange) lpattern(dash)) ///
+>            ytitle("Share of authors", size(vsmall)) xtitle("`xtit'", size(vsm
+> all)) xlab(`min_year'(`gap')`max_year', labsize(vsmall) angle(45)) ylab(, lab
+> size(vsmall)) ///
+>            legend(on label(1 "Movers: " "N = `mover_N'" "mean = `mover_mean'"
+>  "median = `mover_med'") label(2 "Nonmovers: " "N = `nonmover_N'" "mean = `no
+> nmover_mean'" "median = `nonmover_med'") pos(`pos') ring(0) size(vsmall) regi
+> on(fcolor(none)))
+ 57.         graph export ../output/figures/`var'_dist_`samp'.pdf, replace
+ 58.     }
+ 59.     restore
+ 60. 
+.     // create tables of phd_year ?
+.     preserve
+ 61.     gcontract athr_id cohort_bin
+ 62.     drop _freq
+ 63.     drop if mi(cohort_bin)
+ 64.     gcontract cohort_bin, freq(num_athrs)
+ 65.     sum num_athrs
+ 66.     gen perc = num_athrs/r(sum)*100
+ 67.     mkmat cohort_bin num_athrs perc, mat(cohort_dist_`samp')
+ 68.     restore
+ 69. 
+.     preserve
+ 70.     gcontract athr_id publishing_age 
+ 71.     drop _freq
+ 72.     gcontract publishing_age, freq(num_athrs)
+ 73.     sum num_athrs
+ 74.     gen perc = num_athrs/r(sum)*100
+ 75.     mkmat publishing_age num_athrs perc, mat(pub_age_dist_`samp')
+ 76.     restore
+ 77.     
+.     gen patented = pat_wt > 0
+ 78.     gegen msa = group(msa_comb)
+ 79.     gen ln_y = ln(impact_cite_affl_wt)
+ 80.     gen ln_x = ln(msa_size)
+ 81.     gen ln_patent = ln(pat_adj_wt)
+ 82.     rename impact_cite_affl_wt y
+ 83.     rename msa_size x
+ 84. 
+.     // individual level stats
+.     gen ln_affl_wt = ln(affl_wt)
+ 85.     gcollapse (mean) msa_y = y msa_x = x msa_ln_y = ln_y msa_ln_x = ln_x m
+> sa_ln_patent = ln_patent msa_patent = pat_adj_wt msa_patent_rate = patented m
+> sa_affl_wt = affl_wt msa_ln_affl_wt = ln_affl_wt (firstnm) msa , by(inst_id $
+> {time}) 
+ 86.     save ${temp}/msa_`samp'_collapsed, replace
+ 87. 
+.     use if analysis_cond == 1  using ${temp}/mover_temp_`samp' , clear  
+ 88.     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
+ 89.     gen ln_y = ln(impact_cite_affl_wt)
+ 90.     gen ln_x = ln(msa_size)
+ 91.     gen ln_patent = ln(pat_adj_wt)
+ 92.     gen ln_affl_wt = ln(affl_wt)
+ 93.     gen patented = pat_wt > 0
+ 94.     hashsort athr_id which_place year
+ 95.     rename impact_cite_affl_wt y
+ 96.     rename msa_size x
+ 97.     gen rel = year - move_year
+ 98.     foreach var in y x  ln_x ln_y ln_patent ln_affl_wt patented {
+ 99.         bys athr_id which_place: egen avg_`var' = mean(`var') 
+100.     }
+101.     hashsort athr_id which_place -year
+102.     gduplicates drop athr_id which_place, force
+103.     rename year current_year
+104.     gen year = current_year if which_place == 1
+105.     replace year = move_year if which_place == 2
+106.     merge m:1 inst_id year using ${temp}/msa_`samp'_collapsed, assert(1 2 
+> 3) keep(3) nogen
+107.     hashsort athr_id which_place year
+108.     foreach var in msa_ln_y msa_ln_x msa_ln_patent avg_ln_y avg_ln_x avg_l
+> n_patent {
+109.         if strpos("`var'", "msa_") > 0 {
+110.             local type "Destination-Origin Difference in"
+111.             local stem = subinstr("`var'", "msa_","",.)
+112.         }
+113.         if strpos("`var'", "avg_") > 0 {
+114.             local type "Change in"
+115.             local stem = subinstr("`var'", "avg_","",.)
+116.         }
+117.         by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - `var
+> '
+118.     }
+119.     gcontract athr_id avg_ln_y_diff avg_ln_x_diff msa_ln_y_diff msa_ln_x_d
+> iff move_year
+120.     drop _freq
+121.     drop if mi(avg_ln_y_diff)
+122.     save ../temp/dest_origin_changes, replace
+123. end
+
+. 
+. program event_studies 
+  1.     syntax, samp(str) 
+  2.     cap mat drop _all  
+  3.     use if analysis_cond == 1 using ${temp}/mover_temp_`samp' , clear  
+  4.     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
+  5.     merge m:1 athr_id using ../temp/age_`samp', assert(2 3) keep(3) nogen
+  6.     keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size whi
+> ch_place inst_id move_year publishing_age publishing_lifespan post_phd top15_
+> post_phd phd_year first_yr first_yr_in_top15 last_yr top15_pub_diff post_phd_
+> lifespan cohort_bin
+  7.     hashsort athr_id year
+  8.     gen rel = year - move_year
+  9.     merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3)
+>  nogen
+ 10.     hashsort athr_id year
+ 11.     gegen msa = group(msa_comb)
+ 12.     rename inst inst_name
+ 13.     gegen inst = group(inst_id)
+ 14.     gen ln_y = ln(impact_cite_affl_wt)
+ 15.     forval i = 1/10 {
+ 16.         gen lag`i' = 1 if rel == -`i'
+ 17.         gen lead`i' = 1 if rel == `i'
+ 18.     }
+ 19.     ds lead* lag*
+ 20.     foreach var in `r(varlist)' {
+ 21.         replace `var' = 0 if mi(`var')
+ 22.         replace `var' = `var'*msa_ln_y_diff
+ 23.     }
+ 24.     gen treat = msa_ln_y_diff if rel == 0  
+ 25.     replace treat = 0 if mi(treat)
+ 26.     local leads
+ 27.     local lags
+ 28.     forval i = 1/10 {
+ 29.         local leads `leads' lead`i'
+ 30.         local lags lag`i' `lags'
+ 31.     }
+ 32.     gunique athr_id 
+ 33.     local num_movers = r(unique)
+ 34.     // assume you're 25 when you first publish 
+.     // assume you're 28 when you graduate your phd
+.     gen move_age_pub = move_year - first_yr  + 1 + 25
+ 35.     gen move_age_phd = move_year - phd_year + 1 + 28 
+ 36. *    replace move_age_phd = . if move_age_phd <=0 
+.     bys athr_id: gen counter = _n == 1
+ 37.     corr move_age_pub move_age_phd if counter == 1  
+ 38.     local n = r(N)
+ 39.     local corr: di %3.2f r(rho) 
+ 40.     binscatter2 move_age_pub move_age_phd if counter == 1 , xtitle("Move A
+> ge (based on PhD)", size(small)) ytitle("Move Age (based on Publishing Birth 
+> Year)", size(small)) legend(on  order(- "N = `n'" "corr. = `corr'") pos(11) r
+> ing(0) region(fcolor(none)) size(small)) xlab(, labsize(small)) ylab(, labsiz
+> e(small))
+ 41.     graph export ../output/figures/bs_phd_pub_move_yr.pdf, replace 
+ 42.     foreach var in move_age_pub move_age_phd {
+ 43.         sum `var' if counter == 1 , d
+ 44.         local N = r(N)
+ 45.         local median : dis %3.2f r(p50) 
+ 46.         local mean : dis %3.2f r(mean)
+ 47.         tw hist `var' if counter == 1 & `var' > 0, frac ytitle("Share of m
+> overs", size(vsmall)) xtitle("Move Age", size(vsmall)) color(edkblue) legend(
+> on order(- "N = `N'" ///
+>                         "Mean = `mean'" ///
+>                         "Median = `median'") pos(1) ring(0) size(vsmall) regi
+> on(fcolor(none))) xlab(, labsize(vsmall)) ylab(, labsize(vsmall))
+ 48.         graph export ../output/figures/`var'.pdf, replace
+ 49.     }
+ 50.     qui sum move_age_pub if counter == 1, d
+ 51.     gen old = move_age_pub >= r(p50) 
+ 52.     gen young = move_age_pub < r(p50) 
+ 53.     qui sum move_age_phd if counter == 1 & !mi(move_age_phd), d
+ 54.     gen old_phd = move_age_phd >= r(p50) if !mi(move_age_phd)
+ 55.     gen young_phd = move_age_phd < r(p50) if !mi(move_age_phd)
+ 56.     foreach stem in "" "_phd"  {
+ 57.         sum msa_ln_y_diff if old`stem' == 1 & counter == 1
+ 58.         local N_old = r(N)
+ 59.         local mean_old :di %3.2f r(mean)
+ 60.         sum msa_ln_y_diff if young`stem' == 1& counter == 1
+ 61.         local N_young = r(N)
+ 62.         local mean_young : di %3.2f r(mean)
+ 63.         graph tw hist msa_ln_y_diff if old`stem' == 1& counter == 1 , frac
+>  color(edkblue) xline(`mean_old', lpattern(dash)) || ///
+>            hist msa_ln_y_diff if young`stem' == 1 & counter == 1 , frac color
+> (lavender%50) xline(`mean_young', lpattern(dash)) ytitle("Share of movers", s
+> ize(vsmall)) xtitle("Destination-Origin Diff in Log Productivity", size(vsmal
+> l))  legend(on order(- "N Old = `N_old'" ///
+>                         "Mean Old = `mean_old'" ///
+>                         "N Young = `N_young'" ///
+>                         "Mean Young = `mean_young'") pos(1) ring(0) size(vsma
+> ll) region(fcolor(none))) xlab(, labsize(vsmall)) ylab(, labsize(vsmall))
+ 64. 
+.         graph export ../output/figures/move_size`stem'.pdf, replace
+ 65.         foreach c in "inrange(rel, -10,10) & old`stem' ==1" "inrange(rel, 
+> -10,10) & young`stem' == 1" { 
+ 66.             cap mat drop _all 
+ 67.             local timeframe 10
+ 68.             preserve
+ 69.             if "`c'" == "inrange(rel, -10,10) & old`stem' ==1" local suf =
+>  "old" 
+ 70.             if "`c'" == "inrange(rel, -10,10) & young`stem' == 1" local su
+> f = "young" 
+ 71.             reghdfe ln_y `lags' treat `leads' if `c' , absorb(year field m
+> sa field#year field#msa  inst athr_id) vce(cluster inst)
+ 72.             gunique athr_id if `c'
+ 73.             local num_movers = r(unique)
+ 74.             local normalize = _b[lag1]
+ 75.             foreach var in `lags' treat `leads' {
+ 76.                 mat row = _b[`var']-`normalize', _se[`var']
+ 77.                 if "`var'" == "lag1" {
+ 78.                     mat row = _b[`var']-`normalize',0
+ 79.                 }
+ 80.                 mat es = nullmat(es) \ row 
+ 81.             }
+ 82.             svmat es
+ 83.             keep es1 es2
+ 84.             drop if mi(es1)
+ 85.             rename (es1 es2) (b se)
+ 86.             gen ub = b + 1.96*se
+ 87.             gen lb  = b - 1.96*se
+ 88.             gen rel = -`timeframe' if _n == 1
+ 89.             replace rel = rel[_n-1]+ 1 if _n > 1
+ 90.             drop if rel ==`timeframe' 
+ 91.             sum b if inrange(rel, -`timeframe',-2)
+ 92.             local pre_mean : di %3.2f r(mean)
+ 93.             sum b if inrange(rel, 1,`timeframe')
+ 94.             local post_mean : di %3.2f r(mean)
+ 95.             local end = `timeframe' - 1
+ 96.             replace lb = -1 if lb < -1
+ 97.             replace ub = 1 if ub > 1
+ 98.             tw rcap ub lb rel if rel != -1 & se!= 0,  lcolor(gs12) msize(v
+> small) || scatter b rel if (se !=0 | rel == -1) , mcolor(ebblue) xlab(-10(1)`
+> end', angle(45) labsize(vsmall)) ylab(-1(0.2)1, labsize(vsmall)) ///
+>               yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(purple%
+> 50) lpattern(dash)) plotregion(margin(none)) ///
+>               legend(on order(- "N (Movers) = `num_movers'" ///
+>                                                                 "Pre-period m
+> ean = `pre_mean'" ///
+>                                                                 "Post-period 
+> mean = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle
+> ("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmal
+> l))
+ 99.             graph export ../output/figures/es_`samp'_`suf'`stem'.pdf, repl
+> ace
+100.             restore
+101.         }
+102.     }
+103. end
+
+. 
+. program output_tables
+  1.     syntax, samp(str)
+  2.     foreach file in cohort_dist pub_age_dist { 
+  3.          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") m
+> atrix(`file'_`samp') ///
+>            title(<tab:`file'_`samp'>) format(%20.4f) replace
+  4.     }
+  5. 
+. end
+
+. ** 
+. main
+(27,656,928 missing values generated)
+(27572387 real changes made)
+(27,572,387 observations deleted)
+(84,541 missing values generated)
+(5 real changes made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           367,533  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       100,459
+        from master                   100,459  
+        from using                          0  
+
+    Matched                            84,915  
+    -----------------------------------------
+N = 185,374; 185,374 balanced groups of size 1
+N = 84,915; 84,915 balanced groups of size 1
+% of US authors with disseration year: 45.807395
+N = 29,112; 29,112 balanced groups of size 1
+% of US authors with disseration tag: 15.704468
+N = 1,769; 1,769 balanced groups of size 1
+% of US authors with disseration title .95428701
+  variable first_yr was float now int
+  variable last_yr was float now int
+  variable first_yr_in_top15 was float now int
+  variable dissertation_tag was float now byte
+  variable phd_year was float now int
+  variable has_dissertation was float now byte
+  variable lwr_title was str1935 now str785
+  (215,775,336 bytes saved)
+(100,459 missing values generated)
+(100,459 missing values generated)
+(100,459 missing values generated)
+(2,505 real changes made, 2,505 to missing)
+(2,505 real changes made, 2,505 to missing)
+(2,505 real changes made, 2,505 to missing)
+(2,266 real changes made, 2,266 to missing)
+(2,505 real changes made, 2,505 to missing)
+(2,505 real changes made, 2,505 to missing)
+(2,266 real changes made, 2,266 to missing)
+(2,266 real changes made, 2,266 to missing)
+(2,266 real changes made, 2,266 to missing)
+(102,725 missing values generated)
+(41,936 real changes made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           367,533  
+    -----------------------------------------
+(6,656 missing values generated)
+file ../output/figures/productivity_pub_age.pdf saved as PDF format
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           367,533  
+    -----------------------------------------
+(192,491 missing values generated)
+file ../output/figures/productivity_phd_age.pdf saved as PDF format
+(file ../temp/age_year_firstlast.dta not found)
+file ../temp/age_year_firstlast.dta saved
+(19,044,176 observations deleted)
+(8,142,028 missing values generated)
+(9,545,536 real changes made)
+(8,747,004 missing values generated)
+(625,211 observations deleted)
+(3,987 observations deleted)
+(file ../temp/movers.dta not found)
+file ../temp/movers.dta saved
+(already sorted)
+(153,354 missing values generated)
+(367,533 real changes made)
+
+  num_moves |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |     19,841       76.71       76.71
+          2 |      4,510       17.44       94.14
+          3 |      1,052        4.07       98.21
+          4 |        288        1.11       99.32
+          5 |        110        0.43       99.75
+          6 |         36        0.14       99.89
+          7 |         20        0.08       99.97
+          8 |          8        0.03      100.00
+          9 |          1        0.00      100.00
+------------+-----------------------------------
+      Total |     25,866      100.00
+
+      mover |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |    159,508       86.05       86.05
+          1 |     25,866       13.95      100.00
+------------+-----------------------------------
+      Total |    185,374      100.00
+
+      mover |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |    239,322       65.12       65.12
+          1 |    128,211       34.88      100.00
+------------+-----------------------------------
+      Total |    367,533      100.00
+(229,711 real changes made)
+(390 real changes made)
+(0 real changes made)
+(already sorted)
+(325,855 missing values generated)
+(8282 real changes made)
+(10072 real changes made)
+(287,096 observations deleted)
+(file ../temp/single_movers_year_firstlast.dta not found)
+file ../temp/single_movers_year_firstlast.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            61,896  
+    -----------------------------------------
+(28,910 observations deleted)
+(13,269 observations deleted)
+(file ../temp/mover_xw.dta not found)
+file ../temp/mover_xw.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       287,749
+        from master                   287,749  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                            79,784  (_merge==3)
+    -----------------------------------------
+(24,222 observations deleted)
+file /export/scratch/cxu_sci_geo/age_cohort/mover_temp_year_firstlast.dta
+    saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           343,311  
+    -----------------------------------------
+(obs=74,236)
+
+             | first_yr phd_year
+-------------+------------------
+    first_yr |   1.0000
+    phd_year |   0.6385   1.0000
+
+file ../output/figures/bs_phd_pub_yr.pdf saved as PDF format
+
+                          phd_year
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         1946           1886
+ 5%         1964           1895
+10%         1973           1902       Obs              74,236
+25%         1990           1903       Sum of wgt.      74,236
+
+50%         2005                      Mean            1999.38
+                        Largest       Std. dev.      17.80708
+75%         2013           2024
+90%         2017           2024       Variance       317.0923
+95%         2019           2024       Skewness      -1.197548
+99%         2021           2024       Kurtosis       4.143678
+file ../output/figures/phd_year_dist_year_firstlast.pdf saved as PDF format
+
+                          first_yr
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         1945           1899
+ 5%         1958           1900
+10%         1966           1906       Obs             165,852
+25%         1979           1907       Sum of wgt.     165,852
+
+50%         1993                      Mean           1990.277
+                        Largest       Std. dev.      17.20016
+75%         2004           2022
+90%         2010           2022       Variance       295.8456
+95%         2014           2022       Skewness      -.6581977
+99%         2018           2022       Kurtosis       3.007375
+file ../output/figures/first_yr_dist_year_firstlast.pdf saved as PDF format
+
+                       publishing_age
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            6              2
+ 5%           10              2
+10%           14              2       Obs             165,852
+25%           20              2       Sum of wgt.     165,852
+
+50%           31                      Mean           33.72257
+                        Largest       Std. dev.      17.20016
+75%           45            117
+90%           58            118       Variance       295.8456
+95%           66            124       Skewness       .6581977
+99%           79            125       Kurtosis       3.007375
+file ../output/figures/publishing_age_dist_year_firstlast.pdf saved as PDF
+    format
+
+                          post_phd
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          -24            -78
+ 5%           -4            -73
+10%            0            -73       Obs              74,236
+25%            3            -72       Sum of wgt.      74,236
+
+50%            8                      Mean            12.3688
+                        Largest       Std. dev.      15.36455
+75%           20             92
+90%           33             94       Variance       236.0694
+95%           42             94       Skewness       .6468884
+99%           59             97       Kurtosis       5.405362
+file ../output/figures/post_phd_dist_year_firstlast.pdf saved as PDF format
+
+                       top15_post_phd
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          -47            -89
+ 5%          -28            -88
+10%          -19            -86       Obs              74,236
+25%           -8            -85       Sum of wgt.      74,236
+
+50%           -1                      Mean          -.4877687
+                        Largest       Std. dev.      16.39585
+75%            6             71
+90%           19             72       Variance       268.8241
+95%           28             72       Skewness      -.0688047
+99%           46             73       Kurtosis        5.41187
+file ../output/figures/top15_post_phd_dist_year_firstlast.pdf saved as PDF
+    format
+
+                      first_yr_in_top15
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         1958           1945
+ 5%         1967           1945
+10%         1974           1945       Obs             165,852
+25%         1991           1946       Sum of wgt.     165,852
+
+50%         2005                      Mean           2000.517
+                        Largest       Std. dev.      16.56138
+75%         2013           2022
+90%         2018           2022       Variance       274.2792
+95%         2020           2022       Skewness      -.8889968
+99%         2022           2022       Kurtosis       2.918073
+file ../output/figures/first_yr_in_top15_dist_year_firstlast.pdf saved as PDF
+    format
+
+                       top15_pub_diff
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs             167,987
+25%            3              0       Sum of wgt.     167,987
+
+50%            7                      Mean           10.89194
+                        Largest       Std. dev.      13.18965
+75%           15            234
+90%           26            290       Variance        173.967
+95%           35            319       Skewness       3.799839
+99%           57            335       Kurtosis       35.31011
+file ../output/figures/top15_pub_diff_dist_year_firstlast.pdf saved as PDF
+    format
+(93,751 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_athrs |         27    2749.481    3834.846          1      13343
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_athrs |        117    1435.786    1435.123          1       4139
+(1,741 missing values generated)
+(203,779 missing values generated)
+file /export/scratch/cxu_sci_geo/age_cohort/msa_year_firstlast_collapsed.dta
+    saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            79,784  
+    -----------------------------------------
+(276 missing values generated)
+(44,314 missing values generated)
+(134 missing values generated)
+(26,002 missing values generated)
+(note: missing values will be sorted first)
+
+Duplicates in terms of athr_id which_place
+
+(40,350 observations deleted)
+(19,717 missing values generated)
+(19,717 real changes made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            36,981  
+    -----------------------------------------
+(19,726 missing values generated)
+(19,717 missing values generated)
+(22,029 missing values generated)
+(19,817 missing values generated)
+(19,717 missing values generated)
+(31,522 missing values generated)
+(19,817 observations deleted)
+(file ../temp/dest_origin_changes.dta not found)
+file ../temp/dest_origin_changes.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            79,784  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            79,784  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            70,608  
+    -----------------------------------------
+(122 missing values generated)
+(67,203 missing values generated)
+(67,426 missing values generated)
+(67,133 missing values generated)
+(67,538 missing values generated)
+(67,355 missing values generated)
+(67,745 missing values generated)
+(67,950 missing values generated)
+(67,958 missing values generated)
+(68,601 missing values generated)
+(68,068 missing values generated)
+(68,941 missing values generated)
+(68,369 missing values generated)
+(69,425 missing values generated)
+(68,485 missing values generated)
+(69,683 missing values generated)
+(68,643 missing values generated)
+(69,893 missing values generated)
+(68,747 missing values generated)
+(70,064 missing values generated)
+(68,890 missing values generated)
+lead1   lead3   lead5   lead7   lead9   lag1    lag3    lag5    lag7    lag9
+lead2   lead4   lead6   lead8   lead10  lag2    lag4    lag6    lag8    lag10
+(67,426 real changes made)
+(3,191 real changes made, 10 to missing)
+(67,538 real changes made)
+(3,080 real changes made, 10 to missing)
+(67,745 real changes made)
+(2,873 real changes made, 10 to missing)
+(67,958 real changes made)
+(2,660 real changes made, 10 to missing)
+(68,068 real changes made)
+(2,550 real changes made, 10 to missing)
+(68,369 real changes made)
+(2,249 real changes made, 10 to missing)
+(68,485 real changes made)
+(2,133 real changes made, 10 to missing)
+(68,643 real changes made)
+(1,975 real changes made, 10 to missing)
+(68,747 real changes made)
+(1,871 real changes made, 10 to missing)
+(68,890 real changes made)
+(1,728 real changes made, 10 to missing)
+(67,203 real changes made)
+(3,415 real changes made, 10 to missing)
+(67,133 real changes made)
+(3,485 real changes made, 10 to missing)
+(67,355 real changes made)
+(3,263 real changes made, 10 to missing)
+(67,950 real changes made)
+(2,668 real changes made, 10 to missing)
+(68,601 real changes made)
+(2,015 real changes made, 10 to missing)
+(68,941 real changes made)
+(1,677 real changes made, 10 to missing)
+(69,425 real changes made)
+(1,192 real changes made, 10 to missing)
+(69,683 real changes made)
+(935 real changes made, 10 to missing)
+(69,893 real changes made)
+(725 real changes made, 10 to missing)
+(70,064 real changes made)
+(554 real changes made, 10 to missing)
+(63,352 missing values generated)
+(63,352 real changes made)
+N = 70,608; 17,164 unbalanced groups of sizes 2 to 48
+(1,389 missing values generated)
+(35,810 missing values generated)
+(obs=8,191)
+
+             | move_a~b move_a~d
+-------------+------------------
+move_age_pub |   1.0000
+move_age_phd |   0.3788   1.0000
+
+file ../output/figures/bs_phd_pub_move_yr.pdf saved as PDF format
+
+                        move_age_pub
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%           27             27
+ 5%           28             27
+10%           29             27       Obs              16,875
+25%           32             27       Sum of wgt.      16,875
+
+50%           35                      Mean           38.35787
+                        Largest       Std. dev.      9.765819
+75%           42             98
+90%           52             99       Variance       95.37121
+95%           58            100       Skewness       1.783715
+99%           73            101       Kurtosis       7.108866
+file ../output/figures/move_age_pub.pdf saved as PDF format
+
+                        move_age_phd
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%          -14            -35
+ 5%            1            -31
+10%            9            -31       Obs               8,191
+25%           21            -31       Sum of wgt.       8,191
+
+50%           31                      Mean           29.59749
+                        Largest       Std. dev.      16.59129
+75%           38            106
+90%           49            109       Variance       275.2711
+95%           57            111       Skewness       .0822554
+99%           76            117       Kurtosis       4.591675
+file ../output/figures/move_age_phd.pdf saved as PDF format
+(35,810 missing values generated)
+(35,810 missing values generated)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+msa_ln_y_d~f |      9,660   -.1565361    1.422352  -6.513465   7.287467
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+msa_ln_y_d~f |      7,501    -.030739    1.360685   -7.53635   5.701304
+file ../output/figures/move_size.pdf saved as PDF format
+(dropped 1877 singleton observations)
+(MWFE estimator converged in 36 iterations)
+note: lead10 omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =     28,498
+Absorbing 7 HDFE groups                           F(  20,    621) =       4.02
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.7012
+                                                  Adj R-squared   =     0.5466
+                                                  Within R-sq.    =     0.0040
+Number of clusters (inst)    =        622         Root MSE        =     1.6271
+
+                                 (Std. err. adjusted for 622 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       lag10 |   -.297796   .0958148    -3.11   0.002    -.4859562   -.1096358
+        lag9 |  -.3321277   .0842467    -3.94   0.000    -.4975706   -.1666848
+        lag8 |   -.304989   .0806625    -3.78   0.000    -.4633932   -.1465847
+        lag7 |  -.3161476   .0873219    -3.62   0.000    -.4876297   -.1446656
+        lag6 |  -.3781588   .0868291    -4.36   0.000    -.5486731   -.2076444
+        lag5 |  -.3098545   .0790321    -3.92   0.000    -.4650572   -.1546519
+        lag4 |   -.349568   .0760406    -4.60   0.000    -.4988959   -.2002401
+        lag3 |   -.380542   .0772844    -4.92   0.000    -.5323125   -.2287716
+        lag2 |   -.333925   .0700513    -4.77   0.000    -.4714911    -.196359
+        lag1 |  -.3198149   .0859794    -3.72   0.000    -.4886605   -.1509692
+       treat |  -.1449741   .0683802    -2.12   0.034    -.2792586   -.0106895
+       lead1 |  -.2285569   .0734152    -3.11   0.002     -.372729   -.0843848
+       lead2 |  -.2075806   .0796783    -2.61   0.009    -.3640521    -.051109
+       lead3 |  -.1543666   .0719742    -2.14   0.032     -.295709   -.0130242
+       lead4 |  -.2244288   .0767049    -2.93   0.004    -.3750612   -.0737963
+       lead5 |  -.1393611   .0802804    -1.74   0.083    -.2970151     .018293
+       lead6 |   -.094601   .0830356    -1.14   0.255    -.2576657    .0684636
+       lead7 |  -.2074175   .0926245    -2.24   0.025    -.3893127   -.0255224
+       lead8 |  -.2113446   .0797649    -2.65   0.008    -.3679861    -.054703
+       lead9 |  -.2031264   .0754254    -2.69   0.007    -.3512461   -.0550066
+      lead10 |          0  (omitted)
+       _cons |  -2.741466   .0102956  -266.28   0.000    -2.761684   -2.721248
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        77           0          77     |
+        field |         5           1           4     |
+          msa |       153           1         152    ?|
+   field#year |       308          77         231    ?|
+    field#msa |       591         153         438    ?|
+         inst |       622         622           0    *|
+      athr_id |      8176           2        8174    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+N = 30,410; 9,568 unbalanced groups of sizes 1 to 21
+(70,587 observations deleted)
+(20 missing values generated)
+(20 real changes made)
+(1 observation deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           b |          9   -.0138639     .030445  -.0607272   .0220189
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           b |          9    .1341723    .0456569    .091258   .2252139
+(0 real changes made)
+(0 real changes made)
+(note:  named style none not found in class margin, default attributes used)
+file ../output/figures/es_year_firstlast_old.pdf saved as PDF format
+(dropped 1556 singleton observations)
+(MWFE estimator converged in 35 iterations)
+note: lag10 omitted because of collinearity
+note: lag9 omitted because of collinearity
+note: lead10 omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =     19,314
+Absorbing 7 HDFE groups                           F(  18,    473) =       6.44
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.7266
+                                                  Adj R-squared   =     0.5481
+                                                  Within R-sq.    =     0.0074
+Number of clusters (inst)    =        474         Root MSE        =     1.5905
+
+                                 (Std. err. adjusted for 474 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       lag10 |          0  (omitted)
+        lag9 |          0  (omitted)
+        lag8 |  -.2720225   .2041496    -1.33   0.183    -.6731749    .1291298
+        lag7 |  -.5003542   .1386119    -3.61   0.000    -.7727255   -.2279829
+        lag6 |  -.3169785   .1013237    -3.13   0.002    -.5160787   -.1178783
+        lag5 |  -.3818807   .1045778    -3.65   0.000    -.5873754   -.1763861
+        lag4 |  -.3027282   .0856985    -3.53   0.000    -.4711251   -.1343313
+        lag3 |  -.2597298   .0755189    -3.44   0.001    -.4081237   -.1113358
+        lag2 |  -.2793233   .0830749    -3.36   0.001    -.4425648   -.1160818
+        lag1 |  -.2585536   .0892896    -2.90   0.004    -.4340069   -.0831004
+       treat |  -.0690392   .0687605    -1.00   0.316     -.204153    .0660745
+       lead1 |  -.0491188   .0795652    -0.62   0.537    -.2054639    .1072262
+       lead2 |  -.0218434     .08053    -0.27   0.786    -.1800842    .1363974
+       lead3 |    -.05859   .0733965    -0.80   0.425    -.2028134    .0856335
+       lead4 |  -.0035141   .0793544    -0.04   0.965    -.1594448    .1524167
+       lead5 |   .0421397   .0849675     0.50   0.620    -.1248208    .2091003
+       lead6 |   .0074581   .0750114     0.10   0.921    -.1399387    .1548549
+       lead7 |  -.0383837   .0699582    -0.55   0.583     -.175851    .0990835
+       lead8 |   .0501904   .0836863     0.60   0.549    -.1142526    .2146334
+       lead9 |  -.0620042   .0902743    -0.69   0.493    -.2393924    .1153839
+      lead10 |          0  (omitted)
+       _cons |    -2.8592   .0015457 -1849.77   0.000    -2.862237   -2.856162
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        75           0          75     |
+        field |         5           1           4     |
+          msa |       132           1         131    ?|
+   field#year |       295          75         220    ?|
+    field#msa |       496         132         364    ?|
+         inst |       474         474           0    *|
+      athr_id |      6346           1        6345    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+N = 20,890; 7,503 unbalanced groups of sizes 1 to 17
+(70,587 observations deleted)
+(20 missing values generated)
+(20 real changes made)
+(1 observation deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           b |          9    .0015517    .1632997  -.2418006   .2585536
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           b |          9    .2437018    .0418599   .1965494    .308744
+(0 real changes made)
+(0 real changes made)
+(note:  named style none not found in class margin, default attributes used)
+file ../output/figures/es_year_firstlast_young.pdf saved as PDF format
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+msa_ln_y_d~f |      4,235   -.1000101    1.456796  -5.151051   6.665826
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+msa_ln_y_d~f |      3,955    -.077305    1.360219    -5.9881   6.478408
+file ../output/figures/move_size_phd.pdf saved as PDF format
+(dropped 1058 singleton observations)
+(MWFE estimator converged in 36 iterations)
+note: lead10 omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =     11,541
+Absorbing 7 HDFE groups                           F(  20,    453) =       2.34
+Statistics robust to heteroskedasticity           Prob > F        =     0.0010
+                                                  R-squared       =     0.7349
+                                                  Adj R-squared   =     0.5471
+                                                  Within R-sq.    =     0.0053
+Number of clusters (inst)    =        454         Root MSE        =     1.6745
+
+                                 (Std. err. adjusted for 454 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       lag10 |  -.1064278   .1803253    -0.59   0.555    -.4608057      .24795
+        lag9 |  -.2030052   .2060531    -0.99   0.325    -.6079438    .2019334
+        lag8 |  -.2409429   .2022575    -1.19   0.234    -.6384223    .1565365
+        lag7 |  -.3252928   .1969208    -1.65   0.099    -.7122845    .0616988
+        lag6 |  -.1977569   .1492238    -1.33   0.186    -.4910137    .0954999
+        lag5 |  -.2193056   .1545848    -1.42   0.157    -.5230979    .0844867
+        lag4 |   -.254135   .1308996    -1.94   0.053    -.5113808    .0031108
+        lag3 |  -.2651457   .1372586    -1.93   0.054    -.5348883    .0045969
+        lag2 |   -.386579   .1336879    -2.89   0.004    -.6493044   -.1238536
+        lag1 |  -.1733105   .1520393    -1.14   0.255    -.4721002    .1254793
+       treat |  -.0786189   .1240438    -0.63   0.527    -.3223915    .1651538
+       lead1 |  -.1531302   .1205437    -1.27   0.205    -.3900244     .083764
+       lead2 |  -.0950306   .1393752    -0.68   0.496    -.3689327    .1788716
+       lead3 |  -.0407964   .1382838    -0.30   0.768    -.3125537    .2309609
+       lead4 |  -.1583483   .1270389    -1.25   0.213     -.408007    .0913104
+       lead5 |  -.0362909   .1436221    -0.25   0.801     -.318539    .2459573
+       lead6 |  -.1521189   .1369195    -1.11   0.267     -.421195    .1169573
+       lead7 |  -.1095276   .1393086    -0.79   0.432    -.3832988    .1642437
+       lead8 |  -.2775706   .1579693    -1.76   0.080    -.5880142    .0328729
+       lead9 |  -.2051167   .1564402    -1.31   0.190    -.5125553    .1023219
+      lead10 |          0  (omitted)
+       _cons |  -2.678489    .012801  -209.24   0.000    -2.703646   -2.653333
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        76           0          76     |
+        field |         5           1           4     |
+          msa |       132           1         131    ?|
+   field#year |       286          76         210    ?|
+    field#msa |       484         132         352    ?|
+         inst |       454         454           0    *|
+      athr_id |      3542           2        3540    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+N = 12,612; 4,205 unbalanced groups of sizes 1 to 21
+(70,587 observations deleted)
+(20 missing values generated)
+(20 real changes made)
+(1 observation deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           b |          9   -.0709774    .0797266  -.2132685   .0668827
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           b |          9    .0368738    .0768564  -.1042602   .1370196
+(0 real changes made)
+(0 real changes made)
+(note:  named style none not found in class margin, default attributes used)
+file ../output/figures/es_year_firstlast_old_phd.pdf saved as PDF format
+(dropped 1110 singleton observations)
+(MWFE estimator converged in 35 iterations)
+note: lead10 omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =     10,894
+Absorbing 7 HDFE groups                           F(  20,    400) =       2.02
+Statistics robust to heteroskedasticity           Prob > F        =     0.0060
+                                                  R-squared       =     0.7254
+                                                  Adj R-squared   =     0.5482
+                                                  Within R-sq.    =     0.0055
+Number of clusters (inst)    =        401         Root MSE        =     1.5495
+
+                                 (Std. err. adjusted for 401 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       lag10 |  -.3399873   .1726061    -1.97   0.050    -.6793157   -.0006588
+        lag9 |  -.5433212   .1410148    -3.85   0.000    -.8205439   -.2660985
+        lag8 |  -.0676383   .1838166    -0.37   0.713    -.4290056     .293729
+        lag7 |  -.3801163   .1338318    -2.84   0.005    -.6432177   -.1170148
+        lag6 |  -.3051618   .1406016    -2.17   0.031    -.5815722   -.0287513
+        lag5 |  -.3071344   .1249114    -2.46   0.014    -.5526993   -.0615694
+        lag4 |  -.3154886     .12309    -2.56   0.011    -.5574727   -.0735045
+        lag3 |  -.3871021   .1116727    -3.47   0.001    -.6066408   -.1675634
+        lag2 |  -.2611925   .1272064    -2.05   0.041    -.5112691   -.0111159
+        lag1 |  -.2366589   .1114995    -2.12   0.034    -.4558571   -.0174608
+       treat |  -.1060609   .0968275    -1.10   0.274    -.2964153    .0842935
+       lead1 |  -.1662685   .1072395    -1.55   0.122    -.3770919    .0445549
+       lead2 |  -.1571244   .1042675    -1.51   0.133    -.3621052    .0478564
+       lead3 |  -.1691723   .0999247    -1.69   0.091    -.3656154    .0272709
+       lead4 |  -.1458435    .127795    -1.14   0.254    -.3970773    .1053902
+       lead5 |  -.0787173   .1121949    -0.70   0.483    -.2992826     .141848
+       lead6 |  -.1006272   .1270775    -0.79   0.429    -.3504504     .149196
+       lead7 |  -.0498221   .1093549    -0.46   0.649    -.2648042      .16516
+       lead8 |  -.1175524   .1056554    -1.11   0.267    -.3252617    .0901569
+       lead9 |  -.1871475   .1212082    -1.54   0.123    -.4254323    .0511372
+      lead10 |          0  (omitted)
+       _cons |  -2.790743   .0048168  -579.37   0.000    -2.800212   -2.781273
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+         year |        72           0          72     |
+        field |         5           1           4     |
+          msa |       130           1         129    ?|
+   field#year |       287          72         215    ?|
+    field#msa |       436         130         306    ?|
+         inst |       401         401           0    *|
+      athr_id |      3131           5        3126    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+N = 12,016; 3,926 unbalanced groups of sizes 1 to 20
+(70,587 observations deleted)
+(20 missing values generated)
+(20 real changes made)
+(1 observation deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           b |          9   -.0863569     .125428  -.3066623   .1690206
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           b |          9    .1064061    .0463384   .0495114   .1868369
+(0 real changes made)
+(0 real changes made)
+(note:  named style none not found in class margin, default attributes used)
+file ../output/figures/es_year_firstlast_young_phd.pdf saved as PDF format
+
+. 
+end of do-file
+
+--------------------------------------------------------------------------------
+Makelog ended: 2024-02-19 02:08:34
+Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/age_cohorts/code
+--------------------------------------------------------------------------------

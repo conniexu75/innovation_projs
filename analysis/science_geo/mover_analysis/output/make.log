@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-01-09 21:09:51
+Makelog started: 2024-01-30 15:54:29
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -139,7 +139,7 @@ not available in non-GUI version
  44.     bys athr_id: egen max_year = max(year)
  45.     gcontract athr_id min_year max_year
  46.     drop _freq
- 47.     save ../temp/single_movers, replace
+ 47.     save ../temp/single_movers_`samp', replace
  48.     merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
  49.     keep if move_year >= min_year & move_year <= max_year
  50.     gcontract athr_id move_year
@@ -814,6 +814,6 @@ file ../temp/dest_origin_changes.dta saved
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2024-01-09 21:19:03
+Makelog ended: 2024-01-30 16:04:36
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
