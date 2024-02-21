@@ -12,13 +12,16 @@ global temp "/export/scratch/cxu_sci_geo/openalex"
 program main
     use ../external/ids/list_of_works, clear
     count
-    local N = r(N)/5000
+    local N = round(r(N)/5000)
     di "`N'"
+    local list
     forval i = 1/`N' {
-        cap confirm file "../output/openalex_authors`i'.csv"
+        cap confirm file "/export/scratch/cxu_sci_geo/scrape_full_athr_hist2/openalex_authors`i'.csv"
         if _rc != 0 {
-            di "`i'"
+            *di "`i'"
+            local list `list' "`i' "
         }
     }
+    di "`list'"
 end
 main

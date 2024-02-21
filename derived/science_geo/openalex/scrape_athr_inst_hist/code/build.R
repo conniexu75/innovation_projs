@@ -12,13 +12,14 @@ pmid_file <- read_dta('../external/ids/list_of_works.dta')
 nr <- nrow(pmid_file)
 split_pmid <- split(pmid_file, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 num_file <- length(split_pmid)
-for (q in 4328:4328) {
+l <- c(10297)
+for (q in l) {
     print(q)
    ## pull open alex data from pmids
    works_from_pmids <- oa_fetch(
      entity = "works",
      mailto = "conniexu@g.harvard.edu",
-     id  = split_pmid[[q]] %>% filter(id != "id") %>% pull(id),
+     id  = split_pmid[[q]] %>% filter(id != "id" & id != "") %>% pull(id),
      output = "list"
    )
    ## pull open_alex author ids associated with each author for each paper
@@ -26,6 +27,24 @@ for (q in 4328:4328) {
    au_ids <- lapply(1:N_articles, function(i) {
      if (length(works_from_pmids[[i]][["authorships"]])!=0) {
        ids <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), works_from_pmids[[i]][["id"]]) %>% data.frame
+       if (length(works_from_pmids[[i]][["doi"]])!=0) {
+         doi <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), works_from_pmids[[i]][["doi"]]) %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["doi"]])==0) {
+         doi <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), "") %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["primary_location"]][["source"]][["display_name"]])!=0) {
+         jrnl <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), works_from_pmids[[i]][["primary_location"]][["source"]][["display_name"]]) %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["primary_location"]][["source"]][["display_name"]])==0) {
+         jrnl <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), "") %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["title"]])!=0) {
+         title <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), works_from_pmids[[i]][["title"]]) %>% data.frame
+       }
+       if (length(works_from_pmids[[i]][["title"]])==0) {
+         title <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), "") %>% data.frame
+       }
        if (length(works_from_pmids[[i]][["publication_date"]])!=0) {
          pub_date <- replicate(n=length(works_from_pmids[[i]][["authorships"]]), works_from_pmids[[i]][["publication_date"]]) %>% data.frame
        }
@@ -77,10 +96,10 @@ for (q in 4328:4328) {
            append(athr_name,as.character(works_from_pmids[[i]][["authorships"]][[j]][["author"]][["display_name"]]))
          }
        }) %>% data.frame %>% t()
-       cbind(ids, pub_date,pub_type,pub_type_crossref, which_athr, athr_id, athr_name, raw_affl, num_affls)
+       cbind(ids, doi, pub_date,jrnl, title, pub_type,pub_type_crossref, which_athr, athr_id, athr_name, raw_affl, num_affls)
      }
    }) %>% bind_rows()
-   colnames(au_ids) <- c("id", "pub_date","pub_type", "pub_type_crossref", "which_athr","athr_id", "athr_name", "raw_affl", "num_affls")
+   colnames(au_ids) <- c("id", "doi", "pub_date","jrnl", "title", "pub_type", "pub_type_crossref", "which_athr","athr_id", "athr_name", "raw_affl", "num_affls")
    au_ids <- au_ids %>%
      mutate(num_affls = replace(num_affls, num_affls == 0, 1)) %>%
      uncount(num_affls)
@@ -121,5 +140,5 @@ for (q in 4328:4328) {
             id = str_replace(as.character(id), "https://openalex.org/",""),
             athr_id= str_replace(athr_id, "https://openalex.org/", ""),
             inst_id = str_replace(inst_id, "https://openalex.org/",""))
-   write_csv(affl_list, paste0("../output/openalex_authors", as.character(q), ".csv"))
+   write_csv(affl_list, paste0("/export/scratch/cxu_sci_geo/scrape_full_athr_hist2/openalex_authors", as.character(q), ".csv"))
 }
