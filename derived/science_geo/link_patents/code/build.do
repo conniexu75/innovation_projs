@@ -23,7 +23,9 @@ program merge_w_openalex
     gen wt = 1 if wherefound == "body" | wherefound == "front"
     replace wt = 2 if wherefound == "both"
     gen patent_count = _merge == 3
-    gcollapse (sum) wt patent_count, by(id)
+    gen front_only = wherefound == "front"
+    gen body_only = wherefound == "body"
+    gcollapse (sum) wt patent_count front_only body_only, by(id)
     save ../output/patent_ppr_cnt, replace
 end
 
