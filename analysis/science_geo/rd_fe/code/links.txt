@@ -1,0 +1,4 @@
+./fes/ | /export/home/dor/cxu/innovation_projs/analysis/science_geo/fe_analysis/output
+./herd/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/nsf/clean_herd/output
+./xw/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/nsf/clean_herd/temp
+./rd/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/nsf/pca/output
