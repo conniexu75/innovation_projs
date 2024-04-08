@@ -22,6 +22,7 @@ program main
         sample_desc, samp(`s')
         maps, samp(`s')
         raw_bs, samp(`s')
+        econ_regression, samp(`s')
         regression, samp(`s')
         firm_externalities, samp(`s')
         output_tables, samp(`s')
@@ -268,6 +269,38 @@ program raw_bs
     *graph export ../output/figures/log_pat_prod_`samp'.pdf, replace
 end
 
+program econ_regression 
+    syntax, samp(str) 
+    use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/samp/athr_panel_full_comb_`samp', clear 
+    gcollapse (mean) msa_size, by(msa_comb year)
+    rename msa_size ls_msa_size
+    save ../temp/ls_yr_cluster, replace
+    
+    use if !mi(msa_comb) & inrange(year, 1945, 2022) using ../external/econs_samp/athr_panel_full_comb_year.dta, clear
+    merge m:1 msa_comb year using  ../temp/ls_yr_cluster, assert(1 2 3) keep(1 3) nogen
+    local reg_eq "ln_y ln_x"
+    local mat_est "_b[ln_x] \ _se[ln_x]"
+    bys athr_id msa_comb ${time} : gen count = _n == 1
+    replace msa_size = 0.0000000000001 if msa_size == 0
+    replace ls_msa_size = 0.0000000000001 if ls_msa_size == 0
+    gegen msa = group(msa_comb)
+    rename inst inst_name
+    gegen inst = group(inst_id)
+    gen ln_y = ln(cite_affl_wt)
+    gen ln_x = ln(ls_msa_size)
+    gen ln_x_econ = ln(msa_size)
+    reghdfe `reg_eq', noabsorb
+    local slope = _b[ln_x]
+    foreach fe in "${time} msa" "${time} msa inst" "${time} msa inst athr_id" {
+        reghdfe `reg_eq', absorb(`fe') vce(cluster msa)
+        mat econ_coef_`samp' = nullmat(econ_coef_`samp'), (`mat_est' \ . \ . \e(N))
+        local slope : dis %3.2f _b[ln_x]
+    }
+    reghdfe ln_y ln_x_econ, absorb(${time} msa inst athr_id) vce(cluster msa)
+    mat econ_`samp' = nullmat(econ_`samp'), (. \ . \ _b[ln_x_econ] \ _se[ln_x_econ] \ e(N))
+    mat econ_coef_`samp' = nullmat(econ_coef_`samp') , econ_`samp'
+    mat drop econ_`samp'
+end
 
 program regression 
     syntax, samp(str) 
@@ -505,7 +538,7 @@ end
 
 program output_tables
     syntax, samp(str) 
-    foreach file in top_10clus top_30clus coef field city_stats inst_elasticities { 
+    foreach file in top_10clus top_30clus coef field city_stats inst_elasticities econ_coef { 
          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
            title(<tab:`file'_`samp'>) format(%20.4f) replace
     }
