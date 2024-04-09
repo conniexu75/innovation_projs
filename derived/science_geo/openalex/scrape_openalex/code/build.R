@@ -10,7 +10,7 @@ set.seed(8975)
 
 #
 #################################### NEWFUND JRNLS  ###################################
-pmid_file <- read_dta('../external/pmids/cleaned_all_jrnl_base.dta')
+pmid_file <- read_dta('../external/pmids/.dta')
 nr <- nrow(pmid_file)
 split_pmid <- split(pmid_file, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 num_file <- length(split_pmid)

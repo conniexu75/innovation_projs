@@ -1,0 +1,5 @@
+./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
+./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/scrape_openalex/output/
+./pmids_jrnl/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/append_pmids/output/
+./patents/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/link_patents/output
+
