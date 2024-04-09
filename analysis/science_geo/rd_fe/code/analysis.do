@@ -6,18 +6,59 @@ set scheme modern
 graph set window fontface "Arial Narrow"
 pause on
 set seed 8975
+global movers "/export/scratch/cxu_sci_geo/movers"
 global overall_fund tot_fund tot_fed_fund tot_bus_fund tot_inst_fund tot_state_fund tot_nonprof_fund 
 global external_fund_source contracts_fund grants_fund
-global science_fund med_sch_expend clin_trial_expend fed_ls_fund fed_ls_hs_fund fed_ls_bio_fund hhs_ls_bio_fund hhs_ls_fund hhs_ls_hs_fund nonfed_ls_fund nonfed_ls_bio_fund nonfed_ls_hs_fund ls_fund hs_fund bio_fund ls_cap_expend perc_fed_fund_ls perc_hhs_fund_ls perc_ls_cap perc_ls_biohs
+global science_fund med_sch_expend clin_trial_expend fed_ls_fund fed_ls_hs_fund fed_ls_bio_fund hhs_ls_bio_fund hhs_ls_fund hhs_ls_hs_fund nonfed_ls_fund nonfed_ls_bio_fund nonfed_ls_hs_fund ls_fund hs_fund bio_fund ls_cap_expend perc_fed_fund_ls perc_hhs_fund_ls perc_ls_cap 
 global rd_type basic_expend basic_fed_expend applied_expend applied_fed_expend dev_expend perc_expend_basic perc_basic_fed 
 global other_fund expend_salaries expend_capital expend_fed expend_nonfed perc_sal perc_cap rd_index
 global vars $overall_fund $external_fund_source $science_fund $rd_type $other_fund
 
 program main
-    merge_data
+    merge_data, samp(year)
+    merge_data, samp(year_firstlast)
 end
 
 program merge_data
+    syntax, samp(str)
+    use if analysis_cond == 1 & inrange(year, 1945, 2022)  using ${movers}/mover_temp_`samp' , clear  
+    merge m:1 athr_id using ${movers}/mover_xw, assert(1 2 3) keep(3) nogen
+    keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year
+    hashsort athr_id year
+    gen rel = year - move_year
+    merge m:1 athr_id move_year using ${movers}/dest_origin_changes, keep(3) nogen
+    hashsort athr_id year
+    gegen msa = group(msa_comb)
+    rename inst inst_name
+    gegen inst = group(inst_id)
+    gen ln_y = ln(impact_cite_affl_wt)
+    forval i = 1/18 {
+        gen lag`i' = 1 if rel == -`i'
+        gen lead`i' = 1 if rel == `i'
+    }
+    ds lead* lag*
+    foreach var in `r(varlist)' {
+        replace `var' = 0 if mi(`var')
+        replace `var' = `var'*msa_ln_y_diff
+    }
+    gen treat = msa_ln_y_diff if rel == 0  
+    replace treat = 0 if mi(treat)
+    local leads
+    local lags
+    forval i = 1/18 {
+        local leads `leads' lead`i'
+        local lags lag`i' `lags'
+    }
+    gunique athr_id 
+    local num_movers = r(unique)
+    mat drop _all
+    reghdfe ln_y `lags' treat `leads' , absorb(year field msa field#year field#msa inst_fes = inst athr_fes = athr_id) vce(cluster inst) residuals
+    gcontract inst_id inst_fes
+    drop _freq
+    drop if mi(inst_fes)
+    rename inst_fes b
+    save ../temp/inst_fes, replace
+
     import delimited using ../external/rd/herd_2010_2022, clear
     merge 1:1 inst_id using ../external/xw/inst_names, assert(2 3) keep(3) nogen
     drop _freq
@@ -26,8 +67,7 @@ program merge_data
     rename matched_oa_inst_id inst_id
     save ../temp/merged_data, replace
 
-    merge 1:1 inst_id using ../external/fes/normalized_inst_fes.dta, assert(1 2 3) keep(3) nogen
-    drop total_funding year lb ub inrange rank 
+    merge 1:1 inst_id using ../temp/inst_fes.dta, assert(1 2 3) keep(3) nogen
     foreach var in $vars {
         qui sum `var', d
         replace `var' = (`var'-r(mean))/r(sd) 
@@ -86,19 +126,19 @@ program merge_data
     label variable rd_index "R&D Index"
 
     coefplot ($overall_fund), drop(_cons) xline(0) title("Sources of R&D Expenditures", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) 
-    graph export ../output/figures/overall_fund.pdf, replace
+    graph export ../output/figures/overall_fund_`samp'.pdf, replace
     
     coefplot ($external_fund_source), drop(_cons) xline(0) title("Sources of External Funding", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) 
-    graph export ../output/figures/external_fund.pdf, replace
+    graph export ../output/figures/external_fund_`samp'.pdf, replace
     
-    coefplot ($science_fund), drop(_cons) xline(0) title("Science-Related Expenditures", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) 
-    graph export ../output/figures/science_fund.pdf, replace
+    coefplot ($science_fund), drop(_cons) xline(0) title("Science-Related Expenditures", size(small)) xlab(-0.2(0.05)0.2, labsize(small)) ylab(, labsize(small)) 
+    graph export ../output/figures/science_fund_`samp'.pdf, replace
 
     coefplot ($rd_type), drop(_cons) xline(0) title("R&D Expenditures by Type of Research", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) 
-    graph export ../output/figures/rd_type.pdf, replace
+    graph export ../output/figures/rd_type_`samp'.pdf, replace
     
     coefplot ($other_fund), drop(_cons) xline(0) title("Other Spending Statistics", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) 
-    graph export ../output/figures/other_fund.pdf, replace
+    graph export ../output/figures/other_fund_`samp'.pdf, replace
 end
 ** 
 main
