@@ -18,8 +18,9 @@ program main
 end
 
 program append
-    qui {
-        forval i = 8001/10966 {
+    forval i = 1/10966 {
+        di "`i'"
+        qui {
             import delimited ../external/pprs/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
             gen date = date(pub_date, "YMD")
             format date %td
@@ -253,7 +254,7 @@ program clean_panel
 
     // do some final cleaning
     cap gen year  = yofd(dofq(qrtr))
-    drop if !inrange(year, 1945, 2023) 
+*    drop if !inrange(year, 1945, 2023) 
     save ${temp}/athr_panel, replace
     
     import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
@@ -444,6 +445,8 @@ program clean_panel
     replace msa_c_world = substr(msa_c_world, 1, strpos(msa_c_world, ", ")-1) + ", US" if country == "United States" & !mi(msa_c_world)
     replace msa_c_world = city + ", " + country_code if country_code != "US" & !mi(city) & !mi(country_code)
     compress, nocoalesce
+    save ${output}/filled_in_panel_all_`time', replace
+    keep if inrange(year, 1945, 2023)
     save ${output}/filled_in_panel_`time', replace
 end
 
