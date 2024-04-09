@@ -1,0 +1,421 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/var_decomp/cod
+> e/analysis.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
+
+. pause on
+
+. set seed 8975
+
+. global temp "/export/scratch/cxu_sci_geo/movers"
+
+. global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
+
+. global y_name "Productivity"
+
+. global pat_adj_wt_name "Patent-to-Paper Citations"
+
+. global ln_patent_name "Log Patent-to-Paper Citations"
+
+. global ln_y_name "Log Productivity"
+
+. global x_name "Cluster Size"
+
+. global ln_x_name "Log Cluster Size"
+
+. global time year 
+
+. program main
+  1.     foreach t in year year_firstlast {
+  2.         qui make_movers, samp(`t')
+  3.         sum_stats, samp(`t')
+  4.         qui output_tables, samp(`t')
+  5.         qui event_study, samp(`t') timeframe(18) ymax(1) ygap(0.1) 
+  6.         qui event_study, samp(`t') timeframe(10) startyr(1945) endyr(1980)
+>  ymax(1) ygap(0.1)
+  7.         qui event_study, samp(`t') timeframe(10) startyr(1980) endyr(2000)
+>  ymax(1) ygap(0.1)
+  8.         qui event_study, samp(`t') timeframe(10) startyr(1980) endyr(1995)
+>  ymax(1) ygap(0.1)
+  9.         qui event_study, samp(`t') timeframe(8) startyr(2000) endyr(2023) 
+> ymax(1) ygap(0.1)
+ 10.         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) 
+> ymax(1) ygap(0.1)
+ 11.     }
+ 12. end
+
+. 
+. program make_movers
+  1.     syntax, samp(str)
+  2.     use ${${time}_insts}/filled_in_panel_${time}, clear
+  3.     keep if country_code == "US"
+  4.     hashsort athr_id year
+  5.     gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_com
+> b[_n-1]
+  6.     bys athr_id: egen num_moves = total(place_count)
+  7.     bys athr_id (year): gen which_place = sum(place_count)
+  8.     bys athr_id: gen athr_counter =  _n == 1
+  9.     replace num_moves = num_moves-1
+ 10.     bys athr_id (year) : gen move_year = year if place_count == 1  & _n !=
+>  1
+ 11.     gcontract athr_id  move_year  num_moves
+ 12.     drop _freq
+ 13.     drop if mi(move_year)
+ 14.     drop if num_moves <= 0
+ 15.     save ../temp/movers, replace
+ 16.     
+.     use if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_ful
+> l_comb_`samp', clear 
+ 17.     hashsort athr_id year
+ 18.     gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_com
+> b[_n-1]
+ 19.     bys athr_id: egen num_moves = total(place_count)
+ 20.     bys athr_id (year): gen which_place = sum(place_count)
+ 21.     bys athr_id: gen athr_counter =  _n == 1
+ 22.     replace num_moves = num_moves-1
+ 23.     gen mover = num_moves > 0 
+ 24.     tab num_moves if athr_counter == 1 & mover == 1
+ 25.     tab mover if athr_counter == 1
+ 26.     bys athr_id year: gen athr_year_counter =  _n == 1
+ 27.     tab mover if athr_year_counter == 1
+ 28.     replace which_place = 0 if mover == 0
+ 29.     replace which_place = 1 if which_place == 0 & mover == 1
+ 30.     bys athr_id: egen min_which_place =min(which_place)
+ 31.     replace which_place = which_place + 1 if mover == 1 & min_which_place 
+> == 0
+ 32.     drop min_which_place
+ 33.     hashsort athr_id year 
+ 34.     bys athr_id (year): gen origin = 1 if which_place == 1
+ 35.     gen dest = place_count == 1 & origin != 1 & mover == 1
+ 36.     bys athr_id (year): replace origin = 1 if mover == 1 & place_count[_n+
+> 1] == 1 & mi(origin) 
+ 37.     hashsort athr_id which_place origin
+ 38.     bys athr_id which_place:  replace origin = origin[_n-1] if mi(origin) 
+> & !mi(origin[_n-1])
+ 39.     preserve
+ 40.     keep if mover == 1 & num_moves == 1 
+ 41.     gcontract athr_id year
+ 42.     drop _freq
+ 43.     bys athr_id: egen min_year = min(year)
+ 44.     bys athr_id: egen max_year = max(year)
+ 45.     gcontract athr_id min_year max_year
+ 46.     drop _freq
+ 47.     save ../temp/single_movers_`samp', replace
+ 48.     merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
+ 49.     keep if move_year >= min_year & move_year <= max_year
+ 50.     gcontract athr_id move_year
+ 51.     drop _freq
+ 52.     bys athr_id: gen N = _n 
+ 53.     keep if N == 1
+ 54.     save ../temp/mover_xw, replace
+ 55.     restore
+ 56.     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(1 3) 
+ 57.     *keep if (mover == 0 & _merge == 1) | (mover == 1 & _merge == 3)
+.     bys inst_id year: egen has_mover = max(mover == 1)
+ 58. *    bys msa_comb year: egen has_mover = max(mover == 1)
+.     drop if has_mover == 0
+ 59.     gen analysis_cond = mover == 1 & num_moves == 1 & ((mover == 0 & _merg
+> e == 1) | (mover == 1 & _merge == 3))
+ 60.     save ${temp}/mover_temp_`samp' , replace
+ 61. end
+
+. 
+. program sum_stats
+  1.     syntax, samp(str)
+  2.     use ${temp}/mover_temp_`samp' , clear  
+  3.     gen patented = pat_wt > 0
+  4.     gegen msa = group(msa_comb)
+  5.     gen ln_y = ln(impact_cite_affl_wt)
+  6.     gen ln_x = ln(msa_size)
+  7.     gen ln_patent = ln(pat_adj_wt)
+  8.     rename impact_cite_affl_wt y
+  9.     rename msa_size x
+ 10. 
+.     // individual level stats
+.     preserve
+ 11.     bys athr_id: gen num_years = _N
+ 12.     bys athr_id inst_id : gen inst_cntr = _n == 1
+ 13.     bys athr_id : egen num_insts = total(inst_cntr)
+ 14.     gen life_time_prod = y
+ 15.     gcollapse (mean) num_years num_moves avg_team_size x y pat_adj_wt num_
+> insts mover (min) analysis_cond (sum) life_time_prod, by(athr_id)
+ 16.     count
+ 17.     foreach var in num_years avg_team_size x y life_time_prod num_moves {
+ 18.         sum `var'
+ 19.         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
+ 20.     }
+ 21.     count if mover == 0 
+ 22.     foreach var in num_years avg_team_size x y life_time_prod {
+ 23.         sum `var' if mover == 0 
+ 24.         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
+ 25.     } 
+ 26.     count if mover == 1
+ 27.     foreach var in num_years avg_team_size x y life_time_prod {
+ 28.         sum `var' if mover == 1 
+ 29.         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
+ 30.     }
+ 31.     count if analysis_cond == 1 
+ 32.     foreach var in num_years avg_team_size x y life_time_prod {
+ 33.         sum `var' if analysis_cond == 1  
+ 34.         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
+ 35.     }
+ 36.     restore
+ 37.     preserve
+ 38.     gen life_time_prod = y
+ 39.     bys msa_comb inst_id: gen inst_cntr = _n == 1
+ 40.     bys msa_comb: egen num_insts = total(inst_cntr)
+ 41.     gcollapse (mean) x y num_insts (sum) life_time_prod, by(inst_id)
+ 42.     count
+ 43.     foreach var in num_insts x y life_time_prod {
+ 44.         qui sum `var' 
+ 45.         mat city_stats = nullmat(city_stats) \ (r(mean), r(sd))
+ 46.     }
+ 47.     restore
+ 48.     mat stat_`samp' = ind_stats \ city_stats 
+ 49.     gen ln_affl_wt = ln(affl_wt)
+ 50.     gcollapse (mean) msa_y = y msa_x = x msa_ln_y = ln_y msa_ln_x = ln_x m
+> sa_ln_patent = ln_patent msa_patent = pat_adj_wt msa_patent_rate = patented m
+> sa_affl_wt = affl_wt msa_ln_affl_wt = ln_affl_wt (firstnm) msa , by(inst_id $
+> {time}) 
+ 51.     save ${temp}/msa_`samp'_collapsed, replace
+ 52. 
+.     use if analysis_cond == 1  using ${temp}/mover_temp_`samp' , clear  
+ 53.     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
+ 54.     gen ln_y = ln(impact_cite_affl_wt)
+ 55.     gen ln_x = ln(msa_size)
+ 56.     gen ln_patent = ln(pat_adj_wt)
+ 57.     gen ln_affl_wt = ln(affl_wt)
+ 58.     gen patented = pat_wt > 0
+ 59.     hashsort athr_id which_place year
+ 60.     rename impact_cite_affl_wt y
+ 61.     rename msa_size x
+ 62.     gen rel = year - move_year
+ 63.     foreach var in y x  ln_x ln_y ln_patent ln_affl_wt patented {
+ 64.         bys athr_id which_place: egen avg_`var' = mean(`var') 
+ 65.     }
+ 66.     hashsort athr_id which_place -year
+ 67.     gduplicates drop athr_id which_place, force
+ 68.     rename year current_year
+ 69.     gen year = current_year if which_place == 1
+ 70.     replace year = move_year if which_place == 2
+ 71.     merge m:1 inst_id year using ${temp}/msa_`samp'_collapsed, assert(1 2 
+> 3) keep(3) nogen
+ 72.     hashsort athr_id which_place year
+ 73.     foreach var in msa_ln_y msa_ln_x msa_ln_patent avg_ln_y avg_ln_x avg_l
+> n_patent {
+ 74.         if strpos("`var'", "msa_") > 0 {
+ 75.             local type "Destination-Origin Difference in"
+ 76.             local stem = subinstr("`var'", "msa_","",.)
+ 77.         }
+ 78. 
+.         if strpos("`var'", "avg_") > 0 {
+ 79.             local type "Change in"
+ 80.             local stem = subinstr("`var'", "avg_","",.)
+ 81.         }
+ 82.         by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - `var
+> '
+ 83.         qui sum `var'_diff
+ 84.         local N = r(N)
+ 85.         local mean : dis %3.2f r(mean)
+ 86.         local sd : dis %3.2f r(sd)
+ 87.         tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) x
+> title("`type' ${`stem'_name}", size(vsmall)) color(edkblue) xlab(, labsize(vs
+> mall)) ylab(, labsize(vsmall)) legend(on order(- "N (Movers) = `N'" ///
+>                                                         "Mean = `mean'" ///
+>                                                         "            (`sd')")
+>  pos(1) ring(0) size(vsmall) region(fcolo(none)))
+ 88.         graph export ../output/figures/`var'_diff_`samp'.pdf, replace
+ 89.     }
+ 90. 
+.     reg avg_ln_y_diff msa_ln_y_diff  
+ 91.     local N = e(N)
+ 92.     local coef : dis %3.2f _b[msa_ln_y_diff]
+ 93.     binscatter2 avg_ln_y_diff msa_ln_y_diff,  mcolor(gs5) lcolor(ebblue) x
+> lab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Dif
+> ference in Log Productivity", size(vsmall)) ytitle("Change in Log Productivit
+> y after Move", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
+>                                                             "Slope = `coef'")
+>  pos(5) ring(0) size(vsmall) region(fcolor(none)))
+ 94.     graph export ../output/figures/place_effect_desc_`samp'.pdf , replace
+ 95.     
+.     reg avg_ln_patent_diff msa_ln_y_diff 
+ 96.     local N = e(N)
+ 97.     local coef : dis %3.2f _b[msa_ln_y_diff]
+ 98.     binscatter2 avg_ln_patent_diff msa_ln_y_diff,  mcolor(gs5) lcolor(ebbl
+> ue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) ytitle("Change in Log Pap
+> er-to-Patent Citations after Move", size(vsmall)) xtitle("Destination-Origin 
+> Difference in Log Productivity", size(vsmall)) legend(on order(- "N (Movers) 
+> = `N'" ///
+>                                                                              
+> "Slope = `coef'") pos(5) ring(0) size(vsmall) region(fcolor(none)))
+ 99.     *graph export ../output/figures/place_productivity_patent_bs_`samp'.pd
+> f , replace
+.     gcontract athr_id avg_ln_y_diff avg_ln_x_diff msa_ln_y_diff msa_ln_x_diff
+>  move_year
+100.     drop _freq
+101.     drop if mi(avg_ln_y_diff)
+102.     save ../temp/dest_origin_changes, replace
+103. end
+
+. 
+. program event_study 
+  1.     syntax, samp(str) timeframe(int) [startyr(int 1945) endyr(int 2023) ym
+> ax(real 1) ygap(real 0.2)] 
+  2.     cap mat drop _all  
+  3.     use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using $
+> {temp}/mover_temp_`samp' , clear  
+  4.     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
+  5.     keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size whi
+> ch_place inst_id move_year
+  6.     hashsort athr_id year
+  7. /*    by athr_id: gen move = which_place != which_place[_n+1] &  _n != _N
+>     gen move_year = year if move == 1
+>     hashsort athr_id move_year
+>     by athr_id: replace move_year = move_year[_n-1] if mi(move_year) & !mi(mo
+> ve_year[_n-1])*/
+.     gen rel = year - move_year
+  8.     merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3)
+>  nogen
+  9.     hashsort athr_id year
+ 10.     gegen msa = group(msa_comb)
+ 11.     rename inst inst_name
+ 12.     gegen inst = group(inst_id)
+ 13.     gen ln_y = ln(impact_cite_affl_wt)
+ 14.     forval i = 1/`timeframe' {
+ 15.         gen lag`i' = 1 if rel == -`i'
+ 16.         gen lead`i' = 1 if rel == `i'
+ 17.     }
+ 18.     ds lead* lag*
+ 19.     foreach var in `r(varlist)' {
+ 20.         replace `var' = 0 if mi(`var')
+ 21.         replace `var' = `var'*msa_ln_y_diff
+ 22.     }
+ 23.     gen treat = msa_ln_y_diff if rel == 0  
+ 24.     replace treat = 0 if mi(treat)
+ 25.     local leads
+ 26.     local lags
+ 27.     forval i = 1/`timeframe' {
+ 28.         local leads `leads' lead`i'
+ 29.         local lags lag`i' `lags'
+ 30.     }
+ 31.     gunique athr_id 
+ 32.     local num_movers = r(unique)
+ 33.     egen pos_move_size = cut(msa_ln_y_diff) if msa_ln_y_diff > 0, group(2)
+ 34.     egen neg_move_size = cut(msa_ln_y_diff) if msa_ln_y_diff < 0, group(2)
+ 35.     bys athr_id: egen l2h_move = max(msa_ln_y_diff > 0)
+ 36.     bys athr_id: egen h2l_move = max(msa_ln_y_diff < 0)
+ 37.     foreach cond in "" "& l2h_move== 1" "& h2l_move == 1" "& pos_move_size
+>  == 1" "& neg_move_size == 0" {
+ 38.         local c "inrange(rel,-`timeframe',`timeframe') `cond'"
+ 39.         local suf = ""
+ 40.         if "`cond'" == "& l2h_move== 1" {
+ 41.             local suf = "_l2h"
+ 42.         }
+ 43.         else if "`cond'" == "& h2l_move == 1" {
+ 44.             local suf = "_h2l"
+ 45.         }
+ 46.         else if "`cond'" == "& pos_move_size == 0" {
+ 47.             local suf = "_l2m"
+ 48.         }
+ 49.         else if "`cond'" == "& pos_move_size == 1" {
+ 50.             local suf = "_ll2hh"
+ 51.         }
+ 52.         else if "`cond'" == "& neg_move_size == 0" {
+ 53.             local suf = "_hh2ll"
+ 54.         }
+ 55.         else if "`cond'" == "& neg_move_size == 1" {
+ 56.             local suf = "_h2m"
+ 57.         }
+ 58.         preserve
+ 59.         mat drop _all
+ 60.         reghdfe ln_y `lags' treat `leads' if `c' , absorb(year field msa f
+> ield#year field#msa inst athr_id) vce(cluster inst)
+ 61.         gunique athr_id if `c'
+ 62.         local num_movers = r(unique)
+ 63.         local normalize = _b[lag1]
+ 64.         foreach var in `lags' treat `leads' {
+ 65.             mat row = _b[`var']-`normalize', _se[`var']
+ 66.             if "`var'" == "lag1" {
+ 67.                 mat row = _b[`var']-`normalize',0
+ 68.             }
+ 69.             mat es = nullmat(es) \ row 
+ 70.         }
+ 71.         svmat es
+ 72.         keep es1 es2
+ 73.         drop if mi(es1)
+ 74.         rename (es1 es2) (b se)
+ 75.         gen ub = b + 1.96*se
+ 76.         gen lb  = b - 1.96*se
+ 77.         gen rel = -`timeframe' if _n == 1
+ 78.         replace rel = rel[_n-1]+ 1 if _n > 1
+ 79.         drop if rel ==`timeframe' 
+ 80.         sum b if inrange(rel, -`timeframe',-2)
+ 81.         local pre_mean : di %3.2f r(mean)
+ 82.         sum b if inrange(rel, 1,`timeframe')
+ 83.         local post_mean : di %3.2f r(mean)
+ 84.         local end = `timeframe' - 1
+ 85.         replace lb = -1 if lb < -1
+ 86.         replace ub = 1 if ub > 1
+ 87.         tw rcap ub lb rel if rel != -1,  lcolor(gs12) msize(vsmall) || sca
+> tter b rel, mcolor(ebblue) xlab(-`timeframe'(1)`end', angle(45) labsize(vsmal
+> l)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+>           yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(purple%50) 
+> lpattern(dash)) plotregion(margin(none)) ///
+>           legend(on order(- "N (Movers) = `num_movers'" ///
+>                                                             "Pre-period mean 
+> = `pre_mean'" ///
+>                                                             "Post-period mean
+>  = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Re
+> lative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
+ 88.         graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf
+> , replace
+ 89.         restore
+ 90.     }
+ 91. end
+
+. 
+. program output_tables
+  1.     syntax, samp(str)
+  2.     foreach file in stat { 
+  3.          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") m
+> atrix(`file'_`samp') ///
+>            title(<tab:`file'_`samp'>) format(%20.4f) replace
+  4.     }
+  5. 
+. end
+
+. ** 

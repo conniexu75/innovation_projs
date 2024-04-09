@@ -1,0 +1,2 @@
+./samp/ | /export/scratch/cxu_sci_geo/create_panel/output
+./reg/ | /export/home/dor/cxu/analysis/mover_analysis/output 
