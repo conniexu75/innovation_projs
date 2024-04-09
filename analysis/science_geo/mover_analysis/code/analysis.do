@@ -16,7 +16,7 @@ global x_name "Cluster Size"
 global ln_x_name "Log Cluster Size"
 global time year 
 program main
-    foreach t in year year_firstlast {
+    foreach t in year year_firstlast year {
         qui make_movers, samp(`t')
         sum_stats, samp(`t')
         qui output_tables, samp(`t')
@@ -44,7 +44,7 @@ program make_movers
     drop _freq
     drop if mi(move_year)
     drop if num_moves <= 0
-    save ../temp/movers, replace
+    save ${temp}/movers, replace
     
     use if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_full_comb_`samp', clear 
     hashsort athr_id year
@@ -77,16 +77,16 @@ program make_movers
     bys athr_id: egen max_year = max(year)
     gcontract athr_id min_year max_year
     drop _freq
-    save ../temp/single_movers_`samp', replace
-    merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
+    save ${temp}/single_movers_`samp', replace
+    merge 1:m athr_id using ${temp}/movers, assert(1 2 3) keep(3) nogen
     keep if move_year >= min_year & move_year <= max_year
     gcontract athr_id move_year
     drop _freq
     bys athr_id: gen N = _n 
     keep if N == 1
-    save ../temp/mover_xw, replace
+    save ${temp}/mover_xw, replace
     restore
-    merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(1 3) 
+    merge m:1 athr_id using ${temp}/mover_xw, assert(1 2 3) keep(1 3) 
     *keep if (mover == 0 & _merge == 1) | (mover == 1 & _merge == 3)
     bys inst_id year: egen has_mover = max(mover == 1)
 *    bys msa_comb year: egen has_mover = max(mover == 1)
@@ -151,7 +151,7 @@ program sum_stats
     save ${temp}/msa_`samp'_collapsed, replace
 
     use if analysis_cond == 1  using ${temp}/mover_temp_`samp' , clear  
-    merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
+    merge m:1 athr_id using ${temp}/mover_xw, assert(1 2 3) keep(3) nogen
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
     gen ln_patent = ln(pat_adj_wt)
@@ -208,14 +208,14 @@ program sum_stats
     gcontract athr_id avg_ln_y_diff avg_ln_x_diff msa_ln_y_diff msa_ln_x_diff move_year
     drop _freq
     drop if mi(avg_ln_y_diff)
-    save ../temp/dest_origin_changes, replace
+    save ${temp}/dest_origin_changes, replace
 end
 
 program event_study 
     syntax, samp(str) timeframe(int) [startyr(int 1945) endyr(int 2023) ymax(real 1) ygap(real 0.2)] 
     cap mat drop _all  
     use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using ${temp}/mover_temp_`samp' , clear  
-    merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
+    merge m:1 athr_id using ${temp}/mover_xw, assert(1 2 3) keep(3) nogen
     keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year
     hashsort athr_id year
 /*    by athr_id: gen move = which_place != which_place[_n+1] &  _n != _N
@@ -223,7 +223,7 @@ program event_study
     hashsort athr_id move_year
     by athr_id: replace move_year = move_year[_n-1] if mi(move_year) & !mi(move_year[_n-1])*/
     gen rel = year - move_year
-    merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3) nogen
+    merge m:1 athr_id move_year using ${temp}/dest_origin_changes, keep(3) nogen
     hashsort athr_id year
     gegen msa = group(msa_comb)
     rename inst inst_name
@@ -275,7 +275,8 @@ program event_study
         }
         preserve
         mat drop _all
-        reghdfe ln_y `lags' treat `leads' if `c' , absorb(year field msa field#year field#msa inst athr_id) vce(cluster inst)
+        reghdfe ln_y `lags' treat `leads' if `c' , absorb(year field msa field#year field#msa inst_fes = inst athr_fes = athr_id) vce(cluster inst)
+        estimates save ../output/es_`startyr'_`endyr'_`samp', replace
         gunique athr_id if `c'
         local num_movers = r(unique)
         local normalize = _b[lag1]

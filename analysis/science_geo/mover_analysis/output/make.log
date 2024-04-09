@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-01-30 15:54:29
+Makelog started: 2024-03-06 21:31:34
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -65,7 +65,7 @@ not available in non-GUI version
 . global time year 
 
 . program main
-  1.     foreach t in year year_firstlast {
+  1.     foreach t in year year_firstlast year {
   2.         qui make_movers, samp(`t')
   3.         sum_stats, samp(`t')
   4.         qui output_tables, samp(`t')
@@ -368,34 +368,35 @@ not available in non-GUI version
  58.         preserve
  59.         mat drop _all
  60.         reghdfe ln_y `lags' treat `leads' if `c' , absorb(year field msa f
-> ield#year field#msa inst athr_id) vce(cluster inst)
- 61.         gunique athr_id if `c'
- 62.         local num_movers = r(unique)
- 63.         local normalize = _b[lag1]
- 64.         foreach var in `lags' treat `leads' {
- 65.             mat row = _b[`var']-`normalize', _se[`var']
- 66.             if "`var'" == "lag1" {
- 67.                 mat row = _b[`var']-`normalize',0
- 68.             }
- 69.             mat es = nullmat(es) \ row 
- 70.         }
- 71.         svmat es
- 72.         keep es1 es2
- 73.         drop if mi(es1)
- 74.         rename (es1 es2) (b se)
- 75.         gen ub = b + 1.96*se
- 76.         gen lb  = b - 1.96*se
- 77.         gen rel = -`timeframe' if _n == 1
- 78.         replace rel = rel[_n-1]+ 1 if _n > 1
- 79.         drop if rel ==`timeframe' 
- 80.         sum b if inrange(rel, -`timeframe',-2)
- 81.         local pre_mean : di %3.2f r(mean)
- 82.         sum b if inrange(rel, 1,`timeframe')
- 83.         local post_mean : di %3.2f r(mean)
- 84.         local end = `timeframe' - 1
- 85.         replace lb = -1 if lb < -1
- 86.         replace ub = 1 if ub > 1
- 87.         tw rcap ub lb rel if rel != -1,  lcolor(gs12) msize(vsmall) || sca
+> ield#year field#msa inst_fes = inst athr_fes = athr_id) vce(cluster inst)
+ 61.         estimates save ../output/es_`startyr'_`endyr'_`samp', replace
+ 62.         gunique athr_id if `c'
+ 63.         local num_movers = r(unique)
+ 64.         local normalize = _b[lag1]
+ 65.         foreach var in `lags' treat `leads' {
+ 66.             mat row = _b[`var']-`normalize', _se[`var']
+ 67.             if "`var'" == "lag1" {
+ 68.                 mat row = _b[`var']-`normalize',0
+ 69.             }
+ 70.             mat es = nullmat(es) \ row 
+ 71.         }
+ 72.         svmat es
+ 73.         keep es1 es2
+ 74.         drop if mi(es1)
+ 75.         rename (es1 es2) (b se)
+ 76.         gen ub = b + 1.96*se
+ 77.         gen lb  = b - 1.96*se
+ 78.         gen rel = -`timeframe' if _n == 1
+ 79.         replace rel = rel[_n-1]+ 1 if _n > 1
+ 80.         drop if rel ==`timeframe' 
+ 81.         sum b if inrange(rel, -`timeframe',-2)
+ 82.         local pre_mean : di %3.2f r(mean)
+ 83.         sum b if inrange(rel, 1,`timeframe')
+ 84.         local post_mean : di %3.2f r(mean)
+ 85.         local end = `timeframe' - 1
+ 86.         replace lb = -1 if lb < -1
+ 87.         replace ub = 1 if ub > 1
+ 88.         tw rcap ub lb rel if rel != -1,  lcolor(gs12) msize(vsmall) || sca
 > tter b rel, mcolor(ebblue) xlab(-`timeframe'(1)`end', angle(45) labsize(vsmal
 > l)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
 >           yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(purple%50) 
@@ -406,11 +407,11 @@ not available in non-GUI version
 >                                                             "Post-period mean
 >  = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Re
 > lative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
- 88.         graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf
+ 89.         graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf
 > , replace
- 89.         restore
- 90.     }
- 91. end
+ 90.         restore
+ 91.     }
+ 92. end
 
 . 
 . program output_tables
@@ -495,96 +496,96 @@ avg_team_s~e |     66,517    9.983068    8.911749          1        100
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
 life_time_~d |     66,517    1.814336    5.885887    .000123   415.3675
-  49,380
+  49,381
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-   num_years |     49,380    4.120697    3.509834          2         53
+   num_years |     49,381    4.120654    3.509811          2         53
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-avg_team_s~e |     49,380    10.03632    8.989577          1        100
+avg_team_s~e |     49,381     10.0363    8.989487          1        100
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           x |     49,380    6718.045    5325.559   10.66667   22480.75
+           x |     49,381    6718.128    5325.537   10.66667   22480.75
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-           y |     49,380    .2938596    .7577443   .0000615   67.67683
+           y |     49,381    .2938536    .7577377   .0000615   67.67683
 
     Variable |        Obs        Mean    Std. dev.       Min        Max
 -------------+---------------------------------------------------------
-life_time_~d |     49,380    1.390526    4.627894    .000123   327.3783
+life_time_~d |     49,381    1.390498    4.627851    .000123   327.3783
   4,134
 file /export/scratch/cxu_sci_geo/movers/msa_year_collapsed.dta saved
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                           203,480  
+    Matched                           203,482  
     -----------------------------------------
 (682 missing values generated)
 (3 missing values generated)
-(106,327 missing values generated)
+(106,329 missing values generated)
 (3 missing values generated)
 (310 missing values generated)
-(60,615 missing values generated)
+(60,617 missing values generated)
 (note: missing values will be sorted first)
 
 Duplicates in terms of athr_id which_place
 
 (104,720 observations deleted)
-(49,380 missing values generated)
-(49,380 real changes made)
+(49,381 missing values generated)
+(49,381 real changes made)
 
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                            94,031  
+    Matched                            94,030  
     -----------------------------------------
-(49,394 missing values generated)
+(49,395 missing values generated)
 file ../output/figures/msa_ln_y_diff_year.pdf saved as PDF format
-(49,382 missing values generated)
+(49,383 missing values generated)
 file ../output/figures/msa_ln_x_diff_year.pdf saved as PDF format
-(53,558 missing values generated)
+(53,559 missing values generated)
 file ../output/figures/msa_ln_patent_diff_year.pdf saved as PDF format
-(49,645 missing values generated)
+(49,646 missing values generated)
 file ../output/figures/avg_ln_y_diff_year.pdf saved as PDF format
-(49,382 missing values generated)
+(49,383 missing values generated)
 file ../output/figures/avg_ln_x_diff_year.pdf saved as PDF format
-(78,563 missing values generated)
+(78,562 missing values generated)
 file ../output/figures/avg_ln_patent_diff_year.pdf saved as PDF format
 
-      Source |       SS           df       MS      Number of obs   =    44,383
--------------+----------------------------------   F(1, 44381)     =   4096.78
-       Model |  26378.3814         1  26378.3814   Prob > F        =    0.0000
-    Residual |  285760.573    44,381  6.43880428   R-squared       =    0.0845
+      Source |       SS           df       MS      Number of obs   =    44,381
+-------------+----------------------------------   F(1, 44379)     =   4095.10
+       Model |  26369.1047         1  26369.1047   Prob > F        =    0.0000
+    Residual |  285764.676    44,379  6.43918692   R-squared       =    0.0845
 -------------+----------------------------------   Adj R-squared   =    0.0845
-       Total |  312138.954    44,382  7.03300784   Root MSE        =    2.5375
+       Total |  312133.781    44,380  7.03320823   Root MSE        =    2.5376
 
 ------------------------------------------------------------------------------
 avg_ln_y_d~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-msa_ln_y_d~f |    .531112   .0082978    64.01   0.000     .5148481    .5473759
-       _cons |  -.2565486    .012059   -21.27   0.000    -.2801845   -.2329128
+msa_ln_y_d~f |   .5310592   .0082987    63.99   0.000     .5147936    .5473249
+       _cons |  -.2566233   .0120596   -21.28   0.000    -.2802604   -.2329862
 ------------------------------------------------------------------------------
 file ../output/figures/place_effect_desc_year.pdf saved as PDF format
 
       Source |       SS           df       MS      Number of obs   =    15,468
--------------+----------------------------------   F(1, 15466)     =    161.22
-       Model |  430.844223         1  430.844223   Prob > F        =    0.0000
-    Residual |  41331.7604    15,466  2.67242729   R-squared       =    0.0103
+-------------+----------------------------------   F(1, 15466)     =    161.23
+       Model |  430.884793         1  430.884793   Prob > F        =    0.0000
+    Residual |  41331.7198    15,466  2.67242466   R-squared       =    0.0103
 -------------+----------------------------------   Adj R-squared   =    0.0103
        Total |  41762.6046    15,467  2.70011021   Root MSE        =    1.6348
 
 ------------------------------------------------------------------------------
 avg_ln_pat~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-msa_ln_y_d~f |   .1181063   .0093018    12.70   0.000     .0998737    .1363389
-       _cons |  -.2847952   .0132022   -21.57   0.000    -.3106732   -.2589173
+msa_ln_y_d~f |   .1181196   .0093024    12.70   0.000     .0998859    .1363534
+       _cons |  -.2847995   .0132022   -21.57   0.000    -.3106773   -.2589216
 ------------------------------------------------------------------------------
-(49,645 observations deleted)
+(49,646 observations deleted)
 (file ../temp/dest_origin_changes.dta not found)
 file ../temp/dest_origin_changes.dta saved
 (note:  named style none not found in class margin, default attributes used)
@@ -731,53 +732,244 @@ Duplicates in terms of athr_id which_place
     Result                      Number of obs
     -----------------------------------------
     Not matched                             0
-    Matched                            36,984  
+    Matched                            36,981  
     -----------------------------------------
 (19,726 missing values generated)
 file ../output/figures/msa_ln_y_diff_year_firstlast.pdf saved as PDF format
 (19,717 missing values generated)
 file ../output/figures/msa_ln_x_diff_year_firstlast.pdf saved as PDF format
-(22,031 missing values generated)
+(22,029 missing values generated)
 file ../output/figures/msa_ln_patent_diff_year_firstlast.pdf saved as PDF
     format
 (19,817 missing values generated)
 file ../output/figures/avg_ln_y_diff_year_firstlast.pdf saved as PDF format
 (19,717 missing values generated)
 file ../output/figures/avg_ln_x_diff_year_firstlast.pdf saved as PDF format
-(31,525 missing values generated)
+(31,522 missing values generated)
 file ../output/figures/avg_ln_patent_diff_year_firstlast.pdf saved as PDF
     format
 
-      Source |       SS           df       MS      Number of obs   =    17,164
--------------+----------------------------------   F(1, 17162)     =   1377.04
-       Model |  7842.25808         1  7842.25808   Prob > F        =    0.0000
-    Residual |  97737.7983    17,162  5.69501213   R-squared       =    0.0743
+      Source |       SS           df       MS      Number of obs   =    17,161
+-------------+----------------------------------   F(1, 17159)     =   1375.43
+       Model |  7834.62429         1  7834.62429   Prob > F        =    0.0000
+    Residual |  97740.0815    17,159  5.69614089   R-squared       =    0.0742
 -------------+----------------------------------   Adj R-squared   =    0.0742
-       Total |  105580.056    17,163  6.15160848   Root MSE        =    2.3864
+       Total |  105574.706    17,160  6.15237213   Root MSE        =    2.3867
 
 ------------------------------------------------------------------------------
 avg_ln_y_d~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-msa_ln_y_d~f |   .4838188    .013038    37.11   0.000      .458263    .5093745
-       _cons |  -.2183623   .0182636   -11.96   0.000    -.2541607   -.1825639
+msa_ln_y_d~f |   .4836454   .0130409    37.09   0.000     .4580839    .5092069
+       _cons |   -.218556   .0182668   -11.96   0.000    -.2543609   -.1827512
 ------------------------------------------------------------------------------
 file ../output/figures/place_effect_desc_year_firstlast.pdf saved as PDF
     format
 
       Source |       SS           df       MS      Number of obs   =     5,459
--------------+----------------------------------   F(1, 5457)      =    115.26
-       Model |  305.373179         1  305.373179   Prob > F        =    0.0000
-    Residual |  14457.4466     5,457  2.64933967   R-squared       =    0.0207
+-------------+----------------------------------   F(1, 5457)      =    115.50
+       Model |  305.975584         1  305.975584   Prob > F        =    0.0000
+    Residual |  14456.8442     5,457  2.64922928   R-squared       =    0.0207
 -------------+----------------------------------   Adj R-squared   =    0.0205
-       Total |  14762.8198     5,458  2.70480392   Root MSE        =    1.6277
+       Total |  14762.8198     5,458  2.70480392   Root MSE        =    1.6276
 
 ------------------------------------------------------------------------------
 avg_ln_pat~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-msa_ln_y_d~f |   .1680897   .0156565    10.74   0.000     .1373967    .1987826
-       _cons |   .0536801   .0221663     2.42   0.015     .0102254    .0971348
+msa_ln_y_d~f |   .1682692   .0156574    10.75   0.000     .1375743     .198964
+       _cons |   .0536701   .0221654     2.42   0.015      .010217    .0971232
 ------------------------------------------------------------------------------
 (19,817 observations deleted)
+file ../temp/dest_origin_changes.dta saved
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(note:  named style none not found in class margin, default attributes used)
+(4,705 missing values generated)
+(7 missing values generated)
+(512,656 missing values generated)
+  418,619
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |    418,619    2.201536    2.685996          1         55
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |    418,619     10.8037    11.74516          1        100
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |    418,619    7273.927    6904.515          0      23038
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |    418,619    .2444103    .9604253          0   176.5879
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |    418,619    .6621793    3.160427          0   415.3675
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_moves |    418,619    .1879919    .6220192         -1         16
+  352,102
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |    352,102    1.659374    1.730931          1         48
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |    352,102    10.95873     12.2006          1        100
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |    352,102    7388.291    7179.482          0      23038
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |    352,102    .2325704    .9883268          0   176.5879
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |    352,102    .4445208     2.24332          0   274.6264
+  66,517
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |     66,517    5.071425    4.444389          2         55
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |     66,517    9.983068    8.911749          1        100
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |     66,517    6668.549    5170.846   10.66667   22480.75
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |     66,517    .3070835    .7936859   .0000615   67.67683
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |     66,517    1.814336    5.885887    .000123   415.3675
+  49,381
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |     49,381    4.120654    3.509811          2         53
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |     49,381     10.0363    8.989487          1        100
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |     49,381    6718.128    5325.537   10.66667   22480.75
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |     49,381    .2938536    .7577377   .0000615   67.67683
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |     49,381    1.390498    4.627851    .000123   327.3783
+  4,134
+file /export/scratch/cxu_sci_geo/movers/msa_year_collapsed.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           203,482  
+    -----------------------------------------
+(682 missing values generated)
+(3 missing values generated)
+(106,329 missing values generated)
+(3 missing values generated)
+(310 missing values generated)
+(60,617 missing values generated)
+(note: missing values will be sorted first)
+
+Duplicates in terms of athr_id which_place
+
+(104,720 observations deleted)
+(49,381 missing values generated)
+(49,381 real changes made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            94,030  
+    -----------------------------------------
+(49,395 missing values generated)
+file ../output/figures/msa_ln_y_diff_year.pdf saved as PDF format
+(49,383 missing values generated)
+file ../output/figures/msa_ln_x_diff_year.pdf saved as PDF format
+(53,559 missing values generated)
+file ../output/figures/msa_ln_patent_diff_year.pdf saved as PDF format
+(49,646 missing values generated)
+file ../output/figures/avg_ln_y_diff_year.pdf saved as PDF format
+(49,383 missing values generated)
+file ../output/figures/avg_ln_x_diff_year.pdf saved as PDF format
+(78,562 missing values generated)
+file ../output/figures/avg_ln_patent_diff_year.pdf saved as PDF format
+
+      Source |       SS           df       MS      Number of obs   =    44,381
+-------------+----------------------------------   F(1, 44379)     =   4095.10
+       Model |  26369.1047         1  26369.1047   Prob > F        =    0.0000
+    Residual |  285764.676    44,379  6.43918692   R-squared       =    0.0845
+-------------+----------------------------------   Adj R-squared   =    0.0845
+       Total |  312133.781    44,380  7.03320823   Root MSE        =    2.5376
+
+------------------------------------------------------------------------------
+avg_ln_y_d~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+msa_ln_y_d~f |   .5310592   .0082987    63.99   0.000     .5147936    .5473249
+       _cons |  -.2566233   .0120596   -21.28   0.000    -.2802604   -.2329862
+------------------------------------------------------------------------------
+file ../output/figures/place_effect_desc_year.pdf saved as PDF format
+
+      Source |       SS           df       MS      Number of obs   =    15,468
+-------------+----------------------------------   F(1, 15466)     =    161.23
+       Model |  430.884793         1  430.884793   Prob > F        =    0.0000
+    Residual |  41331.7198    15,466  2.67242466   R-squared       =    0.0103
+-------------+----------------------------------   Adj R-squared   =    0.0103
+       Total |  41762.6046    15,467  2.70011021   Root MSE        =    1.6348
+
+------------------------------------------------------------------------------
+avg_ln_pat~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+msa_ln_y_d~f |   .1181196   .0093024    12.70   0.000     .0998859    .1363534
+       _cons |  -.2847995   .0132022   -21.57   0.000    -.3106773   -.2589216
+------------------------------------------------------------------------------
+(49,646 observations deleted)
 file ../temp/dest_origin_changes.dta saved
 (note:  named style none not found in class margin, default attributes used)
 (note:  named style none not found in class margin, default attributes used)
@@ -814,6 +1006,6 @@ file ../temp/dest_origin_changes.dta saved
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2024-01-30 16:04:36
+Makelog ended: 2024-03-06 21:59:39
 Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
