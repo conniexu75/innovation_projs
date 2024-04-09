@@ -7,7 +7,9 @@ graph set window fontface "Arial Narrow"
 pause on
 set seed 8975
 global temp "/export/scratch/cxu_sci_geo/age_cohort"
+global all_fund "/export/scratch/cxu_sci_geo/scrape_full_pmids"
 global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
+global years "/export/scratch/cxu_sci_geo/append_all_pprs/output"
 global y_name "Productivity"
 global pat_adj_wt_name "Patent-to-Paper Citations"
 global ln_patent_name "Log Patent-to-Paper Citations"
@@ -17,37 +19,54 @@ global ln_x_name "Log Cluster Size"
 global time year 
 
 program main
-    foreach t in year_firstlast {
-        find_age, samp(`t')
-        /*make_movers, samp(`t')
-        sum_stats, samp(`t')
-        qui output_tables, samp(`t')
-        event_studies, samp(`t')*/
+*    get_athr_prod
+    foreach t in year year_firstlast {
+        *find_age, samp(`t')
+        *make_movers, samp(`t')
+        *sum_stats, samp(`t')
+        *qui output_tables, samp(`t')
+        *event_studies, samp(`t')
     }
+    plot_prod_profile
+end
+
+program get_athr_prod
+    use ../external/samp/cleaned_all_all_jrnls.dta, clear
+    gcollapse (count) num_pprs = pmid (sum) cite_affl_wt body_adj_wt impact_affl_wt affl_wt impact_cite_affl_wt, by(athr_id year)
+    compress, nocoalesce
+    save ${temp}/athr_prod_year, replace
+    use ../external/first_last/cleaned_all_all_jrnls.dta, clear
+    gcollapse (count) num_pprs = pmid (sum) cite_affl_wt body_adj_wt impact_affl_wt affl_wt impact_cite_affl_wt, by(athr_id year)
+    compress, nocoalesce
+    save ${temp}/athr_prod_year_firstlast, replace
+
+    use ${all_fund}/output/openalex_all_jrnls_merged, clear 
+    gen date = date(pub_date, "YMD")
+    gen year = yofd(date)
+    gcontract athr_id year
+    drop _freq
+    bys athr_id: egen first_fund_ppr = min(year)
+    gcontract athr_id first_fund_ppr
+    drop _freq
+    save ${temp}/fund_athr_yr, replace
 end
 
 program find_age
     syntax, samp(str)
     // find your publishing birth year first
-    use ${${time}_insts}/filled_in_panel_all_${time}, clear
-    gcontract athr_id year
-    drop _freq 
-    bys athr_id : gen year_rank = _n
-    by athr_id: egen first_yr = min(year)
-    by athr_id: gen second_yr = year if year_rank == 2
-    by athr_id: egen last_yr = max(year)
-    hashsort athr_id second_yr
-    by athr_id: replace second_yr = second_yr[_n-1] if mi(second_yr)
+    use ${${time}s}/appended_athr_yrs, clear
+    bys athr_id (year): gen year_rank = _n
+    by athr_id: gegen first_pub_yr = min(year)
+    by athr_id: gegen last_pub_yr = max(year)
     keep if year_rank == 1 
-    gen first_second_diff = second_yr - first_yr
-    replace first_yr = second_yr if  first_second_diff >= 10 & !mi(first_second_diff)
     gisid athr_id 
-    gcontract athr_id first_yr last_yr
+    gcontract athr_id first_pub_yr last_pub_yr
     drop _freq
-    // find your pubishing in the top 15 birthday
-    merge 1:m athr_id using ../external/samp/athr_panel_full_comb_`samp', assert(1 3) keep(3) nogen 
-    bys athr_id: egen first_yr_in_top15 = min(year)
-    gcontract athr_id first_yr last_yr first_yr_in_top15
+    save ${temp}/athr_first_last_pub, replace
+
+    merge 1:m athr_id using ../temp/athr_prod_`samp', assert(1 2 3) keep(3) nogen 
+    bys athr_id : egen first_yr_in_top15 = min(year)
+    gcontract athr_id first_pub_yr last_pub_yr first_yr_in_top15
     drop _freq
     merge 1:1 athr_id using ../external/dissertation/appended_pprs, assert(1 2 3) keep(1 3) nogen
     gunique athr_id 
@@ -58,38 +77,52 @@ program find_age
     di "% of US authors with disseration tag: " r(unique)/`N_athrs'*100
     gunique athr_id if dissertation_tag == 0 & strpos(lwr_title, "dissertation")>0 | strpos(lwr_title, "thesis")>0  
     di "% of US authors with disseration title " r(unique)/`N_athrs'*100
-    compress, nocoalesce
-    gen publishing_age= 2023-first_yr + 1 
-    gen publishing_lifespan= last_yr-first_yr + 1 
-    gen post_phd = phd_year - first_yr + 1
-    gen top15_post_phd = phd_year - first_yr_in_top15 + 1
-    gen top15_pub_diff = first_yr_in_top15 - first_yr
-    gen post_phd_lifespan = last_yr - phd_year + 1  
+    gen year_since_first_pub = 2024-first_pub_yr + 1 
+    gen publishing_lifespan= last_pub_yr-first_pub_yr + 1 
+    gen post_phd = phd_year - first_pub_yr + 1
+    gen post_phd_lifespan = last_pub_yr - phd_year + 1  
+    gen top15_post_phd = phd_year - first_yr_in_top15+1 
+    gen top15_pub_diff = first_yr_in_top15 - first_pub_yr + 1 
     gegen publishing_lifespan99 = pctile(publishing_lifespan), p(99)
     gegen post_phd_lifespan99 = pctile(post_phd_lifespan), p(99)
     gen windsorize = publishing_lifespan >= publishing_lifespan99 | (post_phd_lifespan >= post_phd_lifespan99 & !mi(phd_year))
-    foreach var in first_yr last_yr first_yr_in_top15 phd_year publishing_age publishing_lifespan post_phd top15_post_phd post_phd_lifespan {
+    foreach var in first_pub_yr last_pub_yr phd_year year_since_first_pub publishing_lifespan post_phd post_phd_lifespan first_yr_in_top15 top15_post_phd top15_pub_diff {
         replace `var' = . if windsorize == 1  
     }
     gen cohort_bin = floor(phd_year/10)*10
     replace cohort_bin = cohort_bin + 5 if phd_year >= cohort_bin+5
+    gisid athr_id
     preserve
-    merge 1:m athr_id using ../external/samp/athr_panel_full_comb_`samp', assert(1 3) keep(3) nogen 
-    gen age = year - first_yr 
-    gcollapse (mean) impact_cite_affl_wt, by(age)
-    tw scatter impact_cite_affl_wt age , xtitle("Year Relative to First Publication", size(small))  ytitle("Average Productivity")
-    graph export ../output/figures/productivity_pub_age.pdf, replace
+    merge 1:m athr_id using ../temp/athr_prod_`samp', assert(1 2 3) keep(3) nogen 
+    gen pub_age = year - first_pub_yr + 25  
+    drop if mi(pub_age)
+    replace pub_age = 25 if pub_age < 25 
+    bys pub_age athr_id: gen athr_cnt = _n == 1
+    gcollapse (sum) athr_cnt (mean) num_pprs cite_affl_wt body_adj_wt impact_affl_wt affl_wt impact_cite_affl_wt, by(pub_age)
+    save ../temp/age_prod_`samp', replace
     restore
-    stop
     preserve
-    merge 1:m athr_id using ../external/samp/athr_panel_full_comb_`samp', assert(1 3) keep(3) nogen 
-    gen age = year - phd_year  if !mi(phd_year)
-    gcollapse (mean) impact_cite_affl_wt, by(age)
-    tw scatter impact_cite_affl_wt age if inrange(age, 25, 85), xtitle("Age (based on PhD)", size(small))  ytitle("Average Productivity")
-    graph export ../output/figures/productivity_phd_age.pdf, replace
+    merge 1:m athr_id using ../temp/athr_prod_`samp', assert(1 2 3) keep(3) nogen 
+    keep if !mi(phd_year)
+    gen phd_age = year - phd_year + 30 if !mi(phd_year)
+    bys phd_age athr_id: gen athr_cnt = _n == 1
+    gcollapse (sum) athr_cnt (mean) num_pprs cite_affl_wt body_adj_wt impact_affl_wt affl_wt impact_cite_affl_wt, by(phd_age)
+    save ../temp/phd_age_prod_`samp', replace
     restore
+    preserve
+    merge 1:m athr_id using ../temp/athr_prod_`samp', assert(1 2 3) keep(3) nogen 
+    keep if mi(phd_year)
+    gen phd_age = year - first_pub_yr + 25 
+    replace phd_age = 25 if phd_age < 25 
+    bys phd_age athr_id: gen athr_cnt = _n == 1
+    gcollapse (sum) athr_cnt (mean)  cite_affl_wt body_adj_wt impact_affl_wt affl_wt impact_cite_affl_wt num_pprs, by(phd_age)
+    drop if mi(phd_age)
+    save ../temp/no_phd_age_prod_`samp', replace
+    restore
+    compress, nocoalesce
     save ../temp/age_`samp', replace
 end
+
 
 program make_movers
     syntax, samp(str)
@@ -108,7 +141,7 @@ program make_movers
     drop if num_moves <= 0
     save ../temp/movers, replace
     
-    use if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_full_comb_`samp', clear 
+    use if !mi(msa_comb) & !mi(inst_id) using ../external/panel/athr_panel_full_comb_`samp', clear 
     hashsort athr_id year
     gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_comb[_n-1]
     bys athr_id: egen num_moves = total(place_count)
@@ -161,21 +194,21 @@ end
 program sum_stats
     syntax, samp(str)
     use ${temp}/mover_temp_`samp' , clear  
-    merge m:1 athr_id using ../temp/age_`samp', assert(2 3) keep(3) nogen
+    merge m:1 athr_id using ../temp/age_`samp', assert(1 2 3) keep(3) nogen
     // plot stats at the author level
     preserve
-    gcontract athr_id analysis_cond publishing_age publishing_lifespan post_phd top15_post_phd phd_year first_yr first_yr_in_top15 last_yr top15_pub_diff post_phd_lifespan
+    gcontract athr_id analysis_cond year_since_first_pub publishing_lifespan post_phd top15_post_phd phd_year first_pub_yr first_yr_in_top15 last_pub_yr top15_pub_diff post_phd_lifespan
     drop _freq
     gisid athr_id
-    corr first_yr phd_year
+    corr first_pub_yr phd_year
     local n = r(N)
     local corr: di %3.2f r(rho) 
-    binscatter2 first_yr phd_year, xtitle("PhD Graduation Year", size(small)) ytitle("Publishing Birth Year", size(small)) legend(on  order(- "N = `n'" "corr. = `corr'") pos(11) ring(0) region(fcolor(none)) size(small)) xlab(1945(5)2022, labsize(small)) ylab(1945(5)2022, labsize(small))
+    binscatter2 first_pub_yr phd_year, xtitle("PhD Graduation Year", size(small)) ytitle("Publishing Birth Year", size(small)) legend(on  order(- "N = `n'" "corr. = `corr'") pos(11) ring(0) region(fcolor(none)) size(small)) xlab(1945(5)2022, labsize(small)) ylab(1945(5)2022, labsize(small))
     graph export ../output/figures/bs_phd_pub_yr.pdf, replace 
     gisid athr_id 
     local gap 5
     local pos 10
-    foreach var in phd_year first_yr publishing_age post_phd top15_post_phd first_yr_in_top15 top15_pub_diff {
+    foreach var in phd_year first_pub_yr year_since_first_pub post_phd top15_post_phd first_yr_in_top15 top15_pub_diff {
         sum `var', d
         local min_year = r(min)
         local max_year = r(max)
@@ -188,7 +221,7 @@ program sum_stats
         local nonmover_med: di %3.2f r(p50)
         local nonmover_N = r(N)
         if "`var'" == "phd_year" local xtit = "PhD Graduation Year"
-        if "`var'" == "first_yr" {
+        if "`var'" == "first_pub_yr" {
             local xtit = "Publishing Birth Year"
             local gap = 10
         }
@@ -197,7 +230,7 @@ program sum_stats
             local gap = 4 
             local pos = 11
         }
-        if "`var'" == "publishing_age" {
+        if "`var'" == "year_since_first_pub" {
             local xtit = "Publishing Age (2023-Publishing Birth Year)"
             local gap = 10
             local pos = 1
@@ -235,12 +268,12 @@ program sum_stats
     restore
 
     preserve
-    gcontract athr_id publishing_age 
+    gcontract athr_id year_since_first_pub 
     drop _freq
-    gcontract publishing_age, freq(num_athrs)
+    gcontract year_since_first_pub, freq(num_athrs)
     sum num_athrs
     gen perc = num_athrs/r(sum)*100
-    mkmat publishing_age num_athrs perc, mat(pub_age_dist_`samp')
+    mkmat year_since_first_pub num_athrs perc, mat(pub_age_dist_`samp')
     restore
     
     gen patented = pat_wt > 0
@@ -299,8 +332,8 @@ program event_studies
     cap mat drop _all  
     use if analysis_cond == 1 using ${temp}/mover_temp_`samp' , clear  
     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
-    merge m:1 athr_id using ../temp/age_`samp', assert(2 3) keep(3) nogen
-    keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year publishing_age publishing_lifespan post_phd top15_post_phd phd_year first_yr first_yr_in_top15 last_yr top15_pub_diff post_phd_lifespan cohort_bin
+    merge m:1 athr_id using ../temp/age_`samp', assert(1 2 3) keep(3) nogen
+    keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year year_since_first_pub publishing_lifespan post_phd top15_post_phd phd_year first_pub_yr first_yr_in_top15 last_pub_yr top15_pub_diff post_phd_lifespan cohort_bin
     hashsort athr_id year
     gen rel = year - move_year
     merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3) nogen
@@ -330,7 +363,7 @@ program event_studies
     local num_movers = r(unique)
     // assume you're 25 when you first publish 
     // assume you're 28 when you graduate your phd
-    gen move_age_pub = move_year - first_yr  + 1 + 25
+    gen move_age_pub = move_year - first_pub_yr  + 1 + 25
     gen move_age_phd = move_year - phd_year + 1 + 28 
 *    replace move_age_phd = . if move_age_phd <=0 
     bys athr_id: gen counter = _n == 1
@@ -411,6 +444,54 @@ program event_studies
             restore
         }
     }
+end
+
+program plot_prod_profile
+    use ../temp/age_prod_year, clear
+    gen grp = "year"
+    append using ../temp/age_prod_year_firstlast
+    replace grp = "year_firstlast" if mi(grp)
+    gen cohort_bin = floor(pub_age/10)*10
+    replace cohort_bin = cohort_bin + 5 if pub_age >= cohort_bin+5
+    foreach var in impact_cite_affl_wt body_adj_wt num_pprs {
+        local ylab "0(0.1)1.4"
+        if "`var'" == "impact_cite_affl_wt"  local ytit "Average Life Sciences Productivity (Top 15)"
+        if "`var'" == "body_adj_wt" local ytit "Paper to Patent Productivity (Top 15)"
+        if "`var'" == "num_pprs" {
+            local ytit "Total Publications in (Top 15)" 
+            local ylab "1(0.05)1.5"
+        }
+        heatplot athr_cnt `var' pub_age if grp == "year", discrete scatter colors(blues, ipolate(20)) p(mlc(black)) legend(off) ytitle(`ytit', size(vsmall)) xtitle("Age", size(vsmall)) xlab(25(5)150, labsize(vsmall)) ylab(`ylab', labsize(vsmall)) 
+        graph export ../output/figures/pub_age_`var'_profile_year.pdf, replace
+        heatplot athr_cnt `var' pub_age if grp == "year_firstlast", discrete scatter colors(blues, ipolate(20)) p(mlc(black)) legend(off) ytitle(`ytit', size(vsmall)) xtitle("Age", size(vsmall)) xlab(25(5)150, labsize(vsmall)) ylab(`ylab', labsize(vsmall)) 
+        graph export ../output/figures/pub_age_`var'_profile_year_firstlast.pdf, replace
+        preserve
+        if "`var'" != "num_pprs" local ylab "0(0.1)1.4"
+        gen num = `var' * athr_cnt
+        bys cohort_bin grp : egen tot_athrs = total(athr_cnt)
+        bys cohort_bin grp : egen tot_num = total(num)
+        gen mean_prod = tot_num/tot_athrs
+        gcollapse (mean) mean_prod (sum) athr_cnt, by(cohort_bin grp)
+        tw scatter mean_prod cohort_bin if grp == "year", mcolor(edkblue) || scatter mean_prod cohort_bin if grp == "year_firstlast", mcolor(dkorange) ytitle(`ytit', size(vsmall)) xtitle("Age", size(vsmall)) xlab(0(5)150, labsize(vsmall)) ylab(`ylab', labsize(vsmall)) legend(on label(1 "All Authors") label(2 "First & Last Authors") size(tiny) pos(11) ring(0) lwidth(none)region(fcolor(none)))
+        graph export ../output/figures/cohort_`var'_profile.pdf, replace
+        restore
+    }
+/*    use ../temp/phd_age_prod_year, clear
+    replace phd_age = phd_age 
+    gen grp = "phd"
+    gen cohort_bin = floor(phd_age/10)*10
+    replace cohort_bin = cohort_bin + 5 if phd_age >= cohort_bin+5
+    foreach var in impact_cite_affl_wt body_adj_wt num_pprs {
+        local ylab "0(0.05)0.6"
+        if "`var'" == "impact_cite_affl_wt"  local ytit "Average Life Sciences Productivity (Top 15)"
+        if "`var'" == "body_adj_wt" local ytit "Paper to Patent Productivity (Top 15)"
+        if "`var'" == "num_pprs" {
+            local ytit "Total Publications in (Top 15)" 
+            local ylab "1(0.05)1.5"
+        }
+        heatplot athr_cnt `var' phd_age if grp == "phd" & phd_age >= 15, discrete scatter colors(blues, ipolate(20)) p(mlc(black)) legend(off) ytitle(`ytit', size(vsmall)) xtitle("Age", size(vsmall)) xlab(15(10)100, labsize(vsmall)) ylab(`ylab', labsize(vsmall)) 
+        graph export ../output/figures/phd_age_`var'_profile_year.pdf, replace
+    }*/
 end
 
 program output_tables

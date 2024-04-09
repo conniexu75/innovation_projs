@@ -1,3 +1,5 @@
-./samp/ | /export/scratch/cxu_sci_geo/create_panel/output
+./panel/ | /export/scratch/cxu_sci_geo/create_panel/output
+./samp/ | /export/scratch/cxu_sci_geo/clean_openalex_output
+./first_last/ | /export/scratch/cxu_sci_geo/create_first_last
 ./dissertation/ | /export/scratch/cxu_sci_geo/dissertations/output
 ./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
