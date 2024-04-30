@@ -1,2 +1,0 @@
-./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
-./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/clean_wos_exports/output/

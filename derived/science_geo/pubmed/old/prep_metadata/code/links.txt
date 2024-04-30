@@ -1,2 +1,0 @@
-./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/scrape_metadata/output/metadata
-./cats/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/append_pmids/output

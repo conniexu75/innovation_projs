@@ -1,3 +1,0 @@
-./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
-./wos/ | /export/home/dor/cxu/innovation_projs/raw/wos_extracts/
-./samp/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/append_pmids/output/
