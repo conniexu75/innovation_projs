@@ -1,3 +1,0 @@
-./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/clean_openalex/output
-./clusters/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/cluster_fields/output
-./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
