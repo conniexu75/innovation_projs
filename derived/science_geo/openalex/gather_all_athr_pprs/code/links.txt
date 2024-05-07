@@ -1,0 +1,1 @@
+./pmids/ | /export/scratch/cxu_sci_geo/scrape_full_pmids/output/
