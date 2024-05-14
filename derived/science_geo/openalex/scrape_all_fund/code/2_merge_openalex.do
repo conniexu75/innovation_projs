@@ -7,8 +7,8 @@ pause on
 set seed 8975
 here, set
 set maxvar 120000
-global temp "/export/scratch/cxu_sci_geo/scrape_full_pmids"
-global output "/export/scratch/cxu_sci_geo/scrape_full_pmids/output"
+global temp "/export/scratch/cxu_sci_geo/scrape_all_fund"
+global output "/export/scratch/cxu_sci_geo/scrape_all_fund/output"
 
 program main
     append_files

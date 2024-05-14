@@ -12,7 +12,7 @@ pmid_file <- read_dta('../external/pmids/all_newfund_pmids.dta')
 nr <- nrow(pmid_file)
 split_pmid <- split(pmid_file, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 num_file <- length(split_pmid)
-for (q in 401:num_file) {
+for (q in 150:150) {
    ## pull open alex data from pmids
    works_from_pmids <- oa_fetch(
      entity = "works",
@@ -162,7 +162,7 @@ for (q in 401:num_file) {
             pmid = str_replace(pmid, "https://pubmed.ncbi.nlm.nih.gov/", ""),
             athr_id= str_replace(athr_id, "https://openalex.org/", ""),
             inst_id = str_replace(inst_id, "https://openalex.org/",""))
-   write_csv(affl_list, paste0("/export/scratch/cxu_sci_geo/scrape_full_pmids/openalex_authors", as.character(q), ".csv"))
+   write_csv(affl_list, paste0("/export/scratch/cxu_sci_geo/scrape_all_fund/openalex_authors", as.character(q), ".csv"))
    ## get mesh terms
    mesh_terms <- lapply(1:N_articles, function(i) {
      if (length(works_from_pmids[[i]][["mesh"]]) !=0 ) {
@@ -192,7 +192,7 @@ for (q in 401:num_file) {
    colnames(mesh_terms) <- c("id","which_mesh","term", "is_major_topic", "qualifier_name")
    if(nrow(mesh_terms)!=0) {
      mesh_terms <- mesh_terms %>% mutate(id = str_replace(as.character(id), "https://openalex.org/",""))
-     write_csv(mesh_terms, paste0("/export/scratch/cxu_sci_geo/scrape_full_pmids/mesh_terms", as.character(q), ".csv"))
+     write_csv(mesh_terms, paste0("/export/scratch/cxu_sci_geo/scrape_all_fund/mesh_terms", as.character(q), ".csv"))
    }
    # get concepts
    concepts <- lapply(1:N_articles, function(i) {
@@ -223,7 +223,7 @@ for (q in 401:num_file) {
    if(nrow(concepts)!=0) {
        concepts <- concepts %>% mutate(id = str_replace(as.character(id), "https://openalex.org/",""), 
                                       concept_id = str_replace(as.character(concept_id), "https://openalex.org/","" ))
-       write_csv(concepts, paste0("/export/scratch/cxu_sci_geo/scrape_full_pmids/concepts", as.character(q), ".csv"))
+       write_csv(concepts, paste0("/export/scratch/cxu_sci_geo/scrape_all_fund/concepts", as.character(q), ".csv"))
    }
 }
 
