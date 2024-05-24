@@ -13,7 +13,7 @@ program main
     append_pprs
 end
 program append_pprs
-/*    use ../output/list_of_athrs,clear 
+    use ../output/list_of_athrs,clear 
     count
     local N = ceil(r(N)/500)
     forval i = 1/`N' {
@@ -31,14 +31,14 @@ program append_pprs
         replace id = subinstr(id, "//openalex.org", "", .)
         replace id = subinstr(id, "/", "", .)
         save ${temp}/works`i', replace
-    }*/
+    }
 
-        clear
+    /*    clear
         forval i = 6001/6403 {
            append using ${temp}/works`i'
            gduplicates drop
         }
-        save ../output/list_of_works7, replace
+        save ../output/list_of_works7, replace*/
 end
 
 

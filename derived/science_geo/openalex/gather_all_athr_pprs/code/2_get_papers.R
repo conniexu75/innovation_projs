@@ -12,7 +12,7 @@ athrs <- read_dta("../output/list_of_athrs.dta")
 nr <- nrow(athrs)
 split_athr <- split(athrs, rep(1:ceiling(nr/500), each = 500, length.out=nr))
 num_file <- length(split_athr)
-for (q in 6403:6403) {
+for (q in 2104:2139) {
 print(q)
     works <- oa_fetch(
         entity = "works", 
