@@ -1,0 +1,4 @@
+*.tt filter=lfs diff=lfs merge=lfs -text
+thera_pmids.txt filter=lfs diff=lfs merge=lfs -text
+disease_pmids.txt filter=lfs diff=lfs merge=lfs -text
+fundamental_pmids.txt filter=lfs diff=lfs merge=lfs -text
