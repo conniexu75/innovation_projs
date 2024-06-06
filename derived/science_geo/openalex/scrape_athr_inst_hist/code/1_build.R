@@ -14,7 +14,7 @@ split_pmid <- split(pmid_file, rep(1:ceiling(nr/5000), each = 5000, length.out=n
 num_file <- length(split_pmid)
 missing <- read_csv('../temp/missing_segments.csv')
 split_missing <- split(missing, rep(1:ceiling(nrow(missing)/20), each = 20, length.out=nrow(missing)))
-l <- unlist(split_missing[46])
+l <- unlist(split_missing[4])
 for (q in l) {
     print(q)
    ## pull open alex data from pmids 
