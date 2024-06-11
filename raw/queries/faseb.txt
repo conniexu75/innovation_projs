@@ -1,2 +1,0 @@
-Query_Name	Query
-faseb	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("FASEB J"[Journal])
