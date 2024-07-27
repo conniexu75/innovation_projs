@@ -408,7 +408,7 @@ program event_studies
             preserve
             if "`c'" == "inrange(rel, -10,10) & old`stem' ==1" local suf = "old" 
             if "`c'" == "inrange(rel, -10,10) & young`stem' == 1" local suf = "young" 
-            reghdfe ln_y `lags' treat `leads' if `c' , absorb(year field msa field#year field#msa  inst athr_id) vce(cluster inst)
+            reghdfe ln_y `lags' treat `leads' if `c' , absorb(field#year athr_id) vce(cluster inst)
             gunique athr_id if `c'
             local num_movers = r(unique)
             local normalize = _b[lag1]
