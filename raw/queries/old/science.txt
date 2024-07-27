@@ -1,0 +1,2 @@
+Query_Name	Query
+science	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("Science"[Journal])

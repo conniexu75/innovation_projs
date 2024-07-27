@@ -1,0 +1,2 @@
+Query_Name	Query
+onco	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("Oncogene"[Journal])

@@ -1,0 +1,2 @@
+Query_Name	Query
+bmj	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("BMJ"[Journal] OR "Br Med J"[Journal] OR "Br Med J (Clin Res Ed)"[Journal])

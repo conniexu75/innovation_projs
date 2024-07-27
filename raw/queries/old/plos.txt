@@ -1,0 +1,2 @@
+Query_Name	Query
+plos	("Journal Article"[Publication Type] OR "Clinical Study"[Publication Type]) AND ("PLoS One"[Journal])
