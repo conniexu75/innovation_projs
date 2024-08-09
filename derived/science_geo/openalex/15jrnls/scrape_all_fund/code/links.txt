@@ -1,2 +1,2 @@
-./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
-./pmids/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/pubmed/append_full_pmids/output/
+./geo/ | /export/projects4/achandra_basicscience/raw/geo/
+./pmids/ | /export/projects4/achandra_basicscience/derived/science_geo/pubmed/append_all_pmids/output/
