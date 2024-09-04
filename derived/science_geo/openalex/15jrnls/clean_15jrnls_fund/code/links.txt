@@ -1,0 +1,9 @@
+./geo/ | /export/projects4/achandra_basicscience/raw/geo/
+./openalex/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/make_15jrnls/output/
+./all/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/all_jrnls/scrape_all_fund/output/
+./insts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/scrape_athr_inst_hist_15jrnls/output
+./pmids_jrnl/ | /export/projects4/achandra_basicscience/derived/science_geo/pubmed/append_all_pmids/output/
+./patents/ | /export/projects4/achandra_basicscience/derived/science_geo/patent_ppr_data/output/
+./year_insts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_athr_inst_hist_15jrnls/output
+
+
