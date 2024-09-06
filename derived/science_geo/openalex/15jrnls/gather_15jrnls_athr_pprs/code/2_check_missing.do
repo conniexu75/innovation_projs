@@ -13,11 +13,11 @@ program main
     check_missing
 end
 program check_missing
-    use ../output/list_of_athrs.dta, clear
+    use ../external/athrs/list_of_athrs_15jrnls.dta, clear
     count
     local N = ceil(r(N)/500)
-    forval i = 1/`N' {
-        cap import delimited "/export/scratch/cxu_sci_geo/gather_all_athr_pprs/works`i'.csv", clear
+    forval i = 800/`N' {
+        cap import delimited "../output/works`i'.csv", clear
         if _rc != 0 {
             di "`i'"
         }

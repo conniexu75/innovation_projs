@@ -189,7 +189,7 @@ program clean_samps
     gen pub_mnth = month(pub_date)
     gen year = year(pub_date)
     gen qrtr = qofd(pub_date)
-    keep if inrange(year, 1945, 2022)
+    keep if inrange(year, 1945, 2023)
     // these OAIDs are misclassified or correspond to multiple pmids
     drop if inlist(id , "W2016575029", "W2331065494", "W4290207833", "W4290198809" , "W4290206947" , "W4290293465")
     drop if inlist(id , "W4290277360", "W4290357912", "W4214483051", "W1978139107" , "W2045742772" , "W2049314578")
@@ -279,7 +279,7 @@ program clean_samps
     bys pmid: gegen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs // this just divides each paper by the # of authors on the paper
     // now give each article a weight based on their ciatation count 
-    qui gen years_since_pub = 2022-year+1
+    qui gen years_since_pub = 2023-year+1
     qui gen avg_cite_yr = cite_count/years_since_pub
     qui gen avg_pat_yr = patent_count/years_since_pub
     qui gen avg_frnt_yr = front_only/years_since_pub
@@ -446,7 +446,7 @@ program clean_samps
     save ${temp}/pmid_id_xwalk_`samp', replace
     restore
 
-    keep if inrange(pub_date, td(01jan2015), td(31dec2022)) & year >=2015
+    keep if inrange(pub_date, td(01jan2015), td(31dec2023)) & year >=2015
     drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt frnt_wt body_wt frnt_adj_wt body_adj_wt
     qui sum avg_cite_yr
     gen cite_wt = avg_cite_yr/r(sum)
