@@ -1,2 +1,11 @@
-./samp/ | /export/scratch/cxu_sci_geo/create_panel/output
-./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo
+./samp/ | /export/projects4/achandra_basicscience/derived/science_geo/create_analysis_samp/output
+./geo/ | /export/projects4/achandra_basicscience/raw/geo/
+./openalex/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output/
+./firstlast/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/create_first_last/output/
+./all/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/all_jrnls/scrape_all_fund/output/
+./insts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/scrape_athr_inst_hist_15jrnls/output
+./pmids_jrnl/ | /export/projects4/achandra_basicscience/derived/science_geo/pubmed/append_all_pmids/output/
+./patents/ | /export/projects4/achandra_basicscience/derived/science_geo/patent_ppr_data/output/
+./year_insts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_athr_inst_hist_15jrnls/output
+./clusters/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/cluster_fields/output
+

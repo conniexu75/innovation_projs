@@ -6,7 +6,6 @@ set scheme modern
 graph set window fontface "Arial Narrow"
 pause on
 set seed 8975
-global temp "/export/scratch/cxu_sci_geo/movers"
 global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
 global y_name "Productivity"
 global pat_adj_wt_name "Patent-to-Paper Citations"
@@ -16,7 +15,7 @@ global x_name "Cluster Size"
 global ln_x_name "Log Cluster Size"
 global time year 
 program main
-    /*use ${${time}_insts}/filled_in_panel_${time}, clear
+    use ../external/year_insts/filled_in_panel_${time}, clear
     keep if country_code == "US"
     hashsort athr_id year
     gen place_count =  1 if inst_id != inst_id[_n-1] & msa_comb != msa_comb[_n-1]
@@ -29,7 +28,7 @@ program main
     drop _freq
     drop if mi(move_year)
     drop if num_moves <= 0
-    save ${temp}/movers, replace*/
+    save ../temp/movers, replace
 
     foreach t in year_firstlast year {
         qui make_movers, samp(`t')
@@ -76,29 +75,29 @@ program make_movers
     bys athr_id: egen max_year = max(year)
     gcontract athr_id min_year max_year
     drop _freq
-    save ${temp}/single_movers_`samp', replace
+    save ../temp/single_movers_`samp', replace
 
-    merge 1:m athr_id using ${temp}/movers, assert(1 2 3) keep(3) nogen
+    merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
     keep if move_year >= min_year & move_year <= max_year
     gcontract athr_id move_year
     drop _freq
     bys athr_id: gen N = _n 
     keep if N == 1
-    save ${temp}/mover_xw, replace
+    save ../temp/mover_xw, replace
     restore
 
-    merge m:1 athr_id using ${temp}/mover_xw, assert(1 2 3) keep(1 3) 
+    merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(1 3) 
     bys inst_id year: egen has_mover = max(mover == 1)
     drop if has_mover == 0
     gen analysis_cond = mover == 1 & num_moves == 1 & ((mover == 0 & _merge == 1) | (mover == 1 & _merge == 3))
     drop _merge
     drop has_mover place_count athr_counter athr_year_counter N
-    save ${temp}/mover_temp_`samp' , replace
+    save ../temp/mover_temp_`samp' , replace
 end
 
 program sum_stats
     syntax, samp(str)
-    use ${temp}/mover_temp_`samp' , clear  
+    use ../temp/mover_temp_`samp' , clear  
     gegen msa = group(msa_comb)
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
@@ -151,7 +150,7 @@ end
 
 program make_dest_origin
     syntax, samp(str)
-    use ${temp}/mover_temp_`samp' , clear  
+    use ../temp/mover_temp_`samp' , clear  
     gegen msa = group(msa_comb)
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
@@ -170,12 +169,12 @@ program make_dest_origin
             bys `loc' (year): gen pre_`v' = (`v'+`v'[_n-1])/2
             bys `loc' (year): gen post_`v' = (`v'+`v'[_n+1])/2
         }
-        save ${temp}/`suf'_`samp'_collapsed, replace
+        save ../temp/`suf'_`samp'_collapsed, replace
         restore
     }
         
-    use if analysis_cond == 1  using ${temp}/mover_temp_`samp' , clear  
-    merge m:1 athr_id using ${temp}/mover_xw, assert(1 2 3) keep(3) nogen
+    use if analysis_cond == 1  using ../temp/mover_temp_`samp' , clear  
+    merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
     hashsort athr_id which_place year
@@ -190,8 +189,8 @@ program make_dest_origin
     rename year current_year
     gen year = current_year if which_place == 1
     replace year = move_year if which_place == 2
-    merge m:1 inst_id year using ${temp}/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
-    merge m:1 msa_comb year using ${temp}/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x pre_msa_ln_x post_msa_ln_x)
+    merge m:1 inst_id year using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
+    merge m:1 msa_comb year using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x pre_msa_ln_x post_msa_ln_x)
     hashsort athr_id which_place year
     foreach var in avg_ln_x avg_ln_y inst_ln_y inst_ln_x msa_ln_x {
         if strpos("`var'", "avg_") == 0 {
@@ -231,18 +230,18 @@ program make_dest_origin
     gcontract athr_id avg_ln_y_diff avg_ln_x_diff inst_ln_y_diff inst_ln_x_diff move_year origin_loc dest_loc msa_ln_x_diff
     drop _freq
     drop if mi(avg_ln_y_diff)
-    save ${temp}/dest_origin_changes, replace
+    save ../temp/dest_origin_changes, replace
 end
 
 program event_study 
     syntax, samp(str) timeframe(int) [startyr(int 1945) endyr(int 2023) ymax(real 1) ygap(real 0.2)] 
     cap mat drop _all  
-    use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using ${temp}/mover_temp_`samp' , clear  
-    merge m:1 athr_id using ${temp}/mover_xw, assert(1 2 3) keep(3) nogen
+    use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using ../temp/mover_temp_`samp' , clear  
+    merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
     keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year
     hashsort athr_id year
     gen rel = year - move_year
-    merge m:1 athr_id move_year using ${temp}/dest_origin_changes, keep(3) nogen
+    merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3) nogen
     hashsort athr_id year
     gegen msa = group(msa_comb)
     gegen inst = group(inst_id)
