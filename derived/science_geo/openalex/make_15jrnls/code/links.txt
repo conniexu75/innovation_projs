@@ -1,0 +1,1 @@
+./pmids/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/all_jrnls/scrape_all_fund/output/
