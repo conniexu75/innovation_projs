@@ -14,6 +14,7 @@ global ln_y_name "Log Productivity"
 global x_name "Cluster Size"
 global ln_x_name "Log Cluster Size"
 global time year 
+
 program main
     use ../external/year_insts/filled_in_panel_${time}, clear
     keep if country_code == "US"
@@ -357,7 +358,20 @@ program event_study
         graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf, replace
         restore
     }
+	gunique athr_id if l2h_move== 1
+    local l2n_num_movers = r(unique)
+	gunique athr_id if h2l_move== 1
+    local h2l_num_movers = r(unique)
 	
+	gunique athr_id if s2b_move== 1
+    local s2b_num_movers = r(unique)
+	gunique athr_id if b2s_move== 1
+    local b2s_num_movers = r(unique)
+	gunique athr_id if young== 1
+    local young_num_movers = r(unique)
+	gunique athr_id if old== 1
+    local old_num_movers = r(unique)
+
 	// merge l2h h2
 	use ../temp/es_coefs_`startyr'_`endyr'_`samp'_l2h, clear
 	gen cat = "l2h"
@@ -376,10 +390,6 @@ program event_study
 	
 	
 	// merge s2b b2s
-	gunique athr_id if s2b_move== 1
-    local s2b_num_movers = r(unique)
-	gunique athr_id if b2s_move== 1
-    local b2s_num_movers = r(unique)
 	use ../temp/es_coefs_`startyr'_`endyr'_`samp'_s2b, clear
 	gen cat = "s2b"
 	replace rel = rel - 0.05
@@ -396,10 +406,6 @@ program event_study
     graph export ../output/figures/es`startyr'_`endyr'_`samp'_sizechg.pdf, replace
 	
 	// merge young old
-	gunique athr_id if young== 1
-    local young_num_movers = r(unique)
-	gunique athr_id if old== 1
-    local old_num_movers = r(unique)
 	use ../temp/es_coefs_`startyr'_`endyr'_`samp'_young, clear
 	gen cat = "young"
 	replace rel = rel - 0.05
