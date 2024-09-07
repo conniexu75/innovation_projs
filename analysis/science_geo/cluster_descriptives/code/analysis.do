@@ -138,36 +138,6 @@ program sample_desc
       (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 60000) lpattern(dash) lcolor(lavender)), xtitle("MSA Productivity", size(vsmall)) ytitle("MSA Paper-to-Patent Citations", size(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
                                                                                                                       "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
    graph export ../output/figures/pat_prod_scatter_`samp'.pdf, replace
-   /*hashsort p -cite_affl_wt 
-   by p: egen mean_msa = mean(msa_size)
-   by p: egen mean_cite = mean(cite_affl_wt)
-   hashsort p -cite_affl_wt  
-   gduplicates drop p mean_msa mean_cite, force
-   drop msa_lab
-   gen msa_lab = msa_comb + " " + string(${time})  + "p"+string(p)
-   qui reg mean_cite mean_msa
-   local coef : dis %3.2f _b[mean_msa]
-   tw scatter mean_cite mean_msa, mcolor(ebblue) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall))  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Size in Year", size(vsmall)) ytitle("Average Effective Output", size(vsmall)) legend(on order(- "Slope = `coef'") pos(5) ring(0) size(vsmall))
-   *graph export ../output/figures/binscatter_`samp'.pdf, replace
-   restore*/
-    
-/*    preserve
-    keep if inrange(year , 2015,2022)
-    gcollapse (mean) msa_size cluster_shr, by(msa_comb)
-    gsort - msa_size
-    mkmat msa_size in 1/30, mat(top_30clus_`samp')
-    li in 1/30
-    mkmat msa_size in 1/10, mat(top_10clus_`samp')
-    restore*/
-/*    gcollapse (mean) msa_size_field field_cluster_shr, by(msa_comb field)
-    forval i = 0/4 {
-        preserve
-        keep if field ==`i'
-        gsort -msa_size_field
-        li in 1/10
-        restore
-    }*/
-
 end
 
 program  maps
