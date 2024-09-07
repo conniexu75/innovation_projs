@@ -9,8 +9,8 @@ here, set
 set maxvar 120000
 
 program main
-    *append_athrs
-    *merge_mesh
+    append_athrs
+    merge_mesh
     merge_concepts
 end
 program append_athrs

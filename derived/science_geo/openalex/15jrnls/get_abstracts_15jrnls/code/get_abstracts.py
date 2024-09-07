@@ -10,6 +10,7 @@ pmid_file = pd.read_stata('../temp/pmids.dta')
 chunk_size = 50
 print(len(pmid_file))
 
+#for i in range(300000,len(pmid_file), chunk_size):
 for i in range(0,len(pmid_file), chunk_size):
     print(i)
     chunk = pmid_file.iloc[i:i+chunk_size]
