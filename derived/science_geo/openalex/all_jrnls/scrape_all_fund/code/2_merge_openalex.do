@@ -7,24 +7,30 @@ pause on
 set seed 8975
 here, set
 set maxvar 120000
-global temp "/export/scratch/cxu_sci_geo/scrape_all_fund"
-global output "/export/scratch/cxu_sci_geo/scrape_all_fund/output"
+global output "/export/scratch/cxu_sci_geo/scrape_all_fund"
 
 program main
-    append_files
+    *append_files
+    append_mesh
+    append_concepts
 end
 program append_files
-    qui {
-        forval i = 1/415 {
-            import delimited using ${temp}/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
-            gen n = `i'
-            save ${output}/openalex_authors`i', replace
+        forval i = 1/5003 {
+        di "`i'"
+        qui {
+                import delimited using ../output/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
+                drop if jrnl == "PubMed"
+                keep if pub_type == "article" & pub_type_crossref == "journal-article"
+                gen n = `i'
+                compress, nocoalesce
+                save ${output}/openalex_authors`i', replace
+            }
         }
         clear
-        forval i = 1/415 {
-            append using ${output}/openalex_authors`i'
+        forval i = 1/5003 {
+            di "`i'"
+            qui append using ${output}/openalex_authors`i'
         }
-    }
     destring pmid, replace
     destring which_athr, replace
     destring which_affl, replace
@@ -55,10 +61,61 @@ program append_files
     drop which_athr2
     bys pmid which_athr (which_affl) : replace which_affl = _n 
     gisid pmid which_athr which_affl
-    save ${output}/openalex_all_jrnls_merged, replace
+    save ../output/openalex_all_jrnls_merged, replace
     
     gcontract inst_id, nomiss
     drop _freq
     save ../output/list_of_insts, replace
+end
+program append_mesh
+        forval i = 2166/5003 {
+        di "`i'"
+        qui {
+                cap import delimited using ../output/mesh_terms`i', stringcols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
+                cap drop n
+                gen n = `i'
+                keep if is_major_topic == "TRUE"
+                if _N > 0 {
+                    gduplicates drop id term qualifier_name, force
+                    compress, nocoalesce
+                    save ${output}/mesh_terms`i', replace
+                }
+            }
+        }
+        clear
+        forval i = 1/5003 {
+            di "`i'"
+            cap qui append using ${output}/mesh_terms`i'
+        }
+        gen gen_mesh = term if strpos(term, ",") == 0 & strpos(term, ";") == 0
+        replace gen_mesh = term if strpos(term, "Models")>0
+        replace gen_mesh = subinstr(gen_mesh, "&; ", "&",.)
+        gen rev_mesh = reverse(term)
+        replace rev_mesh = substr(rev_mesh, strpos(rev_mesh, ",")+1, strlen(rev_mesh)-strpos(rev_mesh, ","))
+        replace rev_mesh = reverse(rev_mesh)
+        replace gen_mesh = rev_mesh if mi(gen_mesh)
+        drop rev_mesh
+        contract id gen_mesh qualifier_name, nomiss
+        save ../output/contracted_gen_mesh_all_jrnls, replace
+end
+program append_concepts
+        forval i = 1/5003 {
+        di "`i'"
+        qui {
+                cap import delimited using ../output/concepts`i', stringcols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
+                gen n = `i'
+                gduplicates drop id term, force
+                compress, nocoalesce
+                save ${output}/concepts`i', replace
+            }
+        }
+        clear
+        forval i = 1/5003 {
+            di "`i'"
+            cap qui append using ${output}/concepts`i'
+        }
+        destring level , replace
+        drop if level > 2
+        save ../output/concepts_all_jrnls_merged,replace
 end
 main

@@ -13,10 +13,10 @@ insts <- read_dta('../output/list_of_insts.dta')
 nr <- nrow(insts)
 split_insts <- split(insts, rep(1:ceiling(nr/5000), each = 5000, length.out=nr))
 num_file <- length(split_insts)
-for (q in 5:5) {
+for (q in 13:13) {
   insts <- oa_fetch(
     entity = "institutions",
-    mailto = "xuconni@gmail.com",
+    mailto = "conniexu@g.harvard.edu",
     id  = split_insts[[q]] %>%  mutate(inst_id = as.character(inst_id)) %>% pull(inst_id),
     verbose = TRUE,
     output = "list"
