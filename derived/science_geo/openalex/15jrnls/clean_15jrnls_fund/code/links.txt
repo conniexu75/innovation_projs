@@ -1,5 +1,5 @@
 ./geo/ | /export/projects4/achandra_basicscience/raw/geo/
-./openalex/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/make_15jrnls/output/
+./openalex/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/make_15jrnls/output/
 ./all/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/all_jrnls/scrape_all_fund/output/
 ./insts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/scrape_athr_inst_hist_15jrnls/output
 ./pmids_jrnl/ | /export/projects4/achandra_basicscience/derived/science_geo/pubmed/append_all_pmids/output/

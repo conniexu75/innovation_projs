@@ -10,12 +10,12 @@ set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_openalex"
 
 program main
-    *aggregate_insts
+    aggregate_insts
     foreach samp in 15jrnls {
-        *clean_titles, samp(`samp')
+        clean_titles, samp(`samp')
         clean_samps, samp(`samp')
-        *clean_mesh, samp(`samp')
-        *clean_concepts, samp(`samp')
+        clean_mesh, samp(`samp')
+        clean_concepts, samp(`samp')
     }
     split_sample
 end
@@ -234,6 +234,10 @@ program clean_samps
     bys pmid: gegen has_editor = max(is_jama)
     drop if has_lancet == 1 | has_london == 1 | has_bmj == 1 | has_jama == 1 | has_editor == 1
     drop is_lancet is_london is_bmj is_jama is_editor has_lancet has_london has_bmj has_jama has_editor
+    // add in cite_ct
+    replace cite_count = cite_count + 1
+    assert cite_count > 0 
+
     save ${temp}/cleaned_all_`samp', replace
     cap drop author_id 
     cap drop which_athr_counter num_which_athr min_which_athr which_athr2 
@@ -675,14 +679,15 @@ program split_sample
         cap drop _freq
         save ../output/list_of_ids_`samp'_newfund_demsci, replace
         restore
+	}
     // split mesh terms
-    use ../output/contracted_gen_mesh_15jrnls, clear
-    foreach samp in cns scisub demsci {
-        preserve
-        merge m:1 id using ../output/list_of_ids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
-        save ../output/contracted_gen_mesh_newfund_`samp', replace
-        restore
-    }
+	use ../output/contracted_gen_mesh_15jrnls, clear
+	foreach samp in cns scisub demsci {
+		preserve
+		merge m:1 id using ../output/list_of_ids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
+		save ../output/contracted_gen_mesh_newfund_`samp', replace
+		restore
+	}
    // split concepts 
     use ../output/concepts_15jrnls, clear
     foreach samp in cns scisub demsci {
@@ -692,5 +697,4 @@ program split_sample
         restore
     }
 end
-
 main
