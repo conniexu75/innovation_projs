@@ -1,2 +1,2 @@
-./openalex/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/scrape_openalex/output/
-./patents/ | /export/home/dor/cxu/innovation_projs/raw/patents
+./openalex/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/make_15jrnls/output/ 
+./patents/ | /export/projects4/achandra_basicscience/raw/patents/ 

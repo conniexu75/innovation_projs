@@ -1,5 +1,0 @@
-Cluster 1 - Top 15 Terms: protein, bind, domain, structur, cell, interact, site, complex, residu, acid, activ, enzym, receptor, peptid, sequenc
-Cluster 2 - Top 15 Terms: cell, express, activ, protein, receptor, signal, regul, inhibit, human, induc, gene, increas, kinas, phosphoryl, transcript
-Cluster 3 - Top 15 Terms: metabol, increas, physiolog, infect, neuron, cell, diseas, drug, control, develop, function, human, respons, brain, activ
-Cluster 4 - Top 15 Terms: cancer, tumor, cell, breast, express, carcinoma, gene, lung, metastasi, growth, target, genet, therapi, mutat, human
-Cluster 5 - Top 15 Terms: gene, genet, genom, sequenc, mutat, express, transcript, dna, identifi, variant, chromosom, human, cell, protein, popul

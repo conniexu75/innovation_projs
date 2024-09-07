@@ -11,7 +11,7 @@ program main
     merge_w_openalex
 end
 program merge_w_openalex
-    use ../external/openalex/openalex_all_jrnls_merged, clear
+    use ../external/openalex/openalex_15jrnls_merged.dta, clear
     gcontract id
     drop _freq
     save ../temp/list_of_papers, replace

@@ -1,5 +1,0 @@
-Cluster 1 - Top 15 Terms: metabol, cell, pharmacolog, drug, chemistri, regul, patholog, enzymolog, human, activ, cytolog, biosynthesi, signal, cancer, express
-Cluster 2 - Top 15 Terms: drug, chemistri, method, therapi, immunolog, pharmacolog, epidemiolog, patholog, cell, blood, therapeut, disea, human, physiopatholog, microbiolog
-Cluster 3 - Top 15 Terms: genet, gene, genom, metabol, mutat, dna, cancer, express, human, method, cell, rna, patholog, disea, microbiolog
-Cluster 4 - Top 15 Terms: physiolog, metabol, cell, neuron, genet, cytolog, physiopatholog, regul, function, human, method, respon, signal, microbiolog, patholog
-Cluster 5 - Top 15 Terms: receptor, protein, metabol, physiolog, genet, chemistri, cell, regul, pharmacolog, signal, activ, express, immunolog, drug, human
