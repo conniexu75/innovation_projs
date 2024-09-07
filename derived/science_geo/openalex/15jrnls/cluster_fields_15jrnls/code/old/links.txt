@@ -1,0 +1,2 @@
+./abstracts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/get_abstracts/output/
+./samp/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output/

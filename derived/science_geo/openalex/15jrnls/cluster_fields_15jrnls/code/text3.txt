@@ -1,0 +1,5 @@
+Cluster 1 - Top 15 Terms: drug, pharmacology, therapy, metabolism, therapeutic, antagonists_inhibitors, cells, genetics, chemistry, cancer, cell, human, pathology, physiology, receptors
+Cluster 2 - Top 15 Terms: physiology, metabolism, genetics, neurons, cells, cytology, cell, physiopathology, protein, receptors, human, chemistry, signaling, pathology, receptor
+Cluster 3 - Top 15 Terms: chemistry, immunology, epidemiology, pathology, blood, diagnosis, dna, human, cells, brain, disease, physiopathology, cell, cytology, microbiology
+Cluster 4 - Top 15 Terms: genetics, gene, metabolism, genes, expression, human, cancer, dna, rna, pathology, disease, cell, cells, protein, identification
+Cluster 5 - Top 15 Terms: metabolism, protein, chemistry, cells, receptors, receptor, enzymology, cell, human, biosynthesis, kinase, activation, cytology, signaling, proteins

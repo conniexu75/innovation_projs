@@ -1,0 +1,5 @@
+Cluster 1 - Top 15 Terms: metabol, chemistri, genet, physiolog, enzymolog, receptor, cytolog, patholog, biosynthesi, pharmacolog, membrane_protein, transcription_factor, method, dna_binding_protein, immunolog
+Cluster 2 - Top 15 Terms: drug, pharmacolog, therapi, metabol, therapeut, antagonists_inhibitor, genet, chemistri, patholog, receptor, analogs_deriv, physiolog, cytolog, gene_expression_regul, immunolog
+Cluster 3 - Top 15 Terms: metabol, chemistri, immunolog, method, patholog, epidemiolog, cytolog, blood, enzymolog, receptor, analysi, diagnosi, genet, microbiolog, physiopatholog
+Cluster 4 - Top 15 Terms: genet, metabol, method, patholog, receptor, rna, dna, carcinoma, microbiolog, microrna, transcription_factor, neoplasm, chemistri, cytolog, enzymolog
+Cluster 5 - Top 15 Terms: physiolog, metabol, genet, cytolog, receptor, neuron, physiopatholog, patholog, method, brain, signal_transduct, microbiolog, chemistri, growth_develop, biosynthesi
