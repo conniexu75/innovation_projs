@@ -1,5 +1,5 @@
-Cluster 1 - Top 15 Terms: genetics, metabolism, physiology, pathology, receptors, enzymology, cytology, immunology, biosynthesis, dna, therapy, rna, neoplasms, carcinoma, transcription_factors
-Cluster 2 - Top 15 Terms: drug, pharmacology, metabolism, therapy, antagonists_inhibitors, therapeutic, genetics, physiology, pathology, receptors, analogs_derivatives, administration_dosage, gene_expression_regulation, cytology, chemistry
-Cluster 3 - Top 15 Terms: physiology, metabolism, genetics, pathology, immunology, cytology, receptors, epidemiology, blood, physiopathology, enzymology, microbiology, biosynthesis, diagnosis, transcription_factors
-Cluster 4 - Top 15 Terms: metabolism, physiology, genetics, receptors, enzymology, pharmacology, cytology, biosynthesis, pathology, chemistry, membrane_proteins, carrier_proteins, neurons, transcription_factors, protein_serine_threonine_kinases
-Cluster 5 - Top 15 Terms: chemistry, metabolism, enzymology, physiology, genetics, bacterial_proteins, receptors, pharmacology, dna, proteins, membrane_proteins, analogs_derivatives, rna, carrier_proteins, antagonists_inhibitors
+Cluster 1 - Top 15 Terms: metabolism, drug, pharmacology, genetics, immunology, pathology, therapy, cytology, epidemiology, receptors, blood, enzymology, biosynthesis, diagnosis, microbiology
+Cluster 2 - Top 15 Terms: genetics, metabolism, pathology, receptors, enzymology, immunology, cytology, pharmacology, biosynthesis, physiology, drug, dna, therapy, rna, neoplasms
+Cluster 3 - Top 15 Terms: physiology, metabolism, genetics, cytology, neurons, receptors, physiopathology, pharmacology, pathology, signal_transduction, brain, biosynthesis, transcription_factors, enzymology, microbiology
+Cluster 4 - Top 15 Terms: chemistry, metabolism, enzymology, physiology, pharmacology, genetics, bacterial_proteins, receptors, drug, dna, proteins, membrane_proteins, analogs_derivatives, rna, carrier_proteins
+Cluster 5 - Top 15 Terms: metabolism, genetics, physiology, pharmacology, enzymology, receptors, cytology, biosynthesis, pathology, drug, chemistry, membrane_proteins, proteins, carrier_proteins, antagonists_inhibitors

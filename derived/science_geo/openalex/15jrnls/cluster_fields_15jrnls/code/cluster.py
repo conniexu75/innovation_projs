@@ -73,11 +73,12 @@ def tokenize(text, stopwords):
 
 def stem_text(text):
     if pd.notna(text):
-        words = nltk.word_tokenize(text)  # Tokenize the input text
+        words = nltk.word_tokenize(text)  
         stemmed_words = [stemmer.stem(word) for word in words]
         return " ".join(stemmed_words)
     else:
         return ""
+
 def stem_text_element(element):
     if pd.notna(element):
         return stem_text(element)
@@ -147,45 +148,25 @@ athr_data['text2'] = athr_data[[ 'qualifier', 'mesh']].apply(lambda x: ' '.join(
 athr_data['text3'] = athr_data[[ 'qualifier', 'mesh', 'cleaned_titles']].apply(lambda x: ' '.join(x.dropna()), axis=1)
 athr_data['text4'] = athr_data[[ 'cleaned_abstracts', 'qualifier', 'mesh', 'cleaned_titles']].apply(lambda x: ' '.join(x.dropna()), axis=1)
 
-# word2vec version
-word2vec_model = Word2Vec(sentences=athr_data['text4'], vector_size=100, window=5, min_count=1, sg=0)
-
-def document_vector(text):
-    # Tokenize and average word vectors
-    words = text.split()
-    vectors = [word2vec_model.wv[word] for word in words if word in word2vec_model.wv]
-    if len(vectors) == 0:
-        return [0] * word2vec_model.vector_size
-    return list(pd.DataFrame(vectors).mean())
-
-#athr_data['text_vector'] = athr_data['combined_text'].apply(document_vector)
 # stem version
 columns_to_stem = ['mesh', 'qualifier', 'cleaned_titles', 'cleaned_abstracts']
 for column in columns_to_stem:
     athr_data[column] = athr_data[column].apply(stem_text_element)
 
-
-# Loop through each of text1, text2, text3, text4
 for text_column in ['text1', 'text2', 'text3', 'text4']:
-    # Initialize an empty DataFrame to store the results
     result_df = pd.DataFrame(columns=['athr_id', 'year', 'cluster_name'])
     selected_data = athr_data[['athr_id', 'year', text_column]]
     collapsed_data = selected_data.groupby(['athr_id', 'year'])[text_column].apply(lambda x: ' '.join(x)).reset_index()
-    # TF-IDF Vectorization
     max_df = 1.0 if text_column in ['text1', 'text2'] else 0.90
     min_df = 0.01 if text_column in ['text1', 'text2'] else 0.02
     tfidf_vectorizer = TfidfVectorizer(stop_words=custom_stopwords, max_df=max_df, min_df=min_df, token_pattern = r"(?u)\S\S+")
     tfidf_matrix = tfidf_vectorizer.fit_transform(collapsed_data[text_column])
-    # Perform K-Means clustering with 5 clusters
     kmeans = KMeans(n_clusters=5, random_state=42,init='k-means++')
     kmeans.fit(tfidf_matrix)
     collapsed_data['cluster_label'] = kmeans.labels_
-    # Add the results to the result_df
     result_df = pd.concat([result_df, collapsed_data[['athr_id', 'year', 'cluster_label']]], ignore_index=True)
-    #result_df.append(collapsed_data[['athr_id', 'year', 'cluster_label']], ignore_index=True)
     file  = "../output/" + str(text_column) + ".csv"
     result_df.to_csv(file, index = False)
-    # Calculate the top 15 terms for each cluster
     cluster_centers = kmeans.cluster_centers_
     terms = tfidf_vectorizer.get_feature_names_out()
     top_15_terms_list = []
