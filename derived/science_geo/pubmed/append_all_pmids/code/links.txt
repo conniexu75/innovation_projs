@@ -1,0 +1,1 @@
+./samp/ | /export/projects4/achandra_basicscience/derived/science_geo/pubmed/edirect_pull/output
