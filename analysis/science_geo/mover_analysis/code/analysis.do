@@ -24,7 +24,8 @@ program main
     bys athr_id: gen athr_counter =  _n == 1
     replace num_moves = num_moves-1
     bys athr_id (year) : gen move_year = year if place_count == 1  & _n != 1
-    gcontract athr_id  move_year  num_moves
+    bys athr_id : egen first_pub_yr  = min(year)
+    gcontract athr_id  move_year  num_moves first_pub_yr
     drop _freq
     drop if mi(move_year)
     drop if num_moves <= 0
@@ -36,7 +37,8 @@ program main
         qui output_tables, samp(`t')
         qui make_dest_origin, samp(`t')
         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) 
-        qui event_study, samp(`t') timeframe(10) startyr(1945) endyr(1995) ymax(1) ygap(0.1)
+        qui event_study, samp(`t') timeframe(8) startyr(1945) endyr(1980) ymax(1) ygap(0.1)
+        qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) ymax(1) ygap(0.1)
         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) ymax(1) ygap(0.1)
     }
 end
@@ -79,7 +81,7 @@ program make_movers
 
     merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
     keep if move_year >= min_year & move_year <= max_year
-    gcontract athr_id move_year
+    gcontract athr_id move_year first_pub_yr
     drop _freq
     bys athr_id: gen N = _n 
     keep if N == 1
@@ -238,7 +240,7 @@ program event_study
     cap mat drop _all  
     use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using ../temp/mover_temp_`samp' , clear  
     merge m:1 athr_id using ../temp/mover_xw, assert(1 2 3) keep(3) nogen
-    keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year
+    keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year first_pub_yr
     hashsort athr_id year
     gen rel = year - move_year
     merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3) nogen
@@ -279,13 +281,18 @@ program event_study
     }
     gunique athr_id 
     local num_movers = r(unique)
+	gen move_age_pub = move_year - first_pub_yr  + 1 + 25
     egen pos_move_size = cut(inst_ln_y_diff) if inst_ln_y_diff > 0, group(2)
     egen neg_move_size = cut(inst_ln_y_diff) if inst_ln_y_diff < 0, group(2)
     gen l2h_move = inst_ln_y_diff > 0
     gen h2l_move = inst_ln_y_diff < 0
     gen s2b_move = msa_ln_x_diff > 0
     gen b2s_move = msa_ln_x_diff < 0
-    foreach cond in "" "& l2h_move== 1" "& h2l_move == 1" "& b2s_move == 1" "& s2b_move == 1" {
+	by athr_id: gen counter = _n == 1
+	sum move_age_pub if counter == 1, d
+	gen old = move_age_pub >= r(p50)
+    gen young = move_age_pub < r(p50)
+    foreach cond in "" "& l2h_move== 1" "& h2l_move == 1" "& b2s_move == 1" "& s2b_move == 1"  "& old == 1" "& young == 1" {
         local c "inrange(rel,-`timeframe',`timeframe') `cond'"
         local suf = ""
         if "`cond'" == "& l2h_move== 1" {
@@ -306,10 +313,16 @@ program event_study
         else if "`cond'" == "& neg_move_size == 0" {
             local suf = "_hh2ll"
         }
+		else if "`cond'" == "& old == 1" {
+            local suf = "_old"
+        }
+		else if "`cond'" == "& young == 1" {
+            local suf = "_young"
+        }
         preserve
         mat drop _all
         reghdfe ln_y `lags' `leads' lag1 treat `int_lags' int_treat `int_leads' int_lag1  if `c' , absorb(year field field#year athr_fes = athr_id) vce(cluster inst)
-        estimates save ../output/es_`startyr'_`endyr'_`samp', replace
+        estimates save ../output/es_`startyr'_`endyr'_`samp'`suf', replace
         gunique athr_id if `c'
         local num_movers = r(unique)
         foreach var in `int_lags' int_treat `int_leads' int_lag1 {
@@ -335,14 +348,76 @@ program event_study
         local post_mean : di %3.2f r(mean)
         replace lb = -1 if lb < -1
         replace ub = 1 if ub > 1
-        tw rcap ub lb rel if rel != -1,  lcolor(gs12) msize(vsmall) || scatter b rel, mcolor(ebblue) xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
-          yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(purple%50) lpattern(dash))  ///
+		save ../temp/es_coefs_`startyr'_`endyr'_`samp'`suf', replace
+        tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(vsmall) || scatter b rel, mcolor(ebblue%50) xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+          yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
           legend(on order(- "N (Movers) = `num_movers'" ///
                                                             "Pre-period mean = `pre_mean'" ///
                                                             "Post-period mean = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
         graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf, replace
         restore
     }
+	
+	// merge l2h h2l
+	gunique athr_id if l2h_move== 1
+    local l2h_num_movers = r(unique)
+	gunique athr_id if h2l_move== 1
+    local h2l_num_movers = r(unique)
+	use ../temp/es_coefs_`startyr'_`endyr'_`samp'_l2h, clear
+	gen cat = "l2h"
+	replace rel = rel - 0.05
+	append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_h2l, clear
+	replace cat = "h2l" if mi(cat)
+	replace rel = rel + 0.05 if cat == "h2l"
+	tw rcap ub lb rel if rel != -1.05 & cat == "l2h",  lcolor(lavender) msize(vsmall) || ///
+	   scatter b rel if cat == "l2h", mcolor(lavender) || ///
+	   rcap ub lb rel if rel != -0.95 & cat == "h2l",  lcolor(orange) msize(vsmall) || ///
+	   scatter b rel if cat == "h2l", mcolor(orange) msymbol(smdiamond) || /// 
+	   xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+          yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
+          legend(on order(3 "Low to High Productivity Place Movers (N = `l2h_num_movers'" 4 "High to Low Productivity Place Movers (N = `h2l_move'"))) pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
+    graph export ../output/figures/es`startyr'_`endyr'_`samp'_prodchg.pdf, replace
+	
+	
+	// merge s2b b2s
+	gunique athr_id if s2b_move== 1
+    local s2b_num_movers = r(unique)
+	gunique athr_id if b2s_move== 1
+    local b2s_num_movers = r(unique)
+	use ../temp/es_coefs_`startyr'_`endyr'_`samp'_s2b, clear
+	gen cat = "s2b"
+	replace rel = rel - 0.05
+	append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_b2s, clear
+	replace cat = "b2s" if mi(cat)
+	replace rel = rel + 0.05 if cat == "b2s"
+	tw rcap ub lb rel if rel != -1.05 & cat == "s2b",  lcolor(lavender) msize(vsmall) || ///
+	   scatter b rel if cat == "s2b", mcolor(lavender) || ///
+	   rcap ub lb rel if rel != -0.95 & cat == "b2s",  lcolor(orange) msize(vsmall) || ///
+	   scatter b rel if cat == "b2s", mcolor(orange) msymbol(smdiamond) || /// 
+	   xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+          yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
+          legend(on order(3 "Small to Big Place Movers (N = `s2b_num_movers'" 4 "Big to Small Place Movers (N = `b2s_move'"))) pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
+    graph export ../output/figures/es`startyr'_`endyr'_`samp'_sizechg.pdf, replace
+	
+	// merge young old
+	gunique athr_id if young== 1
+    local young_num_movers = r(unique)
+	gunique athr_id if old== 1
+    local old_num_movers = r(unique)
+	use ../temp/es_coefs_`startyr'_`endyr'_`samp'_young, clear
+	gen cat = "young"
+	replace rel = rel - 0.05
+	append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_old, clear
+	replace cat = "old" if mi(cat)
+	replace rel = rel + 0.05 if cat == "old"
+	tw rcap ub lb rel if rel != -1.05 & cat == "young",  lcolor(lavender) msize(vsmall) || ///
+	   scatter b rel if cat == "young", mcolor(lavender) || ///
+	   rcap ub lb rel if rel != -0.95 & cat == "old",  lcolor(orange) msize(vsmall) || ///
+	   scatter b rel if cat == "old", mcolor(orange) msymbol(smdiamond) || /// 
+	   xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+          yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
+          legend(on order(3 "Movers Aged < 40 (N = `young_num_movers'" 4 "Movers Aged >= 40 (N = `old_move'"))) pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
+    graph export ../output/figures/es`startyr'_`endyr'_`samp'_age.pdf, replace
 end
 
 program output_tables
