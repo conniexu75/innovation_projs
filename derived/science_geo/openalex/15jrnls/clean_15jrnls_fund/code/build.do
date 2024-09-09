@@ -175,7 +175,7 @@ end
 program clean_samps
     syntax, samp(str) 
     use id jrnl pmid using ${temp}/openalex_`samp'_clean_titles, clear
-    merge 1:m id using ../external/openalex/openalex_`samp'_merged, keep(3) nogen 
+    merge 1:m id using ../external/openalex/openalex_`samp'_merged, assert(2 3) keep(3) nogen 
     merge m:1 id using ../external/patents/patent_ppr_cnt, assert(1 2 3) keep(1 3) nogen keepusing(patent_count front_only body_only)
     // clean date variables
     gen date = date(pub_date, "YMD")
@@ -255,20 +255,6 @@ program clean_samps
     cap drop new_inst new_inst_id 
     merge m:1 athr_id year using ../external/year_insts/filled_in_panel_year, assert(1 2 3) keep(3) nogen
     gduplicates drop pmid athr_id inst_id, force
-    /*
-    foreach var in region inst_id country country_code city inst {
-        rename `var' curr_`var'
-    }
-    keep if which_affl == 1 
-    foreach var in region inst_id country country_code city inst {
-        replace curr_`var' = `var' if _merge == 3 
-    }
-    gduplicates drop pmid athr_id curr_inst_id, force
-    drop region inst_id country country_code city inst
-    foreach var in region inst_id country country_code city inst {
-        rename curr_`var' `var'
-    }
-    drop _merge*/
     save ${temp}/cleaned_all_`samp'_prewt, replace
 
     // wt_adjust articles 
@@ -331,7 +317,7 @@ program clean_samps
     replace impact_fctr = 8.8 if jrnl == "Oncogene"
     replace impact_fctr = 5.2 if jrnl == "The FASEB Journal"
     replace impact_fctr = 4.8 if jrnl == "Journal of Biological Chemistry"
-    replace impact_fctr = 3.8 if jrnl == "PLoS One"
+    replace impact_fctr = 3.8 if jrnl == "PLoS ONE"
     replace impact_fctr = 35.3 if jrnl == "annals"
     replace impact_fctr = 15.88 if jrnl == "bmj"
     replace impact_fctr = 81.4 if jrnl == "jama"

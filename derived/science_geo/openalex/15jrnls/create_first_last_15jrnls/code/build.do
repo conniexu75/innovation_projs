@@ -97,7 +97,7 @@ program create_firstlast
     replace impact_fctr = 8.8 if jrnl == "Oncogene"
     replace impact_fctr = 5.2 if jrnl == "The FASEB Journal"
     replace impact_fctr = 4.8 if jrnl == "Journal of Biological Chemistry"
-    replace impact_fctr = 3.8 if jrnl == "PLoS One"
+    replace impact_fctr = 3.8 if jrnl == "PLoS ONE"
     replace impact_fctr = 35.3 if jrnl == "annals"
     replace impact_fctr = 15.88 if jrnl == "bmj"
     replace impact_fctr = 81.4 if jrnl == "jama"
