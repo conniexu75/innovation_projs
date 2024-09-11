@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-09-08 23:16:31
+Makelog started: 2024-09-11 14:01:54
 Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -82,27 +82,30 @@ not available in non-GUI version
  14.     drop if num_moves <= 0
  15.     save ../temp/movers, replace
  16. 
-.     foreach t in year_firstlast year {
+.     foreach t in year_firstlast  {
  17.         qui make_movers, samp(`t')
  18.         qui sum_stats, samp(`t')
  19.         qui output_tables, samp(`t')
  20.         qui make_dest_origin, samp(`t')
- 21.         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) 
- 22.         qui event_study, samp(`t') timeframe(8) startyr(1945) endyr(1980) 
+ 21.         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1)
+ 22.         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(s
+> tar_inst_ln_y_diff)
+ 23.         qui event_study, samp(`t') timeframe(8) startyr(1945) endyr(1980) 
 > ymax(1) ygap(0.1)
- 23.         qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) 
+ 24.         qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) 
 > ymax(1) ygap(0.1)
- 24.         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) 
+ 25.         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) 
 > ymax(1) ygap(0.1)
- 25.     }
- 26. end
+ 26.     }
+ 27. end
 
 . 
 . program make_movers
   1.     syntax, samp(str)
-  2.     use athr_id field msa_comb year inst_id msa_size impact_cite_affl_wt a
-> vg_team_size if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_pane
-> l_full_comb_`samp', clear 
+  2. 
+.     use athr_id field msa_comb year inst_id msa_size impact_cite_affl_wt avg_
+> team_size if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_f
+> ull_comb_`samp', clear 
   3.     hashsort athr_id year
   4.     gen place_count =  1 if inst_id != inst_id[_n-1] //& msa_comb != msa_c
 > omb[_n-1]
@@ -231,218 +234,225 @@ not available in non-GUI version
  13.         if "`loc'" == "msa_comb" {
  14.             local suf msa 
  15.         }
- 16.         gcollapse (mean) `suf'_ln_y = ln_y `suf'_ln_x = ln_x  (firstnm) ms
-> a , by(`loc' ${time}) 
- 17.         foreach v in `suf'_ln_y `suf'_ln_x {
- 18.             bys `loc' (year): gen pre_`v' = (`v'+`v'[_n-1])/2
- 19.             bys `loc' (year): gen post_`v' = (`v'+`v'[_n+1])/2
- 20.         }
- 21.         save ../temp/`suf'_`samp'_collapsed, replace
- 22.         restore
- 23.     }
- 24.         
+ 16.         egen p95_value = pctile(ln_y), p(95) by(`loc' year)
+ 17.         gen stars = ln_y if ln_y >= p95_value
+ 18.         gcollapse (mean) `suf'_ln_y = ln_y star_`suf'_ln_y = stars `suf'_l
+> n_x = ln_x  (firstnm) msa , by(`loc' ${time}) 
+ 19.         foreach v in `suf'_ln_y `suf'_ln_x {
+ 20.             bys `loc' (year): gen pre_`v' = (`v'+`v'[_n-1])/2
+ 21.             bys `loc' (year): gen post_`v' = (`v'+`v'[_n+1])/2
+ 22.         }
+ 23.         save ../temp/`suf'_`samp'_collapsed, replace
+ 24.         restore
+ 25.     }
+ 26.         
 .     use if analysis_cond == 1  using ../temp/mover_temp_`samp' , clear  
- 25.     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(3)
+ 27.     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(3)
 >  nogen
- 26.     gen ln_y = ln(impact_cite_affl_wt)
- 27.     gen ln_x = ln(msa_size)
- 28.     hashsort athr_id which_place year
- 29.     rename impact_cite_affl_wt y
- 30.     rename msa_size x
- 31.     gen rel = year - move_year
- 32.     foreach var in ln_x ln_y {
- 33.         bys athr_id which_place: egen avg_`var' = mean(`var') 
- 34.     }
- 35.     hashsort athr_id which_place -year
- 36.     gduplicates drop athr_id which_place, force
- 37.     rename year current_year
- 38.     gen year = current_year if which_place == 1
- 39.     replace year = move_year if which_place == 2
- 40.     merge m:1 inst_id year using ../temp/inst_`samp'_collapsed, assert(1 2
+ 28.     gen ln_y = ln(impact_cite_affl_wt)
+ 29.     gen ln_x = ln(msa_size)
+ 30.     hashsort athr_id which_place year
+ 31.     rename impact_cite_affl_wt y
+ 32.     rename msa_size x
+ 33.     gen rel = year - move_year
+ 34.     foreach var in ln_x ln_y {
+ 35.         bys athr_id which_place: egen avg_`var' = mean(`var') 
+ 36.     }
+ 37.     hashsort athr_id which_place -year
+ 38.     gduplicates drop athr_id which_place, force
+ 39.     rename year current_year
+ 40.     gen year = current_year if which_place == 1
+ 41.     replace year = move_year if which_place == 2
+ 42.     merge m:1 inst_id year using ../temp/inst_`samp'_collapsed, assert(1 2
 >  3) keep(3) nogen
- 41.     merge m:1 msa_comb year using ../temp/msa_`samp'_collapsed, assert(1 2
+ 43.     merge m:1 msa_comb year using ../temp/msa_`samp'_collapsed, assert(1 2
 >  3) keep(3) nogen keepusing(msa_ln_x pre_msa_ln_x post_msa_ln_x)
- 42.     hashsort athr_id which_place year
- 43.     foreach var in avg_ln_x avg_ln_y inst_ln_y inst_ln_x msa_ln_x {
- 44.         if strpos("`var'", "avg_") == 0 {
- 45.             local type "Destination-Origin Difference in"
- 46.             local stem = subinstr(subinstr("`var'", "msa_","",.), "inst_",
+ 44.     hashsort athr_id which_place year
+ 45.     foreach var in avg_ln_x avg_ln_y inst_ln_y inst_ln_x msa_ln_x star_ins
+> t_ln_y {
+ 46.         if strpos("`var'", "avg_") == 0 {
+ 47.             local type "Destination-Origin Difference in"
+ 48.             local stem = subinstr(subinstr("`var'", "msa_","",.), "inst_",
 >  "",.)
- 47.             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - 
+ 49.             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - 
 > `var'
- 48.             *by athr_id (which_place year): gen `var'_diff = post_`var'[_n
+ 50.             *by athr_id (which_place year): gen `var'_diff = post_`var'[_n
 > +1] - pre_`var'
 .         }
- 49.         if strpos("`var'", "avg_") > 0 {
- 50.             local type "Change in"
- 51.             local stem = subinstr("`var'", "avg_","",.)
- 52.             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - 
+ 51.         if strpos("`var'", "avg_") > 0 {
+ 52.             local type "Change in"
+ 53.             local stem = subinstr("`var'", "avg_","",.)
+ 54.             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - 
 > `var'
- 53.         }
- 54.         qui sum `var'_diff
- 55.         local N = r(N)
- 56.         local mean : dis %3.2f r(mean)
- 57.         local sd : dis %3.2f r(sd)
- 58.         tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) x
+ 55.         }
+ 56.         qui sum `var'_diff
+ 57.         local N = r(N)
+ 58.         local mean : dis %3.2f r(mean)
+ 59.         local sd : dis %3.2f r(sd)
+ 60.         tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) x
 > title("`type' ${`stem'_name}", size(vsmall)) color(edkblue) xlab(, labsize(vs
 > mall)) ylab(, labsize(vsmall)) legend(on order(- "N (Movers) = `N'" ///
 >                                                         "Mean = `mean'" ///
 >                                                         "            (`sd')")
 >  pos(1) ring(0) size(vsmall) region(fcolo(none)))
- 59.         graph export ../output/figures/`var'_diff_`samp'.pdf, replace
- 60.     }
- 61. 
+ 61.         graph export ../output/figures/`var'_diff_`samp'.pdf, replace
+ 62.     }
+ 63. 
 . 
 .     reg avg_ln_y_diff inst_ln_y_diff  
- 62.     local N = e(N)
- 63.     local coef : dis %3.2f _b[inst_ln_y_diff]
- 64.     binscatter2 avg_ln_y_diff inst_ln_y_diff,  mcolor(gs5) lcolor(ebblue) 
+ 64.     local N = e(N)
+ 65.     local coef : dis %3.2f _b[inst_ln_y_diff]
+ 66.     binscatter2 avg_ln_y_diff inst_ln_y_diff,  mcolor(gs5) lcolor(ebblue) 
 > xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Di
 > fference in Log Productivity", size(vsmall)) ytitle("Change in Log Productivi
 > ty after Move", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
 >                                                             "Slope = `coef'")
 >  pos(5) ring(0) size(vsmall) region(fcolor(none)))
- 65.     graph export ../output/figures/place_effect_desc_`samp'.pdf , replace
- 66.     
+ 67.     graph export ../output/figures/place_effect_desc_`samp'.pdf , replace
+ 68.     
 .     gen origin_loc = msa_comb if which_place  == 1
- 67.     gen dest_loc = msa_comb if which_place  == 2
- 68.     hashsort athr_id which_place year
- 69.     by athr_id : replace dest_loc = dest_loc[_n+1] if mi(dest_loc)
- 70.     by athr_id : replace origin_loc = origin_loc[_n-1] if mi(origin_loc)
- 71.     gcontract athr_id avg_ln_y_diff avg_ln_x_diff inst_ln_y_diff inst_ln_x
-> _diff move_year origin_loc dest_loc msa_ln_x_diff
- 72.     drop _freq
- 73.     drop if mi(avg_ln_y_diff)
- 74.     save ../temp/dest_origin_changes, replace
- 75. end
+ 69.     gen dest_loc = msa_comb if which_place  == 2
+ 70.     hashsort athr_id which_place year
+ 71.     by athr_id : replace dest_loc = dest_loc[_n+1] if mi(dest_loc)
+ 72.     by athr_id : replace origin_loc = origin_loc[_n-1] if mi(origin_loc)
+ 73.     gcontract athr_id avg_ln_y_diff avg_ln_x_diff inst_ln_y_diff inst_ln_x
+> _diff move_year origin_loc dest_loc msa_ln_x_diff star_inst_ln_y_diff
+ 74.     drop _freq
+ 75.     drop if mi(avg_ln_y_diff)
+ 76.     save ../temp/dest_origin_changes, replace
+ 77. end
 
 . 
 . program event_study 
-  1.     syntax, samp(str) timeframe(int) [startyr(int 1945) endyr(int 2023) ym
-> ax(real 1) ygap(real 0.2)] 
+  1.     syntax, samp(str) timeframe(int) [delta(name) startyr(int 1945) endyr(
+> int 2023) ymax(real 1) ygap(real 0.2)] 
   2.     cap mat drop _all  
-  3.     use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using .
+  3.      if "`delta'" == "" {
+  4.          local delta inst_ln_y_diff  
+  5.      }
+  6.     use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using .
 > ./temp/mover_temp_`samp' , clear  
-  4.     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(3)
+  7.     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(3)
 >  nogen
-  5.     keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size whi
+  8.     keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size whi
 > ch_place inst_id move_year first_pub_yr
-  6.     hashsort athr_id year
-  7.     gen rel = year - move_year
-  8.     merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3)
->  nogen
   9.     hashsort athr_id year
- 10.     gegen msa = group(msa_comb)
- 11.     gegen inst = group(inst_id)
- 12.     gen ln_y = ln(impact_cite_affl_wt)
- 13.     forval i = 1/`timeframe' {
- 14.         gen lag`i' = 1 if rel == -`i'
- 15.         gen lead`i' = 1 if rel == `i'
- 16.         gen int_lag`i' = 1 if rel == -`i'
- 17.         gen int_lead`i' = 1 if rel == `i'
- 18.     }
- 19.     ds int_lead* int_lag*
- 20.     foreach var in `r(varlist)' {
- 21.         replace `var' = 0 if mi(`var')
- 22.         replace `var' = `var'*inst_ln_y_diff
- 23.     }
- 24.     ds lead* lag*
- 25.     foreach var in `r(varlist)' {
- 26.         replace `var' = 0 if mi(`var')
- 27.     }
- 28.     gen int_treat = inst_ln_y_diff if rel == 0  
- 29.     gen treat = 1 if rel == 0  
- 30.     replace int_treat = 0 if mi(int_treat)
- 31.     replace treat = 0 if mi(treat)
- 32.     local leads
- 33.     local int_leads
- 34.     local lags
- 35.     local int_lags
- 36.     forval i = 1/`timeframe' {
- 37.         local leads `leads' lead`i'
- 38.         local int_leads `int_leads' int_lead`i'
- 39.     }
- 40.     forval i = 2/`timeframe' {
- 41.         local lags lag`i' `lags'
- 42.         local int_lags int_lag`i' `int_lags'
- 43.     }
- 44.     gunique athr_id 
- 45.     local num_movers = r(unique)
- 46.         gen move_age_pub = move_year - first_pub_yr  + 1 + 25
- 47.     egen pos_move_size = cut(inst_ln_y_diff) if inst_ln_y_diff > 0, group(
-> 2)
- 48.     egen neg_move_size = cut(inst_ln_y_diff) if inst_ln_y_diff < 0, group(
-> 2)
- 49.     gen l2h_move = inst_ln_y_diff > 0
- 50.     gen h2l_move = inst_ln_y_diff < 0
- 51.     gen s2b_move = msa_ln_x_diff > 0
- 52.     gen b2s_move = msa_ln_x_diff < 0
- 53.         by athr_id: gen counter = _n == 1
- 54.         sum move_age_pub if counter == 1, d
- 55.         gen old = move_age_pub >= r(p50)
- 56.     gen young = move_age_pub < r(p50)
- 57.     foreach cond in "" "& l2h_move== 1" "& h2l_move == 1" "& b2s_move == 1
+ 10.     gen rel = year - move_year
+ 11.     merge m:1 athr_id move_year using ../temp/dest_origin_changes, keep(3)
+>  nogen
+ 12.     hashsort athr_id year
+ 13.     gegen msa = group(msa_comb)
+ 14.     gegen inst = group(inst_id)
+ 15.     gen ln_y = ln(impact_cite_affl_wt)
+ 16.     forval i = 1/`timeframe' {
+ 17.         gen lag`i' = 1 if rel == -`i'
+ 18.         gen lead`i' = 1 if rel == `i'
+ 19.         gen int_lag`i' = 1 if rel == -`i'
+ 20.         gen int_lead`i' = 1 if rel == `i'
+ 21.     }
+ 22.     ds int_lead* int_lag*
+ 23.     foreach var in `r(varlist)' {
+ 24.         replace `var' = 0 if mi(`var')
+ 25.         replace `var' = `var'*`delta'
+ 26.     }
+ 27.     ds lead* lag*
+ 28.     foreach var in `r(varlist)' {
+ 29.         replace `var' = 0 if mi(`var')
+ 30.     }
+ 31.     gen int_treat = `delta' if rel == 0  
+ 32.     gen treat = 1 if rel == 0  
+ 33.     replace int_treat = 0 if mi(int_treat)
+ 34.     replace treat = 0 if mi(treat)
+ 35.     local leads
+ 36.     local int_leads
+ 37.     local lags
+ 38.     local int_lags
+ 39.     forval i = 1/`timeframe' {
+ 40.         local leads `leads' lead`i'
+ 41.         local int_leads `int_leads' int_lead`i'
+ 42.     }
+ 43.     forval i = 2/`timeframe' {
+ 44.         local lags lag`i' `lags'
+ 45.         local int_lags int_lag`i' `int_lags'
+ 46.     }
+ 47.     gunique athr_id 
+ 48.     local num_movers = r(unique)
+ 49.         gen move_age_pub = move_year - first_pub_yr  + 1 + 25
+ 50.     egen pos_move_size = cut(`delta') if `delta' > 0, group(2)
+ 51.     egen neg_move_size = cut(`delta') if `delta' < 0, group(2)
+ 52.     gen l2h_move = `delta' > 0
+ 53.     gen h2l_move = `delta' < 0
+ 54.     gen s2b_move = msa_ln_x_diff > 0
+ 55.     gen b2s_move = msa_ln_x_diff < 0
+ 56.         by athr_id: gen counter = _n == 1
+ 57.         sum move_age_pub if counter == 1, d
+ 58.         gen old = move_age_pub >= r(p50)
+ 59.     gen young = move_age_pub < r(p50)
+ 60.     foreach cond in "" "& l2h_move== 1" "& h2l_move == 1" "& b2s_move == 1
 > " "& s2b_move == 1"  "& old == 1" "& young == 1" {
- 58.         local c "inrange(rel,-`timeframe',`timeframe') `cond'"
- 59.         local suf = ""
- 60.         if "`cond'" == "& l2h_move== 1" {
- 61.             local suf = "_l2h"
- 62.         }
- 63.         else if "`cond'" == "& h2l_move == 1" {
- 64.             local suf = "_h2l"
+ 61.         local c "inrange(rel,-`timeframe',`timeframe') `cond'"
+ 62.         local suf = ""
+ 63.         if "`cond'" == "& l2h_move== 1" {
+ 64.             local suf = "_l2h"
  65.         }
- 66.         else if "`cond'" == "& b2s_move == 1" {
- 67.             local suf = "_b2s"
+ 66.         else if "`cond'" == "& h2l_move == 1" {
+ 67.             local suf = "_h2l"
  68.         }
- 69.         else if "`cond'" == "& s2b_move == 1" {
- 70.             local suf = "_s2b"
+ 69.         else if "`cond'" == "& b2s_move == 1" {
+ 70.             local suf = "_b2s"
  71.         }
- 72.         else if "`cond'" == "& pos_move_size == 1" {
- 73.             local suf = "_ll2hh"
+ 72.         else if "`cond'" == "& s2b_move == 1" {
+ 73.             local suf = "_s2b"
  74.         }
- 75.         else if "`cond'" == "& neg_move_size == 0" {
- 76.             local suf = "_hh2ll"
+ 75.         else if "`cond'" == "& pos_move_size == 1" {
+ 76.             local suf = "_ll2hh"
  77.         }
- 78.                 else if "`cond'" == "& old == 1" {
- 79.             local suf = "_old"
+ 78.         else if "`cond'" == "& neg_move_size == 0" {
+ 79.             local suf = "_hh2ll"
  80.         }
- 81.                 else if "`cond'" == "& young == 1" {
- 82.             local suf = "_young"
+ 81.                 else if "`cond'" == "& old == 1" {
+ 82.             local suf = "_old"
  83.         }
- 84.         preserve
- 85.         mat drop _all
- 86.         reghdfe ln_y `lags' `leads' lag1 treat `int_lags' int_treat `int_l
+ 84.                 else if "`cond'" == "& young == 1" {
+ 85.             local suf = "_young"
+ 86.         } 
+ 87.         if "`delta'" == "" local delta_suf = "" 
+ 88.         if "`delta'" != "" local delta_suf = "star" 
+ 89.         local suf = "`suf'`delta_suf'" 
+ 90.         preserve
+ 91.         mat drop _all
+ 92.         reghdfe ln_y `lags' `leads' lag1 treat `int_lags' int_treat `int_l
 > eads' int_lag1  if `c' , absorb(year field field#year athr_fes = athr_id) vce
 > (cluster inst)
- 87.         estimates save ../output/es_`startyr'_`endyr'_`samp'`suf', replace
- 88.         gunique athr_id if `c'
- 89.         local num_movers = r(unique)
- 90.         foreach var in `int_lags' int_treat `int_leads' int_lag1 {
- 91.             mat row = _b[`var'], _se[`var']
- 92.             if "`var'" == "int_lag1" {
- 93.                 mat row = 0,0
- 94.             }
- 95.             mat es = nullmat(es) \ row 
- 96.         }
- 97.         svmat es
- 98.         keep es1 es2
- 99.         drop if mi(es1)
-100.         rename (es1 es2) (b se)
-101.         gen ub = b + 1.96*se
-102.         gen lb  = b - 1.96*se
-103.         gen rel = -`timeframe' if _n == 1
-104.         replace rel = rel[_n-1]+ 1 if _n > 1
-105.         replace rel = rel+ 1 if rel >= -1
-106.         replace rel = -1 if rel == `timeframe'+1
-107.         sum b if inrange(rel, -`timeframe',-2)
-108.         local pre_mean : di %3.2f r(mean)
-109.         sum b if inrange(rel, 1,`timeframe')
-110.         local post_mean : di %3.2f r(mean)
-111.         replace lb = -1 if lb < -1
-112.         replace ub = 1 if ub > 1
-113.                 save ../temp/es_coefs_`startyr'_`endyr'_`samp'`suf', repla
+ 93.         estimates save ../output/es_`startyr'_`endyr'_`samp'`suf', replace
+ 94.         gunique athr_id if `c'
+ 95.         local num_movers = r(unique)
+ 96.         foreach var in `int_lags' int_treat `int_leads' int_lag1 {
+ 97.             mat row = _b[`var'], _se[`var']
+ 98.             if "`var'" == "int_lag1" {
+ 99.                 mat row = 0,0
+100.             }
+101.             mat es = nullmat(es) \ row 
+102.         }
+103.         svmat es
+104.         keep es1 es2
+105.         drop if mi(es1)
+106.         rename (es1 es2) (b se)
+107.         gen ub = b + 1.96*se
+108.         gen lb  = b - 1.96*se
+109.         gen rel = -`timeframe' if _n == 1
+110.         replace rel = rel[_n-1]+ 1 if _n > 1
+111.         replace rel = rel+ 1 if rel >= -1
+112.         replace rel = -1 if rel == `timeframe'+1
+113.         sum b if inrange(rel, -`timeframe',-2)
+114.         local pre_mean : di %3.2f r(mean)
+115.         sum b if inrange(rel, 1,`timeframe')
+116.         local post_mean : di %3.2f r(mean)
+117.         replace lb = -1 if lb < -1
+118.         replace ub = 1 if ub > 1
+119.                 save ../temp/es_coefs_`startyr'_`endyr'_`samp'`suf', repla
 > ce
-114.         tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(vsmall) |
+120.         tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(vsmall) |
 > | scatter b rel if se !=0 | rel == -1, msize(small) mcolor(ebblue%50) xlab(-`
 > timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`yma
 > x', labsize(vsmall)) ///
@@ -454,32 +464,33 @@ not available in non-GUI version
 >                                                             "Post-period mean
 >  = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Re
 > lative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
-115.         graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf
+121.         graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf
 > , replace
-116.         restore
-117.     }
-118.         gunique athr_id if l2h_move== 1
-119.     local l2h_num_movers = r(unique)
-120.         gunique athr_id if h2l_move== 1
-121.     local h2l_num_movers = r(unique)
-122.         
+122.         restore
+123.     }
+124.         gunique athr_id if l2h_move== 1
+125.     local l2h_num_movers = r(unique)
+126.         gunique athr_id if h2l_move== 1
+127.     local h2l_num_movers = r(unique)
+128.         
 .         gunique athr_id if s2b_move== 1
-123.     local s2b_num_movers = r(unique)
-124.         gunique athr_id if b2s_move== 1
-125.     local b2s_num_movers = r(unique)
-126.         gunique athr_id if young== 1
-127.     local young_num_movers = r(unique)
-128.         gunique athr_id if old== 1
-129.     local old_num_movers = r(unique)
-130. 
+129.     local s2b_num_movers = r(unique)
+130.         gunique athr_id if b2s_move== 1
+131.     local b2s_num_movers = r(unique)
+132.         gunique athr_id if young== 1
+133.     local young_num_movers = r(unique)
+134.         gunique athr_id if old== 1
+135.     local old_num_movers = r(unique)
+136. 
 .         // merge l2h h2
-.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_l2h, clear
-131.         gen cat = "l2h"
-132.         replace rel = rel - 0.09
-133.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_h2l
-134.         replace cat = "h2l" if mi(cat)
-135.         replace rel = rel + 0.09 if cat == "h2l"
-136.         tw rcap ub lb rel if rel != -1.09 & cat == "l2h",  lcolor(lavender
+.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_l2h`delta_suf', clear
+137.         gen cat = "l2h"
+138.         replace rel = rel - 0.09
+139.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_h2l`delta_s
+> uf'
+140.         replace cat = "h2l" if mi(cat)
+141.         replace rel = rel + 0.09 if cat == "h2l"
+142.         tw rcap ub lb rel if rel != -1.09 & cat == "l2h",  lcolor(lavender
 > %70) msize(vsmall) || ///
 >            scatter b rel if cat == "l2h", mcolor(lavender%70) msize(small) ||
 >  ///
@@ -495,17 +506,18 @@ not available in non-GUI version
 > num_movers')" 4 "High to Low Productivity Place Movers (N = `h2l_num_movers')
 > ") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to
 >  Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
-137.     graph export ../output/figures/es`startyr'_`endyr'_`samp'_prodchg.pdf,
->  replace
-138.         
+143.     graph export ../output/figures/es`startyr'_`endyr'_`samp'_prodchg`delt
+> a_suf'.pdf, replace
+144.         
 .         // merge s2b b2s
-.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_s2b, clear
-139.         gen cat = "s2b"
-140.         replace rel = rel - 0.09
-141.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_b2s
-142.         replace cat = "b2s" if mi(cat)
-143.         replace rel = rel + 0.09 if cat == "b2s"
-144.         tw rcap ub lb rel if rel != -1.09 & cat == "s2b",  lcolor(lavender
+.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_s2b`delta_suf', clear
+145.         gen cat = "s2b"
+146.         replace rel = rel - 0.09
+147.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_b2s`delta_s
+> uf'
+148.         replace cat = "b2s" if mi(cat)
+149.         replace rel = rel + 0.09 if cat == "b2s"
+150.         tw rcap ub lb rel if rel != -1.09 & cat == "s2b",  lcolor(lavender
 > %70) msize(vsmall) || ///
 >            scatter b rel if cat == "s2b", mcolor(lavender%70) msize(small) ||
 >  ///
@@ -521,17 +533,18 @@ not available in non-GUI version
 > " 4 "Big to Small Place Movers (N = `b2s_num_movers')") pos(5) ring(0) size(v
 > small) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) yt
 > itle("Log Productivity", size(vsmall))
-145.     graph export ../output/figures/es`startyr'_`endyr'_`samp'_sizechg.pdf,
->  replace
-146.         
+151.     graph export ../output/figures/es`startyr'_`endyr'_`samp'_sizechg`delt
+> a_suf'.pdf, replace
+152.         
 .         // merge young old
-.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_young, clear
-147.         gen cat = "young"
-148.         replace rel = rel - 0.09
-149.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_old
-150.         replace cat = "old" if mi(cat)
-151.         replace rel = rel + 0.09 if cat == "old"
-152.         tw rcap ub lb rel if rel != -1.09 & cat == "young",  lcolor(lavend
+.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_young`delta_suf', clear
+153.         gen cat = "young"
+154.         replace rel = rel - 0.09
+155.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_old`delta_s
+> uf'
+156.         replace cat = "old" if mi(cat)
+157.         replace rel = rel + 0.09 if cat == "old"
+158.         tw rcap ub lb rel if rel != -1.09 & cat == "young",  lcolor(lavend
 > er%70) msize(vsmall) || ///
 >            scatter b rel if cat == "young" & rel > -8, mcolor(lavender%70) ms
 > ize(small)|| ///
@@ -547,9 +560,9 @@ not available in non-GUI version
 > vers Aged >= 40 (N = `old_num_movers')") pos(5) ring(0) size(vsmall) region(f
 > color(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Produ
 > ctivity", size(vsmall))
-153.     graph export ../output/figures/es`startyr'_`endyr'_`samp'_age.pdf, rep
-> lace
-154. end
+159.     graph export ../output/figures/es`startyr'_`endyr'_`samp'_age`delta_su
+> f'.pdf, replace
+160. end
 
 . 
 . program output_tables
@@ -559,8 +572,7 @@ not available in non-GUI version
 > atrix(`file'_`samp') ///
 >            title(<tab:`file'_`samp'>) format(%20.4f) replace
   4.     }
-  5. 
-. end
+  5. end
 
 . ** 
 . main
@@ -577,6 +589,6 @@ file ../temp/movers.dta saved
 end of do-file
 
 --------------------------------------------------------------------------------
-Makelog ended: 2024-09-08 23:22:00
+Makelog ended: 2024-09-11 14:05:28
 Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
