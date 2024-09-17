@@ -1,0 +1,4 @@
+./herd/ | /export/projects4/achandra_basicscience/derived/science_geo/nsf/clean_herd/output
+./herd/ | /export/projects4/achandra_basicscience/derived/science_geo/nsf/clean_herd/temp
+
+
