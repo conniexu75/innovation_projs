@@ -1,0 +1,118 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      17.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/home/dor/cxu/innovation_projs/derived/science_geo/nsf/clean_herd/
+> code/build.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/home/dor/cxu/innovation_projs/derived/science_geo/nsf/clean_herd/code/
+
+. set maxvar 120000
+
+
+. global temp "/export/scratch/cxu_sci_geo/herd"
+
+. 
+. program main
+  1.    import_data 
+  2. end
+
+. 
+. program import_data 
+  1.     forval i = 1972/2022 {
+  2.         import delimited ../external/herd/herd_`i'.csv, clear stringcols(_
+> all)
+  3.         save ${temp}/`i', replace 
+  4.     }
+  5.     // clean herd 2010-2022
+.     // inst ids: keep inst_id hbcu_flag med_sch_flag hhe_flag toi_code hdg_co
+> de toc_code inst_name_long inst_city inst_zip inst_state_code
+.     clear
+  6.     forval i = 2010/2022 {
+  7.         use ${temp}/`i', clear
+  8.         keep if (questionnaire_no == "01.g" & row == "Total") | (questionn
+> aire_no == "06.a" & row == "Basic research" & column == "Total")| (questionna
+> ire_no == "06.a" & row == "Applied research" & column == "Total") | (question
+> naire_no == "06.a" & row == "All" & column == "Total") | (questionnaire_no ==
+>  "09D06" & row == "Life sciences, all" & column == "Total") | (questionnaire_
+> no == "11D06" & row == "Life sciences, all" & column == "Total") | (questionn
+> aire_no == "14D06" & row == "Life sciences, all" & column == "Total")
+  9.         keep inst_id hbcu_flag med_sch_flag hhe_flag toi_code hdg_code toc
+> _code inst_name_long inst_city inst_zip inst_state_code questionnaire_no row 
+> column data 
+ 10.         gen question = "tot_fund" if  questionnaire_no == "01.g" & row == 
+> "Total"
+ 11.         replace question = "basic_expend" if  questionnaire_no == "06.a" &
+>  row == "Basic research" & column == "Total"
+ 12.         replace question = "applied_expend" if questionnaire_no == "06.a" 
+> & row == "Applied research" & column == "Total"
+ 13.         replace question = "tot_expend" if  questionnaire_no == "06.a" & r
+> ow == "All" & column == "Total"
+ 14.         replace question = "fed_ls_fund" if questionnaire_no == "09D06" & 
+> row == "Life sciences, all" & column == "Total"
+ 15.         replace question = "nonfed_ls_fund" if  questionnaire_no == "11D06
+> " & row == "Life sciences, all" & column == "Total"
+ 16.         replace question = "ls_cap_expend" if questionnaire_no == "14D06" 
+> & row == "Life sciences, all" & column == "Total"
+ 17.         gen year = `i'
+ 18.         save ${temp}/herd_`i', replace
+ 19.     }
+ 20.     clear
+ 21.     forval i = 2010/2022 {
+ 22.         append using  ${temp}/herd_`i'
+ 23.     }
+ 24.     gen med_sch = 1 if med_sch_flag == "T"
+ 25.     drop med_sch_flag toi_code
+ 26.     destring *_flag, replace
+ 27.     destring *_code, replace
+ 28.     gen public = toc_code ==1 
+ 29.     preserve
+ 30.     collapse (max) hbcu_flag med_sch hhe_flag public (firstnm) hdg_code in
+> st_name_long inst_city inst_state_code inst_zip, by(inst_id)
+ 31.     gisid inst_id
+ 32.     save ../temp/inst_chars_xw, replace
+ 33.     restore
+ 34.     keep inst_id data year question 
+ 35.     destring data, replace
+ 36.     reshape wide data ,i(inst_id year) j(question) string
+ 37.     rename data* *
+ 38.     merge m:1 inst_id using ../temp/inst_chars_xw, assert(3) keep(3) nogen
+ 39.     save ../temp/herd_2010_2022, replace
+ 40. end
+
+. 
+. main
