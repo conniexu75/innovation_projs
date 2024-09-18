@@ -5,7 +5,6 @@ program drop _all
 set scheme modern
 pause on
 set seed 8975
-here, set
 
 program main
     foreach t in year { 
@@ -76,6 +75,7 @@ program make_panel
     local suf = "" 
     if `firstlast' == 1 {
         use id pmid which_athr which_affl pub_date year jrnl cite_count athr_id athr_name impact_fctr country_code msa_comb msa_c_world inst inst_id msacode using ../external/firstlast/cleaned_all_15jrnls, clear
+
         local suf = "_firstlast" 
     }
     gen qrtr = qofd(pub_date)
@@ -108,9 +108,9 @@ program make_panel
         gen avg_body = body_only/time_since_pub
     }
     bys pmid: replace avg_cite = . if _n != 1
-    bys pmid: replace avg_pat = . if _n != 1
-    bys pmid: replace avg_frnt = . if _n != 1
-    bys pmid: replace avg_body = . if _n != 1
+    by pmid: replace avg_pat = . if _n != 1
+    by pmid: replace avg_frnt = . if _n != 1
+    by pmid: replace avg_body = . if _n != 1
     sum avg_cite
     gen cite_wt = avg_cite/r(sum)
     bys jrnl: gegen tot_cite_N = total(cite_wt)
@@ -153,13 +153,13 @@ program make_panel
     keep if country_code == "US" & !mi(msa_comb)
 
     preserve
-    gcontract pmid `time' athr_id msa_comb
+    gcontract pmid `time' athr_id msa_comb inst_id
     drop _freq
-*    merge m:1 athr_id `time' using ${`time'_insts}/filled_in_panel_`time' , assert(1 2 3) keep(3) nogen keepusing(msa_comb)
     rename athr_id focal_id
     save ../temp/focal_list, replace
     rename focal_id athr_id 
     rename msa_comb coathr_msa
+    rename inst_id coathr_inst
     save ../temp/coauthors, replace
     restore
 
@@ -175,6 +175,21 @@ program make_panel
     save ../temp/coauthor_in_msa_`time', replace
     restore
 
+    preserve
+    use ../temp/focal_list,clear
+    joinby pmid using ../temp/coauthors
+    drop if focal_id == athr_id
+    gcontract focal_id `time' athr_id inst_id msa_comb coathr_inst coathr_msa
+    bys focal_id year: gen num_coauthors = _N
+    gen same = inst_id == coathr_inst
+    bys focal_id year: gegen num_coauthors_same_inst = total(same) 
+    replace same = msa_comb == coathr_msa
+    bys focal_id year: gegen num_coauthors_same_msa = total(same) 
+    drop _freq
+    gcontract focal_id year num_coauthors*
+    drop _freq
+    save ../output/num_fund_coauthors, replace
+    restore
     // get avg team size
     bys athr_id pmid : gen athr_pmid_cntr = _n == 1
     bys athr_id `time': gegen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
