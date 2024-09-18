@@ -10,7 +10,7 @@ set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/herd"
 
 program main
-   import_data 
+   *import_data 
    create_openalex_xw
 end
 
@@ -93,14 +93,13 @@ program import_data
 end
 
 program  create_openalex_xw
-    use ../external/openalex/all_inst_geo_chars, clear
+    use ../external/openalex/cleaned_all_15jrnls.dta, clear
     keep if country_code == "US"
-    keep new_inst_id new_inst region city new_inst 
-    rename new_inst_id inst_id
-    rename new_inst inst
+    gcontract inst_id inst region city
     rename region state
     rename inst_id oa_inst_id
     gduplicates drop oa_inst_id, force
+    drop _freq
     save ../temp/openalex_inst, replace
 end
 

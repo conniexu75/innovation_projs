@@ -2,35 +2,35 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 166,charles r. drew university of medicine and science,los angeles,ca,1,I52710748,charles r. drew university of medicine and science,100.0
 1002,alabama agricultural and mechanical university,normal,al,1,I176692203,alabama agricultural and mechanical university,100.0
 1005,alabama state university,montgomery,al,1,I145611464,alabama state university,100.0
-1009,auburn university,auburn,al,1,I4210151215,auburn university system,95.0
+1009,auburn university,auburn,al,1,I82497590,auburn university,100.0
 1016,university of north alabama,florence,al,1,I12970578,university of north alabama,100.0
 1020,jacksonville state university,jacksonville,al,1,I78724572,jacksonville state university,100.0
 1033,oakwood university,huntsville,al,1,I10986801,oakwood university,100.0
 1047,troy university,troy,al,1,I149292303,troy university,100.0
-1050,tuskegee university,tuskegee,al,1,No Match,No Match,0.0
+1050,tuskegee university,tuskegee,al,1,I6026837,tuskegee university,100.0
 1051,university of alabama,tuscaloosa,al,1,I68631920,university of west alabama,95.0
 1052,university of alabama at birmingham,birmingham,al,1,I32389192,university of alabama at birmingham,100.0
-1055,university of alabama in huntsville,huntsville,al,1,No Match,No Match,0.0
+1055,university of alabama in huntsville,huntsville,al,1,I82495205,university of alabama in huntsville,100.0
 1057,university of south alabama,mobile,al,1,I83809506,university of south alabama,100.0
-1061,alaska pacific university,anchorage,ak,1,No Match,No Match,0.0
-1081,arizona state university,tempe,az,1,No Match,No Match,0.0
-1082,northern arizona university,flagstaff,az,1,No Match,No Match,0.0
-1083,university of arizona,tucson,az,1,No Match,No Match,0.0
+1061,alaska pacific university,anchorage,ak,1,I119343350,alaska pacific university,100.0
+1081,arizona state university,tempe,az,1,I55732556,arizona state university,100.0
+1082,northern arizona university,flagstaff,az,1,I203172682,northern arizona university,100.0
+1083,university of arizona,tucson,az,1,I138006243,university of arizona,100.0
 1086,university of arkansas pine bluff,pine bluff,ar,1,I94525581,university of arkansas at pine bluff,96.0
 1088,lyon university,batesville,ar,1,I178906410,lyon university,100.0
 1089,arkansas tech university,russellville,ar,1,I9508535,arkansas tech university,100.0
-1090,arkansas state university,state university,ar,1,I2801837019,arkansas state university mountain home,90.0
+1090,arkansas state university,state university,ar,1,I125956826,arkansas state university,100.0
 1092,university of central arkansas,conway,ar,1,I32038505,university of central arkansas,100.0
 1097,harding university,searcy,ar,1,I107363760,harding university,100.0
 1099,hendrix university,conway,ar,1,I130327366,hendrix university,100.0
 1101,university of arkansas little rock,little rock,ar,1,I102401767,university of arkansas at little rock,96.0
 1102,ouachita baptist university,arkadelphia,ar,1,I2303707,ouachita baptist university,100.0
-1103,philander smith university,little rock,ar,1,I118757457,philander smith university,100.0
+1103,philander smith university,little rock,ar,1,No Match,No Match,0.0
 1108,university of arkansas,fayetteville,ar,1,I78715868,university of arkansas at fayetteville,90.0
-1109,university of arkansas for medical sciences,little rock,ar,1,No Match,No Match,0.0
+1109,university of arkansas for medical sciences,little rock,ar,1,I79620101,university of arkansas for medical sciences,100.0
 1117,azusa pacific university,azusa,ca,1,I96408169,azusa pacific university,100.0
 1122,biola university,la mirada,ca,1,No Match,No Match,0.0
-1131,california institute of technology,pasadena,ca,1,No Match,No Match,0.0
+1131,california institute of technology,pasadena,ca,1,I122411786,california institute of technology,100.0
 1137,california state university fullerton,fullerton,ca,1,I142934699,"california state university, fullerton",99.0
 1138,california state university east bay,hayward,ca,1,I184813773,"california state university, east bay",99.0
 1139,california state university long beach,long beach,ca,1,I59897056,"california state university, long beach",99.0
@@ -41,45 +41,45 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 1144,california state polytechnic university pomona,pomona,ca,1,No Match,No Match,0.0
 1146,california state university chico,chico,ca,1,I36053171,"california state university, chico",99.0
 1147,california state university fresno,fresno,ca,1,I67328108,"california state university, fresno",99.0
-1149,humboldt state university,arcata,ca,1,No Match,No Match,0.0
+1149,humboldt state university,arcata,ca,1,I192389796,humboldt state university,100.0
 1150,california state university sacramento,sacramento,ca,1,I43522216,"california state university, sacramento",99.0
-1151,san diego state university,san diego,ca,1,I4210144521,"san diego state university, imperial valley",90.0
-1153,california state university northridge,northridge,ca,1,No Match,No Match,0.0
-1154,san francisco state university,san francisco,ca,1,No Match,No Match,0.0
-1155,san jose state university,san jose,ca,1,No Match,No Match,0.0
+1151,san diego state university,san diego,ca,1,I188314818,san diego mesa university,90.0
+1153,california state university northridge,northridge,ca,1,I157638225,"california state university, northridge",99.0
+1154,san francisco state university,san francisco,ca,1,I71838634,san francisco state university,100.0
+1155,san jose state university,san jose,ca,1,I51504820,san jose state university,100.0
 1156,sonoma state university,rohnert park,ca,1,No Match,No Match,0.0
-1157,"california state university, stanislaus",turlock,ca,1,No Match,No Match,0.0
+1157,"california state university, stanislaus",turlock,ca,1,I197875241,"california state university, stanislaus",100.0
 1158,alliant international university,san diego,ca,1,I126533617,alliant international university,100.0
 1164,chapman university,orange,ca,1,I185071736,chapman university,100.0
 1169,claremont graduate university,claremont,ca,1,I136722135,claremont graduate university,100.0
 1170,claremont mckenna university,claremont,ca,1,I106107269,claremont mckenna university,100.0
 1171,harvey mudd university,claremont,ca,1,I133543626,harvey mudd university,100.0
-1172,pitzer university,claremont,ca,1,No Match,No Match,0.0
-1173,pomona university,claremont,ca,1,No Match,No Match,0.0
-1196,dominican university of california,san rafael,ca,1,No Match,No Match,0.0
+1172,pitzer university,claremont,ca,1,I141778976,pitzer university,100.0
+1173,pomona university,claremont,ca,1,I177881444,pomona university,100.0
+1196,dominican university of california,san rafael,ca,1,I172039944,dominican university of california,100.0
 1200,fuller theological seminary in california,pasadena,ca,1,I96521982,fuller theological seminary,90.0
-1218,loma linda university,loma linda,ca,1,I4210166294,loma linda university children's,90.0
+1218,loma linda university,loma linda,ca,1,I4210166294,loma linda university children's hospital,90.0
 1238,mills university,oakland,ca,1,No Match,No Match,0.0
 1243,"mount st. mary's university (los angeles, ca)",los angeles,ca,1,I4210134096,mount st. mary's university,90.0
 1249,occidental university,los angeles,ca,1,I72903472,occidental university,100.0
-1264,pepperdine university,malibu,ca,1,No Match,No Match,0.0
-1293,vanguard university of southern california,costa mesa,ca,1,I144448172,vanguard university,90.0
+1264,pepperdine university,malibu,ca,1,I100191712,pepperdine university,100.0
+1293,vanguard university of southern california,costa mesa,ca,1,No Match,No Match,0.0
 1305,stanford university,stanford,ca,1,I97018004,stanford university,100.0
 1310,naval postgraduate school,monterey,ca,1,No Match,No Match,0.0
 1311,university of california office of the president,oakland,ca,1,No Match,No Match,0.0
-1312,"university of california, berkeley",berkeley,ca,1,No Match,No Match,0.0
-1313,"university of california, davis",davis,ca,1,I4210160527,university of california davis,98.0
-1314,"university of california, irvine",irvine,ca,1,I4210096636,"university of california, irvine",100.0
-1315,"university of california, los angeles",los angeles,ca,1,No Match,No Match,0.0
-1316,"university of california, riverside",riverside,ca,1,No Match,No Match,0.0
-1317,"university of california, san diego",la jolla,ca,1,I2799613061,california university san diego,95.0
-1319,"university of california, san francisco",san francisco,ca,1,I4210110664,university of california san francisco,99.0
-1320,"university of california, santa barbara",santa barbara,ca,1,No Match,No Match,0.0
-1321,"university of california, santa cruz",santa cruz,ca,1,No Match,No Match,0.0
+1312,"university of california, berkeley",berkeley,ca,1,I95457486,"university of california, berkeley",100.0
+1313,"university of california, davis",davis,ca,1,I4210160527,university of california davis medical center,95.0
+1314,"university of california, irvine",irvine,ca,1,I4210096636,"university of california, irvine medical center",95.0
+1315,"university of california, los angeles",los angeles,ca,1,I161318765,"university of california, los angeles",100.0
+1316,"university of california, riverside",riverside,ca,1,I103635307,"university of california, riverside",100.0
+1317,"university of california, san diego",la jolla,ca,1,I4210132395,university of california san diego medical center,95.0
+1319,"university of california, san francisco",san francisco,ca,1,I4210110664,university of california san francisco medical center,95.0
+1320,"university of california, santa barbara",santa barbara,ca,1,I154570441,"university of california, santa barbara",100.0
+1321,"university of california, santa cruz",santa cruz,ca,1,I185103710,"university of california, santa cruz",100.0
 1322,university of redlands,redlands,ca,1,I193054373,university of redlands,100.0
-1323,"university of california, merced",merced,ca,1,No Match,No Match,0.0
+1323,"university of california, merced",merced,ca,1,I156087764,"university of california, merced",100.0
 1325,university of san francisco,san francisco,ca,1,I158404207,city university of san francisco,95.0
-1326,santa clara university,santa clara,ca,1,I78281724,santa ana university,90.0
+1326,santa clara university,santa clara,ca,1,I16269868,santa clara university,100.0
 1328,university of southern california,los angeles,ca,1,I4210137391,university of southern california sea grant,95.0
 1329,university of the pacific,stockton,ca,1,I119942576,university of the pacific,100.0
 1342,whittier university,whittier,ca,1,I70076703,whittier university,100.0
@@ -89,38 +89,38 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 1350,colorado state university,fort collins,co,1,I141988945,western state colorado university,95.0
 1353,fort lewis university,durango,co,1,I149471917,fort lewis university,100.0
 1358,mesa state university,grand junction,co,1,No Match,No Match,0.0
-1363,regis university,denver,co,1,No Match,No Match,0.0
+1363,regis university,denver,co,1,I128365640,regis university,100.0
 1365,colorado state university pueblo,pueblo,co,1,I114312114,colorado state university pueblo,100.0
 1369,united states air force academy,usaf academy,co,1,No Match,No Match,0.0
 1370,university of colorado at boulder,boulder,co,1,I188538660,university of colorado boulder,95.0
 1371,university of denver,denver,co,1,I879689382,metropolitan state university of denver,90.0
 1378,central connecticut state university,new britain,ct,1,I154264771,central connecticut state university,100.0
-1379,connecticut university,new london,ct,1,No Match,No Match,0.0
-1385,fairfield university,fairfield,ct,1,No Match,No Match,0.0
-1397,university of new haven,west haven,ct,1,No Match,No Match,0.0
+1379,connecticut university,new london,ct,1,I4498119,connecticut university,100.0
+1385,fairfield university,fairfield,ct,1,I126350171,fairfield university,100.0
+1397,university of new haven,west haven,ct,1,I40253897,university of new haven,100.0
 1402,quinnipiac university,hamden,ct,1,No Match,No Match,0.0
-1406,southern connecticut state university,new haven,ct,1,No Match,No Match,0.0
+1406,southern connecticut state university,new haven,ct,1,I35462925,southern connecticut state university,100.0
 1414,"trinity university (hartford, ct)",hartford,ct,1,I56722557,trinity university,90.0
 1415,united states coast guard academy,new london,ct,1,I186274478,united states coast guard academy,100.0
 1416,university of bridgeport,bridgeport,ct,1,I154300980,university of bridgeport,100.0
-1422,university of hartford,west hartford,ct,1,No Match,No Match,0.0
+1422,university of hartford,west hartford,ct,1,I162281398,university of hartford,100.0
 1424,wesleyan university,middletown,ct,1,I100538780,wesleyan university,100.0
-1426,yale university,new haven,ct,1,No Match,No Match,0.0
+1426,yale university,new haven,ct,1,I32971472,yale university,100.0
 1428,delaware state university,dover,de,1,I126548940,delaware state university,100.0
-1431,university of delaware,newark,de,1,No Match,No Match,0.0
-1434,american university,washington,dc,1,I109654844,american university of cardiology,90.0
+1431,university of delaware,newark,de,1,I86501945,university of delaware,100.0
+1434,american university,washington,dc,1,I1301779074,american university of preventive medicine,90.0
 1436,capitol university,laurel,md,1,No Match,No Match,0.0
 1437,catholic university of america,washington,dc,1,I84470341,catholic university of america,100.0
-1443,gallaudet university,washington,dc,1,No Match,No Match,0.0
-1444,george washington university,washington,dc,1,I1286207013,george washington university,100.0
-1445,georgetown university,washington,dc,1,I2802534011,medstar georgetown university,95.0
-1448,howard university,washington,dc,1,I4210109892,howard university,100.0
+1443,gallaudet university,washington,dc,1,I66108857,gallaudet university,100.0
+1444,george washington university,washington,dc,1,I1286207013,george washington university hospital,95.0
+1445,georgetown university,washington,dc,1,I2802534011,medstar georgetown university hospital,90.0
+1448,howard university,washington,dc,1,I4210109892,howard university hospital,90.0
 1466,barry university,miami shores,fl,1,I151583259,barry university,100.0
 1467,bethune-cookman university,daytona beach,fl,1,I55356238,bethune-cookman university,100.0
-1469,florida institute of technology,melbourne,fl,1,No Match,No Match,0.0
+1469,florida institute of technology,melbourne,fl,1,I106959904,florida institute of technology,100.0
 1479,embry-riddle aeronautical university,daytona beach,fl,1,I84475105,embry–riddle aeronautical university,100.0
-1480,florida agricultural and mechanical university,tallahassee,fl,1,No Match,No Match,0.0
-1481,florida atlantic university,boca raton,fl,1,No Match,No Match,0.0
+1480,florida agricultural and mechanical university,tallahassee,fl,1,I8248082,florida agricultural and mechanical university,100.0
+1481,florida atlantic university,boca raton,fl,1,I63772739,florida atlantic university,100.0
 1487,eckerd university,st. petersburg,fl,1,I88973175,eckerd university,100.0
 1489,florida state university,tallahassee,fl,1,I1323276237,florida a&m university - florida state university university of engineering,90.0
 1495,jacksonville university,jacksonville,fl,1,I36075867,jacksonville university,100.0
@@ -129,98 +129,98 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 1515,rollins university,winter park,fl,1,I90840245,rollins university,100.0
 1531,stetson university,deland,fl,1,I99490713,stetson university,100.0
 1535,university of florida,gainesville,fl,1,I61515104,university of florida health science center,90.0
-1536,university of miami,coral gables,fl,1,No Match,No Match,0.0
-1542,agnes scott university,decatur,ga,1,No Match,No Match,0.0
-1544,albany state university,albany,ga,1,I113508548,albany state university,100.0
+1536,university of miami,coral gables,fl,1,I4210118328,university of miami hospital,95.0
+1542,agnes scott university,decatur,ga,1,I64506506,agnes scott university,100.0
+1544,albany state university,albany,ga,1,No Match,No Match,0.0
 1546,armstrong atlantic state university,savannah,ga,1,I226413961,armstrong atlantic state university,100.0
 1559,clark atlanta university,atlanta,ga,1,I52064589,clark atlanta university,100.0
-1564,emory university,atlanta,ga,1,I3008489243,emory university orthopaedics and spine,90.0
+1564,emory university,atlanta,ga,1,I3008489243,emory university orthopaedics and spine hospital,90.0
 1566,fort valley state university,fort valley,ga,1,No Match,No Match,0.0
 1570,southern polytechnic state university,marietta,ga,1,I206426949,southern polytechnic state university,100.0
-1572,georgia southern university,statesboro,ga,1,No Match,No Match,0.0
-1574,georgia state university,atlanta,ga,1,I898538061,east georgia state university,95.0
-1577,kennesaw state university,kennesaw,ga,1,No Match,No Match,0.0
+1572,georgia southern university,statesboro,ga,1,I39815113,georgia southern university,100.0
+1574,georgia state university,atlanta,ga,1,I181565077,georgia state university,100.0
+1577,kennesaw state university,kennesaw,ga,1,I172980758,kennesaw state university,100.0
 1579,medical university of georgia,augusta,ga,1,No Match,No Match,0.0
 1582,morehouse university,atlanta,ga,1,I85230861,morehouse university,100.0
 1585,north georgia university & state university,dahlonega,ga,1,I138220800,georgia university & state university,95.0
 1590,savannah state university,savannah,ga,1,I159289790,savannah state university,100.0
 1594,spelman university,atlanta,ga,1,I118458328,spelman university,100.0
-1598,university of georgia,athens,ga,1,I7449891,university of coastal georgia,95.0
+1598,university of georgia,athens,ga,1,I165733156,university of georgia,100.0
 1599,valdosta state university,valdosta,ga,1,I102716817,valdosta state university,100.0
 1601,university of west georgia,carrollton,ga,1,I5950314,university of west georgia,100.0
 1610,university of hawaii manoa,honolulu,hi,1,No Match,No Match,0.0
 1616,boise state university,boise,id,1,I120156002,boise state university,100.0
-1620,idaho state university,pocatello,id,1,No Match,No Match,0.0
-1626,university of idaho,moscow,id,1,I736929005,university of western idaho,95.0
+1620,idaho state university,pocatello,id,1,I106969075,idaho state university,100.0
+1626,university of idaho,moscow,id,1,I94481902,university of idaho,100.0
 1633,"augustana university (rock island, il)",rock island,il,1,No Match,No Match,0.0
 1641,bradley university,peoria,il,1,I24648388,bradley university,100.0
-1657,"midwestern university (downers grove, il)",downers grove,il,1,No Match,No Match,0.0
-1659,rosalind franklin university of medicine and science,north chicago,il,1,No Match,No Match,0.0
+1657,"midwestern university (downers grove, il)",downers grove,il,1,I128902783,midwestern university,90.0
+1659,rosalind franklin university of medicine and science,north chicago,il,1,I189273616,rosalind franklin university of medicine and science,100.0
 1671,depaul university,chicago,il,1,I118353179,depaul university,100.0
 1674,eastern illinois university,charleston,il,1,I16820183,illinois university,95.0
-1691,illinois institute of technology,chicago,il,1,No Match,No Match,0.0
-1692,illinois state university,normal,il,1,No Match,No Match,0.0
-1693,northeastern illinois university,chicago,il,1,I2801271393,southeastern illinois university,94.0
+1691,illinois institute of technology,chicago,il,1,I180949307,illinois institute of technology,100.0
+1692,illinois state university,normal,il,1,I47301684,illinois state university,100.0
+1693,northeastern illinois university,chicago,il,1,I27639287,northeastern illinois university,100.0
 1694,chicago state university,chicago,il,1,I74234424,chicago state university,100.0
-1696,illinois wesleyan university,bloomington,il,1,No Match,No Match,0.0
+1696,illinois wesleyan university,bloomington,il,1,I184616310,illinois wesleyan university,100.0
 1706,lake forest university,lake forest,il,1,No Match,No Match,0.0
-1710,loyola university chicago,maywood,il,1,I1304196042,loyola university,95.0
-1732,national university of health sciences,lombard,il,1,I185849064,national university of health sciences,100.0
+1710,loyola university chicago,maywood,il,1,I1925986,loyola university chicago,100.0
+1732,national university of health sciences,lombard,il,1,No Match,No Match,0.0
 1737,northern illinois university,de kalb,il,1,I102502594,northern illinois university,100.0
-1739,northwestern university,evanston,il,1,No Match,No Match,0.0
-1758,southern illinois university carbondale,carbondale,il,1,No Match,No Match,0.0
+1739,northwestern university,evanston,il,1,I111979921,northwestern university,100.0
+1758,southern illinois university carbondale,carbondale,il,1,I110378019,southern illinois university carbondale,100.0
 1759,southern illinois university edwardsville,edwardsville,il,1,I87547150,southern illinois university edwardsville,100.0
-1767,benedictine university,lisle,il,1,I114660634,benedictine university,100.0
+1767,benedictine university,lisle,il,1,No Match,No Match,0.0
 1774,university of chicago,chicago,il,1,I205023500,chicago kent university of law,95.0
-1775,university of illinois at urbana-champaign,champaign,il,1,No Match,No Match,0.0
-1776,university of illinois at chicago,chicago,il,1,No Match,No Match,0.0
+1775,university of illinois at urbana-champaign,champaign,il,1,I157725225,university of illinois urbana-champaign,96.0
+1776,university of illinois at chicago,chicago,il,1,I4210110323,"university of illinois chicago, rockford",90.0
 1780,western illinois university,macomb,il,1,I2799946165,southwestern illinois university,92.0
 1786,ball state university,muncie,in,1,I198089087,ball state university,100.0
-1788,butler university,indianapolis,in,1,No Match,No Match,0.0
+1788,butler university,indianapolis,in,1,I110678235,butler university,100.0
 1792,depauw university,greencastle,in,1,No Match,No Match,0.0
 1793,earlham university,richmond,in,1,No Match,No Match,0.0
-1807,indiana state university,terre haute,in,1,I255400825,indiana university,95.0
+1807,indiana state university,terre haute,in,1,I592451,indiana university,95.0
 1809,indiana university bloomington,bloomington,in,1,I4210119109,indiana university bloomington,100.0
 1813,indiana university-purdue university indianapolis,indianapolis,in,1,I55769427,indiana university – purdue university indianapolis,98.0
 1815,"indiana university, gary",gary,in,1,No Match,No Match,0.0
 1816,indiana university south bend,south bend,in,1,I4210134870,indiana university south bend,100.0
-1817,indiana university southeast,new albany,in,1,I4210135278,indiana university east,90.0
-1822,indiana wesleyan university,marions,in,1,No Match,No Match,0.0
-1825,purdue university,west lafayette,in,1,I59900826,indiana university – purdue university columbus,90.0
+1817,indiana university southeast,new albany,in,1,I4210117780,indiana university southeast,100.0
+1822,indiana wesleyan university,marions,in,1,I138535782,indiana wesleyan university,100.0
+1825,purdue university,west lafayette,in,1,I4210130184,purdue university fort wayne,90.0
 1826,purdue university north central,westville,in,1,No Match,No Match,0.0
 1827,purdue university calumet,hammond,in,1,No Match,No Match,0.0
 1828,indiana university-purdue university fort wayne,fort wayne,in,1,I162817326,indiana university – purdue university fort wayne,98.0
 1830,rose-hulman institute of technology,terre haute,in,1,I192578771,rose–hulman institute of technology,100.0
-1840,university of notre dame,notre dame,in,1,No Match,No Match,0.0
+1840,university of notre dame,notre dame,in,1,I107639228,university of notre dame,100.0
 1842,valparaiso university,valparaiso,in,1,I149744451,valparaiso university,100.0
 1844,wabash university,crawfordsville,in,1,No Match,No Match,0.0
 1854,coe university,cedar rapids,ia,1,I153317226,coe university,100.0
-1855,des moines university,des moines,ia,1,I4210166285,des moines university osteopathic,90.0
-1860,drake university,des moines,ia,1,No Match,No Match,0.0
+1855,des moines university,des moines,ia,1,I4210166285,des moines university osteopathic medical center,90.0
+1860,drake university,des moines,ia,1,I87213936,drake university,100.0
 1868,grinnell university,grinnell,ia,1,No Match,No Match,0.0
-1869,iowa state university,ames,ia,1,No Match,No Match,0.0
+1869,iowa state university,ames,ia,1,I173911158,iowa state university,100.0
 1874,luther university,decorah,ia,1,No Match,No Match,0.0
 1890,university of northern iowa,cedar falls,ia,1,I119234918,university of northern iowa,100.0
-1892,university of iowa,iowa city,ia,1,I4210107373,university of iowa foundation,90.0
+1892,university of iowa,iowa city,ia,1,I4210142782,university of iowa health care,90.0
 1926,pittsburg state university,pittsburg,ks,1,No Match,No Match,0.0
 1927,emporia state university,emporia,ks,1,I93131583,emporia state university,100.0
-1928,kansas state university,manhattan,ks,1,No Match,No Match,0.0
+1928,kansas state university,manhattan,ks,1,I189590672,kansas state university,100.0
 1950,wichita state university,wichita,ks,1,I39587148,wichita state university,100.0
 1963,eastern kentucky university,richmond,ky,1,No Match,No Match,0.0
-1968,kentucky state university,frankfort,ky,1,No Match,No Match,0.0
+1968,kentucky state university,frankfort,ky,1,I88447708,kentucky state university,100.0
 1976,morehead state university,morehead,ky,1,I44206873,morehead state university,100.0
 1977,murray state university,murray,ky,1,No Match,No Match,0.0
-1999,university of louisville,louisville,ky,1,I4210164651,university of louisville physicians,95.0
+1999,university of louisville,louisville,ky,1,I142740786,university of louisville,100.0
 2002,western kentucky university,bowling green,ky,1,I94339441,western kentucky university,100.0
-2004,dillard university,new orleans,la,1,I64880365,dillard university,100.0
+2004,dillard university,new orleans,la,1,No Match,No Match,0.0
 2005,nicholls state university,thibodaux,la,1,No Match,No Match,0.0
 2006,grambling state university,grambling,la,1,I152158401,grambling state university,100.0
-2008,louisiana tech university,ruston,la,1,No Match,No Match,0.0
+2008,louisiana tech university,ruston,la,1,I919208787,louisiana tech university,100.0
 2010,louisiana state university and agricultural and mechanical university,baton rouge,la,1,No Match,No Match,0.0
-2013,louisiana state university shreveport,shreveport,la,1,No Match,No Match,0.0
+2013,louisiana state university shreveport,shreveport,la,1,I121820613,louisiana state university,95.0
 2014,louisiana state university health sciences center-new orleans,new orleans,la,1,I75420490,louisiana state university health sciences center new orleans,100.0
-2015,university of new orleans,new orleans,la,1,I2801463575,university  new orleans,96.0
-2016,loyola university new orleans,new orleans,la,1,No Match,No Match,0.0
+2015,university of new orleans,new orleans,la,1,I192396691,university of new orleans,100.0
+2016,loyola university new orleans,new orleans,la,1,I173012211,loyola university new orleans,100.0
 2017,mcneese state university,lake charles,la,1,I172951950,mcneese state university,100.0
 2020,university of louisiana at monroe,monroe,la,1,I71730758,university of louisiana at monroe,100.0
 2021,northwestern state university,natchitoches,la,1,I157717896,northwestern state university,100.0
@@ -228,189 +228,189 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 2025,southern university baton rouge,baton rouge,la,1,No Match,No Match,0.0
 2026,southern university new orleans,new orleans,la,1,I150438462,southern university at new orleans,95.0
 2029,tulane university,new orleans,la,1,I114832834,tulane university,100.0
-2031,university of louisiana at lafayette,lafayette,la,1,No Match,No Match,0.0
-2032,xavier university of louisiana,new orleans,la,1,No Match,No Match,0.0
-2036,bates university,lewiston,me,1,No Match,No Match,0.0
-2038,bowdoin university,brunswick,me,1,No Match,No Match,0.0
+2031,university of louisiana at lafayette,lafayette,la,1,I79516672,university of louisiana at lafayette,100.0
+2032,xavier university of louisiana,new orleans,la,1,I169251466,xavier university of louisiana,100.0
+2036,bates university,lewiston,me,1,I37415318,bates university,100.0
+2038,bowdoin university,brunswick,me,1,I135474949,bowdoin university,100.0
 2039,colby university,waterville,me,1,I27504731,colby university,100.0
 2050,university of new england,biddeford,me,1,I275799156,university of new england,100.0
 2051,"st. joseph's university (standish, me)",standish,me,1,No Match,No Match,0.0
-2053,university of maine,orono,me,1,I91492222,university of maine at augusta,90.0
+2053,university of maine,orono,me,1,I160136153,university of maine at presque isle,90.0
 2062,bowie state university,bowie,md,1,I324100,bowie state university,100.0
-2072,frostburg state university,frostburg,md,1,I152830075,frostburg state university,100.0
+2072,frostburg state university,frostburg,md,1,No Match,No Match,0.0
 2073,goucher university,towson,md,1,I42321615,goucher university,100.0
 2078,loyola university,baltimore,md,1,I165556055,loyola university maryland,90.0
-2083,morgan state university,baltimore,md,1,No Match,No Match,0.0
+2083,morgan state university,baltimore,md,1,I83909951,morgan state university,100.0
 2091,salisbury university,salisbury,md,1,I9364636,salisbury university,100.0
 2095,st. mary's university of maryland,st. mary's city,md,1,I78874557,st. mary's university of maryland,100.0
-2099,towson university,towson,md,1,No Match,No Match,0.0
-2101,united states naval academy,annapolis,md,1,No Match,No Match,0.0
+2099,towson university,towson,md,1,I4322298,towson university,100.0
+2101,united states naval academy,annapolis,md,1,I189158971,united states naval academy,100.0
 2102,university of baltimore,baltimore,md,1,I6059380,university of baltimore,100.0
 2103,university of maryland university park,university park,md,1,I66946132,"university of maryland, university park",99.0
-2104,university of maryland baltimore,baltimore,md,1,I4210091935,university of maryland baltimore washington,95.0
+2104,university of maryland baltimore,baltimore,md,1,I4210091935,university of maryland baltimore washington medical center,90.0
 2105,university of maryland baltimore county,baltimore,md,1,I79272384,"university of maryland, baltimore county",99.0
-2106,university of maryland eastern shore,princess anne,md,1,No Match,No Match,0.0
-2115,amherst university,amherst,ma,1,No Match,No Match,0.0
-2121,babson university,babson park,ma,1,No Match,No Match,0.0
+2106,university of maryland eastern shore,princess anne,md,1,I22407884,university of maryland eastern shore,100.0
+2115,amherst university,amherst,ma,1,I177605424,amherst university,100.0
+2121,babson university,babson park,ma,1,I96062909,babson university,100.0
 2124,bentley university,waltham,ma,1,I139924743,bentley university,100.0
-2128,boston university,chestnut hill,ma,1,I4210114918,boston university academy,95.0
+2128,boston university,chestnut hill,ma,1,I111088046,boston university,100.0
 2130,boston university,boston,ma,1,No Match,No Match,0.0
 2133,brandeis university,waltham,ma,1,I6902469,brandeis university,100.0
-2139,clark university,worcester,ma,1,No Match,No Match,0.0
+2139,clark university,worcester,ma,1,I130785548,clark university,100.0
 2141,university of the holy cross,worcester,ma,1,I107139065,university of the holy cross,100.0
-2155,harvard university,cambridge,ma,1,No Match,No Match,0.0
+2155,harvard university,cambridge,ma,1,I136199984,harvard university,100.0
 2161,university of massachusetts lowell,lowell,ma,1,I133738476,university of massachusetts lowell,100.0
 2164,new england university of optometry,boston,ma,1,I25026578,new england university of optometry,100.0
 2165,massachusetts university of pharmacy and health sciences,boston,ma,1,No Match,No Match,0.0
-2178,massachusetts institute of technology,cambridge,ma,1,No Match,No Match,0.0
-2183,bridgewater state university,bridgewater,ma,1,I17856709,bridgewater state university,100.0
-2184,fitchburg state university,fitchburg,ma,1,I5429594,fitchburg state university,100.0
-2192,mount holyoke university,south hadley,ma,1,No Match,No Match,0.0
-2199,northeastern university,boston,ma,1,No Match,No Match,0.0
+2178,massachusetts institute of technology,cambridge,ma,1,I63966007,massachusetts institute of technology,100.0
+2183,bridgewater state university,bridgewater,ma,1,No Match,No Match,0.0
+2184,fitchburg state university,fitchburg,ma,1,No Match,No Match,0.0
+2192,mount holyoke university,south hadley,ma,1,I150693791,mount holyoke university,100.0
+2199,northeastern university,boston,ma,1,I12912129,northeastern university,100.0
 2208,simmons university,boston,ma,1,I179245896,simmons university,100.0
-2209,smith university,northampton,ma,1,No Match,No Match,0.0
-2210,university of massachusetts dartmouth,north dartmouth,ma,1,No Match,No Match,0.0
-2219,tufts university,boston,ma,1,No Match,No Match,0.0
-2221,university of massachusetts amherst,amherst,ma,1,No Match,No Match,0.0
-2222,university of massachusetts boston,boston,ma,1,No Match,No Match,0.0
-2224,wellesley university,wellesley,ma,1,I60997889,lesley university,92.0
+2209,smith university,northampton,ma,1,I202524275,smith university,100.0
+2210,university of massachusetts dartmouth,north dartmouth,ma,1,I100633361,university of massachusetts dartmouth,100.0
+2219,tufts university,boston,ma,1,I121934306,tufts university,100.0
+2221,university of massachusetts amherst,amherst,ma,1,I24603500,university of massachusetts amherst,100.0
+2222,university of massachusetts boston,boston,ma,1,I33434090,university of massachusetts boston,100.0
+2224,wellesley university,wellesley,ma,1,I189731429,wellesley university,100.0
 2226,western new england university,springfield,ma,1,I19833938,western new england university,100.0
 2229,williams university,williamstown,ma,1,I22675022,williams university,100.0
-2230,woods hole oceanographic institution,woods hole,ma,1,No Match,No Match,0.0
-2233,worcester polytechnic institute,worcester,ma,1,No Match,No Match,0.0
+2230,woods hole oceanographic institution,woods hole,ma,1,I66958751,woods hole oceanographic institution,100.0
+2233,worcester polytechnic institute,worcester,ma,1,I107077323,worcester polytechnic institute,100.0
 2238,andrews university,berrien springs,mi,1,I102298084,andrews university,100.0
 2241,calvin university,grand rapids,mi,1,I163795733,calvin university,100.0
-2243,central michigan university,mount pleasant,mi,1,I2800098844,north central michigan university,95.0
+2243,central michigan university,mount pleasant,mi,1,I1629065,central michigan university,100.0
 2259,eastern michigan university,ypsilanti,mi,1,I141649380,western michigan university,96.0
-2262,kettering university,flint,mi,1,No Match,No Match,0.0
+2262,kettering university,flint,mi,1,I39965400,kettering university,100.0
 2268,grand valley state university,allendale,mi,1,I8606887,grand valley state university,100.0
 2273,hope university,holland,mi,1,I145402516,hope university,100.0
 2275,kalamazoo university,kalamazoo,mi,1,I48664048,kalamazoo university,100.0
 2279,lawrence technological university,southfield,mi,1,I2276074,lawrence technological university,100.0
 2290,michigan state university,east lansing,mi,1,I87216513,michigan state university,100.0
 2292,michigan technological university,houghton,mi,1,I11957088,michigan technological university,100.0
-2301,northern michigan university,marquette,mi,1,I46679452,northwestern michigan university,93.0
+2301,northern michigan university,marquette,mi,1,I177331275,northern michigan university,100.0
 2307,oakland university,rochester,mi,1,No Match,No Match,0.0
 2314,saginaw valley state university,university center,mi,1,No Match,No Match,0.0
 2323,university of detroit mercy,detroit,mi,1,I71792333,university of detroit mercy,100.0
-2325,university of michigan-ann arbor,ann arbor,mi,1,No Match,No Match,0.0
+2325,university of michigan-ann arbor,ann arbor,mi,1,I27837315,university of michigan–ann arbor,100.0
 2326,university of michigan-dearborn,dearborn,mi,1,I4210130704,university of michigan–dearborn,100.0
 2327,university of michigan-flint,flint,mi,1,I4210092198,university of michigan–flint,100.0
-2329,wayne state university,detroit,mi,1,No Match,No Match,0.0
-2334,augsburg university,minneapolis,mn,1,No Match,No Match,0.0
+2329,wayne state university,detroit,mi,1,I185443292,wayne state university,100.0
+2334,augsburg university,minneapolis,mn,1,I119916105,augsburg university,100.0
 2336,bemidji state university,bemidji,mn,1,I50898853,bemidji state university,100.0
 2340,carleton university,northfield,mn,1,I188497080,carleton university,100.0
 2345,"university of st. thomas (st paul, mn)",st. paul,mn,1,No Match,No Match,0.0
 2346,concordia university,moorhead,mn,1,I114526571,concordia university - minnesota,90.0
 2353,gustavus adolphus university,saint peter,mn,1,No Match,No Match,0.0
-2354,hamline university,saint paul,mn,1,No Match,No Match,0.0
-2358,macalester university,saint paul,mn,1,No Match,No Match,0.0
+2354,hamline university,saint paul,mn,1,I911846574,hamline university,100.0
+2358,macalester university,saint paul,mn,1,I5444425,macalester university,100.0
 2360,minnesota state university mankato,mankato,mn,1,I152014189,"minnesota state university, mankato",99.0
 2367,"minnesota state university, moorhead",moorehrad,mn,1,I166613482,minnesota state university moorhead,99.0
 2377,st. cloud state university,st. cloud,mn,1,No Match,No Match,0.0
 2379,"st. john's university (universityville, mn)",universityville,mn,1,No Match,No Match,0.0
 2382,st. olaf university,northfield,mn,1,No Match,No Match,0.0
-2388,university of minnesota duluth,duluth,mn,1,I4210115145,"university of minnesota, duluth",98.0
+2388,university of minnesota duluth,duluth,mn,1,I130238516,university of minnesota,95.0
 2389,university of minnesota morris,morris,mn,1,I4210162301,university of minnesota morris,100.0
 2394,winona state university,winona,mn,1,No Match,No Match,0.0
 2396,alcorn state university,lorman,ms,1,I57298602,alcorn state university,100.0
 2410,jackson state university,jackson,ms,1,I61937129,jackson state university,100.0
 2414,millsaps university,jackson,ms,1,I170532803,millsaps university,100.0
-2423,mississippi state university,mississippi state,ms,1,No Match,No Match,0.0
-2424,mississippi valley state university,itta bena,ms,1,I61652871,mississippi valley state university,100.0
+2423,mississippi state university,mississippi state,ms,1,I99041443,mississippi state university,100.0
+2424,mississippi valley state university,itta bena,ms,1,No Match,No Match,0.0
 2439,tougaloo university,tougaloo,ms,1,I115648763,tougaloo university,100.0
 2441,university of southern mississippi,hattiesburg,ms,1,I44854399,university of southern mississippi,100.0
-2454,university of central missouri,warrensberg,mo,1,No Match,No Match,0.0
+2454,university of central missouri,warrensberg,mo,1,I76835614,university of missouri,95.0
 2474,kansas city university of medicine and biosciences,kansas city,mo,1,No Match,No Match,0.0
-2477,a.t. still university of health sciences,kirksville,mo,1,No Match,No Match,0.0
+2477,a.t. still university of health sciences,kirksville,mo,1,I4584351,a.t. still university,90.0
 2479,"lincoln university (jefferson city, mo)",jefferson city,mo,1,No Match,No Match,0.0
-2495,truman state university,kirksville,mo,1,No Match,No Match,0.0
+2495,truman state university,kirksville,mo,1,I199639920,truman state university,100.0
 2496,northwest missouri state university,maryville,mo,1,I11123151,northwest missouri state university,100.0
 2501,southeast missouri state university,cape girardeau,mo,1,I161165907,southeast missouri state university,100.0
 2503,missouri state university,springfield,mo,1,I63855395,missouri western state university,95.0
 2516,university of missouri-columbia,columbia,mo,1,I79477286,columbia university - missouri,95.0
-2517,missouri university of science and technology,rolla,mo,1,No Match,No Match,0.0
+2517,missouri university of science and technology,rolla,mo,1,I20382870,missouri university of science and technology,100.0
 2518,university of missouri-kansas city,kansas city,mo,1,I75421653,university of missouri–kansas city,100.0
-2519,university of missouri-st. louis,st. louis,mo,1,No Match,No Match,0.0
-2520,washington university in st. louis,st. louis,mo,1,I4210135078,washington university,90.0
-2530,montana state university billings,billings,mt,1,I193198326,montana state university billings,100.0
+2519,university of missouri-st. louis,st. louis,mo,1,I208333798,university of missouri–st. louis,100.0
+2520,washington university in st. louis,st. louis,mo,1,I204465549,washington university in st. louis,100.0
+2530,montana state university billings,billings,mt,1,I23732399,montana state university,95.0
 2531,montana tech of the university of montana,butte,mt,1,No Match,No Match,0.0
 2532,montana state university bozeman,bozeman,mt,1,No Match,No Match,0.0
-2536,university of montana-missoula,missoula,mt,1,No Match,No Match,0.0
-2537,university of montana western,dillon,mt,1,No Match,No Match,0.0
-2542,creighton university,omaha,ne,1,No Match,No Match,0.0
-2551,university of nebraska at kearney,kearney,ne,1,No Match,No Match,0.0
+2536,university of montana-missoula,missoula,mt,1,I6750721,university of montana,95.0
+2537,university of montana western,dillon,mt,1,I27802707,university of montana western,100.0
+2542,creighton university,omaha,ne,1,I2800482329,chi health creighton university medical center - bergan mercy,90.0
+2551,university of nebraska at kearney,kearney,ne,1,I36486460,university of nebraska at kearney,100.0
 2554,university of nebraska at omaha,omaha,ne,1,I122266389,university of nebraska at omaha,100.0
 2555,nebraska wesleyan university,lincoln,ne,1,I98924952,nebraska wesleyan university,100.0
-2565,university of nebraska-lincoln,lincoln,ne,1,No Match,No Match,0.0
-2568,"university of nevada, reno",reno,nv,1,No Match,No Match,0.0
+2565,university of nebraska-lincoln,lincoln,ne,1,I114395901,university of nebraska–lincoln,100.0
+2568,"university of nevada, reno",reno,nv,1,I134113660,university of nevada reno,98.0
 2569,"university of nevada, las vegas",las vegas,nv,1,I133999245,"university of nevada, las vegas",100.0
-2573,dartmouth university,hanover,nh,1,No Match,No Match,0.0
+2573,dartmouth university,hanover,nh,1,I107672454,dartmouth university,100.0
 2589,university of new hampshire,durham,nh,1,I179093154,university of new hampshire at manchester,90.0
 2591,plymouth state university,plymouth,nh,1,No Match,No Match,0.0
-2603,drew university,madison,nj,1,I177880774,drew university,100.0
+2603,drew university,madison,nj,1,No Match,No Match,0.0
 2609,rowan university,glassboro,nj,1,I4210089330,cooper medical school of rowan university,90.0
 2613,new jersey city university,jersey city,nj,1,I89554219,new jersey city university,100.0
 2616,monmouth university,west long branch,nj,1,No Match,No Match,0.0
-2617,montclair state university,upper montclair,nj,1,No Match,No Match,0.0
+2617,montclair state university,upper montclair,nj,1,I166088655,montclair state university,100.0
 2620,university of medicine and dentistry of new jersey,newark,nj,1,No Match,No Match,0.0
-2621,new jersey institute of technology,newark,nj,1,No Match,No Match,0.0
+2621,new jersey institute of technology,newark,nj,1,I118118575,new jersey institute of technology,100.0
 2625,william paterson university of new jersey,wayne,nj,1,No Match,No Match,0.0
-2627,princeton university,princeton,nj,1,I4210094960,university  of princeton,95.0
+2627,princeton university,princeton,nj,1,I20089843,princeton university,100.0
 2628,rider university,lawrenceville,nj,1,I186776151,rider university,100.0
-2631,rutgers state university of new jersey-newark,newark,nj,1,No Match,No Match,0.0
+2631,rutgers state university of new jersey-newark,newark,nj,1,I102322142,rutgers state university of new jersey,95.0
 2632,seton hall university,south orange,nj,1,I12524447,seton hall university,100.0
-2639,stevens institute of technology,hoboken,nj,1,No Match,No Match,0.0
-2642,university of new jersey,ewing,nj,1,I2801750073,centenary university of new jersey,95.0
+2639,stevens institute of technology,hoboken,nj,1,I108468826,stevens institute of technology,100.0
+2642,university of new jersey,ewing,nj,1,I64281891,university of new jersey,100.0
 2653,new mexico highlands university,las vegas,nm,1,I59749544,new mexico highlands university,100.0
 2654,new mexico institute of mining and technology,socorro,nm,1,I207123951,new mexico institute of mining and technology,100.0
 2663,university of new mexico,albuquerque,nm,1,I169521973,university of new mexico,100.0
-2666,adelphi university,garden city,ny,1,I4210103735,phi,90.0
+2666,adelphi university,garden city,ny,1,I71965598,adelphi university,100.0
 2667,dowling university,oakdale,ny,1,I162646704,dowling university,100.0
-2671,bard university,annandale on hudson,ny,1,I52700163,levy economics institute of bard university,90.0
+2671,bard university,annandale on hudson,ny,1,I39661318,bard university,100.0
 2681,canisius university,buffalo,ny,1,I80134939,canisius university,100.0
 2687,cuny brooklyn university,brooklyn,ny,1,I83041322,brooklyn university,95.0
 2688,cuny the city university,new york,ny,1,No Match,No Match,0.0
-2689,cuny hunter university,new york,ny,1,No Match,No Match,0.0
-2690,cuny queens university,flushing,ny,1,No Match,No Match,0.0
+2689,cuny hunter university,new york,ny,1,I39694355,hunter university,95.0
+2690,cuny queens university,flushing,ny,1,I111455621,"queens university, cuny",95.0
 2693,cuny john jay university of criminal justice,new york,ny,1,I92507152,john jay university of criminal justice,95.0
 2696,cuny new york city university of technology,brooklyn,ny,1,I76513827,new york city university of technology,95.0
-2699,clarkson university,potsdam,ny,1,No Match,No Match,0.0
+2699,clarkson university,potsdam,ny,1,I16944753,clarkson university,100.0
 2701,colgate university,hamilton,ny,1,I39660569,colgate university,100.0
 2707,columbia university in the city of new york,new york,ny,1,I78577930,columbia university,90.0
-2708,barnard university,new york,ny,1,No Match,No Match,0.0
+2708,barnard university,new york,ny,1,I98540497,barnard university,100.0
 2710,cooper union,new york,ny,1,No Match,No Match,0.0
-2722,fordham university,bronx,ny,1,No Match,No Match,0.0
+2722,fordham university,bronx,ny,1,I164389053,fordham university,100.0
 2728,hamilton university,clinton,ny,1,I188592606,hamilton university,100.0
 2731,hobart and william smith universitys,geneva,ny,1,No Match,No Match,0.0
-2732,hofstra university,hempstead,ny,1,No Match,No Match,0.0
+2732,hofstra university,hempstead,ny,1,I139290212,hofstra university,100.0
 2737,iona university,new rochelle,ny,1,I177328695,union university,90.0
-2739,ithaca university,ithaca,ny,1,No Match,No Match,0.0
+2739,ithaca university,ithaca,ny,1,I87424562,ithaca university,100.0
 2758,manhattan university,bronx,ny,1,I96502947,marymount manhattan university,90.0
 2765,marist university,poughkeepsie,ny,1,I2799465287,maria university,91.0
 2772,mercy university,dobbs ferry,ny,1,No Match,No Match,0.0
 2780,new school,new york,ny,1,I102179633,new school,100.0
-2784,new york medical university,valhalla,ny,1,No Match,No Match,0.0
+2784,new york medical university,valhalla,ny,1,I181190671,new york medical university,100.0
 2785,new york university,new york,ny,1,I901017165,new york university of health professions,90.0
 2788,niagara university,niagara university,ny,1,No Match,No Match,0.0
 2796,polytechnic university,brooklyn,ny,1,No Match,No Match,0.0
 2798,pratt institute,brooklyn,ny,1,I59028336,pratt institute,100.0
 2803,rensselaer polytechnic institute,troy,ny,1,I165799507,rensselaer polytechnic institute,100.0
-2806,rochester institute of technology,rochester,ny,1,No Match,No Match,0.0
+2806,rochester institute of technology,rochester,ny,1,I155173764,rochester institute of technology,100.0
 2807,rockefeller university,new york,ny,1,I83399316,rockefeller university,100.0
-2808,daemen university,amherst,ny,1,I137296409,daemen university,100.0
+2808,daemen university,amherst,ny,1,No Match,No Match,0.0
 2813,sarah lawrence university,bronxville,ny,1,I56327960,sarah lawrence university,100.0
-2814,skidmore university,saratoga springs,ny,1,No Match,No Match,0.0
+2814,skidmore university,saratoga springs,ny,1,I21104390,skidmore university,100.0
 2816,siena university,loudonville,ny,1,I920285187,siena university,100.0
 2817,st. bonaventure university,st. bonaventure,ny,1,No Match,No Match,0.0
-2823,"st. john's university (jamaica, ny)",jamaica,ny,1,No Match,No Match,0.0
-2835,suny albany,albany,ny,1,No Match,No Match,0.0
+2823,"st. john's university (jamaica, ny)",jamaica,ny,1,I142823887,st. john's university,90.0
+2835,suny albany,albany,ny,1,I1327163397,SUNY,90.0
 2836,suny binghamton,binghamton,ny,1,No Match,No Match,0.0
 2839,suny health science center brooklyn,brooklyn,ny,1,No Match,No Match,0.0
-2840,suny upstate medical university,syracuse,ny,1,No Match,No Match,0.0
+2840,suny upstate medical university,syracuse,ny,1,I20388574,suny upstate medical university,100.0
 2841,suny university brockport,brockport,ny,1,No Match,No Match,0.0
-2842,suny university buffalo,buffalo,ny,1,No Match,No Match,0.0
-2843,suny university cortland,cortland,ny,1,No Match,No Match,0.0
+2842,suny university buffalo,buffalo,ny,1,I63190737,"university at buffalo, SUNY",95.0
+2843,suny university cortland,cortland,ny,1,I880615350,SUNY university at cortland,95.0
 2844,suny fredonia,fredonia,ny,1,No Match,No Match,0.0
 2845,suny university geneseo,geneseo,ny,1,No Match,No Match,0.0
 2846,suny new paltz,new paltz,ny,1,I157455823,SUNY at new paltz,95.0
@@ -418,44 +418,44 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 2848,suny university oswego,oswego,ny,1,No Match,No Match,0.0
 2849,suny university plattsburgh,plattsburgh,ny,1,No Match,No Match,0.0
 2850,suny university potsdam,potsdam,ny,1,No Match,No Match,0.0
-2851,suny university of environmental science and forestry,syracuse,ny,1,No Match,No Match,0.0
+2851,suny university of environmental science and forestry,syracuse,ny,1,I157349981,suny university of environmental science and forestry,100.0
 2856,suny university of agriculture and technology at cobleskill,cobleskill,ny,1,No Match,No Match,0.0
 2858,SUNY farmingdale state university,farmingdale,ny,1,I177340980,farmingdale state university,95.0
 2859,suny university of agriculture and technology at morrisville,morrisville,ny,1,No Match,No Match,0.0
-2883,utica university,utica,ny,1,No Match,No Match,0.0
-2885,albany university of pharmacy,albany,ny,1,No Match,No Match,0.0
+2883,utica university,utica,ny,1,I104579289,utica university,100.0
+2885,albany university of pharmacy,albany,ny,1,I365282,albany university of pharmacy and health sciences,90.0
 2887,albany medical university,albany,ny,1,No Match,No Match,0.0
 2889,"union university (schenectady, ny)",schenectady,ny,1,No Match,No Match,0.0
 2893,united states military academy,west point,ny,1,I192545095,united states military academy,100.0
-2894,university of rochester,rochester,ny,1,No Match,No Match,0.0
+2894,university of rochester,rochester,ny,1,I4210120349,university of minnesota rochester,95.0
 2895,vassar university,poughkeepsie,ny,1,I2802823369,asa university,90.0
-2903,yeshiva university,new york,ny,1,No Match,No Match,0.0
-2905,north carolina agricultural and technical state university,greensboro,nc,1,No Match,No Match,0.0
-2906,appalachian state university,boone,nc,1,No Match,No Match,0.0
-2907,university of north carolina asheville,asheville,nc,1,I4210123841,university of north carolina s,92.0
+2903,yeshiva university,new york,ny,1,I19772626,yeshiva university,100.0
+2905,north carolina agricultural and technical state university,greensboro,nc,1,I35777872,north carolina agricultural and technical state university,100.0
+2906,appalachian state university,boone,nc,1,I430192,appalachian state university,100.0
+2907,university of north carolina asheville,asheville,nc,1,I87097829,university of north carolina at asheville,96.0
 2918,davidson university,davidson,nc,1,I141720752,davidson university,100.0
-2920,duke university,durham,nc,1,No Match,No Match,0.0
+2920,duke university,durham,nc,1,I170897317,duke university,100.0
 2923,east carolina university,greenville,nc,1,No Match,No Match,0.0
-2926,elizabeth city state university,elizabeth city,nc,1,I65399651,elizabeth city state university,100.0
+2926,elizabeth city state university,elizabeth city,nc,1,No Match,No Match,0.0
 2928,fayetteville state university,fayetteville,nc,1,No Match,No Match,0.0
-2936,johnson c. smith university,charlotte,nc,1,No Match,No Match,0.0
-2950,north carolina central university,durham,nc,1,No Match,No Match,0.0
-2954,university of north carolina pembroke,pembroke,nc,1,No Match,No Match,0.0
-2962,shaw university,raleigh,nc,1,I97577207,shaw university,100.0
-2972,north carolina state university,raleigh,nc,1,No Match,No Match,0.0
-2974,university of north carolina chapel hill,chapel hill,nc,1,No Match,No Match,0.0
+2936,johnson c. smith university,charlotte,nc,1,I152899642,johnson c. smith university,100.0
+2950,north carolina central university,durham,nc,1,I123127086,north carolina central university,100.0
+2954,university of north carolina pembroke,pembroke,nc,1,I3970613,university of north carolina at pembroke,96.0
+2962,shaw university,raleigh,nc,1,No Match,No Match,0.0
+2972,north carolina state university,raleigh,nc,1,I137902535,north carolina state university,100.0
+2974,university of north carolina chapel hill,chapel hill,nc,1,I114027177,university of north carolina at chapel hill,96.0
 2975,university of north carolina charlotte,charlotte,nc,1,I102149020,university of north carolina at charlotte,96.0
-2976,university of north carolina greensboro,greensboro,nc,1,No Match,No Match,0.0
-2978,wake forest university,winston salem,nc,1,No Match,No Match,0.0
+2976,university of north carolina greensboro,greensboro,nc,1,I169335092,university of north carolina at greensboro,96.0
+2978,wake forest university,winston salem,nc,1,I47251452,wake forest university,100.0
 2981,western carolina university,cullowhee,nc,1,I103406327,western carolina university,100.0
-2984,university of north carolina wilmington,wilmington,nc,1,I153901656,university of north carolina wilmington,100.0
+2984,university of north carolina wilmington,wilmington,nc,1,No Match,No Match,0.0
 2986,winston-salem state university,winston-salem,nc,1,I188405335,winston-salem state university,100.0
-2993,mayville state university,mayville,nd,1,I53457621,mayville state university,100.0
+2993,mayville state university,mayville,nd,1,No Match,No Match,0.0
 2994,minot state university,minot,nd,1,I92063915,minot state university,100.0
 3009,air force institute of technology,wright-patterson afb,oh,1,No Match,No Match,0.0
 3012,ashland university,ashland,oh,1,I195875291,ashland university,100.0
 3014,baldwin-wallace university,berea,oh,1,No Match,No Match,0.0
-3024,case western reserve university,cleveland,oh,1,No Match,No Match,0.0
+3024,case western reserve university,cleveland,oh,1,I58956616,case western reserve university,100.0
 3026,central state university,wilberforce,oh,1,I2801313472,north central state university,95.0
 3032,cleveland state university,cleveland,oh,1,I102607778,cleveland state university,100.0
 3037,university of wooster,wooster,oh,1,No Match,No Match,0.0
@@ -463,21 +463,21 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 3048,heidelberg university,tiffin,oh,1,I85384741,heidelberg university,100.0
 3050,john carroll university,university heights,oh,1,No Match,No Match,0.0
 3065,kenyon university,gambier,oh,1,I166972335,kenyon university,100.0
-3086,oberlin university,oberlin,oh,1,No Match,No Match,0.0
+3086,oberlin university,oberlin,oh,1,I70571728,oberlin university,100.0
 3089,ohio northern university,ada,oh,1,I150722199,ohio northern university,100.0
-3109,ohio wesleyan university,delaware,oh,1,No Match,No Match,0.0
+3109,ohio wesleyan university,delaware,oh,1,I81461992,ohio wesleyan university,100.0
 3127,university of dayton,dayton,oh,1,I127591826,university of dayton,100.0
 3131,university of toledo,toledo,oh,1,I90871651,university of toledo,100.0
-3141,wilberforce university,wilberforce,oh,1,I175232758,wilberforce university,100.0
+3141,wilberforce university,wilberforce,oh,1,No Match,No Match,0.0
 3143,wittenberg university,springfield,oh,1,I18860807,wittenberg university,100.0
 3145,youngstown state university,youngstown,oh,1,I161203489,youngstown state university,100.0
-3152,university of central oklahoma,edmond,ok,1,No Match,No Match,0.0
-3154,east central university,ada,ok,1,I20500054,east central university,100.0
+3152,university of central oklahoma,edmond,ok,1,I139325414,university of central oklahoma,100.0
+3154,east central university,ada,ok,1,No Match,No Match,0.0
 3157,langston university,langston,ok,1,I16473318,langston university,100.0
 3161,northeastern state university,tahlequah,ok,1,I192664086,northeastern state university,100.0
-3170,oklahoma state university,stillwater,ok,1,I4210131712,oklahoma state university oklahoma city,90.0
+3170,oklahoma state university,stillwater,ok,1,I74022624,oklahoma state university center for health sciences,90.0
 3179,southeastern oklahoma state university,durant,ok,1,I187651305,southeastern oklahoma state university,100.0
-3181,southwestern oklahoma state university,weatherford,ok,1,I56955425,northwestern oklahoma state university,95.0
+3181,southwestern oklahoma state university,weatherford,ok,1,I24240638,southwestern oklahoma state university,100.0
 3185,university of tulsa,tulsa,ok,1,I87208437,university of tulsa,100.0
 3193,eastern oregon university,la grande,or,1,I207168215,eastern oregon university,100.0
 3197,lewis and clark university,portland,or,1,I74201987,lewis & clark university,95.0
@@ -485,25 +485,25 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 3209,western oregon university,monmouth,or,1,I95781656,western oregon university,100.0
 3210,oregon state university,corvallis,or,1,I53835047,oregon state university cascades,95.0
 3211,oregon institute of technology,klamath falls,or,1,I129871486,oregon institute of technology,100.0
-3212,pacific university,forest grove,or,1,I4210116460,pioneer pacific university,95.0
+3212,pacific university,forest grove,or,1,I2801505410,warner pacific university,95.0
 3216,portland state university,portland,or,1,I126345244,portland state university,100.0
 3217,reed university,portland,or,1,I55486353,reed university,100.0
 3219,southern oregon university,ashland,or,1,I75909800,southern oregon university,100.0
-3223,university of oregon,eugene,or,1,No Match,No Match,0.0
-3224,university of portland,portland,or,1,No Match,No Match,0.0
+3223,university of oregon,eugene,or,1,I181233156,university of oregon,100.0
+3224,university of portland,portland,or,1,I71578702,university of portland,100.0
 3227,willamette university,salem,or,1,I141670070,willamette university,100.0
-3230,allegheny university,meadville,pa,1,No Match,No Match,0.0
+3230,allegheny university,meadville,pa,1,I120506574,allegheny university,100.0
 3235,arcadia university,glenside,pa,1,I51204116,arcadia university,100.0
 3237,bryn mawr university,bryn mawr,pa,1,I102373834,bryn mawr university,100.0
 3238,bucknell university,lewisburg,pa,1,I131221577,bucknell university,100.0
 3242,carnegie mellon university,pittsburgh,pa,1,I74973139,carnegie mellon university,100.0
 3253,dickinson university,carlisle,pa,1,No Match,No Match,0.0
-3256,drexel university,philadelphia,pa,1,No Match,No Match,0.0
+3256,drexel university,philadelphia,pa,1,I72816309,drexel university,100.0
 3258,duquesne university,pittsburgh,pa,1,I165102784,duquesne university,100.0
 3262,elizabethtown university,elizabethtown,pa,1,I35429941,elizabethtown university,100.0
-3265,franklin & marshall university,lancaster,pa,1,No Match,No Match,0.0
+3265,franklin & marshall university,lancaster,pa,1,I173146385,franklin & marshall university,100.0
 3268,gettysburg university,gettysburg,pa,1,I176113532,gettysburg university,100.0
-3274,haverford university,haverford,pa,1,No Match,No Match,0.0
+3274,haverford university,haverford,pa,1,I155707491,haverford university,100.0
 3278,thomas jefferson university,philadelphia,pa,1,I149251103,thomas jefferson university,100.0
 3279,juniata university,huntingdon,pa,1,I51812067,juniata university,100.0
 3284,lafayette university,easton,pa,1,No Match,No Match,0.0
@@ -524,7 +524,7 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 3327,slippery rock university of pennsylvania,slippery rock,pa,1,I169494899,slippery rock university,90.0
 3328,west chester university of pennsylvania,west chester,pa,1,No Match,No Match,0.0
 3329,pennsylvania state university university park and hershey medical center,university park,pa,1,No Match,No Match,0.0
-3331,pennsylvania state university altoona,altoona,pa,1,No Match,No Match,0.0
+3331,pennsylvania state university altoona,altoona,pa,1,I130769515,pennsylvania state university,95.0
 3332,pennsylvania state university beaver,monaca,pa,1,No Match,No Match,0.0
 3333,pennsylvania state university erie behrend university,erie,pa,1,No Match,No Match,0.0
 3334,pennsylvania state university berks,reading,pa,1,No Match,No Match,0.0
@@ -532,115 +532,115 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 3344,pennsylvania state university worthington-scranton,dunmore,pa,1,No Match,No Match,0.0
 3348,pennsylvania state university great valley school of graduate professional studies,malvern,pa,1,No Match,No Match,0.0
 3352,philadelphia university of osteopathic medicine,philadelphia,pa,1,I106460735,philadelphia university of osteopathic medicine,100.0
-3353,university of the sciences in philadelphia,philadelphia,pa,1,No Match,No Match,0.0
+3353,university of the sciences in philadelphia,philadelphia,pa,1,I110357561,university of the sciences,90.0
 3354,philadelphia university,philadelphia,pa,1,I922845939,philadelphia university,100.0
 3366,st. francis university,loretto,pa,1,No Match,No Match,0.0
 3367,st. joseph's university,philadelphia,pa,1,I51077184,saint joseph's university,92.0
 3369,susquehanna university,selinsgrove,pa,1,No Match,No Match,0.0
-3370,swarthmore university,swarthmore,pa,1,No Match,No Match,0.0
+3370,swarthmore university,swarthmore,pa,1,I118020396,swarthmore university,100.0
 3371,temple university,philadelphia,pa,1,I2800733455,temple university ambler,95.0
-3378,university of pennsylvania,philadelphia,pa,1,I37693276,york university of pennsylvania,95.0
+3378,university of pennsylvania,philadelphia,pa,1,I2799810409,hospital of the university of pennsylvania,90.0
 3384,university of scranton,scranton,pa,1,No Match,No Match,0.0
 3385,ursinus university,universityville,pa,1,I177753169,ursinus university,100.0
-3388,villanova university,villanova,pa,1,No Match,No Match,0.0
+3388,villanova university,villanova,pa,1,I7863295,villanova university,100.0
 3389,washington and jefferson university,washington,pa,1,No Match,No Match,0.0
-3394,wilkes university,wilkes-barre,pa,1,No Match,No Match,0.0
+3394,wilkes university,wilkes-barre,pa,1,I160003610,wilkes university,100.0
 3401,brown university,providence,ri,1,I27804330,brown university,100.0
-3406,providence university,providence,ri,1,No Match,No Match,0.0
-3414,university of rhode island,kingston,ri,1,No Match,No Match,0.0
+3406,providence university,providence,ri,1,I196272386,providence university,100.0
+3414,university of rhode island,kingston,ri,1,I17626003,university of rhode island,100.0
 3420,benedict university,columbia,sc,1,No Match,No Match,0.0
 3424,claflin university,orangeburg,sc,1,I16892885,claflin university,100.0
 3425,clemson university,clemson,sc,1,I8078737,clemson university,100.0
-3428,university of charleston,charleston,sc,1,No Match,No Match,0.0
+3428,university of charleston,charleston,sc,1,I48380244,university of charleston,100.0
 3434,furman university,greenville,sc,1,I86115722,furman university,100.0
-3438,medical university of south carolina,charleston,sc,1,No Match,No Match,0.0
+3438,medical university of south carolina,charleston,sc,1,I155781252,university of south carolina,95.0
 3446,south carolina state university,orangeburg,sc,1,I139398662,south carolina state university,100.0
 3448,university of south carolina columbia,columbia,sc,1,I157173269,columbia university - south carolina,95.0
-3449,university of south carolina aiken,aiken,sc,1,I2801809184,university of south carolina union,91.0
+3449,university of south carolina aiken,aiken,sc,1,I8645926,university of south carolina aiken,100.0
 3450,university of south carolina beaufort,bluffton,sc,1,I90274647,university of south carolina beaufort,100.0
-3451,coastal carolina university,conway,sc,1,I208081647,coastal carolina university,100.0
+3451,coastal carolina university,conway,sc,1,I186335123,east carolina university,90.0
 3456,winthrop university,rock hill,sc,1,I169086405,winthrop university,100.0
 3458,"augustana university (sioux falls, sd)",sioux falls,sd,1,I149700789,augustana university,90.0
 3459,black hills state university,spearfish,sd,1,I75350188,black hills state university,100.0
-3470,south dakota school of mines and technology,rapid city,sd,1,No Match,No Match,0.0
-3471,south dakota state university,brookings,sd,1,No Match,No Match,0.0
-3474,university of south dakota,vermillion,sd,1,No Match,No Match,0.0
+3470,south dakota school of mines and technology,rapid city,sd,1,I184647316,south dakota school of mines and technology,100.0
+3471,south dakota state university,brookings,sd,1,I177156846,south dakota state university,100.0
+3474,university of south dakota,vermillion,sd,1,I189957204,university of south dakota,100.0
 3486,lipscomb university,nashville,tn,1,I192487284,lipscomb university,100.0
 3487,east tennessee state university,johnson city,tn,1,I119443389,east tennessee state university,100.0
 3490,fisk university,nashville,tn,1,I9254433,fisk university,100.0
 3501,le moyne-owen university,memphis,tn,1,I63302308,lemoyne–owen university,98.0
-3506,meharry medical university,nashville,tn,1,No Match,No Match,0.0
-3509,university of memphis,memphis,tn,1,I2801263469,memphis university of art,95.0
+3506,meharry medical university,nashville,tn,1,I118073183,meharry medical university,100.0
+3509,university of memphis,memphis,tn,1,I94658018,university of memphis,100.0
 3510,middle tennessee state university,murfreesboro,tn,1,I169615421,middle tennessee state university,100.0
 3517,southern university of optometry,memphis,tn,1,I3104849,southern university of optometry,100.0
-3519,rhodes university,memphis,tn,1,No Match,No Match,0.0
+3519,rhodes university,memphis,tn,1,I117979880,rhodes university,100.0
 3522,tennessee state university,nashville,tn,1,I75256744,tennessee state university,100.0
-3523,tennessee technological university,cookeville,tn,1,No Match,No Match,0.0
-3529,university of tennessee chattanooga,chattanooga,tn,1,No Match,No Match,0.0
-3530,university of tennessee knoxville,knoxville,tn,1,I2802076678,university of tennessee,95.0
+3523,tennessee technological university,cookeville,tn,1,I63920570,tennessee technological university,100.0
+3529,university of tennessee chattanooga,chattanooga,tn,1,I177097968,university of tennessee at chattanooga,96.0
+3530,university of tennessee knoxville,knoxville,tn,1,I75027704,university of tennessee at knoxville,96.0
 3531,university of tennessee martin,martin,tn,1,I109963312,university of tennessee at martin,95.0
 3534,sewanee: the university of the south,sewanee,tn,1,I145423581,sewanee: the university of the south,100.0
-3537,abilene christian university,abilene,tx,1,I2802849423,university,90.0
+3537,abilene christian university,abilene,tx,1,I60205797,abilene christian university,100.0
 3541,angelo state university,san angelo,tx,1,I41644977,angelo state university,100.0
 3543,austin university,sherman,tx,1,I12138139,austin university,100.0
 3545,baylor university,waco,tx,1,I157394403,baylor university,100.0
-3565,texas a&m university commerce,commerce,tx,1,No Match,No Match,0.0
+3565,texas a&m university commerce,commerce,tx,1,I206651237,texas a&m university – commerce,97.0
 3581,lamar university,beaumont,tx,1,I177898655,lamar university,100.0
 3584,letourneau university,longview,tx,1,I118808232,letourneau university,100.0
 3592,midwestern state university,wichita falls,tx,1,I46896759,midwestern state university,100.0
 3594,university of north texas,denton,tx,1,I87573096,university of north texas at dallas,95.0
 3599,university of texas-pan american,edinburg,tx,1,No Match,No Match,0.0
-3604,rice university,houston,tx,1,No Match,No Match,0.0
+3604,rice university,houston,tx,1,I74775410,rice university,100.0
 3606,sam houston state university,huntsville,tx,1,I191429286,sam houston state university,100.0
 3613,southern methodist university,dallas,tx,1,I178169726,southern methodist university,100.0
-3615,texas state university san marcos,san marcos,tx,1,No Match,No Match,0.0
+3615,texas state university san marcos,san marcos,tx,1,I13511017,texas state university,90.0
 3623,"st. mary's university (san antonio, tx)",san antonio,tx,1,No Match,No Match,0.0
 3624,stephen f. austin state university,nacogdoches,tx,1,No Match,No Match,0.0
 3625,sul ross state university,alpine,tx,1,I162709352,sul ross state university,100.0
 3630,prairie view a&m university,prairie view,tx,1,I250520410,prairie view a&m university,100.0
 3631,tarleton state university,stephenville,tx,1,I75063564,tarleton state university,100.0
-3632,texas a&m university,university station,tx,1,I51380931,texas a&m university – texarkana,90.0
+3632,texas a&m university,university station,tx,1,I2801502816,texas university,95.0
 3636,texas christian university,fort worth,tx,1,I128956969,texas christian university,100.0
-3637,jarvis christian university,hawkins,tx,1,I85785972,jarvis christian university,100.0
-3639,texas a&m university kingsville,kingsville,tx,1,No Match,No Match,0.0
+3637,jarvis christian university,hawkins,tx,1,No Match,No Match,0.0
+3639,texas a&m university kingsville,kingsville,tx,1,I181414168,texas a&m university – kingsville,97.0
 3642,texas southern university,houston,tx,1,I20132289,texas lutheran university,92.0
-3644,texas tech university,lubbock,tx,1,I4210088475,texas tech university system,95.0
-3646,texas woman's university,denton,tx,1,No Match,No Match,0.0
+3644,texas tech university,lubbock,tx,1,I12315562,texas tech university,100.0
+3646,texas woman's university,denton,tx,1,I150913223,texas woman's university,100.0
 3647,trinity university,san antonio,tx,1,I60060512,trinity university,100.0
-3651,university of dallas,irving,tx,1,I182980787,university of dallas,100.0
+3651,university of dallas,irving,tx,1,No Match,No Match,0.0
 3652,university of houston,houston,tx,1,I173388201,university of houston - victoria,90.0
-3656,university of texas arlington,arlington,tx,1,I189196454,the university of texas at arlington,95.0
+3656,university of texas arlington,arlington,tx,1,No Match,No Match,0.0
 3657,university of texas m. d. anderson cancer center,houston,tx,1,I1343551460,the university of texas md anderson cancer center,93.0
-3658,university of texas austin,austin,tx,1,No Match,No Match,0.0
-3659,university of texas health science center at san antonio,san antonio,tx,1,No Match,No Match,0.0
-3660,university of texas southwestern medical center at dallas,dallas,tx,1,No Match,No Match,0.0
-3661,university of texas el paso,el paso,tx,1,I2801700806,university  of el paso,95.0
-3665,west texas a&m university,canyon,tx,1,No Match,No Match,0.0
-3669,wiley university,marshall,tx,1,I52186551,wiley university,100.0
-3675,university of utah,salt lake city,ut,1,I4210148268,university of utah health care,90.0
+3658,university of texas austin,austin,tx,1,I86519309,the university of texas at austin,95.0
+3659,university of texas health science center at san antonio,san antonio,tx,1,I165951966,the university of texas health science center at san antonio,97.0
+3660,university of texas southwestern medical center at dallas,dallas,tx,1,I867280407,the university of texas southwestern medical center,91.0
+3661,university of texas el paso,el paso,tx,1,I164936912,the university of texas at el paso,95.0
+3665,west texas a&m university,canyon,tx,1,I188674872,west texas a&m university,100.0
+3669,wiley university,marshall,tx,1,No Match,No Match,0.0
+3675,university of utah,salt lake city,ut,1,I223532165,university of utah,100.0
 3677,utah state university,logan,ut,1,I2800557468,utah state university eastern,95.0
 3680,weber state university,ogden,ut,1,I119261591,weber state university,100.0
 3691,middlebury university,middlebury,vt,1,I195575238,middlebury university,100.0
-3694,st. michael's university,colchester,vt,1,I55801708,saint michael's university,92.0
-3696,university of vermont,burlington,vt,1,I4210153950,the university of vermont health network home health & hospice,90.0
+3694,st. michael's university,colchester,vt,1,No Match,No Match,0.0
+3696,university of vermont,burlington,vt,1,I111236770,university of vermont,100.0
 3706,christopher newport university,newport news,va,1,I177308816,christopher newport university,100.0
 3714,hampton university,hampton,va,1,I151328261,hampton university,100.0
-3721,james madison university,harrisburg,va,1,No Match,No Match,0.0
+3721,james madison university,harrisburg,va,1,I11883440,james madison university,100.0
 3728,old dominion university,norfolk,va,1,I81365321,old dominion university,100.0
 3732,radford university,radford,va,1,No Match,No Match,0.0
-3735,virginia commonwealth university,richmond,va,1,No Match,No Match,0.0
+3735,virginia commonwealth university,richmond,va,1,I184840846,virginia commonwealth university,100.0
 3736,roanoke university,salem,va,1,I41833579,roanoke university,100.0
-3742,sweet briar university,sweet briar,va,1,I2125089,sweet briar university,100.0
-3744,university of richmond,richmond,va,1,No Match,No Match,0.0
+3742,sweet briar university,sweet briar,va,1,No Match,No Match,0.0
+3744,university of richmond,richmond,va,1,I158012942,university of richmond,100.0
 3746,university of mary washington,fredericksburg,va,1,I191484440,university of mary washington,100.0
-3747,university of virginia's university at wise,wise,va,1,I4901143,university of virginia's university at wise,100.0
-3749,george mason university,fairfax,va,1,No Match,No Match,0.0
+3747,university of virginia's university at wise,wise,va,1,No Match,No Match,0.0
+3749,george mason university,fairfax,va,1,I162714631,george mason university,100.0
 3753,virginia military institute,lexington,va,1,I185641255,virginia military institute,100.0
 3754,virginia polytechnic institute and state university,blacksburg,va,1,No Match,No Match,0.0
 3764,virginia state university,petersburg,va,1,I11786554,virginia state university,100.0
 3765,norfolk state university,norfolk,va,1,I103087548,norfolk state university,100.0
 3768,washington and lee university,lexington,va,1,No Match,No Match,0.0
-3771,central washington university,ellensburg,wa,1,No Match,No Match,0.0
+3771,central washington university,ellensburg,wa,1,I29867402,central washington university,100.0
 3775,eastern washington university,cheney,wa,1,I159107703,eastern washington university,100.0
 3778,gonzaga university,spokane,wa,1,I119888943,gonzaga university,100.0
 3785,pacific lutheran university,tacoma,wa,1,I60065076,pacific lutheran university,100.0
@@ -648,31 +648,31 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 3790,seattle university,seattle,wa,1,I45029084,city university of seattle,95.0
 3797,university of puget sound,tacoma,wa,1,I146552867,university of puget sound,100.0
 3800,washington state university,pullman,wa,1,I170632171,washington state university spokane,95.0
-3802,western washington university,bellingham,wa,1,No Match,No Match,0.0
+3802,western washington university,bellingham,wa,1,I52669646,western washington university,100.0
 3803,whitman university,walla walla,wa,1,I138943879,whitman university,100.0
 3806,alderson-broaddus university,philippi,wv,1,I249887453,alderson broaddus university,100.0
 3809,bluefield state university,bluefield,wv,1,I111759441,bluefield state university,100.0
 3815,marshall university,huntington,wv,1,I88694374,marshall university,100.0
 3823,west liberty state university,west liberty,wv,1,I31452180,west liberty university,95.0
 3826,west virginia state university,institute,wv,1,I77002289,west virginia state university,100.0
-3827,west virginia university,morgantown,wv,1,I2800003084,west virginia university at parkersburg,90.0
-3831,wheeling jesuit university,wheeling,wv,1,I18283598,wheeling jesuit university,100.0
+3827,west virginia university,morgantown,wv,1,I2802882910,west virginia university hospitals,95.0
+3831,wheeling jesuit university,wheeling,wv,1,No Match,No Match,0.0
 3856,lawrence university,appleton,wi,1,I153592363,lawrence university,100.0
-3863,marquette university,milwaukee,wi,1,No Match,No Match,0.0
+3863,marquette university,milwaukee,wi,1,I102461120,marquette university,100.0
 3868,milwaukee school of engineering,milwaukee,wi,1,I50702494,milwaukee school of engineering,100.0
 3875,northland university,ashland,wi,1,I918218293,northland university,100.0
-3895,university of wisconsin madison,madison,wi,1,No Match,No Match,0.0
-3896,university of wisconsin milwaukee,milwaukee,wi,1,No Match,No Match,0.0
+3895,university of wisconsin madison,madison,wi,1,I135310074,university of wisconsin–madison,100.0
+3896,university of wisconsin milwaukee,milwaukee,wi,1,I43579087,university of wisconsin–milwaukee,100.0
 3899,university of wisconsin green bay,green bay,wi,1,I129510320,university of wisconsin–green bay,100.0
-3915,university of wisconsin stout,menomonie,wi,1,No Match,No Match,0.0
+3915,university of wisconsin stout,menomonie,wi,1,I1921588,university of wisconsin–stout,100.0
 3917,university of wisconsin eau claire,eau claire,wi,1,I124727415,university of wisconsin–eau claire,100.0
 3919,university of wisconsin la crosse,la crosse,wi,1,I4657992,university of wisconsin–la crosse,100.0
 3921,university of wisconsin platteville,platteville,wi,1,I1745920,university of wisconsin–platteville,100.0
 3923,university of wisconsin river falls,river falls,wi,1,I14403649,university of wisconsin–river falls,100.0
 3924,university of wisconsin stevens point,stevens point,wi,1,I191114373,university of wisconsin–stevens point,100.0
 3925,university of wisconsin superior,superior,wi,1,I61567134,university of wisconsin–superior,100.0
-3926,university of wisconsin whitewater,whitewater,wi,1,No Match,No Match,0.0
-3932,university of wyoming,laramie,wy,1,No Match,No Match,0.0
+3926,university of wisconsin whitewater,whitewater,wi,1,I183533211,university of wisconsin–whitewater,100.0
+3932,university of wyoming,laramie,wy,1,I12834331,university of wyoming,100.0
 3935,university of guam,mangilao,gu,1,No Match,No Match,0.0
 3941,universidad del este,carolina,pr,1,No Match,No Match,0.0
 3943,university of puerto rico humacao,humacao,pr,1,No Match,No Match,0.0
@@ -684,26 +684,26 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 3979,teachers university columbia university,new york,ny,1,No Match,No Match,0.0
 4063,cuny graduate center,new york,ny,1,I121847817,"the graduate center, cuny",95.0
 4069,"university of minnesota, crookston",crookston,mn,1,I4210159608,university of minnesota crookston,99.0
-4508,university of colorado anschutz medical,aurora,co,1,No Match,No Match,0.0
+4508,university of colorado anschutz medical,aurora,co,1,I51713134,university of colorado anschutz medical,100.0
 4509,university of colorado at colorado springs,colorado springs,co,1,I888729015,university of colorado colorado springs,96.0
-4661,hampshire university,amherst,ma,1,No Match,No Match,0.0
+4661,hampshire university,amherst,ma,1,I47631775,hampshire university,100.0
 4741,rutgers state university of new jersey-camden,camden,nj,1,No Match,No Match,0.0
 4759,"city university of new york, york university",jamaica,ny,1,No Match,No Match,0.0
-4766,cuny baruch university,manhattan,ny,1,No Match,No Match,0.0
-4882,oregon health & science university,portland,or,1,No Match,No Match,0.0
+4766,cuny baruch university,manhattan,ny,1,I141810926,baruch university,95.0
+4882,oregon health & science university,portland,or,1,I165690674,oregon health & science university,100.0
 4917,roger williams university,bristol,ri,1,No Match,No Match,0.0
-4949,baylor university of medicine,houston,tx,1,No Match,No Match,0.0
+4949,baylor university of medicine,houston,tx,1,I181547552,baylor university of medicine,100.0
 4952,university of texas medical branch,galveston,tx,1,I55302922,the university of texas medical branch at galveston,90.0
 5015,university of wisconsin parkside,kenosha,wi,1,I183437572,university of wisconsin–parkside,100.0
 6725,university of tennessee health science center,memphis,tn,1,I160606119,university of tennessee health science center,100.0
-6740,university of colorado denver,denver,co,1,No Match,No Match,0.0
+6740,university of colorado denver,denver,co,1,I921990950,university of colorado denver,100.0
 6791,SUNY purchase university,purchase,ny,1,I103497121,purchase university,95.0
 6814,pennsylvania state university harrisburg,middletown,pa,1,No Match,No Match,0.0
-6895,university of nebraska medical center,omaha,ne,1,No Match,No Match,0.0
+6895,university of nebraska medical center,omaha,ne,1,I1307117695,nebraska medical center,90.0
 6951,university of south carolina upstate,spartanburg,sc,1,I32870303,university of south carolina sumter,90.0
 6964,rutgers state university of new jersey-new brunswick,new brunswick,nj,1,No Match,No Match,0.0
 7022,cuny herbert h. lehman university,bronx,ny,1,I161301626,lehman university,90.0
-7026,mount sinai school of medicine,new york,ny,1,No Match,No Match,0.0
+7026,mount sinai school of medicine,new york,ny,1,I98704320,icahn school of medicine at mount sinai,95.0
 7108,university of puerto rico rio piedras,rio piedras,pr,1,No Match,No Match,0.0
 7109,suny university old westbury,old westbury,ny,1,No Match,No Match,0.0
 7206,university of puerto rico cayey,cayey,pr,1,No Match,No Match,0.0
@@ -711,130 +711,130 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 7993,california state university bakersfield,bakersfield,ca,1,I118839592,"california state university, bakersfield",99.0
 8067,louisiana state university medical center shreveport,shreveport,la,1,No Match,No Match,0.0
 8155,evergreen state university,olympia,wa,1,I60341648,the evergreen state university,95.0
-8296,medical university of wisconsin,milwaukee,wi,1,No Match,No Match,0.0
+8296,medical university of wisconsin,milwaukee,wi,1,I204308271,medical university of wisconsin,100.0
 8310,auburn university at montgomery,montgomery,al,1,No Match,No Match,0.0
-8718,university of connecticut,storrs,ct,1,I140172145,university of connecticut,100.0
-8723,georgia institute of technology,atlanta,ga,1,No Match,No Match,0.0
+8718,university of connecticut,storrs,ct,1,I75929689,university of connecticut health center,90.0
+8723,georgia institute of technology,atlanta,ga,1,I130701444,georgia institute of technology,100.0
 8724,mercer university,macon,ga,1,I2801518522,mercer university health sciences center,90.0
-8744,university of kentucky,lexington,ky,1,I1285210727,university of kentucky healthcare,90.0
-8766,st. louis university,st louis,mo,1,I4210160443,st. louis university high school,90.0
+8744,university of kentucky,lexington,ky,1,I143302722,university of kentucky,100.0
+8766,st. louis university,st louis,mo,1,I47838141,saint louis university,90.0
 8770,fairleigh dickinson university,teaneck,nj,1,I32907511,fairleigh dickinson university,100.0
-8773,new mexico state university,las cruces,nm,1,I4210136290,new mexico state university grants,95.0
-8775,alfred university,alfred,ny,1,I139842744,alfred state university,95.0
-8779,cornell university,ithaca,ny,1,No Match,No Match,0.0
-8780,long island university,brookville,ny,1,No Match,No Match,0.0
-8782,new york institute of technology,old westbury,ny,1,No Match,No Match,0.0
+8773,new mexico state university,las cruces,nm,1,I2801795519,new mexico state university alamogordo,95.0
+8775,alfred university,alfred,ny,1,No Match,No Match,0.0
+8779,cornell university,ithaca,ny,1,I205783295,cornell university,100.0
+8780,long island university,brookville,ny,1,I138873065,long island university,100.0
+8782,new york institute of technology,old westbury,ny,1,I4210104314,new york institute of technology,100.0
 8784,pace university,new york,ny,1,I126863827,pace university,100.0
-8789,syracuse university,syracuse,ny,1,No Match,No Match,0.0
+8789,syracuse university,syracuse,ny,1,I70983195,syracuse university,100.0
 8794,university of north dakota,grand forks,nd,1,I24571045,university of north dakota,100.0
 8796,bowling green state university,bowling green,oh,1,I157417397,bowling green state university,100.0
-8799,kent state university,kent,oh,1,I76083645,kent state university at ashtabula,90.0
-8800,miami university,oxford,oh,1,No Match,No Match,0.0
+8799,kent state university,kent,oh,1,I891261516,kent state university at stark,95.0
+8800,miami university,oxford,oh,1,I83328450,miami university,100.0
 8802,ohio state university,columbus,oh,1,I4210107394,the ohio state university newark,90.0
-8803,ohio university,athens,oh,1,No Match,No Match,0.0
+8803,ohio university,athens,oh,1,I4210106879,ohio university,100.0
 8805,university of cincinnati,cincinnati,oh,1,I63135867,university of cincinnati,100.0
 8807,university of oklahoma,norman,ok,1,I49332381,university of oklahoma health sciences center,90.0
 8810,indiana university of pennsylvania,indiana,pa,1,No Match,No Match,0.0
-8815,university of pittsburgh,pittsburgh,pa,1,I4210117416,university of pittsburgh at greensburg,90.0
+8815,university of pittsburgh,pittsburgh,pa,1,I170201317,university of pittsburgh,100.0
 8841,university of the virgin islands,st. thomas,vi,1,No Match,No Match,0.0
-8907,desert research institute,reno,nv,1,No Match,No Match,0.0
+8907,desert research institute,reno,nv,1,I60138030,desert research institute,100.0
 9016,university of south florida st. petersburg,saint petersburg,fl,1,I75821886,university of south florida st. petersburg,100.0
 9145,governors state university,university park,il,1,I2293663,governors state university,100.0
-9167,wright state university,dayton,oh,1,No Match,No Match,0.0
-9226,francis marion university,florence,sc,1,I189350637,francis marion university,100.0
+9167,wright state university,dayton,oh,1,I19648265,wright state university,100.0
+9226,francis marion university,florence,sc,1,No Match,No Match,0.0
 9266,north dakota state university,fargo,nd,1,I2800567628,north dakota state university of science,95.0
 9275,northern kentucky university,highland heights,ky,1,I168416876,northern kentucky university,100.0
 9333,university of illinois at springfield,springfield,il,1,I79884896,university of illinois at springfield,100.0
 9554,suny buffalo,buffalo,ny,1,No Match,No Match,0.0
 9555,suny stony brook,stony brook,ny,1,No Match,No Match,0.0
-9630,university of wisconsin oshkosh,oshkosh,wi,1,No Match,No Match,0.0
-9635,florida international university,miami,fl,1,No Match,No Match,0.0
-9651,texas a&m international university,laredo,tx,1,No Match,No Match,0.0
-9741,university of texas dallas,richardson,tx,1,No Match,No Match,0.0
+9630,university of wisconsin oshkosh,oshkosh,wi,1,I64185308,university of wisconsin–oshkosh,100.0
+9635,florida international university,miami,fl,1,I19700959,florida international university,100.0
+9651,texas a&m international university,laredo,tx,1,I131740757,texas a&m international university,100.0
+9741,university of texas dallas,richardson,tx,1,I162577319,the university of texas at dallas,95.0
 9756,university of massachusetts worcester,worcester,ma,1,No Match,No Match,0.0
-9762,university of southern maine,portland,me,1,I73443619,university of southern maine,100.0
-9768,university of north texas health science center at fort worth,fort worth,tx,1,No Match,No Match,0.0
+9762,university of southern maine,portland,me,1,No Match,No Match,0.0
+9768,university of north texas health science center at fort worth,fort worth,tx,1,I165139151,university of north texas health science center,95.0
 9800,rush university,chicago,il,1,I49886154,rush university,100.0
 9841,university of north florida,jacksonville,fl,1,I11874761,university of north florida,100.0
 9929,suny university of optometry,new york,ny,1,I87377408,SUNY university of optometry,100.0
 9930,university of texas of the permian basin,odessa,tx,1,I114580094,the university of texas of the permian basin,95.0
 10097,cuny medgar evers university,brooklyn,ny,1,I32170380,medgar evers university,95.0
-10115,university of texas san antonio,san antonio,tx,1,I112197944,san antonio university,95.0
-10338,eastern virginia medical school,norfolk,va,1,No Match,No Match,0.0
-10395,university of san diego,san diego,ca,1,No Match,No Match,0.0
-10438,haskell indian nations university,lawrence,ks,1,I88516139,haskell indian nations university,100.0
-10674,texas tech university health science center,lubbock,tx,1,No Match,No Match,0.0
+10115,university of texas san antonio,san antonio,tx,1,I45438204,the university of texas at san antonio,95.0
+10338,eastern virginia medical school,norfolk,va,1,I156802259,eastern virginia medical school,100.0
+10395,university of san diego,san diego,ca,1,I160856358,university of san diego,100.0
+10438,haskell indian nations university,lawrence,ks,1,No Match,No Match,0.0
+10674,texas tech university health science center,lubbock,tx,1,I926076166,texas tech university health sciences center,99.0
 10724,"carlos albizu university (san juan, pr)",san juan,pr,1,No Match,No Match,0.0
-11161,texas a&m university corpus christi,corpus christi,tx,1,No Match,No Match,0.0
+11161,texas a&m university corpus christi,corpus christi,tx,1,I96749437,texas a&m university – corpus christi,97.0
 11245,west virginia school of osteopathic medicine,lewisburg,wv,1,I111146913,west virginia school of osteopathic medicine,100.0
 11282,oklahoma state university center for health sciences university of osteopathic medicine,tulsa,ok,1,No Match,No Match,0.0
-11618,university of texas health science center at houston,houston,tx,1,No Match,No Match,0.0
-11649,loyola marymount university,los angeles,ca,1,No Match,No Match,0.0
+11618,university of texas health science center at houston,houston,tx,1,I919571938,the university of texas health science center at houston,96.0
+11649,loyola marymount university,los angeles,ca,1,I35566140,loyola marymount university,100.0
 11678,SUNY institute of technology at utica-rome,utica,ny,1,No Match,No Match,0.0
 11711,university of houston-clear lake,houston,tx,1,I52913039,university of houston - clear lake,97.0
-12300,palmer university of chiropractic,davenport,ia,1,I12268063,palmer university of chiropractic,100.0
-12305,brigham young university,provo,ut,1,No Match,No Match,0.0
+12300,palmer university of chiropractic,davenport,ia,1,No Match,No Match,0.0
+12305,brigham young university,provo,ut,1,I100005738,brigham young university,100.0
 12309,western states chiropractic university,portland,or,1,No Match,No Match,0.0
 12310,university of akron,akron,oh,1,I110152177,university of akron,100.0
-12328,northwestern health sciences university,bloomington,mn,1,I116833633,northwestern health sciences university,100.0
+12328,northwestern health sciences university,bloomington,mn,1,No Match,No Match,0.0
 12826,university of houston-downtown,houston,tx,1,I16277215,university of houston - downtown,97.0
 12841,universidad del turabo,gurabo,pr,1,No Match,No Match,0.0
 19039,university of maryland center for environmental science,cambridge,md,1,No Match,No Match,0.0
 21800,northwest indian university,bellingham,wa,1,I36819085,northwest university,95.0
 22635,scripps research institute,la jolla,ca,1,I4210133358,search,90.0
-29001,university of kansas,lawrence,ks,1,I3133271633,central christian university of kansas,90.0
+29001,university of kansas,lawrence,ks,1,I4210128618,university of kansas medical center,90.0
 29020,university of hawaii hilo,hilo,hi,1,I35722693,university of hawaii at hilo,95.0
 29022,prescott university,prescott,az,1,I35445894,prescott university,100.0
-29040,cuny university of staten island,staten island,ny,1,I2801052491,staten island university,95.0
+29040,cuny university of staten island,staten island,ny,1,I142393192,university of staten island,95.0
 29045,northeastern ohio universities university of medicine,rootstown,oh,1,No Match,No Match,0.0
-29094,university of alaska fairbanks,fairbanks,ak,1,No Match,No Match,0.0
-29095,university of alaska anchorage,anchorage,ak,1,No Match,No Match,0.0
-29096,university of alaska southeast,juneau,ak,1,No Match,No Match,0.0
+29094,university of alaska fairbanks,fairbanks,ak,1,I141472210,university of alaska fairbanks,100.0
+29095,university of alaska anchorage,anchorage,ak,1,I147853995,university of alaska anchorage,100.0
+29096,university of alaska southeast,juneau,ak,1,I90464598,university of alaska southeast,100.0
 29100,university of the district of columbia,washington,dc,1,I174612323,university of the district of columbia,100.0
-29112,sinte gleska university,mission,sd,1,I2801294484,sinte gleska university,100.0
+29112,sinte gleska university,mission,sd,1,No Match,No Match,0.0
 29119,polytechnic university of puerto rico,san juan,pr,1,No Match,No Match,0.0
-29129,sitting bull university,fort yates,nd,1,I2800679821,sitting bull university,100.0
-29133,western university of health sciences,pomona,ca,1,No Match,No Match,0.0
-29156,oglala lakota university,eagle butte,sd,1,I126547033,oglala lakota university,100.0
-29164,university of texas tyler,tyler,tx,1,No Match,No Match,0.0
-29169,uniformed services university of the health sciences,bethesda,md,1,No Match,No Match,0.0
+29129,sitting bull university,fort yates,nd,1,No Match,No Match,0.0
+29133,western university of health sciences,pomona,ca,1,I93393672,western university of health sciences,100.0
+29156,oglala lakota university,eagle butte,sd,1,No Match,No Match,0.0
+29164,university of texas tyler,tyler,tx,1,I221716585,the university of texas at tyler,95.0
+29169,uniformed services university of the health sciences,bethesda,md,1,I148314036,uniformed services university of the health sciences,100.0
 29224,salish kootenai university,pablo,mt,1,I78386829,salish kootenai university,100.0
 29228,sojourner-douglass university,baltimore,md,1,No Match,No Match,0.0
 29229,universidad central del caribe,bayamon,pr,1,No Match,No Match,0.0
 29268,ponce school of medicine,ponce,pr,1,No Match,No Match,0.0
 29278,universidad metropolitana,rio piedras,pr,1,No Match,No Match,0.0
-29297,morehouse school of medicine,atlanta,ga,1,No Match,No Match,0.0
+29297,morehouse school of medicine,atlanta,ga,1,I6332465,morehouse school of medicine,100.0
 29361,bastyr university,kenmore,wa,1,I185277837,bastyr university,100.0
 29365,mgh institute of health professions,boston,ma,1,I158133745,mgh institute of health professions,100.0
 29977,johns hopkins university,baltimore,md,1,I145311948,johns hopkins university,100.0
 30113,california state university san marcos,san marcos,ca,1,I226560621,"california state university, san marcos",99.0
 30114,california state university monterey bay,seaside,ca,1,I135369504,"california state university, monterey bay",99.0
 30646,university of texas brownsville,brownsville,tx,1,No Match,No Match,0.0
-32064,texas a&mhealth science center,university station,tx,1,No Match,No Match,0.0
+32064,texas a&mhealth science center,university station,tx,1,I125029298,texas a&m health science center,98.0
 32553,florida gulf coast university,fort myers,fl,1,I2801014300,florida gulf coast university,100.0
-41426,touro university-california,vallejo,ca,1,No Match,No Match,0.0
+41426,touro university-california,vallejo,ca,1,I24624658,touro university california,100.0
 100116,thunderbird school of global management,glendale,az,1,No Match,No Match,0.0
-100130,southern arkansas university,magnolia,ar,1,I103527128,southern arkansas university,100.0
-100132,art center university of design,pasadena,ca,1,I164989479,art center university of design,100.0
+100130,southern arkansas university,magnolia,ar,1,No Match,No Match,0.0
+100132,art center university of design,pasadena,ca,1,No Match,No Match,0.0
 100141,california lutheran university,thousand oaks,ca,1,I176611909,california lutheran university,100.0
 100142,california maritime academy,vallejo,ca,1,I230604491,california maritime academy,100.0
 100146,scripps university,claremont,ca,1,I16970960,scripps university,100.0
 100155,la sierra university,riverside,ca,1,I2799846239,sierra university,95.0
 100159,southern california university of optometry,fullerton,ca,1,No Match,No Match,0.0
 100173,claremont school of theology,claremont,ca,1,No Match,No Match,0.0
-100194,sacred heart university,fairfield,ct,1,No Match,No Match,0.0
-100198,eastern connecticut state university,willimantic,ct,1,No Match,No Match,0.0
+100194,sacred heart university,fairfield,ct,1,I130186095,sacred heart university,100.0
+100198,eastern connecticut state university,willimantic,ct,1,I204366597,western connecticut state university,97.0
 100211,edison state university,fort myers,fl,1,No Match,No Match,0.0
 100235,university of tampa,tampa,fl,1,I93320256,university of tampa,100.0
 100246,columbus state university,columbus,ga,1,No Match,No Match,0.0
-100255,paine university,augusta,ga,1,I19989617,paine university,100.0
+100255,paine university,augusta,ga,1,No Match,No Match,0.0
 100267,university of hawaii maui university,kahului,hi,1,I2802684530,university of hawaii maui university,100.0
 100270,northwest nazarene university,nampa,id,1,I83578353,northwest nazarene university,100.0
 100280,columbia university chicago,chicago,il,1,I45338645,columbia university chicago,100.0
 100304,north central university,naperville,il,1,I45536552,north central university,100.0
 100313,dominican university,river forest,il,1,I189917405,dominican university,100.0
 100322,"wheaton university, wheaton",wheaton,il,1,I73236664,wheaton university - illinois,95.0
-100336,university of southern indiana,evansville,in,1,No Match,No Match,0.0
+100336,university of southern indiana,evansville,in,1,I128409426,university of southern indiana,100.0
 100347,taylor university,upland,in,1,No Match,No Match,0.0
 100356,dordt university,sioux center,ia,1,No Match,No Match,0.0
 100380,fort hays state university,hays,ks,1,I91083438,fort hays state university,100.0
@@ -854,7 +854,7 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 100508,lake superior state university,sault sainte marie,mi,1,I147276918,lake superior state university,100.0
 100520,university of saint benedict,saint joseph,mn,1,I84360360,university of saint benedict and saint john's university,90.0
 100521,st. catherine university,saint paul,mn,1,I142767807,st. catherine university,100.0
-100540,mississippi university,clinton,ms,1,I4210126523,university press of mississippi,95.0
+100540,mississippi university,clinton,ms,1,I52890796,mississippi university,100.0
 100574,university of health sciences and pharmacy in st. louis,saint louis,mo,1,I182380053,university of health sciences and pharmacy,95.0
 100583,"montana state university, havre",havre,mt,1,No Match,No Match,0.0
 100588,doane university,crete,ne,1,I4210117873,doane university,100.0
@@ -862,61 +862,61 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 100603,keene state university,keene,nh,1,No Match,No Match,0.0
 100612,kean university,union,nj,1,I47449453,kean university,100.0
 100617,"eastern new mexico university, portales",portales,nm,1,I163113649,eastern new mexico university,95.0
-100620,bank street university of education,new york,ny,1,I169940031,bank street university of education,100.0
-100678,SUNY fashion institute of technology,new york,ny,1,I883357,fashion institute of technology,95.0
+100620,bank street university of education,new york,ny,1,No Match,No Match,0.0
+100678,SUNY fashion institute of technology,new york,ny,1,No Match,No Match,0.0
 100694,elon university,elon,nc,1,I170164250,elon university,100.0
 100722,dickinson state university,dickinson,nd,1,I65741653,dickinson state university,100.0
-100725,valley city state university,valley city,nd,1,I205944377,valley city state university,100.0
-100793,bryn athyn university,bryn athyn,pa,1,I59273066,bryn athyn university,100.0
+100725,valley city state university,valley city,nd,1,No Match,No Match,0.0
+100793,bryn athyn university,bryn athyn,pa,1,No Match,No Match,0.0
 100806,gannon university,erie,pa,1,I967637,gannon university,100.0
 100819,lycoming university,williamsport,pa,1,I55926968,lycoming university,100.0
 100820,marywood university,scranton,pa,1,I20960122,marywood university,100.0
 100821,messiah university,grantham,pa,1,I10452050,messiah university,100.0
 100836,shippensburg university of pennsylvania,shippensburg,pa,1,I139418187,shippensburg university,90.0
-100843,robert morris university,moon township,pa,1,I178605575,robert morris university,100.0
-100850,"university of pittsburgh, bradford",bradford,pa,1,I4210086901,university of pittsburgh at bradford,97.0
+100843,robert morris university,moon township,pa,1,No Match,No Match,0.0
+100850,"university of pittsburgh, bradford",bradford,pa,1,No Match,No Match,0.0
 100859,bryant university,smithfield,ri,1,I178712713,bryant university,100.0
-100861,rhode island university,providence,ri,1,No Match,No Match,0.0
+100861,rhode island university,providence,ri,1,I53118340,rhode island university,100.0
 100862,rhode island school of design,providence,ri,1,I183146814,rhode island school of design,100.0
 100863,salve regina university,newport,ri,1,No Match,No Match,0.0
 100864,naval war university,newport,ri,1,I59036183,naval war university,100.0
 100870,citadel military university of south carolina,charleston,sc,1,I91036609,citadel,90.0
-100871,coker university,hartsville,sc,1,I108345032,coker university,100.0
-100887,dakota state university,madison,sd,1,I125467818,dakota state university,100.0
+100871,coker university,hartsville,sc,1,No Match,No Match,0.0
+100887,dakota state university,madison,sd,1,No Match,No Match,0.0
 100891,university of sioux falls,sioux falls,sd,1,I22555787,university of sioux falls,100.0
 100893,austin peay state university,clarksville,tn,1,No Match,No Match,0.0
 100897,christian brothers university,memphis,tn,1,I102015815,christian brothers university,100.0
 100932,university of the incarnate word,san antonio,tx,1,I54166199,university of the incarnate word,100.0
-100944,southwestern university,georgetown,tx,1,I4210135962,southwestern christian university,95.0
+100944,southwestern university,georgetown,tx,1,I196270430,southwestern adventist university,95.0
 100945,saint edward's university,austin,tx,1,I9224006,st. edward's university,92.0
 100956,southern utah university,cedar city,ut,1,I110496330,southern utah university,100.0
 100964,johnson state university,johnson,vt,1,No Match,No Match,0.0
 100967,norwich university,northfield,vt,1,I4210151403,norwich university applied research institute,90.0
 100974,eastern mennonite university,harrisonburg,va,1,I201426678,eastern mennonite university,100.0
-100976,ferrum university,ferrum,va,1,I152372855,ferrum university,100.0
+100976,ferrum university,ferrum,va,1,No Match,No Match,0.0
 100979,longwood university,farmville,va,1,I141448028,longwood university,100.0
 100982,marymount university,arlington,va,1,I53276908,marymount university,100.0
-101008,concord university,athens,wv,1,I65571275,concord university,100.0
-101011,university of charleston,charleston,wv,1,I48380244,university of charleston,100.0
+101008,concord university,athens,wv,1,No Match,No Match,0.0
+101011,university of charleston,charleston,wv,1,No Match,No Match,0.0
 101013,shepherd university,shepherdstown,wv,1,I107118585,shepherd university,100.0
 101015,west virginia wesleyan university,buckhannon,wv,1,I45013219,west virginia wesleyan university,100.0
 101016,alverno university,milwaukee,wi,1,No Match,No Match,0.0
 101020,carthage university,kenosha,wi,1,I176902721,carthage university,100.0
 101033,"university of california, hastings university of law",san francisco,ca,1,I4210088377,university of california hastings university of the law,95.0
-101049,utah valley university,orem,ut,1,No Match,No Match,0.0
+101049,utah valley university,orem,ut,1,I197572798,utah valley university,100.0
 101069,logan university,chesterfield,mo,1,I102499492,logan university,100.0
-101092,barnes-jewish university goldfarb school of nursing,saint louis,mo,1,I25085605,barnes-jewish university,90.0
-101102,unity university,unity,me,1,I878931444,central maine community university,90.0
-101118,hawaii pacific university,honolulu,hi,1,No Match,No Match,0.0
+101092,barnes-jewish university goldfarb school of nursing,saint louis,mo,1,No Match,No Match,0.0
+101102,unity university,unity,me,1,I875066120,unity university,100.0
+101118,hawaii pacific university,honolulu,hi,1,I149581226,hawaii pacific university,100.0
 101141,dine university,tsaile,az,1,I142089014,diné university,97.0
 101162,ramapo university of new jersey,mahwah,nj,1,I171851574,ramapo university,90.0
 101163,the richard stockton university of new jersey,galloway,nj,1,No Match,No Match,0.0
 101169,university of puerto rico at ponce,ponce,pr,1,No Match,No Match,0.0
 101185,touro university,new york,ny,1,I200437953,touro university,100.0
-101216,national university,la jolla,ca,1,I4210132068,vision international university,90.0
+101216,national university,la jolla,ca,1,I4210112098,national university,100.0
 101237,new york chiropractic university,seneca falls,ny,1,I79559882,new york chiropractic university,100.0
 101262,liberty university,lynchburg,va,1,I67789559,liberty university,100.0
-101271,hult international business school,cambridge,ma,1,I4210106913,hult international business school,100.0
+101271,hult international business school,cambridge,ma,1,No Match,No Match,0.0
 101281,fielding graduate university,santa barbara,ca,1,I67206655,fielding graduate university,100.0
 101288,university of hawaii at west o'ahu,pearl city,hi,1,I25390106,university of hawaii–west oahu,94.0
 101295,palo alto university,palo alto,ca,1,I1743320,palo alto university,100.0
@@ -925,23 +925,23 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 101403,new england school of acupuncture,newton,ma,1,I4210093807,new england school of acupuncture,100.0
 101448,regent university,virginia beach,va,1,I153338809,regent university,100.0
 101459,southwest university of naturopathic medicine and health sciences,tempe,az,1,I67439152,southwest university of naturopathic medicine & health sciences,97.0
-101466,university of menominee nation,keshena,wi,1,I859956996,university of menominee nation,100.0
+101466,university of menominee nation,keshena,wi,1,No Match,No Match,0.0
 101481,national defense university,washington,dc,1,I111149068,national defense university,100.0
-101520,cold spring harbor laboratory,cold spring harbor,ny,1,No Match,No Match,0.0
+101520,cold spring harbor laboratory,cold spring harbor,ny,1,I2750212522,cold spring harbor laboratory,100.0
 101530,erikson institute,chicago,il,1,I67734520,erikson institute,100.0
 101555,edward via university of osteopathic medicine,blacksburg,va,1,I896114043,edward via university of osteopathic medicine,100.0
 101570,keck graduate institute,claremont,ca,1,I90708416,keck graduate institute,100.0
-101577,union graduate university,schenectady,ny,1,I889948113,union graduate university,100.0
+101577,union graduate university,schenectady,ny,1,No Match,No Match,0.0
 101589,franklin w. olin university of engineering,needham,ma,1,I137428128,franklin w. olin university of engineering,100.0
 101595,"california state university, channel islands",camarillo,ca,1,I194388944,"california state university, channel islands",100.0
 101602,roseman university of health sciences,henderson,nv,1,I215315750,roseman university of health sciences,100.0
 101609,nevada state university,henderson,nv,1,No Match,No Match,0.0
-101657,olivet university,scotts valley,ca,1,I4210145779,olivet university,100.0
+101657,olivet university,scotts valley,ca,1,No Match,No Match,0.0
 101662,united states army war university,carlisle,pa,1,No Match,No Match,0.0
 101674,"palmer university of chiropractic, port orange",port orange,fl,1,No Match,No Match,0.0
 101682,toyota technological institute at chicago,chicago,il,1,I160992636,toyota technological institute at chicago,100.0
 101708,louis v. gerstner jr. graduate school of biomedical sciences at memorial sloan-kettering cancer c,new york,ny,1,No Match,No Match,0.0
-101719,texas a&m university-san antonio,san antonio,tx,1,No Match,No Match,0.0
+101719,texas a&m university-san antonio,san antonio,tx,1,I1335518801,texas a&m university – san antonio,97.0
 101723,future generations graduate school,franklin,wv,1,No Match,No Match,0.0
 101726,marine corps university,quantico,va,1,No Match,No Match,0.0
 101753,national flight test institute,mojave,ca,1,No Match,No Match,0.0
@@ -951,38 +951,38 @@ inst_id,inst_name_long,inst_city,inst_state_code,_freq,matched_oa_inst_id,matche
 102013,van andel institute,grand rapids,mi,1,I1317189400,van andel institute,100.0
 102015,high tech high graduate school of education,san diego,ca,1,No Match,No Match,0.0
 102017,georgia regents university,augusta,ga,1,No Match,No Match,0.0
-102023,marshall b. ketchum university,fullerton,ca,1,I185234458,marshall b. ketchum university,100.0
-102034,texas a&m university-central texas,killeen,tx,1,I67334016,central texas university,95.0
-102037,"university of hawaii,",honolulu,hi,1,No Match,No Match,0.0
+102023,marshall b. ketchum university,fullerton,ca,1,No Match,No Match,0.0
+102034,texas a&m university-central texas,killeen,tx,1,I76756774,texas a&m university – central texas,97.0
+102037,"university of hawaii,",honolulu,hi,1,I1331384533,university of hawaii system,95.0
 102040,university of nebraska central administration,lincoln,ne,1,No Match,No Match,0.0
 102041,"university of oklahoma, tulsa",tulsa,ok,1,No Match,No Match,0.0
 102044,"texas tech university health sciences center, el paso",el paso,tx,1,No Match,No Match,0.0
-102045,SUNY polytechnic institute,utica,ny,1,No Match,No Match,0.0
-102056,university of texas health science center at tyler,tyler,tx,1,I90436673,the university of texas health science center at tyler,96.0
-102058,florida polytechnic university,lakeland,fl,1,I2802307555,florida technical university,90.0
-102059,university of mississippi,university,ms,1,I368840534,university of mississippi,100.0
+102045,SUNY polytechnic institute,utica,ny,1,I90965887,suny polytechnic institute,100.0
+102056,university of texas health science center at tyler,tyler,tx,1,I4210094379,university of texas health science center at dallas,91.0
+102058,florida polytechnic university,lakeland,fl,1,No Match,No Match,0.0
+102059,university of mississippi,university,ms,1,I29606459,university of mississippi medical center,90.0
 102060,"city university of new york, advanced science research center",new york,ny,1,No Match,No Match,0.0
-102077,university of texas rio grande valley,edinburg,tx,1,No Match,No Match,0.0
-102078,albert einstein university of medicine,bronx,ny,1,No Match,No Match,0.0
-102085,university of north georgia,dahlonega,ga,1,No Match,No Match,0.0
+102077,university of texas rio grande valley,edinburg,tx,1,I2802326326,the university of texas rio grande valley,95.0
+102078,albert einstein university of medicine,bronx,ny,1,I129975664,albert einstein university of medicine,100.0
+102085,university of north georgia,dahlonega,ga,1,I924760719,university of north georgia,100.0
 102087,"purdue university, northwest",hammond,in,1,I117015748,purdue university northwest,98.0
 102091,"city university of new york, graduate school of public health and health policy",new york,ny,1,No Match,No Match,0.0
-102092,university of maryland,university park,md,1,I4210114073,university of maryland upper chesapeake health,90.0
+102092,university of maryland,university park,md,1,I14285509,university of maryland medical system,90.0
 102110,university of colorado at denver and health sciences center,denver,co,1,No Match,No Match,0.0
-188661,"the sage universitys,",troy,ny,1,I876513972,sage universitys,95.0
-208828,william & mary,williamsburg,va,1,No Match,No Match,0.0
+188661,"the sage universitys,",troy,ny,1,No Match,No Match,0.0
+208828,william & mary,williamsburg,va,1,I16285277,william & mary,100.0
 233046,western michigan university and homer stryker m.d. school of medicine,kalamazoo,mi,1,No Match,No Match,0.0
-330001,university of minnesota rochester,rochester,mn,1,I4210120349,university of minnesota rochester,100.0
+330001,university of minnesota rochester,rochester,mn,1,No Match,No Match,0.0
 330002,university of south florida sarasota-manatee,sarasota,fl,1,I59422894,university of south florida sarasota–manatee,100.0
 330003,university of south florida polytechnic,lakeland,fl,1,No Match,No Match,0.0
-330004,university of washington bothell,bothell,wa,1,No Match,No Match,0.0
+330004,university of washington bothell,bothell,wa,1,I201448701,university of washington,95.0
 330005,university of washington tacoma,tacoma,wa,1,I4210150356,university of washington tacoma,100.0
 330006,university of washington seattle,seattle,wa,1,No Match,No Match,0.0
-330007,university of virginia,charlottesville,va,1,I2948316424,virginia university of lynchburg,95.0
+330007,university of virginia,charlottesville,va,1,I51556381,university of virginia,100.0
 330008,university of south florida,tampa,fl,1,I2613432,university of south florida,100.0
 330009,"SUNY, university at albany university of nanoscale science and engineering",albany,ny,1,No Match,No Match,0.0
 330010,southern university agricultural research and extension center,baton rouge,la,1,No Match,No Match,0.0
-330037,"texas a&m university, galveston",galveston,tx,1,No Match,No Match,0.0
+330037,"texas a&m university, galveston",galveston,tx,1,I164185940,texas a&m university at galveston,97.0
 330038,commonwealth medical university,scranton,pa,1,I75747061,commonwealth medical university,100.0
 330049,skidaway institute of oceanography,savannah,ga,1,No Match,No Match,0.0
 330050,"city university of new york,",new york,ny,1,I4210117172,craig newmark graduate school of journalism at the city university of new york,90.0
