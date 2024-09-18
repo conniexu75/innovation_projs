@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-09-11 14:01:54
+Makelog started: 2024-09-18 01:00:39
 Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/mover_analysis/code
 --------------------------------------------------------------------------------
 External links successfully created!
@@ -67,100 +67,100 @@ not available in non-GUI version
   1.     use ../external/year_insts/filled_in_panel_${time}, clear
   2.     keep if country_code == "US"
   3.     hashsort athr_id year
-  4.     gen place_count =  1 if inst_id != inst_id[_n-1] //&  msa_comb != msa_
-> comb[_n-1]
+  4.     gen place_count =  1 if inst_id != inst_id[_n-1] & athr_id == athr_id[
+> _n-1] //&  msa_comb != msa_comb[_n-1]
   5.     bys athr_id: egen num_moves = total(place_count)
   6.     bys athr_id (year): gen which_place = sum(place_count)
-  7.     bys athr_id: gen athr_counter =  _n == 1
-  8.     replace num_moves = num_moves-1
-  9.     bys athr_id (year) : gen move_year = year if place_count == 1  & _n !=
->  1
- 10.     bys athr_id : egen first_pub_yr  = min(year)
- 11.     gcontract athr_id  move_year  num_moves first_pub_yr
- 12.     drop _freq
- 13.     drop if mi(move_year)
- 14.     drop if num_moves <= 0
- 15.     save ../temp/movers, replace
- 16. 
+  7.     by athr_id: gen athr_counter =  _n == 1
+  8.     *replace num_moves = num_moves-1
+.     bys athr_id (year) : gen move_year = year if place_count == 1  & _n != 1
+  9.     bys athr_id : egen first_pub_yr  = min(year)
+ 10.     gcontract athr_id  move_year  num_moves first_pub_yr
+ 11.     drop _freq
+ 12.     drop if mi(move_year)
+ 13.     drop if num_moves <= 0
+ 14.     save ../temp/movers, replace
+ 15. 
 .     foreach t in year_firstlast  {
- 17.         qui make_movers, samp(`t')
- 18.         qui sum_stats, samp(`t')
- 19.         qui output_tables, samp(`t')
- 20.         qui make_dest_origin, samp(`t')
- 21.         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1)
- 22.         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(s
+ 16.         qui make_movers, samp(`t')
+ 17.         qui sum_stats, samp(`t')
+ 18.         qui output_tables, samp(`t')
+ 19.         qui make_dest_origin, samp(`t')
+ 20.         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1)
+ 21.         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(s
 > tar_inst_ln_y_diff)
- 23.         qui event_study, samp(`t') timeframe(8) startyr(1945) endyr(1980) 
+ 22.         qui event_study, samp(`t') timeframe(8) startyr(1945) endyr(1980) 
 > ymax(1) ygap(0.1)
- 24.         qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) 
+ 23.         qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) 
 > ymax(1) ygap(0.1)
- 25.         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) 
+ 24.         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) 
 > ymax(1) ygap(0.1)
- 26.     }
+ 25.     }
+ 26.     coathr_locs
  27. end
 
 . 
 . program make_movers
   1.     syntax, samp(str)
-  2. 
-.     use athr_id field msa_comb year inst_id msa_size impact_cite_affl_wt avg_
-> team_size if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_f
-> ull_comb_`samp', clear 
+  2.     use athr_id field msa_comb year inst_id msa_size impact_cite_affl_wt a
+> vg_team_size if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_pane
+> l_full_comb_`samp', clear 
   3.     hashsort athr_id year
-  4.     gen place_count =  1 if inst_id != inst_id[_n-1] //& msa_comb != msa_c
-> omb[_n-1]
+  4.     gen place_count =  1 if inst_id != inst_id[_n-1] & athr_id == athr_id[
+> _n-1] //& msa_comb != msa_comb[_n-1]
   5.     bys athr_id: egen num_moves = total(place_count)
   6.     bys athr_id (year): gen which_place = sum(place_count)
   7.     bys athr_id: gen athr_counter =  _n == 1
-  8.     replace num_moves = num_moves-1
-  9.     gen mover = num_moves > 0 
- 10.     tab num_moves if athr_counter == 1 & mover == 1
- 11.     tab mover if athr_counter == 1
- 12.     bys athr_id year: gen athr_year_counter =  _n == 1
- 13.     tab mover if athr_year_counter == 1
+  8.     *replace num_moves = num_moves-1
+.     gen mover = num_moves > 0 
+  9.     tab num_moves if athr_counter == 1 & mover == 1
+ 10.     tab mover if athr_counter == 1
+ 11.     bys athr_id year: gen athr_year_counter =  _n == 1
+ 12.     tab mover if athr_year_counter == 1
+ 13.     replace which_place = which_place + 1
  14.     replace which_place = 0 if mover == 0
- 15.     replace which_place = 1 if which_place == 0 & mover == 1
- 16.     bys athr_id: egen min_which_place =min(which_place)
- 17.     replace which_place = which_place + 1 if mover == 1 & min_which_place 
-> == 0
- 18.     drop min_which_place
- 19.     hashsort athr_id year 
- 20.     bys athr_id (year): gen origin = 1 if which_place == 1
- 21.     gen dest = place_count == 1 & origin != 1 & mover == 1
- 22.     bys athr_id (year): replace origin = 1 if mover == 1 & place_count[_n+
+ 15.     *replace which_place = 1 if which_place == 0 & mover == 1
+.     *bys athr_id: egen min_which_place =min(which_place)
+.     *replace which_place = which_place + 1 if mover == 1 & min_which_place ==
+>  0
+.     *drop min_which_place
+.     hashsort athr_id year 
+ 16.     bys athr_id (year): gen origin = 1 if which_place == 1
+ 17.     gen dest = place_count == 1 & origin != 1 & mover == 1
+ 18.     bys athr_id (year): replace origin = 1 if mover == 1 & place_count[_n+
 > 1] == 1 & mi(origin) 
- 23.     hashsort athr_id which_place origin
- 24.     bys athr_id which_place:  replace origin = origin[_n-1] if mi(origin) 
+ 19.     hashsort athr_id which_place origin
+ 20.     bys athr_id which_place:  replace origin = origin[_n-1] if mi(origin) 
 > & !mi(origin[_n-1])
- 25. 
+ 21. 
 .     preserve
- 26.     keep if mover == 1 & num_moves == 1 
- 27.     gcontract athr_id year
+ 22.     keep if mover == 1 & num_moves == 1 
+ 23.     gcontract athr_id year
+ 24.     drop _freq
+ 25.     bys athr_id: egen min_year = min(year)
+ 26.     bys athr_id: egen max_year = max(year)
+ 27.     gcontract athr_id min_year max_year
  28.     drop _freq
- 29.     bys athr_id: egen min_year = min(year)
- 30.     bys athr_id: egen max_year = max(year)
- 31.     gcontract athr_id min_year max_year
- 32.     drop _freq
- 33.     save ../temp/single_movers_`samp', replace
- 34. 
+ 29.     save ../temp/single_movers_`samp', replace
+ 30. 
 .     merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
- 35.     keep if move_year >= min_year & move_year <= max_year
- 36.     gcontract athr_id move_year first_pub_yr
- 37.     drop _freq
- 38.     bys athr_id: gen N = _n 
- 39.     keep if N == 1
- 40.     save ../temp/mover_xw_`samp', replace
- 41.     restore
- 42. 
+ 31.     keep if move_year >= min_year & move_year <= max_year
+ 32.     gcontract athr_id move_year first_pub_yr
+ 33.     drop _freq
+ 34.     bys athr_id: gen N = _n 
+ 35.     keep if N == 1
+ 36.     save ../temp/mover_xw_`samp', replace
+ 37.     restore
+ 38. 
 .     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(1 3) 
- 43.     bys inst_id year: egen has_mover = max(mover == 1)
- 44.     drop if has_mover == 0
- 45.     gen analysis_cond = mover == 1 & num_moves == 1 & ((mover == 0 & _merg
+ 39.     bys inst_id year: egen has_mover = max(mover == 1)
+ 40.     drop if has_mover == 0
+ 41.     gen analysis_cond = mover == 1 & num_moves == 1 & ((mover == 0 & _merg
 > e == 1) | (mover == 1 & _merge == 3))
- 46.     drop _merge
- 47.     drop has_mover place_count athr_counter athr_year_counter N
- 48.     save ../temp/mover_temp_`samp' , replace
- 49. end
+ 42.     drop _merge
+ 43.     drop has_mover place_count athr_counter athr_year_counter N
+ 44.     save ../temp/mover_temp_`samp' , replace
+ 45. end
 
 . 
 . program sum_stats
@@ -213,8 +213,7 @@ not available in non-GUI version
  43.         mat city_stats = nullmat(city_stats) \ (r(mean), r(sd))
  44.     }
  45.     restore
- 46.     
-.     mat stat_`samp' = ind_stats \ city_stats 
+ 46.     mat stat_`samp' = ind_stats \ city_stats 
  47. end 
 
 . 
@@ -276,9 +275,7 @@ not available in non-GUI version
 >  "",.)
  49.             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - 
 > `var'
- 50.             *by athr_id (which_place year): gen `var'_diff = post_`var'[_n
-> +1] - pre_`var'
-.         }
+ 50.         }
  51.         if strpos("`var'", "avg_") > 0 {
  52.             local type "Change in"
  53.             local stem = subinstr("`var'", "avg_","",.)
@@ -298,7 +295,6 @@ not available in non-GUI version
  61.         graph export ../output/figures/`var'_diff_`samp'.pdf, replace
  62.     }
  63. 
-. 
 .     reg avg_ln_y_diff inst_ln_y_diff  
  64.     local N = e(N)
  65.     local coef : dis %3.2f _b[inst_ln_y_diff]
@@ -416,8 +412,8 @@ not available in non-GUI version
  84.                 else if "`cond'" == "& young == 1" {
  85.             local suf = "_young"
  86.         } 
- 87.         if "`delta'" == "" local delta_suf = "" 
- 88.         if "`delta'" != "" local delta_suf = "star" 
+ 87.         if "`delta'" != "star_inst_ln_y_diff" local delta_suf = "" 
+ 88.         if "`delta'" == "star_inst_ln_y_diff" local delta_suf = "star" 
  89.         local suf = "`suf'`delta_suf'" 
  90.         preserve
  91.         mat drop _all
@@ -574,21 +570,119 @@ not available in non-GUI version
   4.     }
   5. end
 
+. 
+. program coathr_locs
+  1.     syntax, samp(str)
+  2.     use ../temp/mover_temp_`samp', clear
+  3.     gcontract athr_id year
+  4.     drop _freq
+  5.     save ../temp/samp_restrict, replace 
+  6. 
+.     use if analysis_cond == 1 & origin == 1 using ../temp/mover_temp_`samp' ,
+>  clear  
+  7.     gcontract athr_id inst_id msa_comb move_year
+  8.     gisid athr_id
+  9.     rename athr_id focal_id
+ 10.     rename msa_comb origin_msa
+ 11.     rename inst_id origin_inst
+ 12.     drop _freq
+ 13.     save ../temp/mover_origin, replace
+ 14. 
+.     use if analysis_cond == 1 & dest == 1 using ../temp/mover_temp_`samp' , c
+> lear  
+ 15.     gcontract athr_id inst_id msa_comb move_year
+ 16.     gisid athr_id
+ 17.     rename athr_id focal_id
+ 18.     rename msa_comb dest_msa
+ 19.     rename inst_id dest_inst
+ 20.     drop _freq
+ 21.     save ../temp/mover_dest, replace
+ 22. 
+.     use ../external/openalex/cleaned_all_15jrnls.dta, clear
+ 23.     keep if country_code == "US"
+ 24.     gcontract pmid year athr_id inst_id msa_comb
+ 25.     merge m:1 athr_id year using ../temp/samp_restrict, keep(3) nogen
+ 26.     drop _freq
+ 27.     rename athr_id focal_id
+ 28.     save ../temp/focal_list, replace
+ 29.     use ../external/openalex/cleaned_all_15jrnls.dta, clear
+ 30.     keep if country_code == "US"
+ 31.     gcontract pmid year athr_id inst_id msa_comb
+ 32.     drop _freq
+ 33.     rename inst_id coathr_inst
+ 34.     rename msa_comb coathr_msa
+ 35.     save ../temp/coauthors, replace
+ 36. 
+.     use ../temp/focal_list, clear
+ 37.     joinby pmid using ../temp/coauthors
+ 38.     drop if focal_id == athr_id
+ 39.     gcontract focal_id year athr_id inst_id msa_comb coathr*
+ 40.     drop _freq
+ 41.     merge m:1 focal_id using ../temp/mover_origin, assert(1 2 3) keep(3) n
+> ogen
+ 42.     merge m:1 focal_id using ../temp/mover_dest, assert(1 2 3) keep(3) nog
+> en
+ 43.     bys focal_id year: gen num_coathrs = _N 
+ 44.     gen same_inst = inst_id == coathr_inst
+ 45.     gen same_msa = msa_comb ==  coathr_msa
+ 46.     gen same_origin_inst = origin_inst == coathr_inst
+ 47.     gen same_dest_inst = coathr_inst == dest_inst 
+ 48.     gen same_origin_msa = origin_msa == coathr_msa
+ 49.     gen same_dest_msa = coathr_msa == dest_msa 
+ 50.     gcollapse (sum) same* (mean) num_coathrs (mean) move_year, by(focal_id
+>  year)
+ 51.     foreach v in inst msa origin_inst dest_inst origin_msa dest_msa {
+ 52.         gen share_`v' = same_`v'/num_coathrs
+ 53.     }
+ 54.     gen rel = year - move_year
+ 55.     gcollapse (mean) share*, by(rel)
+ 56.     tw line share_origin_inst rel if inrange(rel,-10,10), lcolor(lavender%
+> 70) ||  ///
+>         line share_dest_inst rel if inrange(rel,-10,10), lcolor(orange%70) , 
+> ///
+>         xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) //
+> /
+>         xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-aut
+> hors", size(vsmall)) ///
+>         legend(on order(1 "Co-authors from Origin Institution" 2 "Co-authors 
+> from Destination Institution") pos(1) ring(0) size(vsmall) region(fcolor(none
+> ))) 
+ 57.     graph export ../output/figures/coauthor_same_inst.pdf, replace
+ 58.     tw line share_origin_msa rel if inrange(rel,-10,10), lcolor(lavender%7
+> 0) ||  ///
+>         line share_dest_msa rel if inrange(rel,-10,10), lcolor(orange%70) , /
+> //
+>         xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) //
+> /
+>         xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-aut
+> hors", size(vsmall)) ///
+>         legend(on order(1 "Co-authors from Origin City" 2 "Co-authors from De
+> stination City") pos(1) ring(0) size(vsmall) region(fcolor(none))) 
+ 59.     graph export ../output/figures/coauthor_same_msa.pdf, replace
+ 60.     tw line share_inst rel if inrange(rel,-10,10), lcolor(lavender%70) || 
+>  ///
+>         line share_msa rel if inrange(rel,-10,10), lcolor(orange%70) , ///
+>         xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) //
+> /
+>         xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-aut
+> hors", size(vsmall)) ///
+>         legend(on order(1 "Co-authors from Same Institution" 2 "Co-authors fr
+> om Same City") pos(1) ring(0) size(vsmall) region(fcolor(none))) 
+ 61.     graph export ../output/figures/coauthor_same_geo.pdf, replace
+ 62. end
+
 . ** 
 . main
 (22,034,336 observations deleted)
-(9,129,711 missing values generated)
-(10,958,788 real changes made)
+(9,845,728 missing values generated)
 (9,845,728 missing values generated)
 (721,133 observations deleted)
-(1,075 observations deleted)
+(0 observations deleted)
 (file ../temp/movers.dta not found)
 file ../temp/movers.dta saved
+option samp() required
+r(198);
 
-. 
 end of do-file
+r(198);
 
---------------------------------------------------------------------------------
-Makelog ended: 2024-09-11 14:05:28
-Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/mover_analysis/code
---------------------------------------------------------------------------------

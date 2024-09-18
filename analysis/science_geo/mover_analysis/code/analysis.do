@@ -43,7 +43,7 @@ program main
         qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) ymax(1) ygap(0.1)
         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) ymax(1) ygap(0.1)
     }
-    coathr_locs
+    coathr_locs, samp(year_firstlast)
 end
 
 program make_movers
