@@ -19,11 +19,11 @@ program main
     use ../external/year_insts/filled_in_panel_${time}, clear
     keep if country_code == "US"
     hashsort athr_id year
-    gen place_count =  1 if inst_id != inst_id[_n-1] //&  msa_comb != msa_comb[_n-1]
+    gen place_count =  1 if inst_id != inst_id[_n-1] & athr_id == athr_id[_n-1] //&  msa_comb != msa_comb[_n-1]
     bys athr_id: egen num_moves = total(place_count)
     bys athr_id (year): gen which_place = sum(place_count)
-    bys athr_id: gen athr_counter =  _n == 1
-    replace num_moves = num_moves-1
+    by athr_id: gen athr_counter =  _n == 1
+    *replace num_moves = num_moves-1
     bys athr_id (year) : gen move_year = year if place_count == 1  & _n != 1
     bys athr_id : egen first_pub_yr  = min(year)
     gcontract athr_id  move_year  num_moves first_pub_yr
@@ -43,28 +43,29 @@ program main
         qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) ymax(1) ygap(0.1)
         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) ymax(1) ygap(0.1)
     }
+    coathr_locs
 end
 
 program make_movers
     syntax, samp(str)
-
     use athr_id field msa_comb year inst_id msa_size impact_cite_affl_wt avg_team_size if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_full_comb_`samp', clear 
     hashsort athr_id year
-    gen place_count =  1 if inst_id != inst_id[_n-1] //& msa_comb != msa_comb[_n-1]
+    gen place_count =  1 if inst_id != inst_id[_n-1] & athr_id == athr_id[_n-1] //& msa_comb != msa_comb[_n-1]
     bys athr_id: egen num_moves = total(place_count)
     bys athr_id (year): gen which_place = sum(place_count)
     bys athr_id: gen athr_counter =  _n == 1
-    replace num_moves = num_moves-1
+    *replace num_moves = num_moves-1
     gen mover = num_moves > 0 
     tab num_moves if athr_counter == 1 & mover == 1
     tab mover if athr_counter == 1
     bys athr_id year: gen athr_year_counter =  _n == 1
     tab mover if athr_year_counter == 1
+    replace which_place = which_place + 1
     replace which_place = 0 if mover == 0
-    replace which_place = 1 if which_place == 0 & mover == 1
-    bys athr_id: egen min_which_place =min(which_place)
-    replace which_place = which_place + 1 if mover == 1 & min_which_place == 0
-    drop min_which_place
+    *replace which_place = 1 if which_place == 0 & mover == 1
+    *bys athr_id: egen min_which_place =min(which_place)
+    *replace which_place = which_place + 1 if mover == 1 & min_which_place == 0
+    *drop min_which_place
     hashsort athr_id year 
     bys athr_id (year): gen origin = 1 if which_place == 1
     gen dest = place_count == 1 & origin != 1 & mover == 1
@@ -149,7 +150,6 @@ program sum_stats
         mat city_stats = nullmat(city_stats) \ (r(mean), r(sd))
     }
     restore
-    
     mat stat_`samp' = ind_stats \ city_stats 
 end 
 
@@ -204,7 +204,6 @@ program make_dest_origin
             local type "Destination-Origin Difference in"
             local stem = subinstr(subinstr("`var'", "msa_","",.), "inst_", "",.)
             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - `var'
-            *by athr_id (which_place year): gen `var'_diff = post_`var'[_n+1] - pre_`var'
         }
         if strpos("`var'", "avg_") > 0 {
             local type "Change in"
@@ -220,7 +219,6 @@ program make_dest_origin
                                                         "            (`sd')") pos(1) ring(0) size(vsmall) region(fcolo(none)))
         graph export ../output/figures/`var'_diff_`samp'.pdf, replace
     }
-
 
     reg avg_ln_y_diff inst_ln_y_diff  
     local N = e(N)
@@ -327,8 +325,8 @@ program event_study
 		else if "`cond'" == "& young == 1" {
             local suf = "_young"
         } 
-        if "`delta'" == "" local delta_suf = "" 
-        if "`delta'" != "" local delta_suf = "star" 
+        if "`delta'" != "star_inst_ln_y_diff" local delta_suf = "" 
+        if "`delta'" == "star_inst_ln_y_diff" local delta_suf = "star" 
         local suf = "`suf'`delta_suf'" 
         preserve
         mat drop _all
@@ -437,6 +435,86 @@ program output_tables
          qui matrix_to_txt, saving("../output/tables/`file'_`samp'.txt") matrix(`file'_`samp') ///
            title(<tab:`file'_`samp'>) format(%20.4f) replace
     }
+end
+
+program coathr_locs
+    syntax, samp(str)
+    use ../temp/mover_temp_`samp', clear
+    gcontract athr_id year
+    drop _freq
+    save ../temp/samp_restrict, replace 
+
+    use if analysis_cond == 1 & origin == 1 using ../temp/mover_temp_`samp' , clear  
+    gcontract athr_id inst_id msa_comb move_year
+    gisid athr_id
+    rename athr_id focal_id
+    rename msa_comb origin_msa
+    rename inst_id origin_inst
+    drop _freq
+    save ../temp/mover_origin, replace
+
+    use if analysis_cond == 1 & dest == 1 using ../temp/mover_temp_`samp' , clear  
+    gcontract athr_id inst_id msa_comb move_year
+    gisid athr_id
+    rename athr_id focal_id
+    rename msa_comb dest_msa
+    rename inst_id dest_inst
+    drop _freq
+    save ../temp/mover_dest, replace
+
+    use ../external/openalex/cleaned_all_15jrnls.dta, clear
+    keep if country_code == "US"
+    gcontract pmid year athr_id inst_id msa_comb
+    merge m:1 athr_id year using ../temp/samp_restrict, keep(3) nogen
+    drop _freq
+    rename athr_id focal_id
+    save ../temp/focal_list, replace
+    use ../external/openalex/cleaned_all_15jrnls.dta, clear
+    keep if country_code == "US"
+    gcontract pmid year athr_id inst_id msa_comb
+    drop _freq
+    rename inst_id coathr_inst
+    rename msa_comb coathr_msa
+    save ../temp/coauthors, replace
+
+    use ../temp/focal_list, clear
+    joinby pmid using ../temp/coauthors
+    drop if focal_id == athr_id
+    gcontract focal_id year athr_id inst_id msa_comb coathr*
+    drop _freq
+    merge m:1 focal_id using ../temp/mover_origin, assert(1 2 3) keep(3) nogen
+    merge m:1 focal_id using ../temp/mover_dest, assert(1 2 3) keep(3) nogen
+    bys focal_id year: gen num_coathrs = _N 
+    gen same_inst = inst_id == coathr_inst
+    gen same_msa = msa_comb ==  coathr_msa
+    gen same_origin_inst = origin_inst == coathr_inst
+    gen same_dest_inst = coathr_inst == dest_inst 
+    gen same_origin_msa = origin_msa == coathr_msa
+    gen same_dest_msa = coathr_msa == dest_msa 
+    gcollapse (sum) same* (mean) num_coathrs (mean) move_year, by(focal_id year)
+    foreach v in inst msa origin_inst dest_inst origin_msa dest_msa {
+        gen share_`v' = same_`v'/num_coathrs
+    }
+    gen rel = year - move_year
+    gcollapse (mean) share*, by(rel)
+    tw line share_origin_inst rel if inrange(rel,-10,10), lcolor(lavender%70) ||  ///
+        line share_dest_inst rel if inrange(rel,-10,10), lcolor(orange%70) , ///
+        xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) ///
+        xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-authors", size(vsmall)) ///
+        legend(on order(1 "Co-authors from Origin Institution" 2 "Co-authors from Destination Institution") pos(1) ring(0) size(vsmall) region(fcolor(none))) 
+    graph export ../output/figures/coauthor_same_inst.pdf, replace
+    tw line share_origin_msa rel if inrange(rel,-10,10), lcolor(lavender%70) ||  ///
+        line share_dest_msa rel if inrange(rel,-10,10), lcolor(orange%70) , ///
+        xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) ///
+        xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-authors", size(vsmall)) ///
+        legend(on order(1 "Co-authors from Origin City" 2 "Co-authors from Destination City") pos(1) ring(0) size(vsmall) region(fcolor(none))) 
+    graph export ../output/figures/coauthor_same_msa.pdf, replace
+    tw line share_inst rel if inrange(rel,-10,10), lcolor(lavender%70) ||  ///
+        line share_msa rel if inrange(rel,-10,10), lcolor(orange%70) , ///
+        xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) ///
+        xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-authors", size(vsmall)) ///
+        legend(on order(1 "Co-authors from Same Institution" 2 "Co-authors from Same City") pos(1) ring(0) size(vsmall) region(fcolor(none))) 
+    graph export ../output/figures/coauthor_same_geo.pdf, replace
 end
 ** 
 main
