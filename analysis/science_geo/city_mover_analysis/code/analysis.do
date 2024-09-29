@@ -32,7 +32,7 @@ program main
     drop if num_moves <= 0
     save ../temp/movers, replace
 
-    foreach t in year_firstlast year {
+    foreach t in year_firstlast {
         qui make_movers, samp(`t')
         make_dest_origin, samp(`t')
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(msa_ln_y_diff)
