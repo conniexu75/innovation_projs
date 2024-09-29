@@ -1,3 +1,4 @@
-./fl/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/create_first_last_15jrnls/output/
-./all/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output/ 
+./samp/ | /export/projects4/achandra_basicscience/derived/science_geo/create_analysis_samp/output
+./geo/ | /export/projects4/achandra_basicscience/raw/geo
+
 
