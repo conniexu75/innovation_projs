@@ -1,14 +1,14 @@
 --------------------------------------------------------------------------------
-Makelog started: 2024-02-22 22:36:18
-Working directory: /export/home/dor/cxu/innovation_projs/analysis/science_geo/rd_fe/code
+Makelog started: 2024-09-25 01:28:16
+Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/place_correlates/code
 --------------------------------------------------------------------------------
 External links successfully created!
 
   ___  ____  ____  ____  ____ ®
- /__    /   ____/   /   ____/      17.0
+ /__    /   ____/   /   ____/      18.0
 ___/   /   /___/   /   /___/       MP—Parallel Edition
 
- Statistics and Data Science       Copyright 1985-2021 StataCorp LLC
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
                                    StataCorp
                                    4905 Lakeway Drive
                                    College Station, Texas 77845 USA
@@ -26,8 +26,8 @@ Notes:
       3. More than 2 billion observations are allowed; see help obs_advice.
       4. Maximum number of variables is set to 120,000; see help set_maxvar.
 
-. do "/export/home/dor/cxu/innovation_projs/analysis/science_geo/rd_fe/code/ana
-> lysis.do" 
+. do "/export/projects4/achandra_basicscience/analysis/science_geo/place_correl
+> ates/code/analysis.do" 
 
 . set more off
 
@@ -46,38 +46,1489 @@ not available in non-GUI version
 
 . set seed 8975
 
-. global temp "/export/scratch/cxu_sci_geo/movers"
+. global overall_fund tot_fund tot_fed_fund tot_bus_fund tot_inst_fund tot_stat
+> e_fund tot_nonprof_fund 
 
-. global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
+. global external_fund_source contracts_fund grants_fund
 
-. global y_name "Productivity"
+. global science_fund med_sch_expend clin_trial_expend fed_ls_fund nonfed_ls_fu
+> nd ls_cap_expend 
 
-. global pat_adj_wt_name "Patent-to-Paper Citations"
+. global rd_type basic_expend basic_fed_expend applied_expend applied_fed_expen
+> d 
 
-. global ln_patent_name "Log Patent-to-Paper Citations"
+. global other_fund expend_salaries expend_capital expend_fed expend_nonfed rd_
+> index
 
-. global ln_y_name "Log Productivity"
+. global vars $overall_fund  $science_fund $rd_type $external_fund_source $othe
+> r_fund body_adj_wt
 
-. global x_name "Cluster Size"
-
-. global ln_x_name "Log Cluster Size"
-
-. global time year 
-
+. 
 . program main
-  1. end
+  1.     merge_data, samp(year_firstlast)
+  2.     merge_data, samp(year)
+  3. end
 
 . 
 . program merge_data
-  1. 
-. 
-. 
-. end
+  1.     syntax, samp(str)
+  2.     use if analysis_cond == 1 & inrange(year, 1945, 2023)  using ../extern
+> al/mover/mover_temp_`samp' , clear  
+  3.     merge m:1 athr_id using ../external/mover/mover_xw_`samp', assert(1 2 
+> 3) keep(3) nogen
+  4.     keep athr_id field year msa_comb impact_cite_affl_wt msa_size which_pl
+> ace inst_id move_year
+  5.     hashsort athr_id year
+  6.     gen rel = year - move_year
+  7.     merge m:1 athr_id move_year using ../external/mover/dest_origin_change
+> s, keep(3) nogen
+  8.     hashsort athr_id year
+  9.     gegen msa = group(msa_comb)
+ 10.     gegen inst = group(inst_id)
+ 11.     gen ln_y = ln(impact_cite_affl_wt)
+ 12.     forval i = 1/18 {
+ 13.         gen lag`i' = 1 if rel == -`i'
+ 14.         gen lead`i' = 1 if rel == `i'
+ 15.     }
+ 16.     ds lead* lag*
+ 17.     foreach var in `r(varlist)' {
+ 18.         replace `var' = 0 if mi(`var')
+ 19.         replace `var' = `var'*inst_ln_y_diff
+ 20.     }
+ 21.     gen treat = inst_ln_y_diff if rel == 0  
+ 22.     replace treat = 0 if mi(treat)
+ 23.     local leads
+ 24.     local lags
+ 25.     forval i = 1/18 {
+ 26.         local leads `leads' lead`i'
+ 27.         local lags lag`i' `lags'
+ 28.     }
+ 29.     gunique athr_id 
+ 30.     local num_movers = r(unique)
+ 31.     mat drop _all
+ 32.     preserve
+ 33.     reghdfe ln_y , absorb(field##year inst_fes = inst msa_fes = msa athr_i
+> d) vce(cluster inst) residuals
+ 34.     reghdfe inst_fes msa_fes, noabsorb
+ 35.     binscatter inst_fes msa_fes
+ 36.     graph export ../output/inst_on_msa.pdf, replace
+ 37.     restore
+ 38.     preserve
+ 39.     reghdfe ln_y , absorb(field##year inst_fes = inst athr_id) vce(cluster
+>  inst) residuals
+ 40.     gcontract inst_id inst_fes
+ 41.     drop _freq
+ 42.     drop if mi(inst_fes)
+ 43.     rename inst_fes b
+ 44.     save ../temp/inst_fes, replace
+ 45.     restore
+ 46.     
+.     reghdfe ln_y  , absorb(field##year msa_fes = inst athr_id) vce(cluster in
+> st) residuals
+ 47.     gcontract msa msa_fes
+ 48.     drop _freq
+ 49.     drop if mi(msa_fes)
+ 50.     rename msa_fes b
+ 51.     save ../temp/msa_fes, replace
+ 52.     
+.     use ../external/samp/athr_panel_full_comb_`samp', clear
+ 53.     gcollapse (sum) body_adj_wt, by(inst_id)
+ 54.     save ../temp/pat_measure, replace 
+ 55. 
+.     import delimited using ../external/rd/herd_2010_2022, clear
+ 56.     merge 1:1 inst_id using ../external/xw/inst_names, assert(2 3) keep(3)
+>  nogen
+ 57.     drop _freq
+ 58.     merge 1:1 inst_id using ../external/xw/herd_oa_xw, assert(2 3) keep(3)
+>  nogen
+ 59.     rename inst_id herd_id
+ 60.     rename matched_oa_inst_id inst_id
+ 61.     save ../temp/merged_data, replace
+ 62. 
+.     merge 1:1 inst_id using ../temp/inst_fes.dta, assert(1 2 3) keep(3) nogen
+ 63.     merge 1:1 inst_id using ../temp/pat_measure.dta, assert(1 2 3) keep(3)
+>  nogen
+ 64.     foreach var in $vars {
+ 65.         qui sum `var', d
+ 66.         replace `var' = (`var'-r(mean))/r(sd) 
+ 67.     }
+ 68.     sum b, d
+ 69.     replace b= (b-r(mean))/r(sd)
+ 70.     foreach var in $vars { 
+ 71.         reg b `var'
+ 72.         estimates store `var'
+ 73.     }
+ 74.     label variable tot_fed_fund "R&D From Federal Gov't ($)" 
+ 75.     label variable tot_bus_fund "R&D From Businesses ($)" 
+ 76.     label variable tot_inst_fund "R&D From Institution ($)" 
+ 77.     label variable tot_state_fund "R&D From State and Local Gov't ($)" 
+ 78.     label variable tot_nonprof_fund "R&D From Nonprofits ($)" 
+ 79.     label variable tot_fund "Total R&D Expenditures ($)" 
+ 80.     
+.     label variable contracts_fund "R&D From Contracts ($)"
+ 81.     label variable grants_fund "R&D From Grants ($)"
+ 82. 
+.     label variable med_sch_expend "Med School R&D ($)"
+ 83.     label variable clin_trial_expend "Clinical Trial R&D ($)"
+ 84.     label variable fed_ls_fund "Life Sciences Federal R&D ($)"
+ 85.     label variable hhs_ls_fund "Life Sciences Expenditures from HHS"
+ 86.     label variable nonfed_ls_fund "Life Sciences Non-Federal R&D ($)"
+ 87.     label variable fed_ls_hs_fund "Health Sciences Expenditures from Feder
+> al Sources"
+ 88.     label variable hhs_ls_hs_fund "Health Sciences Expenditures from HHS"
+ 89.     label variable nonfed_ls_hs_fund "Health Sciences Expenditures from No
+> n-Federal Sources"
+ 90.     label variable fed_ls_bio_fund "Biological and Biomedical Expenditures
+>  from Federal Sources"
+ 91.     label variable hhs_ls_bio_fund "Biological and Biomedical Expenditures
+>  from HHS"
+ 92.     label variable nonfed_ls_bio_fund "Biological and Biomedical Expenditu
+> res from Non-Federal Sources"
+ 93.     label variable ls_fund "Life Sciences R&D ($)"
+ 94.     label variable hs_fund "Health Sciences Expenditures"
+ 95.     label variable bio_fund "Biological and Biomedical Expenditures"
+ 96.     label variable ls_cap_expend "Capitalized Life Sciences Equipment R&D 
+> ($)"
+ 97.     label variable perc_fed_fund_ls "% Life Sciences Spending from Federal
+>  Sources"
+ 98.     label variable perc_hhs_fund_ls "% Life Sciences Spending Spending fro
+> m HHS"
+ 99.     label variable perc_ls_cap "% Capitalized R&D Equipment Spent on Life 
+> Sciences"
+100.     label variable perc_ls_biohs "% Life Sciences Spending that's Health S
+> ciences & Biological and Biomedical"
+101. 
+.     label variable basic_expend "Basic Research R&D ($)"
+102.     label variable basic_fed_expend "Basic Research Federal R&D ($)"
+103.     label variable applied_expend "Applied Research R&D ($)"
+104.     label variable dev_expend "Spending on Experimental Development Resear
+> ch"
+105.     label variable applied_fed_expend "Applied Research Federal R&D ($)"
+106.     label variable dev_expend "Spending on Federal Applied Research"
+107.     label variable perc_expend_basic "% Spent on Basic Research"
+108.     label variable perc_basic_fed "% Basic Research Spending that's Federa
+> l"
+109. 
+.     label variable expend_salaries "R&D Personnel Salaries ($)"
+110.     label variable expend_capital "All Capitalized Equipment R&D ($)"
+111.     label variable expend_fed "Federal $ Spent on Capitalized Equipment"
+112.     label variable expend_nonfed "Nonfederal Federal $ Spent on Capitalize
+> d Equipment"
+113.     label variable perc_sal "% Spent on Salaries"
+114.     label variable perc_cap "% Spent on Capitalized Equipment"
+115.     label variable rd_index "HERD R&D Index"
+116.     label variable body_adj_wt "Prevalence of Fundamental Research Cited i
+> n Patents"
+117. 
+.     coefplot ($overall_fund), drop(_cons) xline(0) title("Sources of R&D Expe
+> nditures", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) 
+118.     graph export ../output/figures/overall_fund_`samp'.pdf, replace
+119.     
+.     coefplot ($external_fund_source), drop(_cons) xline(0) title("Sources of 
+> External Funding", size(small)) xlab(, labsize(small)) ylab(, labsize(small))
+>  
+120.     graph export ../output/figures/external_fund_`samp'.pdf, replace
+121.     
+.     coefplot ($science_fund), drop(_cons) xline(0) title("Science-Related Exp
+> enditures", size(small)) xlab(-0.2(0.05)0.2, labsize(small)) ylab(, labsize(s
+> mall)) 
+122.     graph export ../output/figures/science_fund_`samp'.pdf, replace
+123. 
+.     coefplot ($rd_type), drop(_cons) xline(0) title("R&D Expenditures by Type
+>  of Research", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) 
+124.     graph export ../output/figures/rd_type_`samp'.pdf, replace
+125.     
+.     coefplot ($other_fund), drop(_cons) xline(0) title("Other Spending Statis
+> tics", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) 
+126.     graph export ../output/figures/other_fund_`samp'.pdf, replace
+127. 
+.     coefplot ($vars), drop(_cons) xline(0) title("", size(small)) xlab(, labs
+> ize(vsmall)) ylab(, labsize(vsmall)) 
+128.     graph export ../output/figures/place_correlates_`samp'.pdf, replace
+129. end
 
-. end
-command end is unrecognized
-r(199);
+. ** 
+. main
 
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            74,376  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            48,729  
+    -----------------------------------------
+(45,530 missing values generated)
+(47,327 missing values generated)
+(46,274 missing values generated)
+(47,680 missing values generated)
+(46,868 missing values generated)
+(45,457 missing values generated)
+(47,424 missing values generated)
+(46,598 missing values generated)
+(47,668 missing values generated)
+(46,726 missing values generated)
+(47,987 missing values generated)
+(46,838 missing values generated)
+(48,164 missing values generated)
+(46,984 missing values generated)
+(48,291 missing values generated)
+(47,094 missing values generated)
+(48,354 missing values generated)
+(47,361 missing values generated)
+(48,403 missing values generated)
+(47,370 missing values generated)
+(48,484 missing values generated)
+(47,495 missing values generated)
+(48,500 missing values generated)
+(47,636 missing values generated)
+(48,551 missing values generated)
+(47,692 missing values generated)
+(48,590 missing values generated)
+(47,778 missing values generated)
+(48,602 missing values generated)
+(47,895 missing values generated)
+(48,633 missing values generated)
+(47,991 missing values generated)
+(48,638 missing values generated)
+(48,021 missing values generated)
+(48,645 missing values generated)
+(48,085 missing values generated)
+lead1   lead5   lead9   lead13  lead17  lag3    lag7    lag11   lag15
+lead2   lead6   lead10  lead14  lead18  lag4    lag8    lag12   lag16
+lead3   lead7   lead11  lead15  lag1    lag5    lag9    lag13   lag17
+lead4   lead8   lead12  lead16  lag2    lag6    lag10   lag14   lag18
+(47,327 real changes made)
+(1,402 real changes made)
+(47,680 real changes made)
+(1,049 real changes made)
+(45,457 real changes made)
+(3,272 real changes made)
+(46,598 real changes made)
+(2,131 real changes made)
+(46,726 real changes made)
+(2,003 real changes made)
+(46,838 real changes made)
+(1,891 real changes made)
+(46,984 real changes made)
+(1,745 real changes made)
+(47,094 real changes made)
+(1,635 real changes made)
+(47,361 real changes made)
+(1,368 real changes made)
+(47,370 real changes made)
+(1,359 real changes made)
+(47,495 real changes made)
+(1,234 real changes made)
+(47,636 real changes made)
+(1,093 real changes made)
+(47,692 real changes made)
+(1,037 real changes made)
+(47,778 real changes made)
+(951 real changes made)
+(47,895 real changes made)
+(834 real changes made)
+(47,991 real changes made)
+(738 real changes made)
+(48,021 real changes made)
+(708 real changes made)
+(48,085 real changes made)
+(644 real changes made)
+(45,530 real changes made)
+(3,199 real changes made)
+(46,274 real changes made)
+(2,455 real changes made)
+(46,868 real changes made)
+(1,861 real changes made)
+(47,424 real changes made)
+(1,305 real changes made)
+(47,668 real changes made)
+(1,061 real changes made)
+(47,987 real changes made)
+(742 real changes made)
+(48,164 real changes made)
+(565 real changes made)
+(48,291 real changes made)
+(438 real changes made)
+(48,354 real changes made)
+(375 real changes made)
+(48,403 real changes made)
+(326 real changes made)
+(48,484 real changes made)
+(245 real changes made)
+(48,500 real changes made)
+(229 real changes made)
+(48,551 real changes made)
+(178 real changes made)
+(48,590 real changes made)
+(139 real changes made)
+(48,602 real changes made)
+(127 real changes made)
+(48,633 real changes made)
+(96 real changes made)
+(48,638 real changes made)
+(91 real changes made)
+(48,645 real changes made)
+(84 real changes made)
+(44,694 missing values generated)
+(44,694 real changes made)
+N = 48,729; 11,888 unbalanced groups of sizes 2 to 40
+(dropped 557 singleton observations)
+(MWFE estimator converged in 25 iterations)
+(557 missing values generated)
+
+HDFE Linear regression                            Number of obs   =     48,172
+Absorbing 4 HDFE groups                           F(   0,    613) =          .
+Statistics robust to heteroskedasticity           Prob > F        =          .
+                                                  R-squared       =     0.6454
+                                                  Adj R-squared   =     0.5179
+                                                  Within R-sq.    =     0.0000
+Number of clusters (inst)    =        614         Root MSE        =     1.6469
+
+                                 (Std. err. adjusted for 614 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |  -2.870437   1.63e-11 -1.8e+11   0.000    -2.870437   -2.870437
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+   field#year |       325           0         325     |
+         inst |       614         614           0    *|
+          msa |       152           1         151     |
+      athr_id |     11654           1       11653    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(MWFE estimator converged in 1 iterations)
+note: msa_fes omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =     48,172
+Absorbing 1 HDFE group                            F(   0,  48171) =          .
+                                                  Prob > F        =          .
+                                                  R-squared       =     0.0000
+                                                  Adj R-squared   =     0.0000
+                                                  Within R-sq.    =     0.0000
+                                                  Root MSE        =     0.5026
+
+------------------------------------------------------------------------------
+    inst_fes | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     msa_fes |          0  (omitted)
+       _cons |   1.71e-17   .0022901     0.00   1.000    -.0044885    .0044885
+------------------------------------------------------------------------------
+warning: nquantiles(20) was specified, but only 17 were generated. see help fil
+> e under nquantiles() for explanation.
+file ../output/inst_on_msa.pdf saved as PDF format
+(dropped 557 singleton observations)
+(MWFE estimator converged in 25 iterations)
+(557 missing values generated)
+
+HDFE Linear regression                            Number of obs   =     48,172
+Absorbing 3 HDFE groups                           F(   0,    613) =          .
+Statistics robust to heteroskedasticity           Prob > F        =          .
+                                                  R-squared       =     0.6454
+                                                  Adj R-squared   =     0.5200
+                                                  Within R-sq.    =     0.0000
+Number of clusters (inst)    =        614         Root MSE        =     1.6434
+
+                                 (Std. err. adjusted for 614 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |  -2.870437   1.62e-11 -1.8e+11   0.000    -2.870437   -2.870437
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+   field#year |       325           0         325     |
+         inst |       614         614           0    *|
+      athr_id |     11654           1       11653     |
+------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(433 observations deleted)
+(file ../temp/inst_fes.dta not found)
+file ../temp/inst_fes.dta saved
+(dropped 557 singleton observations)
+(MWFE estimator converged in 25 iterations)
+(557 missing values generated)
+
+HDFE Linear regression                            Number of obs   =     48,172
+Absorbing 3 HDFE groups                           F(   0,    613) =          .
+Statistics robust to heteroskedasticity           Prob > F        =          .
+                                                  R-squared       =     0.6454
+                                                  Adj R-squared   =     0.5200
+                                                  Within R-sq.    =     0.0000
+Number of clusters (inst)    =        614         Root MSE        =     1.6434
+
+                                 (Std. err. adjusted for 614 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |  -2.870437   1.62e-11 -1.8e+11   0.000    -2.870437   -2.870437
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+   field#year |       325           0         325     |
+         inst |       614         614           0    *|
+      athr_id |     11654           1       11653     |
+------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(128 observations deleted)
+(file ../temp/msa_fes.dta not found)
+file ../temp/msa_fes.dta saved
+(file ../temp/pat_measure.dta not found)
+file ../temp/pat_measure.dta saved
+(encoding automatically selected: ISO-8859-1)
+(56 vars, 747 obs)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               747  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               747  
+    -----------------------------------------
+(file ../temp/merged_data.dta not found)
+file ../temp/merged_data.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               204  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               204  
+    -----------------------------------------
+(204 real changes made)
+(204 real changes made)
+(199 real changes made)
+(202 real changes made)
+(199 real changes made)
+(202 real changes made)
+(92 real changes made)
+(123 real changes made)
+(200 real changes made)
+(200 real changes made)
+(196 real changes made)
+(202 real changes made)
+(201 real changes made)
+(203 real changes made)
+(200 real changes made)
+(198 real changes made)
+(204 real changes made)
+(204 real changes made)
+(200 real changes made)
+(200 real changes made)
+(200 real changes made)
+(204 real changes made)
+(204 real changes made)
+
+                         [FE] 1.inst
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -2.519754      -3.554559
+ 5%    -2.088253      -2.668115
+10%    -1.653828      -2.519754       Obs                 204
+25%    -.8071717      -2.488103       Sum of wgt.         204
+
+50%    -.4656929                      Mean           -.488473
+                        Largest       Std. dev.       .828627
+75%    -.0306142       1.447134
+90%     .4361832       1.497628       Variance       .6866226
+95%     .6961442       1.516731       Skewness      -.4732297
+99%     1.497628       1.876118       Kurtosis       4.100885
+(204 real changes made)
+
+      Source |       SS           df       MS      Number of obs   =       204
+-------------+----------------------------------   F(1, 202)       =     24.16
+       Model |  21.6893655         1  21.6893655   Prob > F        =    0.0000
+    Residual |  181.310635       202  .897577399   R-squared       =    0.1068
+-------------+----------------------------------   Adj R-squared   =    0.1024
+       Total |         203       203           1   Root MSE        =    .94741
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    tot_fund |   .3268703   .0664948     4.92   0.000     .1957572    .4579833
+       _cons |   6.79e-11   .0663317     0.00   1.000    -.1307913    .1307913
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       204
+-------------+----------------------------------   F(1, 202)       =     20.02
+       Model |  18.3020662         1  18.3020662   Prob > F        =    0.0000
+    Residual |  184.697934       202  .914346207   R-squared       =    0.0902
+-------------+----------------------------------   Adj R-squared   =    0.0857
+       Total |         203       203           1   Root MSE        =    .95621
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_fed_fund |   .3002631   .0671131     4.47   0.000     .1679311    .4325952
+       _cons |  -1.02e-09   .0669484    -0.00   1.000    -.1320074    .1320074
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       199
+-------------+----------------------------------   F(1, 197)       =     19.05
+       Model |  17.4421232         1  17.4421232   Prob > F        =    0.0000
+    Residual |  180.396956       197   .91572059   R-squared       =    0.0882
+-------------+----------------------------------   Adj R-squared   =    0.0835
+       Total |   197.83908       198   .99918727   Root MSE        =    .95693
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_bus_fund |   .2968022   .0680063     4.36   0.000     .1626885    .4309159
+       _cons |   .0072957   .0678352     0.11   0.914    -.1264806    .1410721
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       202
+-------------+----------------------------------   F(1, 200)       =     17.82
+       Model |  16.1544482         1  16.1544482   Prob > F        =    0.0000
+    Residual |  181.316648       200  .906583241   R-squared       =    0.0818
+-------------+----------------------------------   Adj R-squared   =    0.0772
+       Total |  197.471096       201  .982443265   Root MSE        =    .95215
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_inst_f~d |   .2834967   .0671592     4.22   0.000     .1510657    .4159278
+       _cons |  -.0125603   .0669928    -0.19   0.851    -.1446632    .1195425
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       199
+-------------+----------------------------------   F(1, 197)       =      3.97
+       Model |  3.89510467         1  3.89510467   Prob > F        =    0.0476
+    Residual |  193.164053       197  .980528189   R-squared       =    0.0198
+-------------+----------------------------------   Adj R-squared   =    0.0148
+       Total |  197.059158       198  .995248272   Root MSE        =    .99022
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_state_~d |   .1402578   .0703716     1.99   0.048     .0014794    .2790361
+       _cons |   .0041956   .0701946     0.06   0.952    -.1342336    .1426249
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       202
+-------------+----------------------------------   F(1, 200)       =     24.55
+       Model |  21.6508848         1  21.6508848   Prob > F        =    0.0000
+    Residual |  176.398407       200  .881992036   R-squared       =    0.1093
+-------------+----------------------------------   Adj R-squared   =    0.1049
+       Total |  198.049292       201  .985319861   Root MSE        =    .93914
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_nonpro~d |   .3282009   .0662421     4.95   0.000     .1975783    .4588235
+       _cons |   .0040897    .066078     0.06   0.951    -.1262092    .1343886
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =        92
+-------------+----------------------------------   F(1, 90)        =     23.30
+       Model |  11.3746097         1  11.3746097   Prob > F        =    0.0000
+    Residual |   43.940273        90  .488225255   R-squared       =    0.2056
+-------------+----------------------------------   Adj R-squared   =    0.1968
+       Total |  55.3148826        91  .607855853   Root MSE        =    .69873
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+med_sch_ex~d |   .3535473   .0732469     4.83   0.000     .2080295    .4990651
+       _cons |   .1389561   .0728478     1.91   0.060    -.0057687    .2836809
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       123
+-------------+----------------------------------   F(1, 121)       =      4.85
+       Model |  2.92381469         1  2.92381469   Prob > F        =    0.0295
+    Residual |  72.8990202       121  .602471241   R-squared       =    0.0386
+-------------+----------------------------------   Adj R-squared   =    0.0306
+       Total |  75.8228349       122  .621498646   Root MSE        =    .77619
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+clin_trial~d |   .1548086    .070273     2.20   0.029     .0156847    .2939324
+       _cons |   .0653758   .0699867     0.93   0.352    -.0731813     .203933
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       200
+-------------+----------------------------------   F(1, 198)       =     22.31
+       Model |  19.4406011         1  19.4406011   Prob > F        =    0.0000
+    Residual |  172.542946       198  .871429022   R-squared       =    0.1013
+-------------+----------------------------------   Adj R-squared   =    0.0967
+       Total |  191.983547       199  .964741445   Root MSE        =     .9335
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ fed_ls_fund |   .3125563   .0661743     4.72   0.000     .1820594    .4430532
+       _cons |  -.0028469   .0660087    -0.04   0.966    -.1330172    .1273233
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       200
+-------------+----------------------------------   F(1, 198)       =     19.61
+       Model |  17.3004626         1  17.3004626   Prob > F        =    0.0000
+    Residual |  174.683085       198  .882237803   R-squared       =    0.0901
+-------------+----------------------------------   Adj R-squared   =    0.0855
+       Total |  191.983547       199  .964741445   Root MSE        =    .93928
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+nonf~ls_fund |   .2948508   .0665835     4.43   0.000     .1635471    .4261545
+       _cons |  -.0028469   .0664168    -0.04   0.966     -.133822    .1281281
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       196
+-------------+----------------------------------   F(1, 194)       =     23.24
+       Model |  19.8789559         1  19.8789559   Prob > F        =    0.0000
+    Residual |  165.939092       194  .855356144   R-squared       =    0.1070
+-------------+----------------------------------   Adj R-squared   =    0.1024
+       Total |  185.818048       195  .952913066   Root MSE        =    .92485
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ls_cap_exp~d |   .3192857   .0662302     4.82   0.000      .188662    .4499094
+       _cons |  -.0013945    .066061    -0.02   0.983    -.1316845    .1288956
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       202
+-------------+----------------------------------   F(1, 200)       =     25.67
+       Model |  22.2917502         1  22.2917502   Prob > F        =    0.0000
+    Residual |  173.656347       200  .868281736   R-squared       =    0.1138
+-------------+----------------------------------   Adj R-squared   =    0.1093
+       Total |  195.948097       201  .974866156   Root MSE        =    .93182
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+basic_expend |   .3330229   .0657253     5.07   0.000     .2034195    .4626263
+       _cons |   .0064785   .0655624     0.10   0.921    -.1228036    .1357607
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       201
+-------------+----------------------------------   F(1, 199)       =     22.24
+       Model |  19.6945791         1  19.6945791   Prob > F        =    0.0000
+    Residual |  176.227865       199  .885567162   R-squared       =    0.1005
+-------------+----------------------------------   Adj R-squared   =    0.0960
+       Total |  195.922444       200  .979612222   Root MSE        =    .94105
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+basic_fed_~d |   .3138039    .066542     4.72   0.000      .182586    .4450218
+       _cons |   .0072734   .0663763     0.11   0.913    -.1236177    .1381645
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       203
+-------------+----------------------------------   F(1, 201)       =     11.07
+       Model |  10.5914873         1  10.5914873   Prob > F        =    0.0010
+    Residual |  192.395983       201  .957193948   R-squared       =    0.0522
+-------------+----------------------------------   Adj R-squared   =    0.0475
+       Total |  202.987471       202  1.00488847   Root MSE        =    .97836
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+applied_ex~d |   .2289828   .0688374     3.33   0.001     .0932467    .3647188
+       _cons |     .00055   .0686676     0.01   0.994    -.1348513    .1359514
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       200
+-------------+----------------------------------   F(1, 198)       =      9.53
+       Model |  9.20950441         1  9.20950441   Prob > F        =    0.0023
+    Residual |  191.382767       198  .966579631   R-squared       =    0.0459
+-------------+----------------------------------   Adj R-squared   =    0.0411
+       Total |  200.592271       199  1.00800136   Root MSE        =    .98315
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+applied_fe~d |   .2151253   .0696935     3.09   0.002     .0776885    .3525621
+       _cons |   .0048378    .069519     0.07   0.945    -.1322549    .1419306
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       198
+-------------+----------------------------------   F(1, 196)       =      6.41
+       Model |  6.22655367         1  6.22655367   Prob > F        =    0.0121
+    Residual |   190.44865       196  .971676788   R-squared       =    0.0317
+-------------+----------------------------------   Adj R-squared   =    0.0267
+       Total |  196.675204       197   .99835129   Root MSE        =    .98574
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+contracts_~d |   .1777832   .0702308     2.53   0.012     .0392781    .3162883
+       _cons |   .0052927   .0700533     0.08   0.940    -.1328622    .1434476
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       204
+-------------+----------------------------------   F(1, 202)       =     28.78
+       Model |  25.3161264         1  25.3161264   Prob > F        =    0.0000
+    Residual |  177.683874       202  .879623137   R-squared       =    0.1247
+-------------+----------------------------------   Adj R-squared   =    0.1204
+       Total |         203       203           1   Root MSE        =    .93788
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ grants_fund |    .353143   .0658264     5.36   0.000     .2233479    .4829381
+       _cons |   3.41e-11   .0656649     0.00   1.000    -.1294766    .1294766
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       204
+-------------+----------------------------------   F(1, 202)       =     21.71
+       Model |  19.6980647         1  19.6980647   Prob > F        =    0.0000
+    Residual |  183.301935       202  .907435323   R-squared       =    0.0970
+-------------+----------------------------------   Adj R-squared   =    0.0926
+       Total |         203       203           1   Root MSE        =    .95259
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+expend_sal~s |   .3115041    .066859     4.66   0.000      .179673    .4433351
+       _cons |  -5.59e-10   .0666949    -0.00   1.000    -.1315075    .1315075
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       200
+-------------+----------------------------------   F(1, 198)       =     15.63
+       Model |  14.2853692         1  14.2853692   Prob > F        =    0.0001
+    Residual |  181.008336       198  .914183514   R-squared       =    0.0731
+-------------+----------------------------------   Adj R-squared   =    0.0685
+       Total |  195.293705       199  .981375401   Root MSE        =    .95613
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+expend_cap~l |   .2679287   .0677782     3.95   0.000     .1342688    .4015885
+       _cons |   .0006938   .0676086     0.01   0.992    -.1326315     .134019
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       200
+-------------+----------------------------------   F(1, 198)       =     14.43
+       Model |  13.2623578         1  13.2623578   Prob > F        =    0.0002
+    Residual |  182.031347       198  .919350237   R-squared       =    0.0679
+-------------+----------------------------------   Adj R-squared   =    0.0632
+       Total |  195.293705       199  .981375401   Root MSE        =    .95883
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+  expend_fed |    .258157   .0679695     3.80   0.000       .12412     .392194
+       _cons |   .0006938   .0677993     0.01   0.992    -.1330077    .1343952
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       200
+-------------+----------------------------------   F(1, 198)       =     11.53
+       Model |  10.7447392         1  10.7447392   Prob > F        =    0.0008
+    Residual |  184.548966       198  .932065483   R-squared       =    0.0550
+-------------+----------------------------------   Adj R-squared   =    0.0502
+       Total |  195.293705       199  .981375401   Root MSE        =    .96544
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+expend_non~d |   .2323654   .0684379     3.40   0.001     .0974046    .3673261
+       _cons |   .0006937   .0682666     0.01   0.992    -.1339292    .1353167
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       204
+-------------+----------------------------------   F(1, 202)       =     25.19
+       Model |  22.5052156         1  22.5052156   Prob > F        =    0.0000
+    Residual |  180.494784       202  .893538537   R-squared       =    0.1109
+-------------+----------------------------------   Adj R-squared   =    0.1065
+       Total |         203       203           1   Root MSE        =    .94527
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    rd_index |   .3329612   .0663451     5.02   0.000     .2021435    .4637789
+       _cons |   1.03e-09   .0661823     0.00   1.000    -.1304967    .1304967
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       204
+-------------+----------------------------------   F(1, 202)       =     18.19
+       Model |  16.7683716         1  16.7683716   Prob > F        =    0.0000
+    Residual |  186.231628       202  .921938754   R-squared       =    0.0826
+-------------+----------------------------------   Adj R-squared   =    0.0781
+       Total |         203       203           1   Root MSE        =    .96018
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ body_adj_wt |   .2874071   .0673912     4.26   0.000     .1545267    .4202874
+       _cons |  -6.87e-19   .0672258    -0.00   1.000    -.1325543    .1325543
+------------------------------------------------------------------------------
+file ../output/figures/overall_fund_year_firstlast.pdf saved as PDF format
+file ../output/figures/external_fund_year_firstlast.pdf saved as PDF format
+file ../output/figures/science_fund_year_firstlast.pdf saved as PDF format
+file ../output/figures/rd_type_year_firstlast.pdf saved as PDF format
+file ../output/figures/other_fund_year_firstlast.pdf saved as PDF format
+file ../output/figures/place_correlates_year_firstlast.pdf saved as PDF
+    format
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           195,307  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           173,825  
+    -----------------------------------------
+(161,866 missing values generated)
+(167,111 missing values generated)
+(164,450 missing values generated)
+(168,432 missing values generated)
+(166,758 missing values generated)
+(159,958 missing values generated)
+(168,660 missing values generated)
+(165,347 missing values generated)
+(169,890 missing values generated)
+(166,217 missing values generated)
+(170,928 missing values generated)
+(166,949 missing values generated)
+(171,652 missing values generated)
+(167,688 missing values generated)
+(172,188 missing values generated)
+(168,377 missing values generated)
+(172,532 missing values generated)
+(169,148 missing values generated)
+(172,811 missing values generated)
+(169,504 missing values generated)
+(173,000 missing values generated)
+(169,986 missing values generated)
+(173,138 missing values generated)
+(170,428 missing values generated)
+(173,266 missing values generated)
+(170,781 missing values generated)
+(173,358 missing values generated)
+(171,050 missing values generated)
+(173,441 missing values generated)
+(171,408 missing values generated)
+(173,513 missing values generated)
+(171,621 missing values generated)
+(173,540 missing values generated)
+(171,839 missing values generated)
+(173,594 missing values generated)
+(172,011 missing values generated)
+lead1   lead5   lead9   lead13  lead17  lag3    lag7    lag11   lag15
+lead2   lead6   lead10  lead14  lead18  lag4    lag8    lag12   lag16
+lead3   lead7   lead11  lead15  lag1    lag5    lag9    lag13   lag17
+lead4   lead8   lead12  lead16  lag2    lag6    lag10   lag14   lag18
+(167,111 real changes made)
+(6,714 real changes made)
+(168,432 real changes made)
+(5,393 real changes made)
+(159,958 real changes made)
+(13,867 real changes made)
+(165,347 real changes made)
+(8,478 real changes made)
+(166,217 real changes made)
+(7,608 real changes made)
+(166,949 real changes made)
+(6,876 real changes made)
+(167,688 real changes made)
+(6,137 real changes made)
+(168,377 real changes made)
+(5,448 real changes made)
+(169,148 real changes made)
+(4,677 real changes made)
+(169,504 real changes made)
+(4,321 real changes made)
+(169,986 real changes made)
+(3,839 real changes made)
+(170,428 real changes made)
+(3,397 real changes made)
+(170,781 real changes made)
+(3,044 real changes made)
+(171,050 real changes made)
+(2,775 real changes made)
+(171,408 real changes made)
+(2,417 real changes made)
+(171,621 real changes made)
+(2,204 real changes made)
+(171,839 real changes made)
+(1,986 real changes made)
+(172,011 real changes made)
+(1,814 real changes made)
+(161,866 real changes made)
+(11,959 real changes made)
+(164,450 real changes made)
+(9,375 real changes made)
+(166,758 real changes made)
+(7,067 real changes made)
+(168,660 real changes made)
+(5,165 real changes made)
+(169,890 real changes made)
+(3,935 real changes made)
+(170,928 real changes made)
+(2,897 real changes made)
+(171,652 real changes made)
+(2,173 real changes made)
+(172,188 real changes made)
+(1,637 real changes made)
+(172,532 real changes made)
+(1,293 real changes made)
+(172,811 real changes made)
+(1,014 real changes made)
+(173,000 real changes made)
+(825 real changes made)
+(173,138 real changes made)
+(687 real changes made)
+(173,266 real changes made)
+(559 real changes made)
+(173,358 real changes made)
+(467 real changes made)
+(173,441 real changes made)
+(384 real changes made)
+(173,513 real changes made)
+(312 real changes made)
+(173,540 real changes made)
+(285 real changes made)
+(173,594 real changes made)
+(231 real changes made)
+(158,121 missing values generated)
+(158,121 real changes made)
+N = 173,825; 43,207 unbalanced groups of sizes 2 to 43
+(dropped 1034 singleton observations)
+(MWFE estimator converged in 25 iterations)
+(1,034 missing values generated)
+
+HDFE Linear regression                            Number of obs   =    172,791
+Absorbing 4 HDFE groups                           F(   0,   1281) =          .
+Statistics robust to heteroskedasticity           Prob > F        =          .
+                                                  R-squared       =     0.5616
+                                                  Adj R-squared   =     0.4090
+                                                  Within R-sq.    =     0.0000
+Number of clusters (inst)    =      1,282         Root MSE        =     1.8585
+
+                               (Std. err. adjusted for 1,282 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |  -3.525152   1.97e-11 -1.8e+11   0.000    -3.525152   -3.525152
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+   field#year |       340           0         340     |
+         inst |      1282        1282           0    *|
+          msa |       193           1         192     |
+      athr_id |     42795           1       42794    ?|
+------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+(MWFE estimator converged in 1 iterations)
+note: msa_fes omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =    172,791
+Absorbing 1 HDFE group                            F(   0, 172790) =          .
+                                                  Prob > F        =          .
+                                                  R-squared       =    -0.0000
+                                                  Adj R-squared   =    -0.0000
+                                                  Within R-sq.    =     0.0000
+                                                  Root MSE        =     0.5050
+
+------------------------------------------------------------------------------
+    inst_fes | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     msa_fes |          0  (omitted)
+       _cons |  -2.01e-16   .0012148    -0.00   1.000     -.002381     .002381
+------------------------------------------------------------------------------
+warning: nquantiles(20) was specified, but only 16 were generated. see help fil
+> e under nquantiles() for explanation.
+file ../output/inst_on_msa.pdf saved as PDF format
+(dropped 1034 singleton observations)
+(MWFE estimator converged in 25 iterations)
+(1,034 missing values generated)
+
+HDFE Linear regression                            Number of obs   =    172,791
+Absorbing 3 HDFE groups                           F(   0,   1281) =          .
+Statistics robust to heteroskedasticity           Prob > F        =          .
+                                                  R-squared       =     0.5616
+                                                  Adj R-squared   =     0.4099
+                                                  Within R-sq.    =     0.0000
+Number of clusters (inst)    =      1,282         Root MSE        =     1.8571
+
+                               (Std. err. adjusted for 1,282 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |  -3.525152   1.97e-11 -1.8e+11   0.000    -3.525152   -3.525152
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+   field#year |       340           0         340     |
+         inst |      1282        1282           0    *|
+      athr_id |     42795           1       42794     |
+------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(802 observations deleted)
+file ../temp/inst_fes.dta saved
+(dropped 1034 singleton observations)
+(MWFE estimator converged in 25 iterations)
+(1,034 missing values generated)
+
+HDFE Linear regression                            Number of obs   =    172,791
+Absorbing 3 HDFE groups                           F(   0,   1281) =          .
+Statistics robust to heteroskedasticity           Prob > F        =          .
+                                                  R-squared       =     0.5616
+                                                  Adj R-squared   =     0.4099
+                                                  Within R-sq.    =     0.0000
+Number of clusters (inst)    =      1,282         Root MSE        =     1.8571
+
+                               (Std. err. adjusted for 1,282 clusters in inst)
+------------------------------------------------------------------------------
+             |               Robust
+        ln_y | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |  -3.525152   1.97e-11 -1.8e+11   0.000    -3.525152   -3.525152
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+------------------------------------------------------+
+  Absorbed FE | Categories  - Redundant  = Num. Coefs |
+--------------+---------------------------------------|
+   field#year |       340           0         340     |
+         inst |      1282        1282           0    *|
+      athr_id |     42795           1       42794     |
+------------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+(160 observations deleted)
+file ../temp/msa_fes.dta saved
+file ../temp/pat_measure.dta saved
+(encoding automatically selected: ISO-8859-1)
+(56 vars, 747 obs)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               747  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               747  
+    -----------------------------------------
+file ../temp/merged_data.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               297  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                               297  
+    -----------------------------------------
+(297 real changes made)
+(297 real changes made)
+(280 real changes made)
+(288 real changes made)
+(278 real changes made)
+(292 real changes made)
+(103 real changes made)
+(151 real changes made)
+(286 real changes made)
+(285 real changes made)
+(280 real changes made)
+(294 real changes made)
+(293 real changes made)
+(291 real changes made)
+(287 real changes made)
+(284 real changes made)
+(297 real changes made)
+(297 real changes made)
+(291 real changes made)
+(291 real changes made)
+(291 real changes made)
+(297 real changes made)
+(297 real changes made)
+
+                         [FE] 1.inst
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -4.054976       -5.42636
+ 5%    -2.836189      -4.446522
+10%    -2.016253      -4.054976       Obs                 297
+25%     -1.12104       -4.00239       Sum of wgt.         297
+
+50%    -.4854825                      Mean          -.6201717
+                        Largest       Std. dev.      1.112404
+75%    -.0635677       2.190678
+90%     .5952738        2.25391       Variance       1.237442
+95%     1.150062       2.527548       Skewness      -.6580587
+99%      2.25391       2.658308       Kurtosis       5.125486
+(297 real changes made)
+
+      Source |       SS           df       MS      Number of obs   =       297
+-------------+----------------------------------   F(1, 295)       =     20.05
+       Model |   18.837883         1   18.837883   Prob > F        =    0.0000
+    Residual |  277.162117       295    .9395326   R-squared       =    0.0636
+-------------+----------------------------------   Adj R-squared   =    0.0605
+       Total |         296       296           1   Root MSE        =    .96929
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    tot_fund |   .2522727   .0563391     4.48   0.000     .1413951    .3631502
+       _cons |   2.07e-10   .0562442     0.00   1.000    -.1106907    .1106907
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       297
+-------------+----------------------------------   F(1, 295)       =     16.11
+       Model |  15.3287232         1  15.3287232   Prob > F        =    0.0001
+    Residual |  280.671277       295  .951428057   R-squared       =    0.0518
+-------------+----------------------------------   Adj R-squared   =    0.0486
+       Total |         296       296           1   Root MSE        =    .97541
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_fed_fund |   .2275659   .0566947     4.01   0.000     .1159886    .3391431
+       _cons |  -1.48e-10   .0565991    -0.00   1.000    -.1113892    .1113892
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       280
+-------------+----------------------------------   F(1, 278)       =     15.83
+       Model |     14.2959         1     14.2959   Prob > F        =    0.0001
+    Residual |  251.049521       278  .903055832   R-squared       =    0.0539
+-------------+----------------------------------   Adj R-squared   =    0.0505
+       Total |  265.345421       279  .951058858   Root MSE        =    .95029
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_bus_fund |   .2263621   .0568925     3.98   0.000     .1143672    .3383569
+       _cons |  -.0005329   .0567908    -0.01   0.993    -.1123276    .1112618
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       288
+-------------+----------------------------------   F(1, 286)       =     17.68
+       Model |  15.9920812         1  15.9920812   Prob > F        =    0.0000
+    Residual |  258.638965       286  .904332044   R-squared       =    0.0582
+-------------+----------------------------------   Adj R-squared   =    0.0549
+       Total |  274.631046       287  .956902599   Root MSE        =    .95096
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_inst_f~d |   .2360541   .0561336     4.21   0.000     .1255667    .3465415
+       _cons |   .0026586   .0560361     0.05   0.962    -.1076368     .112954
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       278
+-------------+----------------------------------   F(1, 276)       =      4.47
+       Model |  3.77464567         1  3.77464567   Prob > F        =    0.0353
+    Residual |  232.814237       276  .843529844   R-squared       =    0.0160
+-------------+----------------------------------   Adj R-squared   =    0.0124
+       Total |  236.588883       277   .85411149   Root MSE        =    .91844
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_state_~d |   .1167342   .0551836     2.12   0.035     .0080999    .2253685
+       _cons |   .0235161   .0550843     0.43   0.670    -.0849226    .1319549
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       292
+-------------+----------------------------------   F(1, 290)       =     20.52
+       Model |  19.2256211         1  19.2256211   Prob > F        =    0.0000
+    Residual |  271.736371       290  .937021971   R-squared       =    0.0661
+-------------+----------------------------------   Adj R-squared   =    0.0629
+       Total |  290.961993       291   .99986939   Root MSE        =      .968
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+tot_nonpro~d |   .2570359   .0567451     4.53   0.000     .1453514    .3687203
+       _cons |   .0080266   .0566479     0.14   0.887    -.1034664    .1195197
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       103
+-------------+----------------------------------   F(1, 101)       =     21.01
+       Model |   9.7475114         1   9.7475114   Prob > F        =    0.0000
+    Residual |  46.8641742       101  .464001724   R-squared       =    0.1722
+-------------+----------------------------------   Adj R-squared   =    0.1640
+       Total |  56.6116855       102  .555016525   Root MSE        =    .68118
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+med_sch_ex~d |    .309134   .0674465     4.58   0.000     .1753382    .4429298
+       _cons |   .1248335   .0671183     1.86   0.066    -.0083112    .2579782
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       151
+-------------+----------------------------------   F(1, 149)       =      3.34
+       Model |  2.12638444         1  2.12638444   Prob > F        =    0.0697
+    Residual |  94.8945394       149  .636876103   R-squared       =    0.0219
+-------------+----------------------------------   Adj R-squared   =    0.0154
+       Total |  97.0209239       150  .646806159   Root MSE        =    .79805
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+clin_trial~d |   .1190626   .0651601     1.83   0.070    -.0096947    .2478198
+       _cons |   .1043291    .064944     1.61   0.110    -.0240011    .2326593
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       286
+-------------+----------------------------------   F(1, 284)       =     16.93
+       Model |  15.4566567         1  15.4566567   Prob > F        =    0.0001
+    Residual |   259.34523       284  .913187429   R-squared       =    0.0562
+-------------+----------------------------------   Adj R-squared   =    0.0529
+       Total |  274.801887       285  .964217146   Root MSE        =    .95561
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ fed_ls_fund |   .2328817   .0566054     4.11   0.000     .1214624     .344301
+       _cons |   .0126402   .0565063     0.22   0.823    -.0985841    .1238645
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       285
+-------------+----------------------------------   F(1, 283)       =     17.31
+       Model |  15.6086293         1  15.6086293   Prob > F        =    0.0000
+    Residual |  255.212195       283  .901809875   R-squared       =    0.0576
+-------------+----------------------------------   Adj R-squared   =    0.0543
+       Total |  270.820824       284   .95359445   Root MSE        =    .94964
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+nonf~ls_fund |   .2344354   .0563506     4.16   0.000      .123516    .3453549
+       _cons |   .0059169   .0562516     0.11   0.916    -.1048078    .1166416
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       280
+-------------+----------------------------------   F(1, 278)       =     18.07
+       Model |  16.5066034         1  16.5066034   Prob > F        =    0.0000
+    Residual |  253.900252       278   .91331026   R-squared       =    0.0610
+-------------+----------------------------------   Adj R-squared   =    0.0577
+       Total |  270.406856       279    .9692002   Root MSE        =    .95567
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ls_cap_exp~d |   .2432354   .0572146     4.25   0.000     .1306065    .3558643
+       _cons |   .0038613   .0571124     0.07   0.946    -.1085663    .1162889
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       294
+-------------+----------------------------------   F(1, 292)       =     19.11
+       Model |  18.0911251         1  18.0911251   Prob > F        =    0.0000
+    Residual |  276.490434       292  .946885049   R-squared       =    0.0614
+-------------+----------------------------------   Adj R-squared   =    0.0582
+       Total |  294.581559       293  1.00539781   Root MSE        =    .97308
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+basic_expend |   .2484843    .056848     4.37   0.000     .1366006     .360368
+       _cons |   .0012518   .0567512     0.02   0.982    -.1104414     .112945
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       293
+-------------+----------------------------------   F(1, 291)       =     16.22
+       Model |  15.4849349         1  15.4849349   Prob > F        =    0.0001
+    Residual |  277.857918       291  .954838206   R-squared       =    0.0528
+-------------+----------------------------------   Adj R-squared   =    0.0495
+       Total |  293.342853       292  1.00459881   Root MSE        =    .97716
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+basic_fed_~d |   .2302837   .0571839     4.03   0.000     .1177373    .3428301
+       _cons |   .0050439   .0570862     0.09   0.930    -.1073103     .117398
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       291
+-------------+----------------------------------   F(1, 289)       =     11.84
+       Model |   10.845119         1   10.845119   Prob > F        =    0.0007
+    Residual |  264.823041       289  .916342702   R-squared       =    0.0393
+-------------+----------------------------------   Adj R-squared   =    0.0360
+       Total |   275.66816       290  .950579861   Root MSE        =    .95726
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+applied_ex~d |   .1933829   .0562121     3.44   0.001     .0827459      .30402
+       _cons |   .0065151   .0561155     0.12   0.908    -.1039317    .1169619
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       287
+-------------+----------------------------------   F(1, 285)       =      9.17
+       Model |  8.57036704         1  8.57036704   Prob > F        =    0.0027
+    Residual |  266.270671       285  .934283057   R-squared       =    0.0312
+-------------+----------------------------------   Adj R-squared   =    0.0278
+       Total |  274.841038       286  .960982652   Root MSE        =    .96658
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+applied_fe~d |   .1731078   .0571553     3.03   0.003     .0606078    .2856078
+       _cons |   .0063647   .0570556     0.11   0.911    -.1059391    .1186685
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       284
+-------------+----------------------------------   F(1, 282)       =      6.02
+       Model |  5.90988004         1  5.90988004   Prob > F        =    0.0147
+    Residual |  276.685295       282  .981153528   R-squared       =    0.0209
+-------------+----------------------------------   Adj R-squared   =    0.0174
+       Total |  282.595175       283  .998569523   Root MSE        =    .99053
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+contracts_~d |   .1445094    .058881     2.45   0.015     .0286073    .2604115
+       _cons |  -.0046799   .0587773    -0.08   0.937    -.1203778    .1110179
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       297
+-------------+----------------------------------   F(1, 295)       =     22.17
+       Model |  20.6934302         1  20.6934302   Prob > F        =    0.0000
+    Residual |   275.30657       295   .93324261   R-squared       =    0.0699
+-------------+----------------------------------   Adj R-squared   =    0.0668
+       Total |         296       296           1   Root MSE        =    .96604
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ grants_fund |   .2644054   .0561502     4.71   0.000     .1538997    .3749112
+       _cons |  -4.68e-10   .0560556    -0.00   1.000    -.1103196    .1103196
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       297
+-------------+----------------------------------   F(1, 295)       =     18.54
+       Model |  17.5048887         1  17.5048887   Prob > F        =    0.0000
+    Residual |  278.495111       295  .944051225   R-squared       =    0.0591
+-------------+----------------------------------   Adj R-squared   =    0.0559
+       Total |         296       296           1   Root MSE        =    .97162
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+expend_sal~s |   .2431833   .0564744     4.31   0.000     .1320395    .3543272
+       _cons |  -2.50e-10   .0563793    -0.00   1.000    -.1109566    .1109566
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       291
+-------------+----------------------------------   F(1, 289)       =     12.89
+       Model |  12.5786068         1  12.5786068   Prob > F        =    0.0004
+    Residual |  282.025058       289  .975865251   R-squared       =    0.0427
+-------------+----------------------------------   Adj R-squared   =    0.0394
+       Total |  294.603664       290   1.0158747   Root MSE        =    .98786
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+expend_cap~l |   .2082655   .0580091     3.59   0.000     .0940916    .3224393
+       _cons |  -.0021804   .0579093    -0.04   0.970    -.1161579    .1117971
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       291
+-------------+----------------------------------   F(1, 289)       =     11.21
+       Model |  10.9966157         1  10.9966157   Prob > F        =    0.0009
+    Residual |  283.607049       289  .981339269   R-squared       =    0.0373
+-------------+----------------------------------   Adj R-squared   =    0.0340
+       Total |  294.603664       290   1.0158747   Root MSE        =    .99063
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+  expend_fed |    .194729   .0581715     3.35   0.001     .0802353    .3092226
+       _cons |  -.0021804   .0580715    -0.04   0.970    -.1164771    .1121163
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       291
+-------------+----------------------------------   F(1, 289)       =     10.48
+       Model |   10.306694         1   10.306694   Prob > F        =    0.0013
+    Residual |   284.29697       289  .983726541   R-squared       =    0.0350
+-------------+----------------------------------   Adj R-squared   =    0.0316
+       Total |  294.603664       290   1.0158747   Root MSE        =    .99183
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+expend_non~d |   .1885214   .0582423     3.24   0.001     .0738886    .3031542
+       _cons |  -.0021804   .0581421    -0.04   0.970     -.116616    .1122553
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       297
+-------------+----------------------------------   F(1, 295)       =     20.01
+       Model |  18.8065507         1  18.8065507   Prob > F        =    0.0000
+    Residual |  277.193449       295  .939638811   R-squared       =    0.0635
+-------------+----------------------------------   Adj R-squared   =    0.0604
+       Total |         296       296           1   Root MSE        =    .96935
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    rd_index |   .2520628   .0563423     4.47   0.000      .141179    .3629466
+       _cons |   3.42e-10   .0562474     0.00   1.000     -.110697     .110697
+------------------------------------------------------------------------------
+
+      Source |       SS           df       MS      Number of obs   =       297
+-------------+----------------------------------   F(1, 295)       =     15.49
+       Model |  14.7632339         1  14.7632339   Prob > F        =    0.0001
+    Residual |  281.236766       295   .95334497   R-squared       =    0.0499
+-------------+----------------------------------   Adj R-squared   =    0.0467
+       Total |         296       296           1   Root MSE        =    .97639
+
+------------------------------------------------------------------------------
+           b | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ body_adj_wt |   .2233289   .0567517     3.94   0.000     .1116393    .3350185
+       _cons |  -2.84e-17   .0566561    -0.00   1.000    -.1115014    .1115014
+------------------------------------------------------------------------------
+file ../output/figures/overall_fund_year.pdf saved as PDF format
+file ../output/figures/external_fund_year.pdf saved as PDF format
+file ../output/figures/science_fund_year.pdf saved as PDF format
+file ../output/figures/rd_type_year.pdf saved as PDF format
+file ../output/figures/other_fund_year.pdf saved as PDF format
+file ../output/figures/place_correlates_year.pdf saved as PDF format
+
+. 
 end of do-file
-r(199);
 
+--------------------------------------------------------------------------------
+Makelog ended: 2024-09-25 01:28:42
+Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/place_correlates/code
+--------------------------------------------------------------------------------
