@@ -209,7 +209,7 @@ program top_insts
     hashsort msa_rank rank
     qui count
     li msa_comb inst wt_prod 
-    mkmat wt_prod , mat(inst_msa_if_wt_`athr'`jrnls')
+    mkmat wt_prod , mat(inst_msa_`athr'`jrnls')
     qui save ../temp/inst_in_msa_rank_`athr'`jrnls', replace
     restore
 end
@@ -219,9 +219,10 @@ program output_tables
     syntax, samp(str) athr(str) 
     local jrnls = ""
     if "`samp'" == "cns" local jrnls "_cns"
-    foreach file in top_inst top_msa_comb inst_msa {
-        cap qui matrix_to_txt, saving("../output/tables/`file'_if_wt_`athr'`jrnls'.txt") matrix(`file'_if_wt_`athr'`jrnls')  ///
-           title(<tab:`file'_if_wt_`athr'`jrnls'>) format(%20.4f) replace
+    cap mat state_msa_`athr'`jrnls' = top_us_state_`athr'`jrnls' \ top_msa_comb_`athr'`jrnls' 
+    foreach file in top_inst inst_msa state_msa {
+        cap qui matrix_to_txt, saving("../output/tables/`file'_`athr'`jrnls'.txt") matrix(`file'_`athr'`jrnls')  ///
+           title(<tab:`file'_`athr'`jrnls'>) format(%20.4f) replace
          }
  end
 ** 
