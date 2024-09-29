@@ -6,7 +6,6 @@ set scheme modern
 graph set window fontface "Arial Narrow"
 pause on
 set seed 8975
-global year_insts "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_output"
 global y_name "Productivity"
 global pat_adj_wt_name "Patent-to-Paper Citations"
 global ln_patent_name "Log Patent-to-Paper Citations"
@@ -23,8 +22,8 @@ program main
     bys athr_id: egen num_moves = total(place_count)
     bys athr_id (year): gen which_place = sum(place_count)
     by athr_id: gen athr_counter =  _n == 1
-    *replace num_moves = num_moves-1
     bys athr_id (year) : gen move_year = year if place_count == 1  & _n != 1
+    replace move_year = move_year - 3
     bys athr_id : egen first_pub_yr  = min(year)
     gcontract athr_id  move_year  num_moves first_pub_yr
     drop _freq
@@ -32,13 +31,13 @@ program main
     drop if num_moves <= 0
     save ../temp/movers, replace
 
-    foreach t in year_firstlast  {
+    foreach t in year_firstlast year year_firstlast_cns {
         qui make_movers, samp(`t')
         qui sum_stats, samp(`t')
         qui output_tables, samp(`t')
         qui make_dest_origin, samp(`t')
-        qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1)
-        qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(star_inst_ln_y_diff)
+        qui event_study, samp(`t') timeframe(8) ymax(1) ygap(0.1)
+        qui event_study, samp(`t') timeframe(8) ymax(1) ygap(0.1) delta(star_inst_ln_y_diff)
         qui event_study, samp(`t') timeframe(8) startyr(1945) endyr(1980) ymax(1) ygap(0.1)
         qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) ymax(1) ygap(0.1)
         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) ymax(1) ygap(0.1)
@@ -54,7 +53,6 @@ program make_movers
     bys athr_id: egen num_moves = total(place_count)
     bys athr_id (year): gen which_place = sum(place_count)
     bys athr_id: gen athr_counter =  _n == 1
-    *replace num_moves = num_moves-1
     gen mover = num_moves > 0 
     tab num_moves if athr_counter == 1 & mover == 1
     tab mover if athr_counter == 1
@@ -62,10 +60,6 @@ program make_movers
     tab mover if athr_year_counter == 1
     replace which_place = which_place + 1
     replace which_place = 0 if mover == 0
-    *replace which_place = 1 if which_place == 0 & mover == 1
-    *bys athr_id: egen min_which_place =min(which_place)
-    *replace which_place = which_place + 1 if mover == 1 & min_which_place == 0
-    *drop min_which_place
     hashsort athr_id year 
     bys athr_id (year): gen origin = 1 if which_place == 1
     gen dest = place_count == 1 & origin != 1 & mover == 1
@@ -210,14 +204,16 @@ program make_dest_origin
             local stem = subinstr("`var'", "avg_","",.)
             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - `var'
         }
-        qui sum `var'_diff
-        local N = r(N)
-        local mean : dis %3.2f r(mean)
-        local sd : dis %3.2f r(sd)
-        tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) xtitle("`type' ${`stem'_name}", size(vsmall)) color(edkblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (Movers) = `N'" ///
-                                                        "Mean = `mean'" ///
-                                                        "            (`sd')") pos(1) ring(0) size(vsmall) region(fcolo(none)))
-        graph export ../output/figures/`var'_diff_`samp'.pdf, replace
+        if "`var'" == "inst_ln_y" | "`var'" == "star_inst_ln_y" {
+            qui sum `var'_diff
+            local N = r(N)
+            local mean : dis %3.2f r(mean)
+            local sd : dis %3.2f r(sd)
+            tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall)) xtitle("`type' ${`stem'_name}", size(vsmall)) color(edkblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (Movers) = `N'" ///
+                                                            "Mean = `mean'" ///
+                                                            "            (`sd')") pos(1) ring(0) size(vsmall) region(fcolo(none)))
+            graph export ../output/figures/`var'_diff_`samp'.pdf, replace
+        }
     }
 
     reg avg_ln_y_diff inst_ln_y_diff  
@@ -358,12 +354,15 @@ program event_study
         replace lb = -1 if lb < -1
         replace ub = 1 if ub > 1
 		save ../temp/es_coefs_`startyr'_`endyr'_`samp'`suf', replace
-        tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(vsmall) || scatter b rel if se !=0 | rel == -1, msize(small) mcolor(ebblue%50) xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
-          yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
-          legend(on order(- "N (Movers) = `num_movers'" ///
-                                                            "Pre-period mean = `pre_mean'" ///
-                                                            "Post-period mean = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
-        graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf, replace
+        if "`cond'" == "" {
+            tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(vsmall) || scatter b rel if se !=0 | rel == -1, msize(small) mcolor(ebblue%50) xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+              yline(0, lcolor(black) lpattern(solid)) xline(-0.5, lcolor(gs12) lpattern(dash))  ///
+              legend(on order(- "N (Movers) = `num_movers'" ///
+                                                                "Pre-period mean = `pre_mean'" ///
+                                                                "Post-period mean = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
+            graph export ../output/figures/es`startyr'_`endyr'_`samp'`suf'.pdf, replace
+
+        }
         restore
     }
 	gunique athr_id if l2h_move== 1
@@ -420,7 +419,7 @@ program event_study
 	replace cat = "old" if mi(cat)
 	replace rel = rel + 0.09 if cat == "old"
 	tw rcap ub lb rel if rel != -1.09 & cat == "young",  lcolor(lavender%70) msize(vsmall) || ///
-	   scatter b rel if cat == "young" & rel > -8, mcolor(lavender%70) msize(small)|| ///
+	   scatter b rel if cat == "young" & rel > -7, mcolor(lavender%70) msize(small)|| ///
 	   rcap ub lb rel if rel != -0.91 & cat == "old",  lcolor(orange%70) msize(vsmall) || ///
 	   scatter b rel if cat == "old", mcolor(orange%70) msymbol(smdiamond) msize(small) /// 
 	   xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
@@ -497,23 +496,29 @@ program coathr_locs
     }
     gen rel = year - move_year
     gcollapse (mean) share*, by(rel)
-    tw line share_origin_inst rel if inrange(rel,-10,10), lcolor(lavender%70) ||  ///
-        line share_dest_inst rel if inrange(rel,-10,10), lcolor(orange%70) , ///
+    tw (line share_origin_inst rel if inrange(rel,-10,10), lcolor(lavender%70))  ///
+        (line share_dest_inst rel if inrange(rel,-10,10), lcolor(orange%70))   ///
+        (scatteri 1 3 0 3, recast(line) lwidth(vthin) lpattern(dash) lcolor(ebblue))  ///
+        (scatteri 1 -0.5 0 -0.5, recast(line) lwidth(vthin) lpattern(dash) lcolor(gs12)),  ///
         xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) ///
         xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-authors", size(vsmall)) ///
-        legend(on order(1 "Co-authors from Origin Institution" 2 "Co-authors from Destination Institution") pos(1) ring(0) size(vsmall) region(fcolor(none))) 
+        legend(on order(1 "Co-authors from Origin Institution" 2 "Co-authors from Destination Institution" 3 "First Publication Affiliated with Destination" 4 "Move") pos(11) ring(0) size(vsmall) region(fcolor(none))) 
     graph export ../output/figures/coauthor_same_inst.pdf, replace
-    tw line share_origin_msa rel if inrange(rel,-10,10), lcolor(lavender%70) ||  ///
-        line share_dest_msa rel if inrange(rel,-10,10), lcolor(orange%70) , ///
+    tw (line share_origin_msa rel if inrange(rel,-10,10), lcolor(lavender%70))  ///
+        (line share_dest_msa rel if inrange(rel,-10,10), lcolor(orange%70))  ///
+        (scatteri 1 3 0 3, recast(line) lwidth(vthin) lpattern(dash) lcolor(ebblue))  ///
+        (scatteri 1 -0.5 0 -0.5, recast(line) lwidth(vthin) lpattern(dash) lcolor(gs12)),  ///
         xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) ///
         xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-authors", size(vsmall)) ///
-        legend(on order(1 "Co-authors from Origin City" 2 "Co-authors from Destination City") pos(1) ring(0) size(vsmall) region(fcolor(none))) 
+        legend(on order(1 "Co-authors from Origin City" 2 "Co-authors from Destination City" 3 "First Publication Affiliated with Destination" 4 "Move") pos(11) ring(0) size(vsmall) region(fcolor(none))) 
     graph export ../output/figures/coauthor_same_msa.pdf, replace
-    tw line share_inst rel if inrange(rel,-10,10), lcolor(lavender%70) ||  ///
-        line share_msa rel if inrange(rel,-10,10), lcolor(orange%70) , ///
+    tw (line share_inst rel if inrange(rel,-10,10), lcolor(lavender%70)) ||  ///
+        (line share_msa rel if inrange(rel,-10,10), lcolor(orange%70)) ///
+        (scatteri 1 3 0 3, recast(line) lwidth(vthin) lpattern(dash) lcolor(ebblue))  ///
+        (scatteri 1 -0.5 0 -0.5, recast(line) lwidth(vthin) lpattern(dash) lcolor(gs12)),  ///
         xlabel(-10(1)10, labsize(vsmall)) ylabel(0(0.1)1, labsize(vsmall)) ///
         xtitle("Relative Year to Move", size(vsmall)) ytitle("Share of co-authors", size(vsmall)) ///
-        legend(on order(1 "Co-authors from Same Institution" 2 "Co-authors from Same City") pos(1) ring(0) size(vsmall) region(fcolor(none))) 
+        legend(on order(1 "Co-authors from Same Institution" 2 "Co-authors from Same City" 3 "First Publication Affiliated with Destination" 4 "Move") pos(11) ring(0) size(vsmall) region(fcolor(none))) 
     graph export ../output/figures/coauthor_same_geo.pdf, replace
 end
 ** 
