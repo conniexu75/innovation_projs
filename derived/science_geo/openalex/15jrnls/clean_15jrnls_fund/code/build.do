@@ -10,10 +10,10 @@ set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_openalex"
 
 program main
-    *aggregate_insts
+    aggregate_insts
     foreach samp in 15jrnls {
-        *clean_titles, samp(`samp')
-        *clean_samps, samp(`samp')
+        clean_titles, samp(`samp')
+        clean_samps, samp(`samp')
         clean_mesh, samp(`samp')
         clean_concepts, samp(`samp')
     }
@@ -93,6 +93,8 @@ program aggregate_insts
     replace new_inst_id = "I111979921" if new_inst == "Northwestern University"
     replace new_inst = "Harvard University" if inlist(inst, "Harvard Global Health Institute", "Harvard Pilgrim Health Care", "Harvard Affiliated Emergency Medicine Residency", "Harvard NeuroDiscovery Center")
     replace new_inst_id = "I136199984" if new_inst == "Harvard University"
+    replace new_inst = "University of California, San Francisco" if inlist(inst, "Ernest Gallo Clinic and Research Center") 
+    replace new_inst_id = "I180670191" if new_inst == "University of California, San Francisco"
     // health systems
     replace new_inst = "University of Virginia" if strpos(inst, "University of Virginia") > 0 & (strpos(inst, "Hospital") >0 | strpos(inst, "Medical")>0 | strpos(inst, "Health")>0)
     replace new_inst_id = "I51556381" if new_inst == "University of Virginia"
@@ -102,15 +104,27 @@ program aggregate_insts
     replace new_inst_id = "I157394403" if new_inst == "Baylor University"
     replace new_inst = "Columbia University" if strpos(inst, "Columbia University Irving Medical Center")>0
     replace new_inst_id = "I78577930" if new_inst == "Columbia University"
+    replace new_inst = "Yale University" if strpos(inst, "Yale New Haven Health System")>0 | strpos(inst, "Yale New Haven Hospital")>0
+    replace new_inst_id = "I32971472" if new_inst == "Yale University"
+    replace new_inst = "University of Florida" if strpos(inst, "UF Health")>0 | strpos(inst, "Florida Medical Entomology Laboratory")>0
+    replace new_inst_id = "I33213144" if new_inst == "University of Florida"
+    replace new_inst = "University of Wisconsin–Madison" if strpos(inst, "University of Wisconsin Carbone Cancer Center")>0 | strpos(inst, "UW Health")>0
+    replace new_inst_id = "I135310074" if new_inst == "University of Wisconsin–Madison"
     gen edit = 0
-    foreach s in "Health System" "Clinic" "Hospital" "Medical Center" {
+    // agencies
+    replace new_inst = "National Institute of Standards and Technology" if associated == "National Institute of Standards and Technology" &associated_rel == "parent"
+    replace new_inst_id = "I1321296531" if new_inst ==  "National Institute of Standards and Technology"
+    replace new_inst = "Allen Institute" if associated == "Allen Institute" & associated_rel == "parent"
+    replace new_inst = "Allen Institute" if inst == "Allen Institute for Artificial Intelligence"
+    replace new_inst_id = "I4210140341" if new_inst ==  "Allen Institute"
+    foreach s in "Health System" "Clinic" "Hospital of the"  "Hospital" "Medical Center" {
         replace new_inst = subinstr(inst, "`s'", "", .) if (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 & edit == 0 & country_code == "US"
         replace edit = 1 if  (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 &  country_code == "US"
     }
     replace new_inst = strtrim(new_inst)
     bys new_inst (edit) : replace new_inst_id = new_inst_id[_n-1] if edit == 1 & !mi(new_inst_id[_n-1])  & city == city[_n-1]
-    replace new_inst = associated if !mi(associated) & mi(new_inst) & has_parent == 1 & type == "facility" & associated_type == "education"
-    replace new_inst_id = associated_id if !mi(associated_id) & mi(new_inst_id) & has_parent == 1 & type == "facility" & associated_type == "education"
+    replace new_inst = associated if !mi(associated) & mi(new_inst) & has_parent == 1 & inlist("facility", "other", "nonprofit", "healthcare") & associated_type == "education"
+    replace new_inst_id = associated_id if !mi(associated_id) & mi(new_inst_id) & has_parent == 1 &  inlist("facility", "other", "nonprofit", "healthcare") & associated_type == "education"
     replace new_inst = inst if mi(new_inst)
     replace new_inst_id = inst_id if mi(new_inst_id)
     gduplicates tag inst_id, gen(dup)
