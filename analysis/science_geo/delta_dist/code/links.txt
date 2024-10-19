@@ -1,0 +1,3 @@
+./inst/ | /export/projects4/achandra_basicscience/analysis/science_geo/mover_analysis/output
+./city/ | /export/projects4/achandra_basicscience/analysis/science_geo/city_mover_analysis/output
+
