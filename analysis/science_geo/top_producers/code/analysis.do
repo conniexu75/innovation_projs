@@ -17,23 +17,23 @@ program main
     global msatitle_name "MSAs"
     global msa_comb_name "MSAs"
     global msa_world_name "cities"
-    global msa_c_world_name "cities"
+    global msa_name "cities"
     di "OUTPUT START"
     foreach athr_type in first_last all {
     if "`athr_type'" == "first_last" local fol "fl"
     if "`athr_type'" == "all" local fol "all"
         foreach var in impact_cite_affl_wt body_adj_wt {
-            di "CNS: `var'"
-            athr_loc, data(newfund) samp(cns) wt_var(`var') fol(`fol')
-            qui trends, data(newfund) samp(cns) wt_var(`var') fol(`fol')
+            *di "CNS: `var'"
+            *athr_loc, data(newfund) samp(cns) wt_var(`var') fol(`fol')
+            *qui trends, data(newfund) samp(cns) wt_var(`var') fol(`fol')
             di "ALL: `var'"
-            athr_loc, data(all) samp(jrnls) wt_var(`var') fol(`fol')
-            qui trends, data(all) samp(jrnls) wt_var(`var') fol(`fol')
+            athr_loc, data(all) samp(15jrnls) wt_var(`var') fol(`fol')
+            qui trends, data(all) samp(15jrnls) wt_var(`var') fol(`fol')
         }
-        qui output_tables, data(newfund) samp(cns) fol(`fol')
-        qui output_tables, data(all) samp(jrnls) fol(`fol')
+        *qui output_tables, data(newfund) samp(cns) fol(`fol')
+        qui output_tables, data(all) samp(15jrnls) fol(`fol')
     }
-    top_mesh_terms, data(all) samp(jrnls) 
+    top_mesh_terms, data(all) samp(15jrnls) 
 end
 
 program athr_loc
@@ -46,10 +46,17 @@ program athr_loc
     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
     if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
     if "`wt_var'" == "body_adj_wt" local suf "_body"
-    use ../external/`fol'/cleaned_last5yrs_`data'_`samp', clear 
+    if "`data'" == "all" {
+         use ../external/`fol'/cleaned_last5yrs_`samp', clear
+    }
+    else if "`data'" != "all" {
+         use ../external/`fol'/cleaned_last5yrs_`data'_`samp', clear
+     }
+     cap drop msa
+     rename msa_c_world msa_c
     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
     local end 20
-    foreach loc in country msa_c_world inst {
+    foreach loc in country { //msa_c inst {
         if "`loc'" == "inst" & ("`wt_var'" != "pat_adj_wt" & "`wt_var'" != "body_adj_wt") {
             local end 50
         }
@@ -81,7 +88,7 @@ program athr_loc
 *        mat top_`loc'_`data'_`samp' = nullmat(top_`loc'_`data'_`samp') , (top_`loc'_`samp'`suf')
         qui levelsof `loc' in 1/2
         global top2_`loc'_`data' "`r(levels)'"
-        if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "msaworld", "msa_c_world") {
+        if inlist("`loc'", "inst", "city_full", "msatitle","msa_comb", "msaworld", "msa_c") {
             qui levelsof `loc' in 1/`rank_end'
             global `loc'_`data' "`r(levels)'"
         }
@@ -107,7 +114,12 @@ end
 program calc_broad_hhmi
    syntax, data(str) samp(str) fol(str)
    local athr = cond("`fol'" == "fl", "", "_all")
-   use if inrange(year, 1945, 2022) using ../external/`fol'/cleaned_last5yrs_`data'_`samp', clear
+    if "`data'" == "all" {
+         use if inrange(year, 1945, 2023) using ../external/`fol'/cleaned_last5yrs_`samp', clear
+    }
+    else if "`data'" != "all" {
+         use if inrange(year, 1945, 2023) using ../external/`fol'/cleaned_last5yrs_`data'_`samp', clear
+   }
    replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
    qui gunique pmid which_athr
    local num_athrs = r(unique)
@@ -159,7 +171,12 @@ program trends
     if "`wt_var'" == "pat_adj_wt" local suf "_pat"
     if "`wt_var'" == "frnt_adj_wt" local suf "_frnt"
     if "`wt_var'" == "body_adj_wt" local suf "_body"
-    use if inrange(year, 1945, 2022)  using ../external/`fol'/cleaned_all_`data'_`samp', clear
+    if "`data'" == "all" {
+         use if inrange(year, 1945, 2023) using ../external/`fol'/cleaned_all_`samp', clear
+    }
+    else if "`data'" != "all" {
+         use if inrange(year, 1945, 2023) using ../external/`fol'/cleaned_all_`data'_`samp', clear
+    }
     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
     cap drop counter
 
@@ -167,7 +184,7 @@ program trends
     replace msa_world = city if country != "United States"
     qui bys pmid year: gen counter = _n == 1
     qui bys year: egen tot_in_yr = total(counter)
-    foreach loc in country  msa_c_world inst {
+    foreach loc in country  { //msa_c inst {
         preserve
         if inlist("`loc'", "us_state", "area", "msatitle", "msa_comb") {
             qui keep if country == "United States"
@@ -180,7 +197,8 @@ program trends
         }
         qui sum year
         local min_year = max(1945,r(min))
-        qui egen year_bin  = cut(year), at(1945(3)2023) 
+        gen year_bin = 1945 + 4 * floor((year - 1945) / 4)
+        *qui egen year_bin  = cut(year), at(1945(2)2024) 
         keep if !mi(`loc')
         local year_var year_bin
         
@@ -204,7 +222,7 @@ program trends
         qui replace tot = round(tot)
         assert tot==100
         qui drop tot
-        if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "msa_world" |  "`loc'" == "msa_c_world" | "`loc'" == "msa_comb" {
+        if "`loc'" == "city_full" | "`loc'" == "msatitle" | "`loc'" == "msa_world" |  "`loc'" == "msa_c" | "`loc'" == "msa_comb" {
             label define rank_grp 1 ${`loc'_first} 2 ${`loc'_second} 3 "Remaining top 10" 4 "Remaining places" 
         }
         if "`loc'" == "inst" {
@@ -282,7 +300,7 @@ program trends
             qui graph export ../output/figures/`loc'_stacked_`data'_`samp'`suf'`athr'.pdf , replace 
         }
         local w = 27 
-        if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_c_world" | "`loc'" == "msa_comb") local w = 27 
+        if ("`loc'" == "msatitle" | "`loc'" == "msa_world" | "`loc'" == "msa_c" | "`loc'" == "msa_comb") local w = 27 
         if "`loc'" != "country" {
             graph tw `stacklines' (scatter labely `year_var' if `year_var' ==2023, ms(smcircle) ///
               msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
@@ -298,7 +316,7 @@ end
 program top_mesh_terms
     syntax, data(str) samp(str) 
     foreach mesh in gen_mesh {
-        use ../external/mesh/contracted_`mesh'_`data'_`samp', clear
+        use ../external/mesh/contracted_`mesh'_`samp', clear
         gunique pmid
         local total_articles = r(unique)
         qui bys pmid: gen wt = 1/_N
@@ -330,13 +348,13 @@ end
 program output_tables
     syntax, data(str) samp(str) fol(str)
     local athr = cond("`fol'" == "fl", "", "_all")
-    cap mat if_comb`athr' = top_country_jrnls_if_wt`athr' \ top_msa_c_world_jrnls_if_wt`athr'
+    cap mat if_comb`athr' = top_country_jrnls_if_wt`athr' \ top_msa_c_jrnls_if_wt`athr'
     cap matrix_to_txt, saving("../output/tables/if_comb`athr'.txt") matrix(if_comb`athr') title(<tab:if_comb`athr'>) format(%20.4f) replace
-    cap mat body_comb`athr' = top_country_jrnls_body`athr' \ top_msa_c_world_jrnls_body`athr' \ top_inst_jrnls_body`athr'
+    cap mat body_comb`athr' = top_country_jrnls_body`athr' \ top_msa_c_jrnls_body`athr' \ top_inst_jrnls_body`athr'
     cap matrix_to_txt, saving("../output/tables/body_comb`athr'.txt") matrix(body_comb`athr') title(<tab:body_comb`athr'>) format(%20.4f) replace
-    cap mat if_comb_cns`athr' = top_country_cns_if_wt`athr' \ top_msa_c_world_cns_if_wt`athr'
+    cap mat if_comb_cns`athr' = top_country_cns_if_wt`athr' \ top_msa_c_cns_if_wt`athr'
     cap matrix_to_txt, saving("../output/tables/if_comb_cns`athr'.txt") matrix(if_comb_cns`athr') title(<tab:if_comb_cns`athr'>) format(%20.4f) replace
-    cap mat body_comb_cns`athr' = top_country_cns_body`athr' \ top_msa_c_world_cns_body`athr' \ top_inst_cns_body`athr'
+    cap mat body_comb_cns`athr' = top_country_cns_body`athr' \ top_msa_c_cns_body`athr' \ top_inst_cns_body`athr'
     cap matrix_to_txt, saving("../output/tables/body_comb_cns`athr'.txt") matrix(body_comb_cns`athr') title(<tab:body_comb_cns`athr'>) format(%20.4f) replace
     foreach file in top_inst {
         cap qui matrix_to_txt, saving("../output/tables/`file'_`samp'_wt`athr'.txt") matrix(`file'_`samp'_wt`athr') ///

@@ -1,4 +1,4 @@
-./fl/ | /export/scratch/cxu_sci_geo/create_first_last/
-./all/ | /export/scratch/cxu_sci_geo/clean_openalex_output/
-./mesh/  |  /export/scratch/cxu_sci_geo/clean_openalex_output/
+./fl/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/create_first_last_15jrnls/output/
+./all/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output/
+./mesh/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output/
 

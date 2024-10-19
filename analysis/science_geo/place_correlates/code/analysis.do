@@ -15,14 +15,13 @@ global vars $overall_fund  $science_fund $rd_type $external_fund_source $other_f
 
 program main
     merge_data, samp(year_firstlast)
-    merge_data, samp(year)
 end
 
 program merge_data
     syntax, samp(str)
     use if analysis_cond == 1 & inrange(year, 1945, 2023)  using ../external/mover/mover_temp_`samp' , clear  
     merge m:1 athr_id using ../external/mover/mover_xw_`samp', assert(1 2 3) keep(3) nogen
-    keep athr_id field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year
+    keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year first_pub_yr
     hashsort athr_id year
     gen rel = year - move_year
     merge m:1 athr_id move_year using ../external/mover/dest_origin_changes, keep(3) nogen
@@ -30,48 +29,61 @@ program merge_data
     gegen msa = group(msa_comb)
     gegen inst = group(inst_id)
     gen ln_y = ln(impact_cite_affl_wt)
-    forval i = 1/18 {
+    local timeframe 8
+    forval i = 1/`timeframe' {
         gen lag`i' = 1 if rel == -`i'
         gen lead`i' = 1 if rel == `i'
+        gen int_lag`i' = 1 if rel == -`i'
+        gen int_lead`i' = 1 if rel == `i'
     }
-    ds lead* lag*
+    ds int_lead* int_lag*
     foreach var in `r(varlist)' {
         replace `var' = 0 if mi(`var')
         replace `var' = `var'*inst_ln_y_diff
     }
-    gen treat = inst_ln_y_diff if rel == 0  
+    ds lead* lag*
+    foreach var in `r(varlist)' {
+        replace `var' = 0 if mi(`var')
+    }
+    gen int_treat = inst_ln_y_diff if rel == 0  
+    gen treat = 1 if rel == 0  
+    replace int_treat = 0 if mi(int_treat)
     replace treat = 0 if mi(treat)
     local leads
+    local int_leads
     local lags
-    forval i = 1/18 {
+    local int_lags
+    forval i = 1/`timeframe' {
         local leads `leads' lead`i'
+        local int_leads `int_leads' int_lead`i'
+    }
+    forval i = 2/`timeframe' {
         local lags lag`i' `lags'
+        local int_lags int_lag`i' `int_lags'
     }
     gunique athr_id 
-    local num_movers = r(unique)
     mat drop _all
+    reghdfe ln_y `lags' `leads' lag1 treat `int_lags' int_treat `int_leads' int_lag1  if inrange(rel,-8,8) , absorb(year field field#year athr_fes = athr_id) vce(cluster inst)
+    preserve
+    gcollapse (mean) ln_y athr_fes, by(athr_id)
+    gen ind_diff = ln_y - athr_fes
+    save ../temp/ind_diff, replace
+    restore
+    preserve
+    bys inst_id : egen place_avg = mean(ln_y)
+    merge m:1 athr_id using ../temp/ind_diff, assert(3) nogen
+    bys inst_id : egen ind_avg = mean(ind_diff)
+    gcontract inst_id ind_avg place_avg
+    gen b  = place_avg-ind_avg
+    save ../temp/inst_fes, replace
+    restore
+
     preserve
     reghdfe ln_y , absorb(field##year inst_fes = inst msa_fes = msa athr_id) vce(cluster inst) residuals
     reghdfe inst_fes msa_fes, noabsorb
     binscatter inst_fes msa_fes
     graph export ../output/inst_on_msa.pdf, replace
     restore
-    preserve
-    reghdfe ln_y , absorb(field##year inst_fes = inst athr_id) vce(cluster inst) residuals
-    gcontract inst_id inst_fes
-    drop _freq
-    drop if mi(inst_fes)
-    rename inst_fes b
-    save ../temp/inst_fes, replace
-    restore
-    
-    reghdfe ln_y  , absorb(field##year msa_fes = inst athr_id) vce(cluster inst) residuals
-    gcontract msa msa_fes
-    drop _freq
-    drop if mi(msa_fes)
-    rename msa_fes b
-    save ../temp/msa_fes, replace
-    
     use ../external/samp/athr_panel_full_comb_`samp', clear
     gcollapse (sum) body_adj_wt, by(inst_id)
     save ../temp/pat_measure, replace 
@@ -79,11 +91,10 @@ program merge_data
     import delimited using ../external/rd/herd_2010_2022, clear
     merge 1:1 inst_id using ../external/xw/inst_names, assert(2 3) keep(3) nogen
     drop _freq
-    merge 1:1 inst_id using ../external/xw/herd_oa_xw, assert(2 3) keep(3) nogen
+    merge 1:1 inst_id using ../external/xw/herd_oa_xw, assert(1 2 3) keep(3) nogen
     rename inst_id herd_id
     rename matched_oa_inst_id inst_id
     save ../temp/merged_data, replace
-
     merge 1:1 inst_id using ../temp/inst_fes.dta, assert(1 2 3) keep(3) nogen
     merge 1:1 inst_id using ../temp/pat_measure.dta, assert(1 2 3) keep(3) nogen
     foreach var in $vars {

@@ -25,6 +25,7 @@ program main
     bys athr_id: gen athr_counter =  _n == 1
     replace num_moves = num_moves-1
     bys athr_id (year) : gen move_year = year if place_count == 1  & _n != 1
+    replace move_year = move_year - 3
     bys athr_id : egen first_pub_yr  = min(year)
     gcontract athr_id  move_year  num_moves first_pub_yr
     drop _freq
@@ -147,6 +148,7 @@ program make_dest_origin
     replace year = move_year if which_place == 2
     merge m:1 inst_id year using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
     merge m:1 msa_comb year using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x pre_msa_ln_x post_msa_ln_x msa_ln_y)
+    save ../output/delta_dist_msa, replace
     hashsort athr_id which_place year
     foreach var in avg_ln_x avg_ln_y inst_ln_y inst_ln_x msa_ln_x msa_ln_y msa_wo_inst {
         if strpos("`var'", "avg_") == 0 {

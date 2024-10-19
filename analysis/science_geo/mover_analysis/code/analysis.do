@@ -15,25 +15,27 @@ global ln_x_name "Log Cluster Size"
 global time year 
 
 program main
-    use ../external/year_insts/filled_in_panel_${time}, clear
-    keep if country_code == "US"
-    hashsort athr_id year
-    gen place_count =  1 if inst_id != inst_id[_n-1] & athr_id == athr_id[_n-1] //&  msa_comb != msa_comb[_n-1]
-    bys athr_id: egen num_moves = total(place_count)
-    bys athr_id (year): gen which_place = sum(place_count)
-    by athr_id: gen athr_counter =  _n == 1
-    bys athr_id (year) : gen move_year = year if place_count == 1  & _n != 1
-    replace move_year = move_year - 3
-    bys athr_id : egen first_pub_yr  = min(year)
-    gcontract athr_id  move_year  num_moves first_pub_yr
-    drop _freq
-    drop if mi(move_year)
-    drop if num_moves <= 0
-    save ../temp/movers, replace
-
+    qui {
+        use ../external/year_insts/filled_in_panel_${time}, clear
+        keep if country_code == "US"
+        hashsort athr_id year
+        gen place_count =  1 if inst_id != inst_id[_n-1] & athr_id == athr_id[_n-1] //&  msa_comb != msa_comb[_n-1]
+        bys athr_id: egen num_moves = total(place_count)
+        bys athr_id (year): gen which_place = sum(place_count)
+        by athr_id: gen athr_counter =  _n == 1
+        bys athr_id (year) : gen move_year = year if place_count == 1  & _n != 1
+        replace move_year = move_year - 3
+        bys athr_id : egen first_pub_yr  = min(year)
+        gcontract athr_id  move_year  num_moves first_pub_yr
+        drop _freq
+        drop if mi(move_year)
+        drop if num_moves <= 0
+        save ../temp/movers, replace
+    }
     foreach t in year_firstlast year year_firstlast_cns {
+        di "SAMP: `t'"
         qui make_movers, samp(`t')
-        qui sum_stats, samp(`t')
+        sum_stats, samp(`t')
         qui output_tables, samp(`t')
         qui make_dest_origin, samp(`t')
         qui event_study, samp(`t') timeframe(8) ymax(1) ygap(0.1)
@@ -42,7 +44,7 @@ program main
         qui event_study, samp(`t') timeframe(8) startyr(1980) endyr(1995) ymax(1) ygap(0.1)
         qui event_study, samp(`t') timeframe(8) startyr(1995) endyr(2023) ymax(1) ygap(0.1)
     }
-    coathr_locs, samp(year_firstlast)
+    qui coathr_locs, samp(year_firstlast)
 end
 
 program make_movers
@@ -193,6 +195,7 @@ program make_dest_origin
     merge m:1 inst_id year using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
     merge m:1 msa_comb year using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x pre_msa_ln_x post_msa_ln_x)
     hashsort athr_id which_place year
+    save ../output/make_delta_figs_inst_`samp', replace
     foreach var in avg_ln_x avg_ln_y inst_ln_y inst_ln_x msa_ln_x star_inst_ln_y {
         if strpos("`var'", "avg_") == 0 {
             local type "Destination-Origin Difference in"

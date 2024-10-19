@@ -1,4 +1,5 @@
 ./mover/ | /export/projects4/achandra_basicscience/analysis/science_geo/mover_analysis/temp
+./fes/ | /export/projects4/achandra_basicscience/analysis/science_geo/mover_analysis/output
 ./herd/ | /export/projects4/achandra_basicscience/derived/science_geo/nsf/clean_herd/output
 ./xw/ | /export/projects4/achandra_basicscience/derived/science_geo/nsf/clean_herd/temp
 ./rd/ | /export/projects4/achandra_basicscience/derived/science_geo/nsf/pca/output 
