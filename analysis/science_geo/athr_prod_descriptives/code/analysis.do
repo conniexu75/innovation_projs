@@ -22,10 +22,11 @@ program main
     di "OUTPUT START"
     foreach athr_type in year_firstlast year {
         di "ALL: impact_cite_affl_wt"
-        athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) 
-        top_insts, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) 
-        di "CNS: impact_cite_affl_wt"
-        athr_loc, athr(`athr_type') samp(cns) wt_var(impact_cite_affl_wt) 
+        athr_loc, athr(`athr_type') samp(all) wt_var(body_adj_wt) 
+        top_insts, athr(`athr_type') samp(all) wt_var(body_adj_wt) 
+        di "CNS: body_adj_wt"
+        athr_loc, athr(`athr_type') samp(cns) wt_var(body_adj_wt) 
+        top_insts, athr(`athr_type') samp(cns) wt_var(body_adj_wt) 
         output_tables, athr(`athr_type') samp(cns)
         output_tables, athr(`athr_type') samp(all) 
         map, athr(`athr_type') samp(all) 
@@ -220,7 +221,8 @@ program output_tables
     local jrnls = ""
     if "`samp'" == "cns" local jrnls "_cns"
     cap mat state_msa_`athr'`jrnls' = top_us_state_`athr'`jrnls' \ top_msa_comb_`athr'`jrnls' 
-    foreach file in top_inst inst_msa state_msa {
+    cap mat all_`athr'`jrnls' = top_us_state_`athr'`jrnls' \ top_msa_comb_`athr'`jrnls'  \ top_inst_`athr'`jrnls'
+    foreach file in top_inst inst_msa state_msa all {
         cap qui matrix_to_txt, saving("../output/tables/`file'_`athr'`jrnls'.txt") matrix(`file'_`athr'`jrnls')  ///
            title(<tab:`file'_`athr'`jrnls'>) format(%20.4f) replace
          }
