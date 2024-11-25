@@ -7,22 +7,24 @@ pause on
 set seed 8975
 
 program main
-    foreach t in year { 
-        create_mesh_xw, time(`t')
-        make_panel, time(`t') firstlast(1)
-        make_panel, time(`t') 
+    foreach s in 15jrnls newfund_cns {
+        foreach t in year { 
+            create_mesh_xw, time(`t') samp(`s')
+            make_panel, time(`t') firstlast(1) samp(`s')
+            make_panel, time(`t') samp(`s')
+        }
     }
 end
 
 program create_mesh_xw
-    syntax, time(string)
-    use id pmid athr_id athr_name year pub_date using ../external/openalex/cleaned_all_15jrnls, clear
+    syntax, time(string) samp(str)
+    use id pmid athr_id athr_name year pub_date using ../external/openalex/cleaned_all_`samp', clear
     gen qrtr = qofd(pub_date)
     gcontract id athr_id `time' 
     drop _freq
-    save ../temp/athr_pmid_xw_`time', replace
-    use ../external/openalex/concepts_15jrnls.dta, clear
-    joinby id using  ../temp/athr_pmid_xw_`time'
+    save ../temp/athr_pmid_xw_`time'_`samp', replace
+    use ../external/openalex/concepts_`samp'.dta, clear
+    joinby id using  ../temp/athr_pmid_xw_`time'_`samp'
     cap destring score, replace
     preserve
     collapse (sum) score , by(athr_id `time' term)
@@ -32,10 +34,10 @@ program create_mesh_xw
     by athr_id `time' : gen which = _n
     drop score drop
     reshape wide term, i(athr_id `time') j(which)
-    save ../temp/athr_concept_`time', replace
+    save ../temp/athr_concept_`time'_`samp', replace
     restore
-    use ../external/openalex/contracted_gen_mesh_15jrnls.dta, clear
-    joinby id using  ../temp/athr_pmid_xw_`time'
+    use ../external/openalex/contracted_gen_mesh_`samp'.dta, clear
+    joinby id using  ../temp/athr_pmid_xw_`time'_`samp'
     preserve
     gcontract athr_id qualifier `time'
     hashsort athr_id `time' -_freq
@@ -44,7 +46,7 @@ program create_mesh_xw
     by athr_id `time' : gen which = _n
     drop _freq drop
     reshape wide qualifier, i(athr_id `time') j(which)
-    save ../temp/athr_qualifier_`time', replace
+    save ../temp/athr_qualifier_`time'_`samp', replace
     restore
     preserve
     gcontract athr_id gen_mesh `time'
@@ -54,12 +56,12 @@ program create_mesh_xw
     by athr_id `time' : gen which = _n
     drop _freq drop
     reshape wide gen_mesh, i(athr_id `time') j(which)
-    save ../temp/athr_mesh_`time', replace
+    save ../temp/athr_mesh_`time'_`samp', replace
     restore
 end
 
 program make_panel
-    syntax, time(string) [, firstlast(int 0)]
+    syntax, time(string) samp(str) [, firstlast(int 0)] 
     import delimited ../external/clusters/text4.csv, clear
     drop cluster_name
     replace athr_id = subinstr(athr_id, "A", "", .)
@@ -71,12 +73,15 @@ program make_panel
     bys athr_id (year): replace cluster_label = cluster_label[_n-1] if mi(cluster_label) & !mi(cluster_label[_n-1])
     save ../temp/clusters, replace
 
-    use id pmid which_athr which_affl pub_date year jrnl cite_count athr_id athr_name impact_fctr country_code msa_comb msa_c_world inst inst_id msacode using ../external/openalex/cleaned_all_15jrnls, clear
+    use id pmid which_athr which_affl pub_date year jrnl cite_count athr_id athr_name impact_fctr country_code msa_comb msa_c_world inst inst_id msacode using ../external/openalex/cleaned_all_`samp', clear
     local suf = "" 
     if `firstlast' == 1 {
-        use id pmid which_athr which_affl pub_date year jrnl cite_count athr_id athr_name impact_fctr country_code msa_comb msa_c_world inst inst_id msacode using ../external/firstlast/cleaned_all_15jrnls, clear
+        use id pmid which_athr which_affl pub_date year jrnl cite_count athr_id athr_name impact_fctr country_code msa_comb msa_c_world inst inst_id msacode using ../external/firstlast/cleaned_all_`samp', clear
 
         local suf = "_firstlast" 
+    }
+    if "`samp'" == "newfund_cns" {
+        local suf = "`suf'_cns"
     }
     gen qrtr = qofd(pub_date)
     merge m:1 athr_id year using ../temp/clusters, assert(1 2 3) keep(3) nogen
@@ -156,28 +161,28 @@ program make_panel
     gcontract pmid `time' athr_id msa_comb inst_id
     drop _freq
     rename athr_id focal_id
-    save ../temp/focal_list, replace
+    save ../temp/focal_list_`samp', replace
     rename focal_id athr_id 
     rename msa_comb coathr_msa
     rename inst_id coathr_inst
-    save ../temp/coauthors, replace
+    save ../temp/coauthors_`samp', replace
     restore
 
     preserve
-    use ../temp/focal_list,clear
-    joinby pmid using ../temp/coauthors
+    use ../temp/focal_list_`samp',clear
+    joinby pmid using ../temp/coauthors_`samp'
     drop if focal_id == athr_id
     gcontract focal_id `time' msa_comb athr_id coathr_msa
     drop _freq
     keep if coathr_msa == msa_comb
     gcontract focal_id `time', freq(num_coauthors_same_msa)
     rename focal_id athr_id
-    save ../temp/coauthor_in_msa_`time', replace
+    save ../temp/coauthor_in_msa_`time'_`samp', replace
     restore
 
     preserve
-    use ../temp/focal_list,clear
-    joinby pmid using ../temp/coauthors
+    use ../temp/focal_list_`samp',clear
+    joinby pmid using ../temp/coauthors_`samp'
     drop if focal_id == athr_id
     gcontract focal_id `time' athr_id inst_id msa_comb coathr_inst coathr_msa
     bys focal_id year: gen num_coauthors = _N
@@ -188,7 +193,7 @@ program make_panel
     drop _freq
     gcontract focal_id year num_coauthors*
     drop _freq
-    save ../output/num_fund_coauthors, replace
+    save ../output/num_fund_coauthors_`samp', replace
     restore
     // get avg team size
     bys athr_id pmid : gen athr_pmid_cntr = _n == 1
@@ -196,13 +201,13 @@ program make_panel
     preserve
     if "`time'" == "year" {
         gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt frnt_adj_wt body_adj_wt front_only body_only (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
-        merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
+        merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time'_`samp', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ../external/year_insts/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
         gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count frnt_adj_wt body_adj_wt front_only body_only impact_affl_wt impact_cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
-        merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
+        merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time'_`samp', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
         merge m:1 athr_id `time' using ../external/year_insts/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
@@ -227,9 +232,9 @@ program make_panel
     replace cite_affl_wt = 0 if mi(cite_affl_wt)
     replace affl_wt = 0 if mi(affl_wt)
 
-    merge 1:1 athr_id `time' using ../temp/athr_concept_`time', assert(1 2 3) keep(1 3) nogen
-    merge 1:1 athr_id `time' using ../temp/athr_mesh_`time', assert(1 2 3) keep(1 3) nogen
-    merge 1:1 athr_id `time' using ../temp/athr_qualifier_`time', assert(1 2 3) keep(1 3) nogen
+    merge 1:1 athr_id `time' using ../temp/athr_concept_`time'_`samp', assert(1 2 3) keep(1 3) nogen
+    merge 1:1 athr_id `time' using ../temp/athr_mesh_`time'_`samp', assert(1 2 3) keep(1 3) nogen
+    merge 1:1 athr_id `time' using ../temp/athr_qualifier_`time'_`samp', assert(1 2 3) keep(1 3) nogen
     foreach var in term1 term2 gen_mesh1 gen_mesh2 qualifier_name1 qualifier_name2 {
         bys athr_id (`time') : replace `var' = `var'[_n-1] if mi(`var') & !mi(`var'[_n-1])
     }
@@ -238,13 +243,13 @@ program make_panel
     preserve
     if "`time'" == "year" {
         gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt front_only body_only frnt_adj_wt body_adj_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
-        merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
+        merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time'_`samp', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ../external/year_insts/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
         gcollapse (sum) affl_wt cite_affl_wt frnt_adj_wt body_adj_wt body_only front_only pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
-        merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time', assert(1 3) keep(1 3) nogen
+        merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time'_`samp', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
         merge m:1 athr_id `time' using ../external/year_insts/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
@@ -269,9 +274,9 @@ program make_panel
     replace cite_affl_wt = 0 if mi(cite_affl_wt)
     replace affl_wt = 0 if mi(affl_wt)
 
-    merge 1:1 athr_id `time' using ../temp/athr_concept_`time', assert(1 2 3) keep(1 3) nogen
-    merge 1:1 athr_id `time' using ../temp/athr_mesh_`time', assert(1 2 3) keep(1 3) nogen
-    merge 1:1 athr_id `time' using ../temp/athr_qualifier_`time', assert(1 2 3) keep(1 3) nogen
+    merge 1:1 athr_id `time' using ../temp/athr_concept_`time'_`samp', assert(1 2 3) keep(1 3) nogen
+    merge 1:1 athr_id `time' using ../temp/athr_mesh_`time'_`samp', assert(1 2 3) keep(1 3) nogen
+    merge 1:1 athr_id `time' using ../temp/athr_qualifier_`time'_`samp', assert(1 2 3) keep(1 3) nogen
     foreach var in term1 term2 gen_mesh1 gen_mesh2 qualifier_name1 qualifier_name2 {
         bys athr_id (`time') : replace `var' = `var'[_n-1] if mi(`var') & !mi(`var'[_n-1])
     }

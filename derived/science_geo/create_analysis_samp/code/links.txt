@@ -1,6 +1,5 @@
 ./openalex/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output 
-./firstlast/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/create_first_last_15jrnls/output 
 ./clusters/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/cluster_fields_15jrnls/output 
+./firstlast/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/create_first_last_15jrnls/output 
 ./patents/ | /export/projects4/achandra_basicscience/derived/science_geo/patent_ppr_data/output
-./geo/ | /export/projects4/achandra_basicscience/raw/geo 
 ./year_insts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_athr_inst_hist_15jrnls/output
