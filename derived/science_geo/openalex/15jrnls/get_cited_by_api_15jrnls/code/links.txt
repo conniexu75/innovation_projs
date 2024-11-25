@@ -1,0 +1,3 @@
+./samp/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output/
+./pprs/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/gather_15jrnls_athr_pprs/output
+./pmids_jrnl/ | /export/projects4/achandra_basicscience/derived/science_geo/pubmed/append_all_pmids/output/

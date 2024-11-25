@@ -10,7 +10,7 @@ global temp "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_15jrnls"
 
 program main
     *append_files
-    *merge_geo
+    merge_geo
     clean_panel, time(year)
     *clean_panel, time(qrtr)
     *convert_year_to_qrtr
@@ -65,7 +65,7 @@ program merge_geo
     gen new_inst_id = ""
     foreach var in inst inst_id {
         replace new_`var' =  `var' if has_parent == 0
-        replace new_`var' = `var' if ((strpos(associated, "Universit")>0|strpos(associated, "College")|strpos(associated, "Higher Education")) & strpos(associated, "System")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | inlist(associated, "University of London", "Wellcome Trust") | (strpos(associated, "Health")>0 & strpos(associated, "System")>0 & associated_type == "healthcare" & (type == "education" | type == "healthcare")) | strpos(associated, "Ministry of") > 0 | strpos(associated, "Board of")>0 | strpos(associated, "Government of")>0 | (strpos(associated, "Department of")>0 & country != "Russia")
+        replace new_`var' = `var' if (((strpos(associated, "Universit")>0|strpos(associated, "College")|strpos(associated, "Higher Education")) & strpos(associated, "System")>0 & associated_type == "education" & (type == "education" | type == "healthcare")) | inlist(associated, "University of London", "Wellcome Trust") | (strpos(associated, "Health")>0 & strpos(associated, "System")>0 & associated_type == "healthcare" & (type == "education" | type == "healthcare")) | strpos(associated, "Ministry of") > 0 | strpos(associated, "Board of")>0 | strpos(associated, "Government of")>0 | (strpos(associated, "Department of")>0 & country != "Russia")) & !inlist(associated, "State Univerisity of New York", "City University of New York")
         replace new_`var' = `var' if country_code != associated_country
     }
     replace associated = "" if !mi(new_inst)
@@ -121,6 +121,8 @@ program merge_geo
     replace new_inst_id = "I111979921" if new_inst == "Northwestern University"
     replace new_inst = "Harvard University" if inlist(inst, "Harvard Global Health Institute", "Harvard Pilgrim Health Care", "Harvard Affiliated Emergency Medicine Residency", "Harvard NeuroDiscovery Center")
     replace new_inst_id = "I136199984" if new_inst == "Harvard University"
+    replace new_inst = "University of California, San Francisco" if inlist(inst, "Ernest Gallo Clinic and Research Center")
+    replace new_inst_id = "I180670191" if new_inst == "University of California, San Francisco"
     // health systems
     replace new_inst = "University of Virginia" if strpos(inst, "University of Virginia") > 0 & (strpos(inst, "Hospital") >0 | strpos(inst, "Medical")>0 | strpos(inst, "Health")>0)
     replace new_inst_id = "I51556381" if new_inst == "University of Virginia"
@@ -128,17 +130,75 @@ program merge_geo
     replace new_inst_id = "I76835614" if new_inst == "University of Missouri"
     replace new_inst = "Baylor University" if strpos(inst, "Baylor University Medical Center")>0
     replace new_inst_id = "I157394403" if new_inst == "Baylor University"
-    replace new_inst = "Columbia University" if strpos(inst, "Columbia University Irving Medical Center")>0
+    replace new_inst = "Columbia University" if strpos(inst, "Columbia University Irving")>0
     replace new_inst_id = "I78577930" if new_inst == "Columbia University"
+    replace new_inst = "Yale University" if strpos(inst, "Yale New Haven Health System")>0 | strpos(inst, "Yale New Haven Hospital")>0 | strpos(inst, "Yale Cancer Center") >0  
+    replace new_inst_id = "I32971472" if new_inst == "Yale University"
+    replace new_inst = "University of Florida" if strpos(inst, "UF Health")>0 | strpos(inst, "Florida Medical Entomology Laboratory")>0
+    replace new_inst_id = "I33213144" if new_inst == "University of Florida"
+    replace new_inst = "University of Wisconsin–Madison" if strpos(inst, "University of Wisconsin Carbone Cancer Center")>0 | strpos(inst, "UW Health")>0
+    replace new_inst_id = "I135310074" if new_inst == "University of Wisconsin–Madison"
+	replace new_inst = "Scripps Health" if inlist(inst, "Scripps Clinic Medical Group", "Scripps Clinic", "Scripps Laboratories (United States)")
+    replace new_inst_id = "I1311914864" if new_inst == "Scripps Health"
+	replace new_inst = "Scripps Research Institute" if inlist(inst, "Scripps (United States)")
+    replace new_inst_id = "I123431417" if new_inst == "Scripps Research Institute"
+	replace new_inst = "Duke University" if inlist(inst, "Duke Medical Center")
+	replace new_inst_id = "I170897317" if new_inst == "Duke University"
+	replace new_inst = "Washington University in St. Louis" if (inlist(inst, "Washington University") & city == "St Louis") 
+	replace new_inst_id = "I204465549" if new_inst == "Washington University in St. Louis" 
+	replace new_inst = "University of Michigan–Ann Arbor" if inst == "Michigan Medicine" | inst == "Michigan Center for Translational Pathology"
+	replace new_inst_id = "I27837315" if new_inst == "University of Michigan–Ann Arbor"
+	replace new_inst = "University of Pittsburgh" if strpos(inst, "UPMC")>0
+	replace new_inst_id = "I170201317" if new_inst == "University of Pittsburgh" 
+	replace new_inst = "Vanderbilt University" if inst == "Vanderbilt Health"
+	replace new_inst_id = "I200719446" if new_inst == "Vanderbilt University"ll
+	// fix the UCs
+	replace new_inst = "University of California, San Francisco" if strpos(inst, "UCSF")>0 | inst == "University of California San Francisco"
+	replace new_inst_id = "I180670191" if new_inst == "University of California, San Francisco"
+	replace new_inst = "University of California, San Diego" if inst == "University of California San Diego"
+	replace new_inst_id = "I36258959" if inst == "University of California, San Diego" | strpos(inst, "UC San Diego") >0 | strpos(inst, "UCSD")>0
+	replace new_inst = "University of California, Davis" if inst == "University of California Davis"
+	replace new_inst_id = "I84218800" if inst == "University of California, Davis"
+	replace new_inst = "University of California, Los Angeles" if inst == "University of California Los Angeles" | strpos(inst , "UCLA") >0 
+	replace new_inst_id = "I161318765" if inst == "University of California, Los Angeles"
+	replace new_inst = "University of California, Berkeley" if inst == "University of California Berkeley"
+	replace new_inst_id = "I95457486" if inst == "University of California, Berkeley"
+	replace new_inst = "University of California, Davis" if strpos(inst, "UC Davis") > 0
+	replace new_inst_id = "I84218800" if new_inst ==  "University of California, Davis" 
+	replace new_inst = "University of California, Irvine" if strpos(inst, "UC Irvine") > 0
+	replace new_inst_id = "I204250578" if new_inst ==  "University of California, Irvine" 
+	
+    // agencies
+    replace new_inst = "National Institute of Standards and Technology" if associated == "National Institute of Standards and Technology" &associated_rel == "parent"
+    replace new_inst_id = "I1321296531" if new_inst ==  "National Institute of Standards and Technology"
+	replace new_inst = "National Institutes of Health" if inst == "Center for Cancer Research" | inst == "National Center for Biotechnology Information"
+	replace new_inst_id = "I1299303238" if new_inst == "National Institutes of Health"
+	replace new_inst = "Carnegie Institution for Science" if associated == "Carnegie Institution for Science" & associated_rel == "parent"
+	replace new_inst_id = "I196817621" if new_inst == "Carnegie Institution for Science"
+    replace new_inst = "Allen Institute" if associated == "Allen Institute" & associated_rel == "parent"
+    replace new_inst = "Allen Institute" if inst == "Allen Institute for Artificial Intelligence"
+    replace new_inst_id = "I4210140341" if new_inst ==  "Allen Institute"
+    replace new_inst = "Abbott (United States)" if inst == "Abbott Fund"
+	replace new_inst_id = "I4210088555" if new_inst == "Abbott (United States)"
+    // fix
+    replace new_inst = "Synaptic Pharmaceutical Corporation" if inst_id == "I4210132327"
+    replace city = "Paramus" if inst_id == "I4210132327"
+    replace region = "New Jersey" if inst_id == "I4210132327"
+    replace new_inst = "Immunex" if inst_id == "I4210143161"
+    replace city = "Seattle" if inst_id == "I4210143161" 
+    replace region = "Washington" if inst_id == "I4210143161"
+    replace new_inst = "Genetics Institute" if inst_id == "I4210165860"
+    replace city = "Cambridge" if inst_id == "I4210165860"
+    replace region = "Massachusetts" if inst_id == "I4210165860"
     gen edit = 0
-    foreach s in "Health System" "Clinic" "Hospital" "Medical Center" {
+    foreach s in "Health System" "Clinic" "Hospital of the" "Hospital" "Medical Center" {
         replace new_inst = subinstr(inst, "`s'", "", .) if (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 & edit == 0 & country_code == "US"
         replace edit = 1 if  (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 &  country_code == "US"
     }
     replace new_inst = strtrim(new_inst)
     bys new_inst (edit) : replace new_inst_id = new_inst_id[_n-1] if edit == 1 & !mi(new_inst_id[_n-1])  & city == city[_n-1]
-    replace new_inst = associated if !mi(associated) & mi(new_inst) & has_parent == 1 & type == "facility" & associated_type == "education"
-    replace new_inst_id = associated_id if !mi(associated_id) & mi(new_inst_id) & has_parent == 1 & type == "facility" & associated_type == "education"
+    replace new_inst = associated if !mi(associated) & mi(new_inst) & has_parent == 1 & inlist(type,"facility", "other", "nonprofit", "healthcare") & associated_type == "education" & !inlist(associated, "State Univerisity of New York", "City University of New York")
+    replace new_inst_id = associated_id if !mi(associated_id) & mi(new_inst_id) & has_parent == 1 &  inlist(type,"facility", "other", "nonprofit", "healthcare") & associated_type == "education" & !inlist(associated, "State Univerisity of New York", "City University of New York")
     replace new_inst = inst if mi(new_inst)
     replace new_inst_id = inst_id if mi(new_inst_id)
     gduplicates tag inst_id, gen(dup)
@@ -164,13 +224,14 @@ program clean_panel
     replace inst = new_inst 
     gen broad_affl = inst == "Broad Institute"
     gen hhmi_affl = inst == "Howard Hughes Medical Institute"
+    gen wrong = inst  == "Molecular Oncology (United States)"
     gen funder = (strpos(inst, "Trust")> 0 | strpos(inst, "Foundation")>0 | strpos(inst, "Fund")>0) & !inlist(type, "education", "facility", "healthcare")
     gduplicates tag athr_id inst_id `time', gen(dup_entry)
     bys athr_id inst_id `time': gegen tot_times = sum(num_times) 
     replace num_times = tot_times
     drop if dup_entry > 0 & mi(new_inst)
     bys athr_id `time': gen num_affls = _N 
-    drop if num_affls > 1 & (funder == 1 | broad_affl == 1 | hhmi_affl == 1)
+    drop if (num_affls > 1 & (funder == 1 | broad_affl == 1 | hhmi_affl == 1 ))| wrong == 1 
     drop if inst == "Howard Hughes Medical Institute"
     drop if inst_id == "I1344073410"
     drop new_inst new_inst_id dup_entry tot_times type
@@ -218,6 +279,8 @@ program clean_panel
         drop if has_mult == 1 & has_after == 1 & same_as_after == 0  & N <= 10
         bys athr_id `time': replace has_mult = _N > 1
     }
+    bys athr_id: gegen has_genentech = max(inst_id == "I183934855")
+    replace inst_id = "I183934855" if has_genentech == 1 & inst_id == "I4210150208"
     cap drop N
     bys athr_id `time' : gen N = _N 
     // if there are sandwiched insts no mater what the `time' gap is
@@ -237,30 +300,41 @@ program clean_panel
     gen sandwich = prev_inst == post_inst & prev_inst != inst_id if athr_id[_n-1] == athr_id[_n+1] & athr[_n-1] == athr_id 
     replace inst_id = prev_inst if sandwich == 1 & sandwich[_n-1] != 1  & N<=10
     replace inst = inst[_n-1] if sandwich == 1 & sandwich[_n-1] != 1 & N<=10
-    drop sandwich
-    
+    drop sandwich prev_inst post_inst
+
     bys athr_id: gegen modal_inst = mode(inst_id)
     by athr_id `time': replace has_mult = _N > 1
     gen mode_match = inst_id == modal_inst
     bys athr_id `time': gegen has_mode_match = max(mode_match)
     gen mode_yr = year if mode_match == 1
     bys athr_id : gegen min_mode_yr = min(mode_yr) 
-    by athr_id : egen max_mode_yr = max(mode_yr) 
+    by athr_id : gegen max_mode_yr = max(mode_yr) 
     drop if has_mult == 1 & has_mode_match == 1 & mode_match == 0 & inrange(year, min_mode_yr, max_mode_yr) & N <= 10
 
     gen rand = rnormal(0,1)
     gsort athr_id `time' rand
+    gduplicates tag athr_id `time',gen(dup)
+    gunique athr_id `time' if  dup > 0
     gduplicates drop athr_id `time', force
     gunique athr_id `time'
     assert r(unique) == `N'
     drop if mi(`time')
     gisid athr_id `time'
+    hashsort athr_id `time'
+    gen prev_inst = inst_id[_n-1]
+    gen post_inst = inst_id[_n+1]
+
+    gen sandwich = prev_inst == post_inst & prev_inst != inst_id if athr_id[_n-1] == athr_id[_n+1] & athr[_n-1] == athr_id 
+    replace inst_id = prev_inst if sandwich == 1 & sandwich[_n-1] != 1  
+    replace inst = inst[_n-1] if sandwich == 1 & sandwich[_n-1] != 1 
+    drop sandwich prev_inst post_inst
     keep athr_id inst_id `time' num_times inst country_code country city region broad_affl hhmi_affl
 
     // do some final cleaning
     cap gen year  = yofd(dofq(qrtr))
 *    drop if !inrange(year, 1945, 2023) 
     save ${temp}/athr_panel, replace
+
     
     import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
     glevelsof statefull , local(state_names)
