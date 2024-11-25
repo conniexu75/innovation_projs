@@ -1,1 +1,15 @@
 *.RData
+# Ignore any folder named 'external'
+external/
+
+# Ignore any folder named 'temp'
+temp/
+
+# Ignore any folder named 'output_local'
+output_local/
+# Ignore all untracked files
+*
+
+# Or ignore specific types of files
+# *.log
+# *.tmp
