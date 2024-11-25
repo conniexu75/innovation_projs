@@ -1,0 +1,42 @@
+--------------------------------------------------------------------------------
+Makelog started: 2024-11-11 13:59:24
+Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/inst_prod_descriptives/code
+--------------------------------------------------------------------------------
+External links successfully created!
+*********************************************************
+* Error with `run_stata`. Traceback can be found below. *
+*********************************************************
+
+Traceback (most recent call last):
+  File "/export/home/dor/cxu/.local/lib/python3.10/site-packages/gslab_make/private/programdirective.py", line 113, in execute_command
+    stdout, stderr = process.communicate()
+  File "/usr/local/app/rcs_bin/grid3/envs/rcs_2023.09/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/local/app/rcs_bin/grid3/envs/rcs_2023.09/lib/python3.10/subprocess.py", line 2021, in _communicate
+    ready = selector.select(timeout)
+  File "/usr/local/app/rcs_bin/grid3/envs/rcs_2023.09/lib/python3.10/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/export/home/dor/cxu/.local/lib/python3.10/site-packages/gslab_make/run_program.py", line 1002, in run_stata
+    exit_code, stderr = direct.execute_command(command)
+  File "/export/home/dor/cxu/.local/lib/python3.10/site-packages/gslab_make/private/programdirective.py", line 126, in execute_command
+    raise CritError(error_message)
+gslab_make.private.exceptionclasses.CritError: 
+ERROR! The following command cannot be executed by operating system.
+  > stata-mp -e do \"/export/projects4/achandra_basicscience/analysis/science_geo/inst_prod_descriptives/code/analysis\.do\"
+This could be because the command may be misspecified or does not exist. For further detail, refer to the traceback below.
+  > Traceback (most recent call last):
+  >   File "/export/home/dor/cxu/.local/lib/python3.10/site-packages/gslab_make/private/programdirective.py", line 113, in execute_command
+  >     stdout, stderr = process.communicate()
+  >   File "/usr/local/app/rcs_bin/grid3/envs/rcs_2023.09/lib/python3.10/subprocess.py", line 1154, in communicate
+  >     stdout, stderr = self._communicate(input, endtime, timeout)
+  >   File "/usr/local/app/rcs_bin/grid3/envs/rcs_2023.09/lib/python3.10/subprocess.py", line 2021, in _communicate
+  >     ready = selector.select(timeout)
+  >   File "/usr/local/app/rcs_bin/grid3/envs/rcs_2023.09/lib/python3.10/selectors.py", line 416, in select
+  >     fd_event_list = self._selector.poll(timeout)
+  > KeyboardInterrupt
+

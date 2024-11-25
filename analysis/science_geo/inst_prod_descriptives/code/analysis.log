@@ -1,0 +1,297 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2024
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/projects4/achandra_basicscience/analysis/science_geo/inst_prod_de
+> scriptives/code/analysis.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
+
+. pause on
+
+. set seed 8975
+
+. here, set
+/export/projects4/achandra_basicscience/analysis/science_geo/inst_prod_descript
+> ives/code/
+
+. 
+. global country_name "countries"
+
+. global us_state_name "US states"
+
+. global area_name "US cities"
+
+. global city_full_name "cities"
+
+. global inst_name "institutions"
+
+. global msatitle_name "MSAs"
+
+. global msa_comb_name "MSAs"
+
+. global msa_world_name "cities"
+
+. global msa_c_world_name "cities"
+
+. 
+. program main
+  1.     di "OUTPUT START"
+  2.     foreach athr_type in year_firstlast {
+  3.         map, athr(`athr_type') samp(all) 
+  4.     }
+  5. end
+
+. 
+. program athr_loc
+  1.     syntax, athr(str) samp(str) wt_var(str) 
+  2.     local jrnls = ""
+  3.     if "`samp'" == "cns" local jrnls "_cns"
+  4.     use ../external/samp/athr_panel_full_comb_`athr'`jrnls', clear 
+  5.     keep if country == "United States"
+  6.     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts G
+> eneral Hospital" , "Brigham and Women's Hospital")
+  7.     local end 20
+  8.     foreach loc in us_state msa_comb inst {
+  9.         if "`loc'" == "inst"  {
+ 10.             local end 50
+ 11.         }
+ 12.         preserve
+ 13.         bys `loc' athr_id : gen athr_cnt = _n == 1
+ 14.         bys `loc' : egen num_athrs = total(athr_cnt)
+ 15.         bys `loc': gen `loc'_cnt = _n == 1
+ 16.         sum num_athrs if `loc'_cnt == 1
+ 17.         gen wt = num_athrs/r(sum)
+ 18.         sum `wt_var'
+ 19.         local total = r(sum)
+ 20.         gen wt_prod   = wt * `wt_var'
+ 21.         sum wt_prod 
+ 22.         local sum = r(sum)
+ 23.         gen scale = `total'/`sum'
+ 24.         replace wt_prod = scale * wt_prod
+ 25.         collapse (mean) `wt_var' wt_prod,  by(`loc')
+ 26.         tw hist `wt_var' , frac bin(50) color(ebblue%50) ytitle("Share of 
+> ${`loc'_name}") xtitle("Log Avg. Productivity")
+ 27.         graph export ../output/figures/dist_`loc'.pdf, replace
+ 28.         tw hist wt_prod , frac bin(50) color(ebblue%50) ytitle("Share of $
+> {`loc'_name}") xtitle("Wt. Log Avg. Productivity")
+ 29.         graph export ../output/figures/wt_dist_`loc'.pdf, replace
+ 30.         qui hashsort -wt_prod 
+ 31.         qui drop if mi(`loc')
+ 32.         gen rank = _n 
+ 33.         save ../temp/rankings_`loc'_`athr'`jrnls', replace
+ 34.         drop rank
+ 35.         qui count
+ 36.         local rank_end = min(r(N),`end') 
+ 37.         li `loc' wt_prod in 1/`rank_end'
+ 38.         mkmat wt_prod in 1/`rank_end', mat(top_`loc'_`athr'`jrnls')
+ 39.         qui save ../temp/`loc'_rank_`athr'`jrnls', replace
+ 40.         restore
+ 41.     }
+ 42. end
+
+. 
+. program map
+  1.     syntax, athr(str) samp(str) 
+  2.     spshape2dta ../external/geo/cb_2018_us_state_500k.shp, replace saving(
+> usa_state)
+  3.     use usa_state_shp, clear
+  4.     merge m:1 _ID using usa_state
+  5.     destring STATEFP, replace
+  6.     drop if STATEFP > 56
+  7.     // alaska
+.     drop if _X > 0 & !mi(_X) & STATEFP == 2  
+  8.     geo2xy _Y _X if STATEFP ==2, proj(mercator) replace
+  9.     replace _Y = _Y / 5 +1200000 if STATEFP == 2 
+ 10.     replace _X = _X / 5 - 2000000  if STATEFP == 2 
+ 11.     drop if _X < -160 & !mi(_X) & _ID == 43  // small islands to the west
+ 12.     geo2xy _Y _X if _ID == 43, proj(mercator) replace
+ 13.     replace _Y = _Y  + 800000 if _ID == 43
+ 14.     replace _X = _X  - 1200000 if _ID == 43
+ 15.     geo2xy _Y _X if !inlist(_ID, 28,43), replace proj(mercator)
+ 16.     replace _X = _X + 53500 if !inlist(_ID, 28,43)
+ 17.     replace _Y = _Y - 3100 if !inlist(_ID, 28,43)
+ 18.     drop _CX- _merge
+ 19.     sort _ID shape_order
+ 20.     save usa_state_shp_clean.dta, replace
+ 21.     
+.     spshape2dta ../external/geo/cb_2018_us_cbsa_500k.shp, replace saving(usa_
+> msa)
+ 22.     use usa_msa_shp, clear
+ 23.     merge m:1 _ID using usa_msa, nogen
+ 24.     destring CBSAFP, replace
+ 25.     gen state = strtrim(substr(NAME, strpos(NAME, ",")+1, 3))
+ 26.     drop if inlist(state, "PR")
+ 27.     // alaska
+.     drop if _X > 0 & !mi(_X) & state == "AK" 
+ 28.     geo2xy _Y _X if state == "AK" , proj(mercator) replace
+ 29.    replace _Y = _Y / 5 + 1200000 if state == "AK"
+ 30.     replace _X = _X / 5 - 1705000 if state == "AK" 
+ 31.     drop if _X < -160 & !mi(_X) & state == "HI"  // small islands to the w
+> est
+ 32.     geo2xy _Y _X if state == "HI", proj(mercator) replace
+ 33.     replace _Y = _Y + 800000 if state == "HI" 
+ 34.     replace _X = _X  - 1200000 if state == "HI" 
+ 35.     geo2xy _Y _X if !inlist(state, "AK", "HI"), replace proj(mercator)
+ 36.     sort _ID shape_order
+ 37.     save usa_msa_shp_clean.dta, replace
+ 38. 
+.     use if !mi(msa_comb) & inrange(year, 1945, 2023) using ../external/samp/a
+> thr_panel_full_`athr', clear
+ 39.     merge m:1 msacode using ../external/geo/msas, assert(1 2 3) keep(1 3) 
+> nogen
+ 40.     replace msa_comb = msatitle if !mi(msatitle)
+ 41.     replace msa_comb = "San Francisco-Oakland-Hayward, CA" if msa_comb == 
+> "San Francisco-Oakland-Haywerd, CA"
+ 42.     replace msa_comb = "Macon-Bibb County, GA" if msa_comb == "Macon, GA"
+ 43.     bys msa_comb inst_id : gen inst_cnt = _n == 1
+ 44.     bys msa_comb : egen num_insts = total(inst_cnt)
+ 45.     bys msa_comb: gen msa_comb_cnt = _n == 1
+ 46.     sum num_athrs if msa_comb_cnt  == 1
+ 47.     gen wt = num_insts/r(sum)
+ 48.     sum impact_cite_affl_wt
+ 49.     local total = r(sum)
+ 50.     gen wt_prod   = wt * impact_cite_affl_wt
+ 51.     sum wt_prod 
+ 52.     local sum = r(sum)
+ 53.     gen scale = `total'/`sum'
+ 54.     replace wt_prod = scale * wt_prod
+ 55.     gcollapse (mean) wt_prod , by(msa_comb)
+ 56.     save ../temp/map_samp_`samp'_`athr', replace
+ 57.     
+.     use usa_msa, clear
+ 58.     rename NAME msa_comb
+ 59.     merge 1:m msa_comb using ../temp/map_samp_`samp'_`athr', assert(1 2 3)
+>  keep(1 3) nogen
+ 60.     foreach var in wt_prod {
+ 61.         xtile `var'_4 = `var', nq(4)
+ 62.         qui sum `var' 
+ 63.         local min : dis %6.4f r(min)
+ 64.         local max : dis %6.4f r(max)
+ 65.         _pctile `var',percentiles(25 50 75)
+ 66.         local p25: dis %6.4f r(r1)
+ 67.         local p50: dis %6.4f r(r2)
+ 68.         local p75: dis %6.4f r(r3)
+ 69.         *local p80: dis %3.2f r(r4)
+.         colorpalette carto Teal, n(4) nograph 
+ 70.         spmap  `var'_4 using usa_msa_shp_clean,  id(_ID)  fcolor(`r(p)'%50
+> ) clnumber(4) ///
+>           ocolor(white ..) osize(0.15 ..) ndfcolor(gs13) ndocolor(white ..) n
+> dsize(0.15 ..) ndlabel("No data") ///
+>           polygon(data("usa_state_shp_clean") ocolor(gs2) osize(0.2) fcolor(e
+> ggshell%20)) ///
+>           legend(label(2 "Min-p25: `min'-`p25'") label(3 "p25-p50: `p25'-`p50
+> '") label(4 "p50-p75: `p50'-`p75'") label(5 "p75-max: `p75'-`max'") pos(4) si
+> ze(2)) legtitle("${`var'_name}")
+ 71.         graph export ../output/figures/`var'_map_`samp'_`athr'.pdf, replac
+> e
+ 72.     }
+ 73. end
+
+. 
+. program top_insts
+  1.     syntax, athr(str) samp(str) wt_var(str) 
+  2.     local jrnls = ""
+  3.     if "`samp'" == "cns" local jrnls "_cns"
+  4.     use ../external/samp/athr_panel_full_comb_`athr'`jrnls', clear 
+  5.     keep if country == "United States"
+  6.     replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts G
+> eneral Hospital" , "Brigham and Women's Hospital")
+  7.     local end 10
+  8.     preserve
+  9.     bys msa_comb athr_id : gen athr_cnt = _n == 1
+ 10.     bys msa_comb : egen num_athrs = total(athr_cnt)
+ 11.     bys msa_comb: gen msa_comb_cnt = _n == 1
+ 12.     sum num_athrs if msa_comb_cnt == 1
+ 13.     gen wt = num_athrs/r(sum)
+ 14.     sum `wt_var'
+ 15.     local total = r(sum)
+ 16.     gen wt_prod   = wt * `wt_var'
+ 17.     sum wt_prod 
+ 18.     local sum = r(sum)
+ 19.     gen scale = `total'/`sum'
+ 20.     replace wt_prod = scale * wt_prod
+ 21.     bys msa_comb: egen avg = mean(wt_prod)
+ 22.     gen neg_avg = -avg
+ 23.     replace neg_avg = . if msa_comb_cnt != 1
+ 24.     egen rank = rank(neg_avg)
+ 25.     hashsort msa_comb rank
+ 26.     by msa_comb : replace rank = rank[_n-1] if mi(rank)
+ 27.     rename rank msa_rank
+ 28.     drop wt* athr_cnt scale avg neg_avg num_athrs
+ 29.     bys inst athr_id : gen athr_cnt = _n == 1
+ 30.     bys inst : egen num_athrs = total(athr_cnt)
+ 31.     bys inst: gen inst_cnt = _n == 1
+ 32.     sum num_athrs if inst_cnt == 1
+ 33.     gen wt = num_athrs/r(sum)
+ 34.     sum `wt_var'
+ 35.     local total = r(sum)
+ 36.     gen wt_prod   = wt * `wt_var'
+ 37.     sum wt_prod 
+ 38.     local sum = r(sum)
+ 39.     gen scale = `total'/`sum'
+ 40.     replace wt_prod = scale * wt_prod
+ 41.     collapse (mean)  wt_prod msa_rank,  by(inst msa_comb)
+ 42.     keep if msa_rank <=10
+ 43.     gen neg_avg = -wt_prod
+ 44.     bys  msa_comb :egen rank= rank(neg_avg)
+ 45.     keep if rank <=5
+ 46.     hashsort msa_rank rank
+ 47.     qui count
+ 48.     li msa_comb inst wt_prod 
+ 49.     mkmat wt_prod , mat(inst_msa_`athr'`jrnls')
+ 50.     qui save ../temp/inst_in_msa_rank_`athr'`jrnls', replace
+ 51.     restore
+ 52. end
+
+. 
+. 
+. program output_tables
+  1.     syntax, samp(str) athr(str) 
+  2.     local jrnls = ""
+  3.     if "`samp'" == "cns" local jrnls "_cns"
+  4.     cap mat state_msa_`athr'`jrnls' = top_us_state_`athr'`jrnls' \ top_msa
+> _comb_`athr'`jrnls' 
+  5.     cap mat all_`athr'`jrnls' = top_us_state_`athr'`jrnls' \ top_msa_comb_
+> `athr'`jrnls'  \ top_inst_`athr'`jrnls'
+  6.     foreach file in top_inst inst_msa state_msa all {
+  7.         cap qui matrix_to_txt, saving("../output/tables/`file'_`athr'`jrnl
+> s'.txt") matrix(`file'_`athr'`jrnls')  ///
+>            title(<tab:`file'_`athr'`jrnls'>) format(%20.4f) replace
+  8.          }
+  9.  end
+
+. ** 
+. main
+OUTPUT START
+  (importing .shp file)
