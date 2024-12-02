@@ -97,6 +97,9 @@ program make_panel
     assert num_affls == 1
     bys pmid: gegen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs
+    gen pat_affl_wt = patent_count * 1/num_affls * 1/num_athrs
+    gen body_affl_wt = body_only * 1/num_affls * 1/num_athrs
+    gen front_affl_wt = front_only * 1/num_affls * 1/num_athrs
     local date  date("`c(current_date)'", "DMY")
     if "`time'" == "qrtr" {
         gen time_since_pub = qofd(`date') - `time'+1
@@ -200,13 +203,13 @@ program make_panel
     bys athr_id `time': gegen avg_team_size = mean(num_athrs) if athr_pmid_cntr == 1
     preserve
     if "`time'" == "year" {
-        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt frnt_adj_wt body_adj_wt front_only body_only (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
+        gcollapse (sum) affl_wt pat_affl_wt body_affl_wt front_affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt frnt_adj_wt body_adj_wt front_only body_only (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time')
         merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time'_`samp', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ../external/year_insts/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
-        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count frnt_adj_wt body_adj_wt front_only body_only impact_affl_wt impact_cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
+        gcollapse (sum) affl_wt pat_affl_wt body_affl_wt front_affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count frnt_adj_wt body_adj_wt front_only body_only impact_affl_wt impact_cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msa_comb `time' year)
         merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time'_`samp', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
@@ -242,13 +245,13 @@ program make_panel
     restore
     preserve
     if "`time'" == "year" {
-        gcollapse (sum) affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt front_only body_only frnt_adj_wt body_adj_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
+        gcollapse (sum) affl_wt pat_affl_wt body_affl_wt front_affl_wt cite_affl_wt pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt front_only body_only frnt_adj_wt body_adj_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time')
         merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time'_`samp', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         merge m:1 athr_id `time' using ../external/year_insts/filled_in_panel_`time', assert(1 2 3) keep(2 3) nogen
     }
     if "`time'" == "qrtr" {
-        gcollapse (sum) affl_wt cite_affl_wt frnt_adj_wt body_adj_wt body_only front_only pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
+        gcollapse (sum) affl_wt pat_affl_wt body_affl_wt front_affl_wt cite_affl_wt frnt_adj_wt body_adj_wt body_only front_only pat_adj_wt pat_wt patent_count impact_affl_wt impact_cite_affl_wt (mean) avg_team_size  (firstnm) field , by(athr_id msacode msa_comb  `time' year)
         merge m:1 athr_id `time' using ../temp/coauthor_in_msa_`time'_`samp', assert(1 3) keep(1 3) nogen
         replace num_coauthors_same_msa = 0 if mi(num_coauthors_same_msa)
         // make into balanced panel
