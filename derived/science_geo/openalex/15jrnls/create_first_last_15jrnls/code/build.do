@@ -47,6 +47,9 @@ program create_firstlast
         assert r(max) == 2
     }
     gen affl_wt = 1/num_affls * 1/num_athrs
+    gen pat_affl_wt = patent_count * 1/num_affls * 1/num_athrs
+    gen body_affl_wt = body_only * 1/num_affls * 1/num_athrs
+    gen front_affl_wt = front_only * 1/num_affls * 1/num_athrs
     qui gen years_since_pub = 2022-year+1
     qui gen avg_cite_yr = cite_count/years_since_pub
     qui gen avg_pat_yr = patent_count/years_since_pub
