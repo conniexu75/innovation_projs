@@ -328,6 +328,9 @@ program clean_samps
     assert num_affls == 1
     bys pmid: gegen num_athrs = max(which_athr)
     gen affl_wt = 1/num_affls * 1/num_athrs // this just divides each paper by the # of authors on the paper
+    gen pat_affl_wt = patent_count * 1/num_affls * 1/num_athrs
+    gen body_affl_wt = body_only * 1/num_affls * 1/num_athrs
+    gen front_affl_wt = front_only * 1/num_affls * 1/num_athrs
     // now give each article a weight based on their ciatation count 
     qui gen years_since_pub = 2023-year+1
     qui gen avg_cite_yr = cite_count/years_since_pub
