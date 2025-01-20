@@ -1,3 +1,3 @@
 ./geo/ | /export/projects4/achandra_basicscience/raw/geo/
 ./pprs/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/scrape_athr_inst_hist_15jrnls/output
-./athrs/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/make_15jrnls/output
+./athrs/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/make_subjrnl_cuts/output

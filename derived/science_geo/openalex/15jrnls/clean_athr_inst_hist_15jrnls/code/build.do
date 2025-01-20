@@ -10,7 +10,7 @@ global temp "/export/scratch/cxu_sci_geo/clean_athr_inst_hist_15jrnls"
 
 program main
     *append_files
-    merge_geo
+    *merge_geo
     clean_panel, time(year)
     *clean_panel, time(qrtr)
     *convert_year_to_qrtr
@@ -43,7 +43,7 @@ program append_files
     gcollapse (sum) num_times, by(athr_id inst_id qrtr)
 
     compress, nocoalesce
-    save ${temp}/appended_pprs, replace
+    save ../temp/appended_pprs, replace
 end
 
 program merge_geo
@@ -208,18 +208,18 @@ program merge_geo
     gduplicates drop inst_id, force
     keep inst_id inst new_inst new_inst_id region city country country_code type 
     drop if mi(inst_id) 
-    save ${temp}/all_inst_chars, replace
+    save ../temp/all_inst_chars, replace
 end 
 
 program clean_panel
     syntax, time(str)
-    use ${temp}/appended_pprs, clear
+    use ../temp/appended_pprs, clear
     gen year = yofd(dofq(qrtr))
     drop if mi(`time')
     if "`time'" == "year" {
         gcollapse (sum) num_times, by(athr_id inst_id `time')
     }
-    fmerge m:1 inst_id using ${temp}/all_inst_chars, assert(1 2 3) keep(3) nogen
+    fmerge m:1 inst_id using ../temp/all_inst_chars, assert(1 2 3) keep(3) nogen
     replace inst_id = new_inst_id 
     replace inst = new_inst 
     gen broad_affl = inst == "Broad Institute"
@@ -333,12 +333,12 @@ program clean_panel
     // do some final cleaning
     cap gen year  = yofd(dofq(qrtr))
 *    drop if !inrange(year, 1945, 2023) 
-    save ${temp}/athr_panel, replace
+    save ../temp/athr_panel, replace
 
     
     import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
     glevelsof statefull , local(state_names)
-    use ${temp}/athr_panel, clear
+    use ../temp/athr_panel, clear
     foreach s in `state_names' {
         replace region = "`s'" if mi(region) & country_code == "US" & strpos(inst, "`s'")>0
     }
@@ -392,14 +392,14 @@ program clean_panel
     replace region = "Missouri" if inst_id == "I4210102181"
     replace region = "New Jersey" if inst_id == "I150569930"
     replace region = "Maryland" if inst_id == "I166416128"
-    save ${temp}/athr_panel, replace
+    save ../temp/athr_panel, replace
 
     import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
     gcontract stateshort statefull
     drop _freq
     drop if mi(stateshort)
     rename statefull region
-    merge 1:m region using ${temp}/athr_panel, assert(1 2 3) keep(2 3) nogen
+    merge 1:m region using ../temp/athr_panel, assert(1 2 3) keep(2 3) nogen
     replace stateshort =  "DC" if region == "District of Columbia"
     replace stateshort =  "VI" if region == "Virgin Islands, U.S."
     gen us_state = stateshort if country_code == "US"
@@ -427,7 +427,7 @@ program clean_panel
     gen sandwich = prev_msa == post_msa & prev_msa != msa_comb if athr_id[_n-1] == athr_id[_n+1] & athr[_n-1] == athr_id
     replace msa_comb = prev_msa if sandwich == 1
     drop sandwich prev_msa post_msa
-    save ${temp}/athr_panel, replace
+    save ../temp/athr_panel, replace
 
     replace athr_id = subinstr(athr_id, "A", "", .)
     destring athr_id, replace
@@ -439,7 +439,7 @@ program clean_panel
     tostring athr_id, replace
     replace athr_id = "A" + athr_id
     keep athr_id inst_id year broad_affl hhmi_affl
-    fmerge m:1 inst_id using ${temp}/all_inst_chars, assert(1 2 3) keep(3) nogen
+    fmerge m:1 inst_id using ../temp/all_inst_chars, assert(1 2 3) keep(3) nogen
     drop new_inst new_inst_id type 
     foreach s in `state_names' {
         replace region = "`s'" if mi(region) & country_code == "US" & strpos(inst, "`s'")>0
@@ -495,14 +495,14 @@ program clean_panel
     replace region = "New Jersey" if inst_id == "I150569930"
     replace region = "Maryland" if inst_id == "I166416128"
     compress, nocoalesce
-    save ${temp}/pre_fill_msa_`time', replace
+    save ../temp/pre_fill_msa_`time', replace
 
     import delimited using ../external/geo/us_cities_states_counties.csv, clear varnames(1)
     gcontract stateshort statefull
     drop _freq
     drop if mi(stateshort)
     rename statefull region
-    merge 1:m region using ${temp}/pre_fill_msa_`time', assert(1 2 3) keep(2 3) nogen
+    merge 1:m region using ../temp/pre_fill_msa_`time', assert(1 2 3) keep(2 3) nogen
     replace stateshort =  "DC" if region == "District of Columbia"
     replace stateshort =  "VI" if region == "Virgin Islands, U.S."
     gen us_state = stateshort if country_code == "US"
@@ -530,7 +530,7 @@ program clean_panel
 end
 
 program convert_year_to_qrtr
-    use ${temp}/appended_pprs, clear
+    use ../temp/appended_pprs, clear
     gen year = yofd(dofq(qrtr))
     keep if inrange(year, 1945, 2023)
     drop if mi(qrtr) | mi(year)

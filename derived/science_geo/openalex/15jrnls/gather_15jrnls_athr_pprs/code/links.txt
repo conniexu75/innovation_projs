@@ -1,2 +1,2 @@
-./athrs/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/make_15jrnls/output
+./athrs/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/make_subjrnl_cuts/output
 ./insts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/all_jrnls/scrape_all_fund/output 
