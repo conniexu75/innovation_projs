@@ -9,14 +9,15 @@ here, set
 set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_openalex"
 program main
-    foreach samp in 15jrnls {
-        create_firstlast, samp(`samp')
+    foreach samp in firstlast last first {
+        create_athr_split, samp(15jrnls) cut(`samp')
+        split_sample, cut(`samp')
     }
-    split_sample
 end
 
-program create_firstlast 
-    syntax, samp(str)
+program create_athr_split
+    syntax, samp(str) cut(str)
+    cap mkdir "../output/`cut'"
     if "`samp'" == "15jrnls" {
         use id pmid which_athr which_affl pub_date year jrnl cite_count front_only body_only patent_count athr_id athr_name  stateshort region inst_id country_code country city us_state msacode msatitle msa_comb msa_c_world inst using ../external/openalex/cleaned_all_`samp', clear
     }
@@ -24,13 +25,17 @@ program create_firstlast
         use  ../external/openalex/cleaned_all_`samp', clear
         drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr affl_wt 
     }
-/*    if "`samp'" == "15jrnls" {
-        merge m:1 athr_id year using ${year_insts}/filled_in_panel_year, assert(1 2 3) keep(3) nogen
-        gduplicates drop id athr_id inst_id, force
-    }*/
     bys id: egen first_athr = min(which_athr)
     bys id: egen last_athr = max(which_athr)
-    keep if which_athr == first_athr | which_athr == last_athr
+    if "`cut'" == "firstlast" {
+        keep if which_athr == first_athr | which_athr == last_athr
+    }
+    if "`cut'" == "last" {
+        keep if which_athr == last_athr
+    }
+    if "`cut'" == "first" {
+        keep if which_athr == first_athr
+    }
     qui hashsort id which_athr which_affl
     cap drop author_id 
     cap drop num_athrs 
@@ -41,10 +46,15 @@ program create_firstlast
     cap drop num_affls
     bys id which_athr: gen num_affls = _N
     bys id: egen num_athrs = max(which_athr)
-    if "`samp'" == "15jrnls" {
+    if "`cut'" == "firstlast" {
         assert num_affls == 1
         qui sum num_athrs
         assert r(max) == 2
+    }
+    if "`cut'" == "last" | "`cut'" == "first" {
+        assert num_affls == 1
+        qui sum num_athrs
+        assert r(max) == 1
     }
     gen affl_wt = 1/num_affls * 1/num_athrs
     gen pat_affl_wt = patent_count * 1/num_affls * 1/num_athrs
@@ -128,7 +138,7 @@ program create_firstlast
     qui sum len
     local n = r(max)
     recast str`n' inst, force
-    save ../output/cleaned_all_`samp', replace
+    save ../output/`cut'/cleaned_all_`samp', replace
 
     keep if inrange(pub_date, td(01jan2015), td(31dec2022)) & year >=2015
     drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt frnt_wt body_wt frnt_adj_wt body_adj_wt
@@ -172,13 +182,14 @@ program create_firstlast
         assert round(r(sum)-`articles') == 0
     }
     compress, nocoalesce
-    save ../output/cleaned_last5yrs_`samp', replace
+    save ../output/`cut'/cleaned_last5yrs_`samp', replace
 end
 
 program split_sample
+    syntax, cut(str)
     foreach samp in all last5yrs {
         preserve
-        use ../output/cleaned_`samp'_15jrnls, clear
+        use ../output/`cut'/cleaned_`samp'_15jrnls, clear
         keep if inlist(jrnl, "Cell", "Science", "Nature")
         drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt frnt_wt body_wt frnt_adj_wt body_adj_wt
         qui sum avg_cite_yr
@@ -220,14 +231,14 @@ program split_sample
             sum `wt'
             assert round(r(sum)-`articles') == 0
         }
-        save ../output/cleaned_`samp'_newfund_cns, replace
+        save ../output/`cut'/cleaned_`samp'_newfund_cns, replace
         gcontract id
         drop _freq
-        save ../output/list_of_ids_`samp'_newfund_cns, replace
+        save ../output/`cut'/list_of_ids_`samp'_newfund_cns, replace
         restore
 
         preserve
-        use ../output/cleaned_`samp'_15jrnls, clear
+        use ../output/`cut'/cleaned_`samp'_15jrnls, clear
         keep if inlist(jrnl, "Cell stem cell", "Nature Biotechnology", "Nature Cell Biology", "Nature Genetics", "Nature Medicine", "Nature Neuroscience", "Neuron", "Nature Chemical Biology")
         drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt frnt_wt body_wt frnt_adj_wt body_adj_wt
         qui sum avg_cite_yr
@@ -269,14 +280,14 @@ program split_sample
             sum `wt'
             assert round(r(sum)-`articles') == 0
         }
-        save ../output/cleaned_`samp'_newfund_scisub, replace
+        save ../output/`cut'/cleaned_`samp'_newfund_scisub, replace
         gcontract id
         drop _freq
-        save ../output/list_of_ids_`samp'_newfund_scisub, replace
+        save ../output/`cut'/list_of_ids_`samp'_newfund_scisub, replace
         restore
 
         preserve
-        use ../output/cleaned_`samp'_15jrnls, clear
+        use ../output/`cut'/cleaned_`samp'_15jrnls, clear
         keep if inlist(jrnl, "The FASEB Journal", "Journal of Biological Chemistry", "Oncogene", "PLoS One")
         drop cite_wt cite_affl_wt impact_wt impact_affl_wt impact_cite_wt impact_cite_affl_wt tot_cite_N reweight_N jrnl_N first_jrnl impact_shr pat_wt pat_adj_wt frnt_wt body_wt frnt_adj_wt body_adj_wt
         qui sum avg_cite_yr
@@ -318,33 +329,33 @@ program split_sample
             sum `wt'
             assert round(r(sum)-`articles') == 0
         }
-        save ../output/cleaned_`samp'_newfund_demsci, replace
+        save ../output/`cut'/cleaned_`samp'_newfund_demsci, replace
         gcontract id
         drop _freq
-        save ../output/list_of_ids_`samp'_newfund_demsci, replace
+        save ../output/`cut'/list_of_ids_`samp'_newfund_demsci, replace
         restore
 
-/*        preserve
+    /*        preserve
         use ../output/cleaned_`samp'_clin_med, clear
         gcontract id
         drop _freq
         save ../output/list_of_ids_`samp'_clin_med,  replace
         restore*/
-    } 
+    }
     // split mesh terms
     use ../external/openalex/contracted_gen_mesh_15jrnls, clear
     foreach samp in cns scisub demsci {
         preserve
-        merge m:1 id using ../output/list_of_ids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
-        save ../output/contracted_gen_mesh_newfund_`samp', replace
+        merge m:1 id using ../output/`cut'/list_of_ids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
+        save ../output/`cut'/contracted_gen_mesh_newfund_`samp', replace
         restore
     }
    // split concepts 
     use ../external/openalex/concepts_15jrnls, clear
     foreach samp in cns scisub demsci {
         preserve
-        merge m:1 id using ../output/list_of_ids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
-        save ../output/concepts_newfund_`samp', replace
+        merge m:1 id using ../output/`cut'/list_of_ids_all_newfund_`samp', assert(1 2 3) keep(3) nogen
+        save ../output/`cut'/concepts_newfund_`samp', replace
         restore
     }
 end
