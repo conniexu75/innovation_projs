@@ -23,7 +23,10 @@ program main
         sum `v', d
         local m_`v' : dis %6.3f r(mean)
         local n_`v' = r(N) 
+        local sd_`v' : dis %5.3f  r(sd)
     }
+    tw kdensity inst_ln_y_diff if group == 1 , lcolor(lavender) , ytitle("Share of Movers", size(vsmall)) xtitle("Destination-Origin Difference in Log Productivity", size(vsmall)) legend(on order(- "Mean = `m_inst_ln_y_diff'" "             (`sd_inst_ln_y_diff')") size(vsmall) ring(0) pos(1) region(fcolor(none))) xlab(, labsize(vsmall)) ylab(, labsize(vsmall))
+    graph export ../output/inst_delta_dist.pdf, replace
     tw kdensity inst_ln_y_diff if group == 1 , lcolor(lavender) || kdensity star_inst_ln_y_diff if group == 1, lcolor(orange) || kdensity msa_wo_inst_diff if group == 2, lcolor(ebblue) , ytitle("Share of Movers", size(vsmall)) xtitle("Destination-Origin Difference in Log Productivity", size(vsmall)) legend(on order(1 "Institution: N = `n_inst_ln_y_diff'; mean = `m_inst_ln_y_diff'" 2 "Institution Stars: N = `n_star_inst_ln_y_diff'; mean = `m_star_inst_ln_y_diff'" 3 "City w/o Focal Institution: N = `n_msa_wo_inst_diff'; mean = `m_msa_wo_inst_diff'") size(vsmall) ring(0) pos(1) region(fcolor(none))) xlab(, labsize(vsmall)) ylab(, labsize(vsmall))
     graph export ../output/delta_dist.pdf, replace
 

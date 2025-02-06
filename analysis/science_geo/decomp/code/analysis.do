@@ -94,8 +94,8 @@ program var_decomp
     keep if num_athrs >= 25
     reghdfe ln_y, absorb(inst_fes = inst_id athr_fes = athr_id year_fes = year) residual
     predict y_hat , xbd
-    gcollapse (mean) y_hat athr_fes (firstnm) inst_fes , by(inst_id year)
-    gcollapse (mean) y_hat athr_fes (firstnm) inst_fes, by(inst_id)
+    gcollapse (mean) y_hat ln_y athr_fes (firstnm) inst_fes , by(inst_id year)
+    gcollapse (mean) y_hat ln_y athr_fes (firstnm) inst_fes, by(inst_id)
     drop if mi(y_hat)
     corr inst_fes athr_fes
     local corr = r(rho)
