@@ -21,29 +21,46 @@ global msa_c_world_name "cities"
 program main
     di "OUTPUT START"
     foreach athr_type in year_second {
-        di "ALL: impact_cite_affl_wt"
-        athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(1) loc(inst_id)
+        identify_movers, athr(`athr_type')
+        *athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(1) loc(inst_id)
         athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(0) loc(inst_id)
         athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(0) loc(msa_comb)
-        athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(1) loc(msa_c_world)
-        *top_insts, athr(`athr_type') samp(all) wt_var(cite_affl_wt) 
-        /*di "CNS: body_adj_wt"
-        athr_loc, athr(`athr_type') samp(cns) wt_var(body_adj_wt) 
-        top_insts, athr(`athr_type') samp(cns) wt_var(body_adj_wt) 
-        output_tables, athr(`athr_type') samp(cns)*/
-        *output_tables, athr(`athr_type') samp(all) 
-        *map, athr(`athr_type') samp(all) 
+        *athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(1) loc(msa_c_world)
+        top_insts, athr(`athr_type') samp(all) wt_var(cite_affl_wt) 
+        output_tables, athr(`athr_type') samp(all) 
     }
 end
 
+program identify_movers 
+    syntax, athr(str) 
+    use ../external/samp/athr_panel_full_comb_`athr'_global, clear 
+    if inst == "City of Hope" {
+        replace inst_id = "I1301076528"
+        replace region = "California"
+        replace msa_c_world = "Los Angeles-Long Beach-Anaheim, US"
+        replace city = "Duarte" 
+        replace us_state = "CA"
+        replace msa_comb = "Los Angeles-Long Beach-Anaheim, CA"
+        replace msatitle = "Los Angeles-Long Beach-Anaheim, CA"
+    }
+    bys athr_id inst_id: gen id_cnt =_n == 1
+    bys athr_id : egen mover = sum(id_cnt)
+    replace mover = mover > 1
+    bys inst_id: egen tot_athrs = total(id_cnt)
+    bys inst_id: egen tot_movers = total(mover * id_cnt)
+    gcontract inst_id tot_athrs tot_movers 
+    drop _freq
+    save ../temp/inst_stats, replace
+end
 program athr_loc
     syntax, athr(str) samp(str) wt_var(str) global(int) loc(str)
     local jrnls = ""
     if "`samp'" == "cns" local jrnls "_cns"
     use ../external/samp/athr_panel_full_comb_`athr'`jrnls'_global, clear 
-    replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
+    keep if inrange(year, 2015, 2023)
+    merge m:1 inst_id using ../temp/inst_stats, assert(3) keep(3) nogen
     local end 20
-    if "`loc'" == "inst"  {
+    if "`loc'" == "inst_id"  {
         local end 50
     }
     if `global' == 1  {
@@ -53,7 +70,21 @@ program athr_loc
         keep if country == "United States" 
     }
     preserve
+    drop if mi(`loc')
     gen log_`wt_var'=log(`wt_var')
+    bys inst_id athr_id year : gen inst_athr_yr_cnt = _n == 1
+    bys inst_id year : egen inst_athr_yrs = total(inst_athr_yr_cnt) 
+    bys inst_id year: gen inst_yr_cnt = _n == 1
+    replace  inst_athr_yrs = . if inst_yr_cnt != 1
+    bys inst_id : egen inst_avg_athr_yrs = mean(inst_athr_yrs)
+    bys inst_id athr_id : gen inst_athr_cnt = _n == 1
+    bys inst_id : egen inst_num_athrs = total(inst_athr_cnt)
+    bys inst_id: egen num_inst_yrs = total(inst_yr_cnt)
+*    drop if num_inst_yrs < 5
+*    drop if inst_avg_athr_yrs < 5
+    drop if tot_athrs <100 
+    drop if tot_movers < 25 
+
     bys `loc' inst_id : gen inst_cnt = _n == 1
     bys `loc' : egen tot_insts = total(inst_cnt) 
     bys `loc' athr_id : gen athr_cnt = _n == 1
@@ -63,53 +94,21 @@ program athr_loc
     replace athr_yrs = . if athr_yr_id != 1
     bys `loc' : egen avg_athr_yrs = mean(athr_yrs)
     bys `loc' : egen num_athrs = total(athr_cnt)
+
     bys `loc': gen `loc'_cnt = _n == 1
     sum num_athrs if `loc'_cnt == 1
     bys `loc' year: gen yr_cnt = _n == 1
     bys `loc': egen num_years = total(yr_cnt)
-    
-/*        gen wt = num_athrs/r(sum)
-    sum `wt_var'
-    local total = r(sum)
-    gen wt_prod   = wt * `wt_var'
-    gen wt_pat   = wt * body_affl_wt 
-   
-    sum wt_prod 
-    local sum = r(sum)
-    gen scale = `total'/`sum'
-    replace wt_prod = scale * wt_prod
-    
-    sum wt_pat
-    local sum = r(sum)
-    sum body_affl_wt 
-    local total = r(sum)
-    replace wt_pat = `total'/`sum' * wt_pat 
-    collapse (mean) `wt_var' wt_prod wt_pat ,  by(`loc')*/
-    drop if mi(`loc')
-    drop if num_years <= 5
-
-    if "`loc'" == "inst_id" {
-        drop if avg_athr_yrs <= 5
-        drop if num_athrs <= 25
-    }
     if "`loc'" != "inst_id" {
-        drop if tot_insts <= 5
-        drop if avg_athr_yrs <= 20 
-        drop if num_athrs <=100 
+*        drop if num_years < 5
+*        drop if tot_insts ==  1
+*        drop if avg_athr_yrs <= 15 
+*        drop if num_athrs <=75 
     }
-    collapse (mean) `wt_var'  log_`wt_var' (mean) tot_insts (firstnm) country inst,  by(`loc' year)
-    collapse (mean) `wt_var' log_`wt_var' (min) min_year = year (max) max_year = year (firstnm) country inst,  by(`loc')
-/*        qui reg wt_pat wt_prod
-    local coef : dis %3.2f _b[wt_prod]
-    local N = e(N)
-    tw scatter wt_pat wt_prod, xtitle("Productivitiy", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3) xlab(, labsize(vsmall)) ylab(, labsize(vsmall))  legend(on order(- "N (MSAs) = `N'" ///
-                                                                                                                  "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
-    graph export ../output/figures/`loc'_pat_prod.pdf, replace*/
+    collapse (mean) `wt_var'  log_`wt_var' tot* (firstnm) country inst,  by(`loc' year)
+    collapse (mean) `wt_var' log_`wt_var' tot* (firstnm) country inst,  by(`loc')
     tw hist log_`wt_var' , frac bin(50) color(ebblue%50) ytitle("Share of ${`loc'_name}") xtitle("Log Avg. Productivity")
     graph export ../output/figures/dist_`loc'_global`global'.pdf, replace
-    /*gen log_wt_prod = log(wt_prod)
-    tw hist log_wt_prod , frac bin(50) color(ebblue%50) ytitle("Share of ${`loc'_name}") xtitle("Wt. Log Avg. Productivity")
-    graph export ../output/figures/wt_dist_`loc'.pdf, replace*/
     qui hashsort -`wt_var'
     qui drop if mi(`loc')
     gen rank = _n 
@@ -117,7 +116,15 @@ program athr_loc
     drop rank
     qui count
     local rank_end = min(r(N),`end') 
-    li `loc' `wt_var' in 1/`rank_end'
+    if "`loc'" == "inst_id"  & `global' == 0 {
+        li inst `wt_var' log_`wt_var' in 1/`rank_end'
+    }
+    if "`loc'" == "inst_id"  & `global' == 1 {
+        li inst country `wt_var' in 1/`rank_end'
+    }
+    else {
+        li `loc' `wt_var' in 1/`rank_end'
+    }
     mkmat `wt_var' in 1/`rank_end', mat(top_`loc'_`athr'`jrnls')
     qui save ../temp/`loc'_rank_`athr'`jrnls'_global`global', replace
 end
@@ -176,35 +183,37 @@ program map
     gen wt = num_athrs/r(sum)
     sum impact_cite_affl_wt
     local total = r(sum)
-    gen wt_prod   = wt * impact_cite_affl_wt
-    sum wt_prod 
-    local sum = r(sum)
-    gen scale = `total'/`sum'
-    replace wt_prod = scale * wt_prod
-    gcollapse (mean) wt_prod , by(msa_comb)
+    bys msa_comb inst_id : gen inst_cnt = _n == 1
+    bys msa_comb : egen tot_insts = total(inst_cnt) 
+    bys msa_comb athr_id year : gen athr_yr_cnt = _n == 1
+    bys msa_comb year : egen athr_yrs = total(athr_yr_cnt) 
+    bys msa_comb year: gen athr_yr_id = _n == 1
+    replace athr_yrs = . if athr_yr_id != 1
+    bys msa_comb : egen avg_athr_yrs = mean(athr_yrs)
+    drop if tot_insts == 1
+    gcollapse (mean) impact_cite_affl_wt, by(msa_comb year)
+    gcollapse (mean) impact_cite_affl_wt, by(msa_comb)
     save ../temp/map_samp_`samp'_`athr', replace
     
     use usa_msa, clear
     rename NAME msa_comb
     merge 1:m msa_comb using ../temp/map_samp_`samp'_`athr', assert(1 2 3) keep(1 3) nogen
-    foreach var in wt_prod {
-    replace wt_prod = log(wt_prod)
-        xtile `var'_4 = `var', nq(4)
-        qui sum `var' 
-        local min : dis %6.4f r(min)
-        local max : dis %6.4f r(max)
-        _pctile `var',percentiles(25 50 75)
-        local p25: dis %6.4f r(r1)
-        local p50: dis %6.4f r(r2)
-        local p75: dis %6.4f r(r3)
-        *local p80: dis %3.2f r(r4)
-        colorpalette carto Teal, n(4) nograph 
-        spmap  `var'_4 using usa_msa_shp_clean,  id(_ID)  fcolor(`r(p)'%50) clnumber(4) ///
-          ocolor(white ..) osize(0.15 ..) ndfcolor(gs13) ndocolor(white ..) ndsize(0.15 ..) ndlabel("No data") ///
-          polygon(data("usa_state_shp_clean") ocolor(gs2) osize(0.2) fcolor(eggshell%20)) ///
-          legend(label(2 "Min-p25: `min'-`p25'") label(3 "p25-p50: `p25'-`p50'") label(4 "p50-p75: `p50'-`p75'") label(5 "p75-max: `p75'-`max'") pos(4) size(2)) legtitle("${`var'_name}")
-        graph export ../output/figures/`var'_map_`samp'_`athr'.pdf, replace
-    }
+    replace impact_cite_affl_wt= log(impact_cite_affl_wt)
+    xtile impact_cite_affl_wt_4 = impact_cite_affl_wt, nq(4)
+    qui sum impact_cite_affl_wt 
+    local min : dis %6.4f r(min)
+    local max : dis %6.4f r(max)
+    _pctile impact_cite_affl_wt,percentiles(25 50 75)
+    local p25: dis %6.4f r(r1)
+    local p50: dis %6.4f r(r2)
+    local p75: dis %6.4f r(r3)
+    *local p80: dis %3.2f r(r4)
+    colorpalette carto Teal, n(4) nograph 
+    spmap  impact_cite_affl_wt_4 using usa_msa_shp_clean,  id(_ID)  fcolor(`r(p)'%50) clnumber(4) ///
+      ocolor(white ..) osize(0.15 ..) ndfcolor(gs13) ndocolor(white ..) ndsize(0.15 ..) ndlabel("No data") ///
+      polygon(data("usa_state_shp_clean") ocolor(gs2) osize(0.2) fcolor(eggshell%20)) ///
+      legend(label(2 "Min-p25: `min'-`p25'") label(3 "p25-p50: `p25'-`p50'") label(4 "p50-p75: `p50'-`p75'") label(5 "p75-max: `p75'-`max'") pos(4) size(2)) legtitle("${impact_cite_affl_wt_name}")
+    graph export ../output/figures/impact_cite_affl_wt_map_`samp'_`athr'.pdf, replace
 end
 
 program top_insts
@@ -212,57 +221,77 @@ program top_insts
     local jrnls = ""
     if "`samp'" == "cns" local jrnls "_cns"
     use ../external/samp/athr_panel_full_comb_`athr'`jrnls'_global, clear 
+    if inst == "City of Hope" {
+        replace inst_id = "I1301076528"
+        replace region = "California"
+        replace msa_c_world = "Los Angeles-Long Beach-Anaheim, US"
+        replace city = "Duarte" 
+        replace us_state = "CA"
+        replace msa_comb = "Los Angeles-Long Beach-Anaheim, CA"
+        replace msatitle = "Los Angeles-Long Beach-Anaheim, CA"
+    }
+    keep if inrange(year, 2015, 2023)
+    merge m:1 inst_id using ../temp/inst_stats, assert(3) keep(3) nogen
     keep if country == "United States"
-    replace inst = "Mass General Brigham" if inlist(inst, "Massachusetts General Hospital" , "Brigham and Women's Hospital")
     local end 10
     preserve
-        bys msa_comb athr_id : gen athr_cnt = _n == 1
-        bys msa_comb athr_id year : gen athr_yr_cnt = _n == 1
-        bys msa_comb : egen num_athrs = total(athr_cnt)
-        bys msa_comb: gen msa_comb_cnt = _n == 1
-        sum num_athrs if msa_comb_cnt == 1
-        bys msa_comb year: gen yr_cnt = _n == 1
-        bys msa_comb: egen num_years = total(yr_cnt)
-/*    gen wt = num_athrs/r(sum)
-    sum `wt_var'
-    local total = r(sum)
-    gen wt_prod   = wt * `wt_var'
-    sum wt_prod 
-    local sum = r(sum)
-    gen scale = `total'/`sum'
-    replace wt_prod = scale * wt_prod*/
+    bys inst_id athr_id : gen inst_athr_cnt = _n == 1
+    bys inst_id : egen inst_athrs=total(inst_athr_cnt)
+
     bys inst_id athr_id year: gen inst_athr_yr_cnt = _n == 1
     bys inst_id year: egen num_athr_yr = total(inst_athr_yr_cnt)
-    bys inst_id : egen mean_athr_yr_cnt = 
-    bys msa_comb: egen avg = mean(wt_prod)
+    bys inst_id year: gen inst_yr_id = _n == 1
+    replace num_athr_yr = . if inst_yr_id != 1
+    bys inst_id : egen avg_inst_athr_yrs = mean(num_athr_yr)
+    
+    bys inst_id year: gen inst_yr_cnt = _n == 1
+    bys inst_id: egen num_inst_yrs = total(inst_yr_cnt)
+    drop if tot_athrs <100 
+    drop if tot_movers < 25 
+    /*drop if num_inst_yrs < 5
+    drop if avg_inst_athr_yrs < 5
+    drop if inst_athrs < 25*/
+
+    bys msa_comb inst_id : gen msa_inst_cnt = _n == 1
+    bys msa_comb : egen tot_insts = total(msa_inst_cnt) 
+    bys msa_comb athr_id : gen athr_cnt = _n == 1
+    bys msa_comb athr_id year : gen athr_yr_cnt = _n == 1
+    bys msa_comb : egen num_athrs = total(athr_cnt)
+    bys msa_comb: gen msa_comb_cnt = _n == 1
+    bys msa_comb year: gen yr_cnt = _n == 1
+    bys msa_comb: egen num_years = total(yr_cnt)
+    bys msa_comb year : egen athr_yrs = total(athr_yr_cnt) 
+    bys msa_comb year: gen athr_yr_id = _n == 1
+    replace athr_yrs = . if athr_yr_id != 1
+    bys msa_comb : egen avg_athr_yrs = mean(athr_yrs)
+*    drop if num_years < 5
+*    drop if tot_insts == 1
+
+    bys msa_comb year: egen avg_yr = mean(impact_cite_affl_wt)
+    bys msa_comb year: gen id = _n == 1 
+    replace avg_yr = . if id != 1
+    bys msa_comb : egen avg = mean(avg_yr)
     gen neg_avg = -avg
     replace neg_avg = . if msa_comb_cnt != 1
     egen rank = rank(neg_avg)
     hashsort msa_comb rank
     by msa_comb : replace rank = rank[_n-1] if mi(rank)
     rename rank msa_rank
-    drop wt* athr_cnt scale avg neg_avg num_athrs
+    drop  athr_cnt  avg neg_avg num_athrs
     bys inst athr_id : gen athr_cnt = _n == 1
     bys inst : egen num_athrs = total(athr_cnt)
     bys inst: gen inst_cnt = _n == 1
     sum num_athrs if inst_cnt == 1
-    gen wt = num_athrs/r(sum)
-    sum `wt_var'
-    local total = r(sum)
-    gen wt_prod   = wt * `wt_var'
-    sum wt_prod 
-    local sum = r(sum)
-    gen scale = `total'/`sum'
-    replace wt_prod = scale * wt_prod*/
-    collapse (mean)  wt_prod msa_rank,  by(inst msa_comb)
+    collapse (mean)  impact_cite_affl_wt  msa_rank,  by(inst msa_comb year)
+    collapse (mean)  impact_cite_affl_wt  msa_rank,  by(inst msa_comb)
     keep if msa_rank <=10
-    gen neg_avg = -wt_prod
+    gen neg_avg = -impact_cite_affl_wt
     bys  msa_comb :egen rank= rank(neg_avg)
     keep if rank <=5
     hashsort msa_rank rank
     qui count
-    li msa_comb inst wt_prod 
-    mkmat wt_prod , mat(inst_msa_`athr'`jrnls')
+    li msa_comb inst  impact_cite_affl_wt
+    mkmat impact_cite_affl_wt, mat(inst_msa_`athr'`jrnls')
     qui save ../temp/inst_in_msa_rank_`athr'`jrnls', replace
     restore
 end
