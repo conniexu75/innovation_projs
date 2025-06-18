@@ -1,0 +1,1110 @@
+--------------------------------------------------------------------------------
+Makelog started: 2025-06-17 17:05:52
+Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/alt_mover_spec/code
+--------------------------------------------------------------------------------
+External links successfully created!
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Unlimited-user 4-core network, expiring 17 Nov 2025
+Serial number: 501809301897
+  Licensed to: Harvard Business School
+               Research Computing
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 120,000; see help set_maxvar.
+
+. do "/export/projects4/achandra_basicscience/analysis/science_geo/alt_mover_sp
+> ec/code/analysis.do" 
+
+. set more off
+
+. clear all
+
+. capture log close
+
+. program drop _all
+
+. set scheme modern
+
+. graph set window fontface "Arial Narrow"
+not available in non-GUI version
+
+. pause on
+
+. set seed 8975
+
+. global y_name "Output"
+
+. global pat_adj_wt_name "Patent-to-Paper Citations"
+
+. global ln_patent_name "Log Patent-to-Paper Citations"
+
+. global ln_y_name "Log Output"
+
+. global x_name "Cluster Size"
+
+. global ln_x_name "Log Cluster Size"
+
+. global time year 
+
+. 
+. program main
+  1.     qui get_full_mover_picture
+  2.     local main_fes "year athr_fes = athr_id"
+  3.     local field "field year athr_fes = athr_id"
+  4.     foreach t in year_second { 
+  5.         di "SAMP: `t'"
+  6.         qui cns_Output, samp(`t')
+  7.         qui make_movers, samp(`t')
+  8.         make_dest_origin, samp(`t')
+  9.         qui event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(e
+> xcluded_inst_ln_y_diff) fes(`main_fes') fol(main) het_analysis(0)
+ 10.     }
+ 11. end
+
+. 
+. program get_full_mover_picture
+  1.     use if country_code == "US" using ../external/year_insts/filled_in_pan
+> el_${time}, clear
+  2.     hashsort athr_id year
+  3.     gen place_count =  1 if inst_id != inst_id[_n-1] & athr_id == athr_id[
+> _n-1] 
+  4.     bys athr_id: egen num_moves = total(place_count)
+  5.     bys athr_id (year): gen which_place = sum(place_count)
+  6.     by athr_id: gen athr_counter =  _n == 1
+  7.     bys athr_id (year) : gen move_year = year if place_count == 1  & _n !=
+>  1 & year[_n-1] == year-1
+  8.     replace move_year = move_year - 3
+  9.     bys athr_id : egen first_pub_yr  = min(year)
+ 10.     bys athr_id : egen last_pub_yr  = max(year)
+ 11.     gcontract athr_id  move_year  num_moves first_pub_yr last_pub_yr
+ 12.     drop _freq
+ 13.     drop if mi(move_year)
+ 14.     hashsort athr_id move_year
+ 15.     by athr_id: gen which_move = _n
+ 16.     drop if num_moves <= 0
+ 17.     drop if num_moves >6
+ 18.     rename num_moves tot_moves
+ 19.     save ../temp/movers, replace
+ 20.     preserve
+ 21.     gcontract athr_id move_year first_pub_yr last_pub_yr
+ 22.     bys athr_id (move_year) : gen i = _n 
+ 23.     drop _freq
+ 24.     reshape wide move_year,  i(athr_id first_pub_yr last_pub_yr) j(i)
+ 25.     save ../temp/move_years, replace
+ 26.     restore
+ 27.     gcontract athr_id tot_moves first_pub_yr last_pub_yr
+ 28.     drop _freq
+ 29.     save ../temp/mover_chars, replace
+ 30. end
+
+. 
+. program cns_Output
+  1.     syntax, samp(str)
+  2.     if strpos("`samp'", "cns") == 0 {
+  3.         use athr_id impact_cite_affl_wt year using ../external/samp/athr_p
+> anel_full_comb_`samp'_cns, clear 
+  4.         rename impact_cite_affl_wt  cns_impact_cite_affl_wt
+  5.         save ../temp/`samp'_cns_prod, replace
+  6.     }
+  7. end
+
+. 
+. program make_movers
+  1.     syntax, samp(str)
+  2.     use athr_id field msa_comb year inst_id inst msa_size impact_cite_affl
+> _wt avg_team_size sec* cns ppr_cnt if !mi(msa_comb) & !mi(inst_id) using ../e
+> xternal/samp/athr_panel_full_comb_`samp', clear 
+  3.     merge m:1 athr_id using ../temp/mover_chars, assert(1 2 3) keep(1 3)
+  4.     gen ever_mover = _merge == 3
+  5.     drop _merge
+  6.     if strpos("`samp'", "cns") == 0 {
+  7.         merge 1:1 athr_id year using ../temp/`samp'_cns_prod, assert(1 3) 
+> keep(1 3) nogen
+  8.     }
+  9.     hashsort athr_id year
+ 10. 
+.     gen place_count =  1 if inst_id != inst_id[_n-1] & athr_id == athr_id[_n-
+> 1] 
+ 11.     bys athr_id: egen num_moves = total(place_count)
+ 12.     bys athr_id (year): gen which_place = sum(place_count)
+ 13.     bys athr_id: gen athr_counter =  _n == 1
+ 14.     gen mover = num_moves > 0 
+ 15.     tab num_moves if athr_counter == 1 & mover == 1
+ 16.     tab mover if athr_counter == 1
+ 17.     bys athr_id year: gen athr_year_counter =  _n == 1
+ 18.     tab mover if athr_year_counter == 1
+ 19.     replace which_place = which_place + 1
+ 20.     replace which_place = 0 if mover == 0
+ 21.     hashsort athr_id year 
+ 22.     bys athr_id (year): gen origin = 1 if which_place == 1
+ 23.     gen dest = place_count == 1 & origin != 1 & mover == 1
+ 24.     bys athr_id (year): replace origin = 1 if mover == 1 & place_count[_n+
+> 1] == 1 & mi(origin) 
+ 25.     hashsort athr_id which_place origin
+ 26.     bys athr_id which_place:  replace origin = origin[_n-1] if mi(origin) 
+> & !mi(origin[_n-1])
+ 27.     drop if num_moves >=5
+ 28.     
+.     preserve
+ 29.     keep if mover == 1  & num_moves == 1
+ 30.     gcontract athr_id year
+ 31.     bys athr_id: egen min_year = min(year)
+ 32.     bys athr_id: egen max_year = max(year)
+ 33.     drop _freq
+ 34.     gcontract athr_id min_year max_year
+ 35.     drop if _freq == 1
+ 36.     drop _freq
+ 37.     save ../temp/single_movers_`samp', replace
+ 38. 
+.     merge 1:m athr_id using ../temp/movers, assert(1 2 3) keep(3) nogen
+ 39.     keep if move_year >= min_year & move_year <= max_year
+ 40.     gcontract athr_id move_year first_pub_yr which_move
+ 41.     drop _freq
+ 42.     bys athr_id: gen N = _n 
+ 43.     keep if N == 1
+ 44.     save ../temp/mover_xw_`samp', replace
+ 45.     restore
+ 46. 
+.     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(1 3) 
+ 47.     drop if mover == 1 &  num_moves > 1 
+ 48.     bys inst_id year: egen has_mover = max(mover == 1)
+ 49.     gen analysis_cond = mover == 1 & ( num_moves == 1) & ((mover == 0 & _m
+> erge == 1) | (mover == 1 & _merge == 3))
+ 50.     drop _merge
+ 51.     save ../temp/mover_temp_`samp' , replace
+ 52. end
+
+. 
+. program sum_stats
+  1.     syntax, samp(str)
+  2.     use ../temp/mover_temp_`samp' , clear  
+  3.     gegen msa = group(msa_comb)
+  4.     gen ln_y = ln(impact_cite_affl_wt)
+  5.     if strpos("`samp'" , "cns") == 0 {
+  6.         gen ln_cns_y = ln(cns_impact_cite_affl_wt)
+  7.     }
+  8.     cap gen ln_cns_y = ln_y
+  9.     gen ln_x = ln(msa_size)
+ 10.     rename impact_cite_affl_wt y
+ 11.     rename msa_size x
+ 12. 
+.     // individual level stats
+.     preserve
+ 13.     bys athr_id: gen num_years = _N
+ 14.     bys athr_id inst_id : gen inst_cntr = _n == 1
+ 15.     bys athr_id : egen num_insts = total(inst_cntr)
+ 16.     gen life_time_prod = y
+ 17.     gcollapse (mean) num_years num_moves avg_team_size x y num_insts mover
+>  (min) analysis_cond (sum) life_time_prod, by(athr_id)
+ 18.     count
+ 19.     foreach var in num_years avg_team_size x y life_time_prod num_moves {
+ 20.         sum `var'
+ 21.         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
+ 22.     }
+ 23.     count if mover == 0 
+ 24.     foreach var in num_years avg_team_size x y life_time_prod {
+ 25.         sum `var' if mover == 0 
+ 26.         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
+ 27.     } 
+ 28.     count if mover == 1
+ 29.     foreach var in num_years avg_team_size x y life_time_prod {
+ 30.         sum `var' if mover == 1 
+ 31.         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
+ 32.     }
+ 33.     count if analysis_cond == 1 
+ 34.     foreach var in num_years avg_team_size x y life_time_prod {
+ 35.         sum `var' if analysis_cond == 1  
+ 36.         mat ind_stats = nullmat(ind_stats) \ (r(mean) , r(sd))
+ 37.     }
+ 38.     restore
+ 39. 
+.     preserve
+ 40.     gen life_time_prod = y
+ 41.     bys msa_comb inst_id: gen inst_cntr = _n == 1
+ 42.     bys msa_comb: egen num_insts = total(inst_cntr)
+ 43.     gcollapse (mean) x y num_insts (sum) life_time_prod, by(inst_id)
+ 44.     count
+ 45.     foreach var in num_insts x y life_time_prod {
+ 46.         qui sum `var' 
+ 47.         mat city_stats = nullmat(city_stats) \ (r(mean), r(sd))
+ 48.     }
+ 49.     restore
+ 50.     mat stat_`samp' = ind_stats \ city_stats 
+ 51. end 
+
+. 
+. program make_dest_origin
+  1.     syntax, samp(str)
+  2.     use ../temp/mover_temp_`samp' , clear  
+  3.     drop if year  == move_year & mover == 1
+  4.     gegen msa = group(msa_comb)
+  5.     gen ln_y = ln(impact_cite_affl_wt)
+  6.     if strpos("`samp'" , "cns") == 0 {
+  7.         gen ln_cns_y = ln(cns_impact_cite_affl_wt)
+  8.     }
+  9.     cap gen ln_cns_y = ln(impact_cite_affl_wt)
+ 10.     gen ln_x = ln(msa_size)
+ 11.     gen prob_cns = cns/ppr_cnt
+ 12.     bys athr_id: egen is_cns_athr = max(cns)
+ 13.     replace is_cns_athr = is_cns_athr > 0 
+ 14.     gen cns_athr = ln_y if is_cns_athr > 0
+ 15.     rename impact_cite_affl_wt y
+ 16.     rename msa_size x
+ 17. 
+.     foreach loc in inst_id msa_comb {
+ 18.         preserve
+ 19.         if "`loc'" == "inst_id" {
+ 20.             local suf inst 
+ 21.         }
+ 22.         if "`loc'" == "msa_comb" {
+ 23.             local suf msa 
+ 24.         }
+ 25.         egen p95_value = pctile(ln_y), p(95) by(`loc' year)
+ 26.         gen stars = ln_y if ln_y >= p95_value
+ 27.         bys `loc' athr_id : gen `suf'_athr_cnt_id = _n == 1
+ 28.         bys `loc'  : egen `suf'_athr_cnt = total(`suf'_athr_cnt_id)
+ 29.         drop `suf'_athr_cnt_id
+ 30.         bys `loc' athr_id year : gen `suf'_athr_cnt_id = _n == 1
+ 31.         bys `loc' year : egen athr_yrs = total(`suf'_athr_cnt_id) 
+ 32.         bys `loc' year : gen athr_yr_id = _n ==1
+ 33.         replace athr_yrs = . if athr_yr_id != 1
+ 34.         bys `loc': egen avg_athr_yrs = mean(athr_yrs)
+ 35.         bys `loc' athr_id year : gen star_`suf'_athr_cnt_id = _n == 1 &  l
+> n_y >= p95_value
+ 36.         bys `loc' athr_id : gen `suf'_star_cnt_id = _n == 1 &  ln_y >= p95
+> _value
+ 37.         bys `loc' : egen `suf'_star_cnt= total(`suf'_star_cnt_id)
+ 38.         bys `loc' year: gen yr_cnt = _n == 1
+ 39.         bys `loc': egen tot_yrs = total(yr_cnt)
+ 40.         bys `loc' inst_id : gen inst_cnt = _n == 1
+ 41.         bys `loc' : egen tot_insts = total(inst_cnt) 
+ 42.         gen `suf'_sum_ln_y = ln_y
+ 43.         gen star_`suf'_sum_ln_y = stars 
+ 44.         drop if tot_yrs <= 5 
+ 45.         if "`loc'" == "inst_id" {
+ 46.             drop if avg_athr_yrs <= 5
+ 47.             drop if `suf'_athr_cnt <= 25
+ 48.         }
+ 49.         if "`loc'" == "msa_comb" {
+ 50.             drop if tot_insts <= 5
+ 51.             drop if avg_athr_yrs <=20 
+ 52.             drop if `suf'_athr_cnt <=100 
+ 53.         }
+ 54.         collapse (mean) ln_cns_y prob_cns avg_yr_ln_y  = ln_y avg_yr_stars
+>  = stars ln_x `suf'_athr_cnt `suf'_star_cnt cns_athr (sum) `suf'_sum_ln_y sta
+> r_`suf'_sum_ln_y `suf'_athr_cnt_id star_`suf'_athr_cnt_id (firstnm) msa inst 
+> , by(`loc' ${time}) 
+ 55.         save ../temp/`suf'_year_`samp'_collapsed, replace
+ 56.         collapse (mean) `suf'_ln_cns_y = ln_cns_y `suf'_prob_cns = prob_cn
+> s `suf'_ln_y = avg_yr_ln_y star_`suf'_ln_y = avg_yr_stars `suf'_ln_x = ln_x `
+> suf'_athr_cnt `suf'_star_cnt `suf'_cns_athr = cns_athr (sum) `suf'_sum_ln_y s
+> tar_`suf'_sum_ln_y (firstnm) msa inst (min) min_year=year (max) max_year = ye
+> ar, by(`loc')
+ 57.         replace `suf'_prob_cns = . if `suf'_prob_cns == 0
+ 58.         save ../temp/`suf'_`samp'_collapsed, replace
+ 59.         restore
+ 60.     }
+ 61.         
+.     use if analysis_cond == 1  using ../temp/mover_temp_`samp' , clear  
+ 62.     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(3)
+>  nogen
+ 63.     gen ln_y = ln(impact_cite_affl_wt)
+ 64.     gen ln_x = ln(msa_size)
+ 65.     gen prob_cns = cns/ppr_cnt
+ 66.     egen p95_value = pctile(ln_y), p(95) by(inst_id year)
+ 67.     gen stars = ln_y >= p95_value
+ 68.     preserve
+ 69.     gcontract athr_id year if stars == 1
+ 70.     drop _freq
+ 71.     save ../output/stars_inst_id_`samp' , replace
+ 72.     restore
+ 73.     hashsort athr_id which_place year
+ 74.     rename impact_cite_affl_wt y
+ 75.     rename msa_size x
+ 76.     gen rel = year - move_year 
+ 77.     foreach var in ln_x ln_y {
+ 78.         bys athr_id which_place: egen avg_`var' = mean(`var') 
+ 79.     }
+ 80.     hashsort athr_id which_place -year
+ 81.     gduplicates drop athr_id which_place, force
+ 82.     rename year current_year
+ 83.     gen year = current_year if which_place == 1
+ 84.     replace year = move_year if which_place == 2
+ 85.     bys inst_id year: gen tag = _n == 1 
+ 86.     bys inst_id : egen denom = total(tag) 
+ 87.     merge m:1 inst_id  year using ../temp/inst_year_`samp'_collapsed, asse
+> rt(1 2 3) keep(3) nogen 
+ 88.     bys inst_id: egen old_num = total(avg_yr_ln_y * tag)
+ 89.     bys inst_id: egen old_star_num = total(avg_yr_stars * tag)
+ 90.     gen excluded_mean = (inst_sum_ln_y - ln_y)/(inst_athr_cnt_id - 1)
+ 91.     gen excluded_star_mean = (star_inst_sum_ln_y - ln_y)/(star_inst_athr_c
+> nt_id - 1)
+ 92.     gen new_num = old_num + (excluded_mean - avg_yr_ln_y)
+ 93.     gen new_star_num = old_star_num + (excluded_star_mean - avg_yr_stars) 
+> if stars == 1
+ 94.     replace new_star_num = old_star_num  if stars == 0
+ 95.     gen excluded_inst_ln_y = new_num/denom
+ 96.     gen excluded_star_inst_ln_y = new_star_num/denom if stars == 1 
+ 97.     replace excluded_star_inst_ln_y = old_star_num/denom if stars == 0 
+ 98.     merge m:1 inst_id  using ../temp/inst_`samp'_collapsed, assert(1 2 3) 
+> keep(3) nogen
+ 99.     merge m:1 msa_comb using ../temp/msa_`samp'_collapsed, assert(1 2 3) k
+> eep(3) nogen keepusing(msa_ln_x msa_athr_cnt) 
+100.     save ../output/make_delta_figs_inst_`samp', replace
+101.     hashsort athr_id which_place year
+102.     foreach var in avg_ln_y excluded_inst_ln_y excluded_star_inst_ln_y ins
+> t_ln_y x inst_ln_x msa_athr_cnt msa_ln_x star_inst_ln_y inst_prob_cns inst_ln
+> _cns_y inst_cns_athr {
+103.         if strpos("`var'", "avg_") == 0 {
+104.             local type "Destination-Origin Difference in"
+105.             local stem = subinstr(subinstr("`var'", "msa_","",.), "inst_",
+>  "",.)
+106.             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - 
+> `var'
+107.             by athr_id (which_place year): gen dest_`var' = `var'[_n+1] 
+108.             by athr_id (which_place year): gen origin_`var' = `var'
+109.         }
+110.         if strpos("`var'", "avg_") > 0 {
+111.             local type "Change in"
+112.             local stem = subinstr("`var'", "avg_","",.)
+113.             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - 
+> `var'
+114.         }
+115.         if inlist("`var'" ,"inst_ln_y" , "star_inst_ln_y", "excluded_inst_
+> ln_y" , "excluded_star_inst_ln_y", "inst_prob_cns", "inst_ln_cns_y", "inst_cn
+> s_athr") {
+116.             qui sum `var'_diff
+117.             local N = r(N)
+118.             local mean : dis %3.2f r(mean)
+119.             local sd : dis %3.2f r(sd)
+120.             tw hist `var'_diff, frac ytitle("Share of Movers", size(vsmall
+> )) xtitle("`type' ${`stem'_name}", size(vsmall)) color(edkblue) xlab(-4(1)4, 
+> labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (Movers) = `N'"
+>  ///
+>                                                             "Mean = `mean'" /
+> //
+>                                                             "            (`sd
+> ')") pos(1) ring(0) size(vsmall) region(fcolo(none)))
+121.             graph export ../output/figures/`var'_diff_`samp'.pdf, replace
+122.         }
+123.     }
+124. 
+.     reg avg_ln_y_diff inst_ln_y_diff  
+125.     local N = e(N)
+126.     local coef : dis %3.2f _b[inst_ln_y_diff]
+127.     binscatter2 avg_ln_y_diff inst_ln_y_diff,  mcolor(gs5) lcolor(ebblue) 
+> xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Di
+> fference in Log Output", size(vsmall)) ytitle("Change in Log Output after Mov
+> e", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
+>                                                             "Slope = `coef'")
+>  pos(5) ring(0) size(vsmall) region(fcolor(none)))
+128.     graph export ../output/figures/place_effect_desc_`samp'.pdf , replace
+129.     
+.     gen origin_loc = msa_comb if which_place  == 1
+130.     gen dest_loc = msa_comb if which_place  == 2
+131.     hashsort athr_id which_place year
+132.     by athr_id : replace dest_loc = dest_loc[_n+1] if mi(dest_loc)
+133.     by athr_id : replace origin_loc = origin_loc[_n-1] if mi(origin_loc)
+134.     gcontract athr_id move_year origin_* dest_* *_diff  
+135.     drop _freq
+136.     drop if mi(avg_ln_y_diff)
+137.     save ../temp/dest_origin_changes_`samp', replace
+138. 
+.     use ../temp/mover_temp_`samp' , clear  
+139.     gegen msa = group(msa_comb)
+140.     gen ln_y = ln(impact_cite_affl_wt)
+141.     gen ln_x = ln(msa_size)
+142.     rename impact_cite_affl_wt y
+143.     rename msa_size x
+144. 
+.     // individual level stats
+.     preserve
+145.     bys athr_id: gen num_years = _N
+146.     bys athr_id inst_id : gen inst_cntr = _n == 1
+147.     bys athr_id : egen num_insts = total(inst_cntr)
+148.     gen life_time_prod = y
+149.     gcollapse (mean) num_years num_moves avg_team_size x y num_insts mover
+>  (min) analysis_cond (sum) life_time_prod, by(athr_id)
+150.     count if mover == 1
+151.     foreach var in num_years avg_team_size x y life_time_prod {
+152.         sum `var' if mover == 0 
+153.         mat mvr_stats_`samp' = nullmat(mvr_stats_`samp') \ (r(mean) , r(sd
+> ))
+154.     }
+155.     merge 1:1 athr_id using ../temp/dest_origin_changes_`samp', assert(1 3
+> ) keep(1 3) nogen 
+156.     count if analysis_cond == 1 & inst_ln_y_diff >= 0
+157.     foreach var in num_years avg_team_size x y life_time_prod {
+158.         sum `var' if analysis_cond == 1  & inst_ln_y_diff >=0
+159.         mat mvr_stats_`samp' = nullmat(mvr_stats_`samp') \ (r(mean) , r(sd
+> ))
+160.     }
+161.     count if analysis_cond == 1 & inst_ln_y_diff < 0
+162.     foreach var in num_years avg_team_size x y life_time_prod {
+163.         sum `var' if analysis_cond == 1  & inst_ln_y_diff < 0
+164.         mat mvr_stats_`samp' = nullmat(mvr_stats_`samp') \ (r(mean) , r(sd
+> ))
+165.     }
+166.     restore
+167. end
+
+. 
+. program event_study 
+  1.     syntax, samp(str) timeframe(int) fes(str) fol(str) [yvar(name) delta(n
+> ame) startyr(int 1945) endyr(int 2023) ymax(real 1) ygap(real 0.2) addcond(st
+> r) het_analysis(real 0)] 
+  2.     cap mkdir "../output/`fol'"
+  3.     cap mkdir "../output/figures/`fol'"
+  4.     cap mkdir "../output/tables/`fol'"
+  5.     cap mat drop _all  
+  6.      if "`delta'" == "" {
+  7.          local delta inst_ln_y_diff  
+  8.      }
+  9.      if "`yvar'" == "" {
+ 10.          local yvar ln_y 
+ 11.          local yvar_name "Log Output"
+ 12.      }
+ 13.      if "`yvar'" == "prob_cns" {
+ 14.         local yvar_name "Probability of Publishing in CNS"
+ 15.      }
+ 16.      if "`addcond'" == "" {
+ 17.          local addcond "" 
+ 18.      }
+ 19.     use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using .
+> ./temp/mover_temp_`samp' , clear  
+ 20.     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(3)
+>  nogen
+ 21.     if strpos("`samp'" , "cns") == 0 {
+ 22.         keep athr_id field year msa_comb impact_cite_affl_wt msa_size whic
+> h_place inst_id move_year first_pub_yr ppr_cnt cns cns_impact_cite_affl_wt wh
+> ich_move
+ 23.     }
+ 24.     if strpos("`samp'" , "cns") > 0 {
+ 25.         keep athr_id field year msa_comb impact_cite_affl_wt msa_size whic
+> h_place inst_id move_year first_pub_yr ppr_cnt cns which_move
+ 26.     }
+ 27.     bys athr_id : egen has_cns = max(cns)
+ 28.     gen ever_cns = has_cns > 0
+ 29.     hashsort athr_id year
+ 30.     gen rel = year - move_year
+ 31.     merge m:1 athr_id move_year using ../temp/dest_origin_changes_`samp', 
+> keep(3) nogen
+ 32.     hashsort athr_id year
+ 33.     gegen msa = group(msa_comb)
+ 34.     gegen inst = group(inst_id)
+ 35.     gen ln_y = ln(impact_cite_affl_wt)
+ 36.     if strpos("`samp'" , "cns") == 0 {
+ 37.         gen ln_cns_y = ln(cns_impact_cite_affl_wt)
+ 38.     }
+ 39.     cap gen ln_cns_y = ln(impact_cite_affl_wt)
+ 40.     gen prob_cns = cns/ppr_cnt  
+ 41.     forval i = 1/`timeframe' {
+ 42.         gen lag`i' = 1 if rel == -`i'
+ 43.         gen lead`i' = 1 if rel == `i'
+ 44.         gen int_lag`i' = 1 if rel == -`i'
+ 45.         gen int_lead`i' = 1 if rel == `i'
+ 46.     }
+ 47.     ds int_lead* int_lag*
+ 48.     foreach var in `r(varlist)' {
+ 49.         replace `var' = 0 if mi(`var')
+ 50.         replace `var' = `var'*`delta'
+ 51.     }
+ 52.     ds lead* lag*
+ 53.     foreach var in `r(varlist)' {
+ 54.         replace `var' = 0 if mi(`var')
+ 55.     }
+ 56.     gen int_treat = `delta' if rel == 0  
+ 57.     gen treat = 1 if rel == 0  
+ 58.     replace int_treat = 0 if mi(int_treat)
+ 59.     replace treat = 0 if mi(treat)
+ 60.     local leads
+ 61.     local int_leads
+ 62.     local lags
+ 63.     local int_lags
+ 64.     forval i = 1/`timeframe' {
+ 65.         local leads `leads' lead`i'
+ 66.         local int_leads `int_leads' int_lead`i'
+ 67.     }
+ 68.     forval i = 2/`timeframe' {
+ 69.         local lags lag`i' `lags'
+ 70.         local int_lags int_lag`i' `int_lags'
+ 71.     }
+ 72.     gunique athr_id 
+ 73.     local num_movers = r(unique)
+ 74.         gen move_age_pub = move_year - first_pub_yr  + 1 + 25
+ 75.     egen pos_move_size = cut(`delta') if `delta' > 0, group(2)
+ 76.     egen neg_move_size = cut(`delta') if `delta' < 0, group(2)
+ 77.     gen l2h_move = `delta' > 0
+ 78.     gen h2l_move = `delta' < 0
+ 79.     gen s2b_move = msa_athr_cnt_diff > 0
+ 80.     gen b2s_move = msa_athr_cnt_diff < 0
+ 81.     gen first_move = which_move == 1
+ 82.     gen later_move = which_move > 1
+ 83.         by athr_id: gen counter = _n == 1
+ 84.         sum move_age_pub if counter == 1, d
+ 85.         gen old = move_age_pub >= 40 
+ 86.     gen young = move_age_pub < 40 
+ 87.     gen dest_boston =  dest_loc == "Boston-Cambridge-Newton, MA-NH"
+ 88.     gen dest_sf =  dest_loc == "Bay Area, CA"
+ 89.     gen not_boston_sf = dest_loc != "Boston-Cambridge-Newton, MA-NH" & des
+> t_loc != "Bay Area, CA"
+ 90.     // baseline Event Study
+.     local cond ""
+ 91.     local c "inrange(rel,-`timeframe',`timeframe') `cond'`addcond'"
+ 92.     local suf = ""
+ 93.     if strpos("`delta'", "star") == 0 local delta_suf = "" 
+ 94.     if "`delta'" == "excluded_inst_ln_y_diff" local delta_suf = "_negi" 
+ 95.     if "`delta'" == "ln_x_diff" local delta_suf = "_size" 
+ 96.     if "`delta'" == "excluded_star_inst_ln_y_diff" local delta_suf = "_sta
+> r_negi" 
+ 97.     if "`delta'" == "star_inst_ln_y_diff" local delta_suf = "_star" 
+ 98.     if "`yvar'" == "ln_cns_y" local delta_suf = "_cns_prod" 
+ 99.     if "`delta'" == "inst_cns_athr_diff" local delta_suf = "_cns_delta" 
+100.     local suf = "`suf'`delta_suf'" 
+101.     preserve
+102.     mat drop _all
+103.     reghdfe `yvar' `int_lags' int_treat `int_leads' int_lag1  if `c' , abs
+> orb(`fes') vce(cluster inst)
+104.     estimates save ../output/`fol'/es_`startyr'_`endyr'_`samp'`suf', repla
+> ce
+105.     gunique athr_id if `c'
+106.     local num_movers = r(unique)
+107.     foreach var in `int_lags' int_treat `int_leads' int_lag1 {
+108.         mat row = _b[`var'], _se[`var']
+109.         if "`var'" == "int_lag1" {
+110.             mat row = 0,0
+111.         }
+112.         mat es = nullmat(es) \ row 
+113.     }
+114.     svmat es
+115.     keep es1 es2
+116.     drop if mi(es1)
+117.     rename (es1 es2) (b se)
+118.     gen ub = b + 1.96*se
+119.     gen lb  = b - 1.96*se
+120.     gen rel = -`timeframe' if _n == 1
+121.     replace rel = rel[_n-1]+ 1 if _n > 1
+122.     replace rel = rel+ 1 if rel >= -1
+123.     replace rel = -1 if rel == `timeframe'+1
+124.     sum b if inrange(rel, -`timeframe',-2)
+125.     local pre_mean : di %3.2f r(mean)
+126.     sum b if inrange(rel, 1,`timeframe')
+127.     local post_mean : di %3.2f r(mean)
+128. *        replace lb = -1 if lb < -1
+. *        replace ub = 1 if ub > 1
+.     save ../temp/es_coefs_`startyr'_`endyr'_`samp'`suf', replace
+129.     if "`cond'" == "" {
+130.         tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(vsmall) |
+> | scatter b rel if se !=0 | rel == -1, msize(small) mcolor(ebblue%50) xlab(-`
+> timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsiz
+> e(vsmall)) ///
+>           yline(0, lcolor(black) lpattern(solid)) xline(-0.5, lcolor(gs12) lp
+> attern(dash))  ///
+>           legend(on order(- "N (Movers) = `num_movers'" ///
+>                                                             "Pre-period mean 
+> = `pre_mean'" ///
+>                                                             "Post-period mean
+>  = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Re
+> lative Year to Move", size(vsmall)) ytitle("`yvar_name'", size(vsmall))
+131.         graph export ../output/figures/`fol'/es`startyr'_`endyr'_`samp'`su
+> f'.pdf, replace
+132. 
+.     }
+133.     restore
+134.     // only run if you want het analysis 
+.     if `het_analysis' == 1 {
+135.         foreach cond in "& l2h_move== 1" "& h2l_move == 1" "& b2s_move == 
+> 1" "& s2b_move == 1"  "& old == 1" "& young == 1" "& first_move == 1" "& late
+> r_move == 1" "& dest_boston == 1" "& dest_boston == 0" { 
+136.             local c "inrange(rel,-`timeframe',`timeframe') `cond'`addcond'
+> "
+137.             local suf = ""
+138.             if "`cond'" == "& l2h_move== 1" {
+139.                 local suf = "_l2h"
+140.             }
+141.             else if "`cond'" == "& h2l_move == 1" {
+142.                 local suf = "_h2l"
+143.             }
+144.             else if "`cond'" == "& b2s_move == 1" {
+145.                 local suf = "_b2s"
+146.             }
+147.             else if "`cond'" == "& s2b_move == 1" {
+148.                 local suf = "_s2b"
+149.             }
+150.             else if "`cond'" == "& pos_move_size == 1" {
+151.                 local suf = "_ll2hh"
+152.             }
+153.             else if "`cond'" == "& neg_move_size == 0" {
+154.                 local suf = "_hh2ll"
+155.             }
+156.             else if "`cond'" == "& old == 1" {
+157.                 local suf = "_old"
+158.             }
+159.             else if "`cond'" == "& young == 1" {
+160.                 local suf = "_young"
+161.             } 
+162.             else if "`cond'" == "& first_move == 1" {
+163.                 local suf = "_mv1"
+164.             } 
+165.             else if "`cond'" == "& later_move == 1" {
+166.                 local suf = "_mvafter1"
+167.             } 
+168.             else if "`cond'" == "& dest_boston == 1" {
+169.                 local suf = "_boston"
+170.             } 
+171.             else if "`cond'" == "& dest_boston == 0" {
+172.                 local suf = "_notboston"
+173.             } 
+174.             else if "`cond'" == "& dest_sf == 1" {
+175.                 local suf = "_sf"
+176.             } 
+177.             else if "`cond'" == "& not_boston_sf == 1" {
+178.                 local suf = "_not_boston_sf"
+179.             } 
+180.             local suf = "`suf'`delta_suf'" 
+181.             preserve
+182.             mat drop _all
+183.             reghdfe `yvar' `int_lags' int_treat `int_leads' int_lag1  if `
+> c' , absorb(`fes') vce(cluster inst)
+184.             estimates save ../output/`fol'/es_`startyr'_`endyr'_`samp'`suf
+> ', replace
+185.             gunique athr_id if `c'
+186.             local num_movers = r(unique)
+187.             foreach var in `int_lags' int_treat `int_leads' int_lag1 {
+188.                 mat row = _b[`var'], _se[`var']
+189.                 if "`var'" == "int_lag1" {
+190.                     mat row = 0,0
+191.                 }
+192.                 mat es = nullmat(es) \ row 
+193.             }
+194.             svmat es
+195.             keep es1 es2
+196.             drop if mi(es1)
+197.             rename (es1 es2) (b se)
+198.             gen ub = b + 1.96*se
+199.             gen lb  = b - 1.96*se
+200.             gen rel = -`timeframe' if _n == 1
+201.             replace rel = rel[_n-1]+ 1 if _n > 1
+202.             replace rel = rel+ 1 if rel >= -1
+203.             replace rel = -1 if rel == `timeframe'+1
+204.             sum b if inrange(rel, -`timeframe',-2)
+205.             local pre_mean : di %3.2f r(mean)
+206.             sum b if inrange(rel, 1,`timeframe')
+207.             local post_mean : di %3.2f r(mean)
+208.     *        replace lb = -1 if lb < -1
+.     *        replace ub = 1 if ub > 1
+.             save ../temp/es_coefs_`startyr'_`endyr'_`samp'`suf', replace
+209.             if "`cond'" == "" {
+210.                 tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(v
+> small) || scatter b rel if se !=0 | rel == -1, msize(small) mcolor(ebblue%50)
+>  xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax'
+> , labsize(vsmall)) ///
+>                   yline(0, lcolor(black) lpattern(solid)) xline(-0.5, lcolor(
+> gs12) lpattern(dash))  ///
+>                   legend(on order(- "N (Movers) = `num_movers'" ///
+>                                                                     "Pre-peri
+> od mean = `pre_mean'" ///
+>                                                                     "Post-per
+> iod mean = `post_mean'") pos(5) ring(0) size(vsmall) region(fcolor(none))) xt
+> itle("Relative Year to Move", size(vsmall)) ytitle("`yvar_name'", size(vsmall
+> ))
+211.                 graph export ../output/figures/`fol'/es`startyr'_`endyr'_`
+> samp'`suf'.pdf, replace
+212. 
+.             }
+213.             restore
+214.         }
+215.         gunique athr_id if l2h_move== 1
+216.         local l2h_num_movers = r(unique)
+217.         gunique athr_id if h2l_move== 1
+218.         local h2l_num_movers = r(unique)
+219.         
+.         gunique athr_id if s2b_move== 1
+220.         local s2b_num_movers = r(unique)
+221.         gunique athr_id if b2s_move== 1
+222.         local b2s_num_movers = r(unique)
+223.         gunique athr_id if young== 1
+224.         local young_num_movers = r(unique)
+225.         gunique athr_id if old== 1
+226.         local old_num_movers = r(unique)
+227.         gunique athr_id if first_move== 1
+228.         local first_move_num_movers = r(unique)
+229.         gunique athr_id if later_move== 1
+230.         local later_move_num_movers = r(unique)
+231.         gunique athr_id if dest_boston== 1
+232.         local dest_boston_num_movers = r(unique)
+233.         gunique athr_id if dest_boston== 0
+234.         local not_dest_boston_num_movers = r(unique)
+235.         gunique athr_id if dest_sf== 1
+236.         local dest_sf_num_movers = r(unique)
+237.         gunique athr_id if not_boston_sf== 1
+238.         local not_boston_sf_num_movers = r(unique)
+239.         // boston sf vs not those
+.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_boston`delta_suf', clea
+> r
+240.         gen cat = "boston"
+241.         replace rel = rel - 0.09
+242.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_notboston`d
+> elta_suf'
+243.         replace cat = "not_boston" if mi(cat)
+244.         replace rel = rel + 0.09 if cat == "not_boston"
+245.         tw rcap ub lb rel if rel != -1.09 & cat == "boston",  lcolor(laven
+> der%70) msize(vsmall) || ///
+>            scatter b rel if cat == "boston", mcolor(lavender%70) msize(small)
+>  || ///
+>            rcap ub lb rel if rel != -0.91 & cat == "not_boston",  lcolor(oran
+> ge%70) msize(vsmall) || ///
+>            scatter b rel if cat == "not_boston", mcolor(orange%70) msymbol(sm
+> diamond) msize(small) /// 
+>            xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`yg
+> ap')`ymax', labsize(vsmall)) ///
+>               yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) l
+> pattern(dash))  ///
+>               legend(on order(2 "Movers to Boston (N = `dest_boston_num_mover
+> s')" 4 "Movers Not to Boston  (N = `not_dest_boston_num_movers')")  pos(5) ri
+> ng(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size
+> (vsmall)) ytitle("`yvar_name'", size(vsmall))
+246.         graph export ../output/figures/`fol'/es`startyr'_`endyr'_`samp'_ci
+> tydiff`delta_suf'.pdf, replace
+247.         
+.         // merge l2h h2
+.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_l2h`delta_suf', clear
+248.         gen cat = "l2h"
+249.         replace rel = rel - 0.09
+250.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_h2l`delta_s
+> uf'
+251.         replace cat = "h2l" if mi(cat)
+252.         replace rel = rel + 0.09 if cat == "h2l"
+253.         tw rcap ub lb rel if rel != -1.09 & cat == "l2h",  lcolor(lavender
+> %70) msize(vsmall) || ///
+>            scatter b rel if cat == "l2h", mcolor(lavender%70) msize(small) ||
+>  ///
+>            rcap ub lb rel if rel != -0.91 & cat == "h2l",  lcolor(orange%70) 
+> msize(vsmall) || ///
+>            scatter b rel if cat == "h2l", mcolor(orange%70) msymbol(smdiamond
+> ) msize(small) /// 
+>            xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`yg
+> ap')`ymax', labsize(vsmall)) ///
+>               yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) l
+> pattern(dash))  ///
+>               legend(on order(2 "Low to High Output Place Movers (N = `l2h_nu
+> m_movers')" 4 "High to Low Output Place Movers (N = `h2l_num_movers')") pos(5
+> ) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", 
+> size(vsmall)) ytitle("`yvar_name'", size(vsmall))
+254.         graph export ../output/figures/`fol'/es`startyr'_`endyr'_`samp'_pr
+> odchg`delta_suf'.pdf, replace
+255.         
+.         // merge s2b b2s
+.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_s2b`delta_suf', clear
+256.         gen cat = "s2b"
+257.         replace rel = rel - 0.09
+258.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_b2s`delta_s
+> uf'
+259.         replace cat = "b2s" if mi(cat)
+260.         replace rel = rel + 0.09 if cat == "b2s"
+261.         tw rcap ub lb rel if rel != -1.09 & cat == "s2b",  lcolor(lavender
+> %70) msize(vsmall) || ///
+>            scatter b rel if cat == "s2b", mcolor(lavender%70) msize(small) ||
+>  ///
+>            rcap ub lb rel if rel != -0.91 & cat == "b2s",  lcolor(orange%70) 
+> msize(vsmall) || ///
+>            scatter b rel if cat == "b2s", mcolor(orange%70) msymbol(smdiamond
+> ) msize(small) /// 
+>            xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`yg
+> ap')`ymax', labsize(vsmall)) ///
+>               yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) l
+> pattern(dash))  ///
+>               legend(on order(2 "Small to Big Place Movers (N = `s2b_num_move
+> rs')" 4 "Big to Small Place Movers (N = `b2s_num_movers')") pos(5) ring(0) si
+> ze(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)
+> ) ytitle("`yvar_name'", size(vsmall))
+262.         graph export ../output/figures/`fol'/es`startyr'_`endyr'_`samp'_si
+> zechg`delta_suf'.pdf, replace
+263.         
+.         // merge young old
+.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_young`delta_suf', clear
+264.         gen cat = "young"
+265.         replace rel = rel - 0.09
+266.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_old`delta_s
+> uf'
+267.         replace cat = "old" if mi(cat)
+268.         replace rel = rel + 0.09 if cat == "old"
+269.         tw rcap ub lb rel if rel != -1.09 & cat == "young" & ub != lb,  lc
+> olor(lavender%70) msize(vsmall) || ///
+>            scatter b rel if cat == "young", mcolor(lavender%70) msize(small)|
+> | ///
+>            rcap ub lb rel if rel != -0.91 & cat == "old" & ub!= lb,  lcolor(o
+> range%70) msize(vsmall) || ///
+>            scatter b rel if cat == "old", mcolor(orange%70) msymbol(smdiamond
+> ) msize(small) /// 
+>            xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`yg
+> ap')`ymax', labsize(vsmall)) ///
+>               yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) l
+> pattern(dash))  ///
+>               legend(on order(2 "Movers Aged < 40 (N = `young_num_movers')" 4
+>  "Movers Aged >= 40 (N = `old_num_movers')") pos(5) ring(0) size(vsmall) regi
+> on(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("`yvar
+> _name'", size(vsmall))
+270.         graph export ../output/figures/`fol'/es`startyr'_`endyr'_`samp'_ag
+> e`delta_suf'.pdf, replace
+271.         
+.         // merge first and later 
+.         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_mv1`delta_suf', clear
+272.         gen cat = "first"
+273.         replace rel = rel - 0.09
+274.         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_mvafter1`de
+> lta_suf'
+275.         replace cat = "later" if mi(cat)
+276.         replace rel = rel + 0.09 if cat == "later"
+277.         tw rcap ub lb rel if rel != -1.09 & cat == "first",  lcolor(lavend
+> er%70) msize(vsmall) || ///
+>            scatter b rel if cat == "first", mcolor(lavender%70) msize(small) 
+> || ///
+>            rcap ub lb rel if rel != -0.91 & cat == "later",  lcolor(orange%70
+> ) msize(vsmall) || ///
+>            scatter b rel if cat == "later", mcolor(orange%70) msymbol(smdiamo
+> nd) msize(small) /// 
+>            xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`yg
+> ap')`ymax', labsize(vsmall)) ///
+>               yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) l
+> pattern(dash))  ///
+>               legend(on order(2 "First-Time Movers (N = `first_move_num_mover
+> s')" 4 "Repeat Movers (N = `later_move_num_movers')") pos(5) ring(0) size(vsm
+> all) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytit
+> le("`yvar_name'", size(vsmall))
+278.         graph export ../output/figures/`fol'/es`startyr'_`endyr'_`samp'_wh
+> ich_move`delta_suf'.pdf, replace
+279.     }
+280. end
+
+. 
+. ** 
+. main
+SAMP: year_second
+(9,074 observations deleted)
+(398,410 missing values generated)
+(12 missing values generated)
+(35,570 real changes made)
+(326,105 missing values generated)
+(454,172 missing values generated)
+(485,757 real changes made, 485,757 to missing)
+(454,172 missing values generated)
+(9,237 observations deleted)
+(37,775 observations deleted)
+(0 observations deleted)
+(file ../temp/inst_year_year_second_collapsed.dta not found)
+file ../temp/inst_year_year_second_collapsed.dta saved
+(9 real changes made, 9 to missing)
+(file ../temp/inst_year_second_collapsed.dta not found)
+file ../temp/inst_year_second_collapsed.dta saved
+(486,164 missing values generated)
+(513,040 real changes made, 513,040 to missing)
+(486,164 missing values generated)
+(327 observations deleted)
+(35,550 observations deleted)
+(22,387 observations deleted)
+(0 observations deleted)
+(file ../temp/msa_year_year_second_collapsed.dta not found)
+file ../temp/msa_year_year_second_collapsed.dta saved
+(0 real changes made)
+(file ../temp/msa_year_second_collapsed.dta not found)
+file ../temp/msa_year_second_collapsed.dta saved
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           106,490  
+    -----------------------------------------
+(file ../output/stars_inst_id_year_second.dta not found)
+file ../output/stars_inst_id_year_second.dta saved
+(note: missing values will be sorted first)
+
+Duplicates in terms of athr_id which_place
+
+(54,800 observations deleted)
+(25,845 missing values generated)
+(25,845 real changes made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            45,848  
+    -----------------------------------------
+(426 missing values generated)
+(6,722 missing values generated)
+(426 missing values generated)
+(41,812 missing values generated)
+(39,343 real changes made)
+(426 missing values generated)
+(41,812 missing values generated)
+(39,343 real changes made)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            45,848  
+    -----------------------------------------
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            41,676  
+    -----------------------------------------
+(file ../output/make_delta_figs_inst_year_second.dta not found)
+file ../output/make_delta_figs_inst_year_second.dta saved
+(24,645 missing values generated)
+(24,899 missing values generated)
+(24,847 missing values generated)
+(332 missing values generated)
+file ../output/figures/excluded_inst_ln_y_diff_year_second.pdf saved as PDF
+    format
+(26,073 missing values generated)
+(25,408 missing values generated)
+(1,920 missing values generated)
+file ../output/figures/excluded_star_inst_ln_y_diff_year_second.pdf saved as
+    PDF format
+(24,645 missing values generated)
+(24,645 missing values generated)
+file ../output/figures/inst_ln_y_diff_year_second.pdf saved as PDF format
+(24,645 missing values generated)
+(24,645 missing values generated)
+(24,645 missing values generated)
+(24,645 missing values generated)
+(24,645 missing values generated)
+(24,645 missing values generated)
+(24,645 missing values generated)
+(24,645 missing values generated)
+(24,645 missing values generated)
+(24,645 missing values generated)
+file ../output/figures/star_inst_ln_y_diff_year_second.pdf saved as PDF
+    format
+(24,670 missing values generated)
+(24,662 missing values generated)
+(33 missing values generated)
+file ../output/figures/inst_prob_cns_diff_year_second.pdf saved as PDF format
+(24,670 missing values generated)
+(24,662 missing values generated)
+(33 missing values generated)
+file ../output/figures/inst_ln_cns_y_diff_year_second.pdf saved as PDF format
+(24,648 missing values generated)
+(24,646 missing values generated)
+(3 missing values generated)
+file ../output/figures/inst_cns_athr_diff_year_second.pdf saved as PDF format
+
+      Source |       SS           df       MS      Number of obs   =    17,031
+-------------+----------------------------------   F(1, 17029)     =    799.04
+       Model |   5267.9719         1   5267.9719   Prob > F        =    0.0000
+    Residual |  112269.558    17,029  6.59284503   R-squared       =    0.0448
+-------------+----------------------------------   Adj R-squared   =    0.0448
+       Total |   117537.53    17,030  6.90179271   Root MSE        =    2.5677
+
+------------------------------------------------------------------------------
+avg_ln_y_d~f | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+inst_ln_y_~f |   .7298202   .0258185    28.27   0.000     .6792133    .7804271
+       _cons |  -.2313968   .0198157   -11.68   0.000    -.2702375    -.192556
+------------------------------------------------------------------------------
+file ../output/figures/place_effect_desc_year_second.pdf saved as PDF format
+(19,767 missing values generated)
+(21,909 missing values generated)
+(already sorted)
+(17,031 real changes made)
+(17,031 real changes made)
+(24,645 observations deleted)
+(file ../temp/dest_origin_changes_year_second.dta not found)
+file ../temp/dest_origin_changes_year_second.dta saved
+(12 missing values generated)
+  37,809
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |    258,948    1.484395     1.50535          1         47
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |    258,948    3.632152    .6720903          1          4
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |    258,948    7369.745    7570.539          0      25094
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |    258,948    .3766321    2.157838   .0000387   287.1186
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |    258,948    .5950627    3.569291   .0000387   373.6811
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       279,726
+        from master                   279,726  
+        from using                          0  
+
+    Matched                            17,031  
+    -----------------------------------------
+  16,449
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |     16,449    3.880297    3.377506          2         42
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |     16,449    3.560777    .5621779          1          4
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |     16,449    7091.142    6084.576   21.33333      24981
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |     16,449    .4531086     1.28548   .0003823   44.92413
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |     16,449    2.031892    9.395272   .0007646   695.1205
+  9,396
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   num_years |      9,396    4.540549    3.882214          2         41
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+avg_team_s~e |      9,396    3.561285    .5435855          1          4
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           x |      9,396    8228.342    6134.526      110.5   24845.67
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+           y |      9,396    .5439408    1.367579   .0006782   35.77761
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+life_time_~d |      9,396    2.615519    8.871778   .0013565   286.9858
+
+. 
+end of do-file
+
+--------------------------------------------------------------------------------
+Makelog ended: 2025-06-17 17:10:26
+Working directory: /export/projects4/achandra_basicscience/analysis/science_geo/alt_mover_spec/code
+--------------------------------------------------------------------------------
