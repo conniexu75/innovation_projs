@@ -1,4 +1,9 @@
 ./samp/ | /export/projects4/achandra_basicscience/derived/science_geo/create_analysis_samp/output
 ./openalex/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output
 ./year_insts/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_athr_inst_hist_15jrnls/output
+./herd/ | /export/projects4/achandra_basicscience/derived/science_geo/nsf/clean_herd/output
+./xw/ | /export/projects4/achandra_basicscience/derived/science_geo/nsf/clean_herd/temp
+./rd/ | /export/projects4/achandra_basicscience/derived/science_geo/nsf/pca/output
+
+
 
