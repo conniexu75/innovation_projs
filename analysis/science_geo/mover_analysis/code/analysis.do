@@ -18,7 +18,18 @@ program main
     qui get_full_mover_picture
     local main_fes "year athr_fes = athr_id"
     local field "field year athr_fes = athr_id"
-    foreach t in year_second_cns { // year year_firstlast { //year_second_cns year year_cns year_first year_first_cns year_firstlast year_firstlast_cns { 
+    import delimited using ../external/rd/herd_2010_2022, clear
+    merge 1:1 inst_id using ../external/xw/inst_names, assert(2 3) keep(3) nogen
+    drop _freq
+    merge 1:1 inst_id using ../external/xw/herd_oa_xw, assert(1 2 3) keep(3) nogen
+    rename inst_id herd_id
+    rename matched_oa_inst_id inst_id
+    replace fed_ls_fund = 0 if mi(fed_ls_fund)
+    replace nonfed_ls_fund = 0 if mi(nonfed_ls_fund)
+    gen tot_ls = fed_ls_fund + nonfed_ls_fund
+    gcollapse (mean) tot_ls fed_ls_fund nonfed_ls_fund, by(inst_id)
+    save ../temp/merged_data, replace
+    foreach t in year_second year_second_cns year year_firstlast year_first { 
         di "SAMP: `t'"
         cns_Output, samp(`t')
         qui make_movers, samp(`t')
@@ -27,10 +38,14 @@ program main
         qui output_tables, samp(`t')
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_inst_ln_y_diff) fes(`main_fes') fol(main) het_analysis(1)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_inst_ln_y_diff) fes(`field') fol(field)  het_analysis(1)
-        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(star_inst_ln_y_diff) fes(`main_fes') fol(main)*/
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(star_inst_ln_y_diff) fes(`main_fes') fol(main)
         event_study, samp(`t') timeframe(10) startyr(1995) endyr(2023) delta(excluded_inst_ln_y_diff) ymax(1) ygap(0.1) fes(`main_fes') fol(main)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(inst_ln_x_diff) fes(`main_fes') fol(size)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(inst_cns_athr_diff) fes(`main_fes') fol(main)
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) fes(`main_fes') fol(main) het_analysis(0)
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(nonfed_ls_fund_diff) fes(`main_fes') fol(main) het_analysis(0) 
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(fed_ls_fund_diff) fes(`main_fes') fol(main) het_analysis(0) 
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(tot_ls_diff) fes(`main_fes') fol(main) het_analysis(0) 
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_inst_ln_nocite_diff) yvar(ln_nocite) fes(`main_fes') fol(main) het_analysis(0)
     }
     qui coathr_locs, samp(year_second)
@@ -230,6 +245,7 @@ program make_dest_origin
         egen p95_value = pctile(ln_y), p(95) by(`loc' year)
         gen stars = ln_y if ln_y >= p95_value
         bys `loc' athr_id : gen `suf'_athr_cnt_id = _n == 1
+        bys `loc' : egen `suf'_tot_movers = total(`suf'_athr_cnt_id & mover == 1) 
         bys `loc'  : egen `suf'_athr_cnt = total(`suf'_athr_cnt_id)
         drop `suf'_athr_cnt_id
         bys `loc' athr_id year : gen `suf'_athr_cnt_id = _n == 1
@@ -249,18 +265,28 @@ program make_dest_origin
         gen star_`suf'_sum_ln_y = stars 
         drop if tot_yrs <= 5 
         if "`loc'" == "inst_id" {
-            drop if avg_athr_yrs <= 5
-            drop if `suf'_athr_cnt <= 25
+            *drop if avg_athr_yrs < 100 
+            drop if `suf'_athr_cnt < 100 
+            drop if `suf'_tot_movers < 10
+            /*drop if tot_insts <= 5
+            drop if `sfu'_athr_cnt <=25 */
         }
         if "`loc'" == "msa_comb" {
-            drop if tot_insts <= 5
+            *drop if avg_athr_yrs < 100 
+            drop if `suf'_athr_cnt < 100 
+            drop if `suf'_tot_movers < 10
+            /*drop if tot_insts <= 5
             drop if avg_athr_yrs <=20 
-            drop if `suf'_athr_cnt <=100 
+            drop if `suf'_athr_cnt <=100 */
         }
-        collapse (mean) ln_cns_y prob_cns avg_yr_ln_nocite = ln_nocite avg_yr_ln_y  = ln_y avg_yr_stars = stars ln_x `suf'_athr_cnt `suf'_star_cnt cns_athr (sum)`suf'_sum_ln_nocite `suf'_sum_ln_y star_`suf'_sum_ln_y `suf'_athr_cnt_id star_`suf'_athr_cnt_id (firstnm) msa inst , by(`loc' ${time}) 
+        collapse (mean) ln_cns_y prob_cns avg_yr_ln_nocite = ln_nocite avg_yr_ln_y  = ln_y avg_yr_stars = stars ln_x `suf'_athr_cnt `suf'_star_cnt cns_athr (sum)`suf'_sum_ln_nocite `suf'_sum_ln_y star_`suf'_sum_ln_y `suf'_athr_cnt_id star_`suf'_athr_cnt_id `suf'_y = y (firstnm) msa inst , by(`loc' ${time}) 
         save ../temp/`suf'_year_`samp'_collapsed, replace
-        collapse (mean) `suf'_ln_cns_y = ln_cns_y `suf'_prob_cns = prob_cns `suf'_ln_nocite = avg_yr_ln_nocite `suf'_ln_y = avg_yr_ln_y star_`suf'_ln_y = avg_yr_stars `suf'_ln_x = ln_x `suf'_athr_cnt `suf'_star_cnt `suf'_cns_athr = cns_athr (sum) `suf'_sum_ln_y star_`suf'_sum_ln_y `suf'_sum_ln_nocite (firstnm) msa inst (min) min_year=year (max) max_year = year, by(`loc')
+        collapse (mean) `suf'_ln_cns_y = ln_cns_y `suf'_prob_cns = prob_cns `suf'_ln_nocite = avg_yr_ln_nocite `suf'_ln_y = avg_yr_ln_y star_`suf'_ln_y = avg_yr_stars `suf'_ln_x = ln_x `suf'_athr_cnt `suf'_star_cnt `suf'_cns_athr = cns_athr (sum) `suf'_sum_ln_y star_`suf'_sum_ln_y `suf'_sum_ln_nocite `suf'_y (firstnm) msa inst (min) min_year=year (max) max_year = year, by(`loc')
         replace `suf'_prob_cns = . if `suf'_prob_cns == 0
+        hashsort -`suf'_y
+        gen `suf'_rank = 1 if _n <= 5
+        replace `suf'_rank = 2 if inrange(_n,6,10)
+        replace `suf'_rank = 3 if inrange(_n,11,20)
         save ../temp/`suf'_`samp'_collapsed, replace
         restore
     }
@@ -296,6 +322,7 @@ program make_dest_origin
     bys inst_id: egen old_num = total(avg_yr_ln_y * tag)
     bys inst_id: egen old_num_nocite = total(avg_yr_ln_nocite * tag)
     bys inst_id: egen old_star_num = total(avg_yr_stars * tag)
+    gen excluded_tot = inst_y - y
     gen excluded_mean = (inst_sum_ln_y - ln_y)/(inst_athr_cnt_id - 1)
     gen excluded_nocite_mean = (inst_sum_ln_nocite - ln_nocite)/(inst_athr_cnt_id - 1)
     gen excluded_star_mean = (star_inst_sum_ln_y - ln_y)/(star_inst_athr_cnt_id - 1)
@@ -308,11 +335,16 @@ program make_dest_origin
     gen excluded_star_inst_ln_y = new_star_num/denom if stars == 1 
     replace excluded_star_inst_ln_y = old_star_num/denom if stars == 0 
     merge m:1 inst_id  using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
-    merge m:1 msa_comb using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x msa_athr_cnt) 
+    merge m:1 inst_id  using ../temp/merged_data, assert(1 2 3) keep(1 3) nogen
+    merge m:1 msa_comb using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x msa_athr_cnt msa_rank) 
     gen msa_noinst_athr = msa_athr_cnt-inst_athr_cnt
+    replace excluded_tot = ln(excluded_tot)
+    replace tot_ls = ln(tot_ls)
+    replace fed_ls_fund = ln(fed_ls_fund)
+    replace nonfed_ls_fund = ln(nonfed_ls_fund)
     save ../output/make_delta_figs_inst_`samp', replace
     hashsort athr_id which_place year
-    foreach var in avg_ln_y excluded_inst_ln_y excluded_star_inst_ln_y excluded_inst_ln_nocite inst_ln_nocite inst_ln_y x inst_ln_x msa_athr_cnt msa_ln_x star_inst_ln_y inst_prob_cns inst_ln_cns_y inst_cns_athr msa_noinst_athr {
+    foreach var in avg_ln_y excluded_inst_ln_y excluded_star_inst_ln_y excluded_inst_ln_nocite inst_ln_nocite inst_ln_y x inst_ln_x msa_athr_cnt msa_ln_x star_inst_ln_y inst_prob_cns inst_ln_cns_y inst_cns_athr msa_noinst_athr excluded_tot tot_ls nonfed_ls_fund fed_ls_fund {
         if strpos("`var'", "avg_") == 0 {
             local type "Destination-Origin Difference in"
             local stem = subinstr(subinstr("`var'", "msa_","",.), "inst_", "",.)
@@ -325,7 +357,7 @@ program make_dest_origin
             local stem = subinstr("`var'", "avg_","",.)
             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - `var'
         }
-        if inlist("`var'" ,"inst_ln_y" , "star_inst_ln_y", "excluded_inst_ln_y" , "excluded_star_inst_ln_y", "inst_prob_cns", "inst_ln_cns_y", "inst_cns_athr", "excluded_inst_ln_nocite") {
+        if inlist("`var'" ,"inst_ln_y" , "star_inst_ln_y", "excluded_inst_ln_y" , "excluded_star_inst_ln_y", "inst_prob_cns", "inst_ln_cns_y", "inst_cns_athr", "excluded_inst_ln_nocite", "excluded_tot") {
             qui sum `var'_diff
             local N = r(N)
             local mean : dis %3.2f r(mean)
@@ -346,8 +378,10 @@ program make_dest_origin
     
     gen origin_loc = msa_comb if which_place  == 1
     gen dest_loc = msa_comb if which_place  == 2
+    gen dest_rank = msa_rank if which_place == 2
     hashsort athr_id which_place year
     by athr_id : replace dest_loc = dest_loc[_n+1] if mi(dest_loc)
+    by athr_id : replace dest_rank = dest_rank[_n+1] if mi(dest_rank)
     by athr_id : replace origin_loc = origin_loc[_n-1] if mi(origin_loc)
     gcontract athr_id move_year origin_* dest_* *_diff  
     drop _freq
@@ -474,6 +508,9 @@ program event_study
     gen b2s_move = msa_athr_cnt_diff < 0 & city_mover == 1 
     gen s2b2_move = msa_noinst_athr_diff > 0 & city_mover == 1
     gen b2s2_move = msa_noinst_athr_diff < 0 & city_mover == 1
+    gen top_city = dest_rank == 1 
+    gen mid_city = dest_rank == 2 
+    gen low_city = dest_rank == 3
     gen first_move = which_move == 1
     gen later_move = which_move > 1
 	by athr_id: gen counter = _n == 1
@@ -488,6 +525,10 @@ program event_study
     local c "inrange(rel,-`timeframe',`timeframe') `cond'`addcond'"
     local suf = ""
     if strpos("`delta'", "star") == 0 local delta_suf = "" 
+    if "`delta'" == "tot_ls_diff" local delta_suf = "_tot_ls"
+    if "`delta'" == "fed_ls_fund_diff" local delta_suf = "_fed_ls"
+    if "`delta'" == "nonfed_ls_fund_diff" local delta_suf = "_nonfed_ls"
+    if "`delta'" == "excluded_tot_diff" local delta_suf = "_tot_otpt"
     if "`delta'" == "excluded_inst_ln_y_diff" local delta_suf = "_negi" 
     if "`delta'" == "excluded_inst_ln_nocite_diff" local delta_suf = "_nocite" 
     if "`delta'" == "ln_x_diff" local delta_suf = "_size" 
@@ -538,7 +579,7 @@ program event_study
     restore
     // only run if you want het analysis 
     if `het_analysis' == 1 {
-        foreach cond in "& l2h_move== 1" "& h2l_move == 1" "& b2s_move == 1" "& s2b_move == 1"  "& old == 1" "& young == 1" "& first_move == 1" "& later_move == 1" "& dest_boston == 1" "& dest_boston == 0" "& b2s2_move == 1" "& s2b2_move == 1" { 
+        foreach cond in "& l2h_move== 1" "& h2l_move == 1" "& b2s_move == 1" "& s2b_move == 1"  "& old == 1" "& young == 1" "& first_move == 1" "& later_move == 1" "& dest_boston == 1" "& dest_boston == 0" "& b2s2_move == 1" "& s2b2_move == 1"  "& top_city == 1" "& mid_city == 1" "& low_city == 1" { 
             local c "inrange(rel,-`timeframe',`timeframe') `cond'`addcond'"
             local suf = ""
             if "`cond'" == "& l2h_move== 1" {
@@ -588,6 +629,15 @@ program event_study
             } 
             else if "`cond'" == "& not_boston_sf == 1" {
                 local suf = "_not_boston_sf"
+            } 
+            else if "`cond'" == "& top_city == 1" {
+                local suf = "_top_city"
+            } 
+            else if "`cond'" == "& mid_city == 1" {
+                local suf = "_mid_city"
+            } 
+            else if "`cond'" == "& low_city == 1" {
+                local suf = "_low_city"
             } 
             local suf = "`suf'`delta_suf'" 
             preserve
@@ -660,6 +710,14 @@ program event_study
         local dest_sf_num_movers = r(unique)
         gunique athr_id if not_boston_sf== 1
         local not_boston_sf_num_movers = r(unique)
+        gunique athr_id if top_city== 1
+        local top_city_movers= r(unique)
+        gunique athr_id if mid_city== 1
+        local mid_city_movers= r(unique)
+        gunique athr_id if low_city== 1
+        local low_city_movers= r(unique)
+
+
         // boston sf vs not those
         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_boston`delta_suf', clear
         gen cat = "boston"
@@ -675,6 +733,27 @@ program event_study
               yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
               legend(on order(2 "Movers to Boston (N = `dest_boston_num_movers')" 4 "Movers Not to Boston  (N = `not_dest_boston_num_movers')")  pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("`yvar_name'", size(vsmall))
         graph export ../output/figures/`fol'/es`startyr'_`endyr'_`samp'_citydiff`delta_suf'.pdf, replace
+        
+        // top vs mid vs low cities
+        use ../temp/es_coefs_`startyr'_`endyr'_`samp'_top_city`delta_suf', clear
+        gen cat = "top_city"
+        replace rel = rel - 0.18
+        append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_mid_city`delta_suf'
+        replace cat = "mid_city" if mi(cat)
+        replace rel = rel - 0.09 if cat == "mid_city"
+        append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_low_city`delta_suf'
+        replace cat = "low_city" if mi(cat)
+        replace rel = rel + 0.09 if cat == "low_city"
+        tw rcap ub lb rel if rel != -1.18 & cat == "top_city",  lcolor(lavender%70) msize(vsmall) || ///
+           scatter b rel if cat == "top_city", mcolor(lavender%70) msize(small) || ///
+           rcap ub lb rel if rel != -1.09 & cat == "mid_city",  lcolor(orange%70) msize(vsmall) || ///
+           scatter b rel if cat == "mid_city", mcolor(orange%70) msymbol(smdiamond) msize(small) || /// 
+           rcap ub lb rel if rel != -0.91 & cat == "low_city",  lcolor(ebblue%70) msize(vsmall) || ///
+           scatter b rel if cat == "low_city", mcolor(ebblue%70) msymbol(smsquare) msize(small) /// 
+           xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+              yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
+              legend(on order(2 "Movers to Top 5 City (N = `top_city_movers')" 4 "Movers to Top 6-10 City (N = `mid_city_movers')" 6 "Movers to Top 11-20 City (N = `low_city_movers')")  pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("`yvar_name'", size(vsmall))
+        graph export ../output/figures/`fol'/es`startyr'_`endyr'_`samp'_cityrank`delta_suf'.pdf, replace
         
         // merge l2h h2
         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_l2h`delta_suf', clear
