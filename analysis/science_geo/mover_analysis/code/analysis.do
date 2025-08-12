@@ -48,6 +48,8 @@ program main
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(fed_ls_fund_diff) fes(`main_fes') fol(main) het_analysis(0) 
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(tot_ls_diff) fes(`main_fes') fol(main) het_analysis(0) 
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_inst_ln_nocite_diff) yvar(ln_nocite) fes(`main_fes') fol(main) het_analysis(0)
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) yvar(avg_tot_athrs) fes(`main_fes') fol(main) het_analysis(0)
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) yvar(unique_coathrs) fes(`main_fes') fol(main) het_analysis(0)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) yvar(avg_us_athrs) fes(`main_fes') fol(main) het_analysis(0)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) yvar(unique_us_coathrs) fes(`main_fes') fol(main) het_analysis(0)
     }
@@ -450,10 +452,10 @@ program event_study
         local yvar_name "# of Unique Coauthors"
      }
      if "`yvar'" == "unique_us_coathrs" {
-        local yvar_name "# of Unique US Coauthors"
+        local yvar_name "# of Unique Coauthors"
      }
      if "`yvar'" == "avg_us_athrs" {
-        local yvar_name "Average US Team Members"
+        local yvar_name "Average Team Size"
      }
      if "`addcond'" == "" {
          local addcond "" 
