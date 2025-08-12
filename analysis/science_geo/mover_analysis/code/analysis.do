@@ -10,6 +10,7 @@ global y_name "Output"
 global pat_adj_wt_name "Patent-to-Paper Citations"
 global ln_patent_name "Log Patent-to-Paper Citations"
 global ln_y_name "Log Output"
+global excluded_tot_name "Log Output"
 global x_name "Cluster Size"
 global ln_x_name "Log Cluster Size"
 global time year 
@@ -29,7 +30,7 @@ program main
     gen tot_ls = fed_ls_fund + nonfed_ls_fund
     gcollapse (mean) tot_ls fed_ls_fund nonfed_ls_fund, by(inst_id)
     save ../temp/merged_data, replace
-    foreach t in year_second year_second_cns year year_firstlast year_first { 
+    foreach t in year_second { // {year_second_cns year year_firstlast year_first { 
         di "SAMP: `t'"
         cns_Output, samp(`t')
         qui make_movers, samp(`t')
@@ -47,6 +48,8 @@ program main
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(fed_ls_fund_diff) fes(`main_fes') fol(main) het_analysis(0) 
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(tot_ls_diff) fes(`main_fes') fol(main) het_analysis(0) 
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_inst_ln_nocite_diff) yvar(ln_nocite) fes(`main_fes') fol(main) het_analysis(0)
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) yvar(avg_us_athrs) fes(`main_fes') fol(main) het_analysis(0)
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) yvar(unique_us_coathrs) fes(`main_fes') fol(main) het_analysis(0)
     }
     qui coathr_locs, samp(year_second)
     qui coathr_prod, samp(year_second)
@@ -95,7 +98,7 @@ end
 
 program make_movers
     syntax, samp(str)
-    use athr_id field msa_comb year inst_id inst msa_size impact_cite_affl_wt impact_affl_wt avg_team_size sec* cns ppr_cnt if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_full_comb_`samp', clear 
+    use athr_id field msa_comb year inst_id inst msa_size impact_cite_affl_wt impact_affl_wt avg_* sec* cns ppr_cnt unique_* if !mi(msa_comb) & !mi(inst_id) using ../external/samp/athr_panel_full_comb_`samp', clear 
     if inst == "City of Hope" {
         replace inst_id = "I1301076528"
         replace msa_comb = "Los Angeles-Long Beach-Anaheim, CA"
@@ -329,11 +332,11 @@ program make_dest_origin
     gen new_num = old_num + (excluded_mean - avg_yr_ln_y)
     gen new_num_nocite = old_num_nocite + (excluded_nocite_mean - avg_yr_ln_nocite)
     gen new_star_num = old_star_num + (excluded_star_mean - avg_yr_stars) if stars == 1
-    replace new_star_num = old_star_num  if stars == 0
+    replace new_star_num = old_star_num  if stars != 1
     gen excluded_inst_ln_y = new_num/denom
     gen excluded_inst_ln_nocite = new_num_nocite/denom
     gen excluded_star_inst_ln_y = new_star_num/denom if stars == 1 
-    replace excluded_star_inst_ln_y = old_star_num/denom if stars == 0 
+    replace excluded_star_inst_ln_y = old_star_num/denom if stars != 1 
     merge m:1 inst_id  using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
     merge m:1 inst_id  using ../temp/merged_data, assert(1 2 3) keep(1 3) nogen
     merge m:1 msa_comb using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x msa_athr_cnt msa_rank) 
@@ -357,7 +360,7 @@ program make_dest_origin
             local stem = subinstr("`var'", "avg_","",.)
             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - `var'
         }
-        if inlist("`var'" ,"inst_ln_y" , "star_inst_ln_y", "excluded_inst_ln_y" , "excluded_star_inst_ln_y", "inst_prob_cns", "inst_ln_cns_y", "inst_cns_athr", "excluded_inst_ln_nocite", "excluded_tot") {
+        if inlist("`var'" ,"inst_ln_y" , "star_inst_ln_y", "excluded_inst_ln_y" , "excluded_star_inst_ln_y", "inst_prob_cns", "inst_ln_cns_y", "inst_cns_athr", "excluded_inst_ln_nocite", "excluded_tot") | inlist("`var'", "fed_ls_fund", "tot_ls" , "nonfed_ls_fund") {
             qui sum `var'_diff
             local N = r(N)
             local mean : dis %3.2f r(mean)
@@ -428,7 +431,7 @@ program event_study
     cap mkdir "../output/tables/`fol'"
     cap mat drop _all  
      if "`delta'" == "" {
-         local delta inst_ln_y_diff  
+         local delta excluded_inst_ln_y_diff
      }
      if "`yvar'" == "" {
          local yvar ln_y 
@@ -440,16 +443,28 @@ program event_study
      if "`yvar'" == "ln_nocite" {
         local yvar_name "Log Paper Count"
      }
+     if "`yvar'" == "avg_tot_athrs" {
+        local yvar_name "Average Team Size"
+     }
+     if "`yvar'" == "unique_coathrs" {
+        local yvar_name "# of Unique Coauthors"
+     }
+     if "`yvar'" == "unique_us_coathrs" {
+        local yvar_name "# of Unique US Coauthors"
+     }
+     if "`yvar'" == "avg_us_athrs" {
+        local yvar_name "Average US Team Members"
+     }
      if "`addcond'" == "" {
          local addcond "" 
      }
     use if analysis_cond == 1 & inrange(year, `startyr', `endyr')  using ../temp/mover_temp_`samp' , clear  
     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(3) nogen
     if strpos("`samp'" , "cns") == 0 {
-        keep athr_id field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year first_pub_yr ppr_cnt cns cns_impact_cite_affl_wt which_move city_mover impact_affl_wt
+        keep athr_id field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year first_pub_yr ppr_cnt cns cns_impact_cite_affl_wt which_move city_mover impact_affl_wt avg* unique_*
     }
     if strpos("`samp'" , "cns") > 0 {
-        keep athr_id field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year first_pub_yr ppr_cnt cns which_move city_mover impact_affl_wt
+        keep athr_id field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year first_pub_yr ppr_cnt cns which_move city_mover impact_affl_wt  avg* unique_*
     }
     bys athr_id : egen has_cns = max(cns)
     gen ever_cns = has_cns > 0
@@ -500,10 +515,10 @@ program event_study
     gunique athr_id 
     local num_movers = r(unique)
 	gen move_age_pub = move_year - first_pub_yr  + 1 + 25
-    egen pos_move_size = cut(`delta') if `delta' > 0, group(2)
-    egen neg_move_size = cut(`delta') if `delta' < 0, group(2)
-    gen l2h_move = `delta' > 0
-    gen h2l_move = `delta' < 0
+    egen pos_move_size = cut(excluded_inst_ln_y_diff) if excluded_inst_ln_y_diff > 0, group(2)
+    egen neg_move_size = cut(excluded_inst_ln_y_diff) if excluded_inst_ln_y_diff < 0, group(2)
+    gen l2h_move = excluded_inst_ln_y_diff > 0
+    gen h2l_move = excluded_inst_ln_y_diff < 0
     gen s2b_move = msa_athr_cnt_diff > 0 & city_mover == 1
     gen b2s_move = msa_athr_cnt_diff < 0 & city_mover == 1 
     gen s2b2_move = msa_noinst_athr_diff > 0 & city_mover == 1
@@ -535,14 +550,22 @@ program event_study
     if "`delta'" == "excluded_star_inst_ln_y_diff" local delta_suf = "_star_negi" 
     if "`delta'" == "star_inst_ln_y_diff" local delta_suf = "_star" 
     if "`yvar'" == "ln_cns_y" local delta_suf = "_cns_prod" 
+    if "`yvar'" == "avg_tot_athrs" local delta_suf = "_athrs" 
+    if "`yvar'" == "unique_coathrs" local delta_suf = "_unique" 
+    if "`yvar'" == "unique_us_coathrs" local delta_suf = "_unique_us" 
+    if "`yvar'" == "avg_us_athrs" local delta_suf = "_us_athrs" 
     if "`delta'" == "inst_cns_athr_diff" local delta_suf = "_cns_delta" 
     local suf = "`suf'`delta_suf'" 
     preserve
     mat drop _all
     reghdfe `yvar' `lags' `leads' lag1 treat `int_lags' int_treat `int_leads' int_lag1  if `c' , absorb(`fes') vce(cluster inst)
     estimates save ../output/`fol'/es_`startyr'_`endyr'_`samp'`suf', replace
-    gunique athr_id if `c'
-    local num_movers = r(unique)
+    gunique athr_id if `c' 
+    local num_movers = r(unique) 
+    if inlist("`delta'" , "nonfed_ls_fund_diff", "fed_ls_fund_diff", "tot_ls_diff") {
+        gunique athr_id if `c' & !mi(`delta')
+        local num_movers = r(unique)
+    }
     foreach var in `int_lags' int_treat `int_leads' int_lag1 {
         mat row = _b[`var'], _se[`var']
         if "`var'" == "int_lag1" {
@@ -716,7 +739,6 @@ program event_study
         local mid_city_movers= r(unique)
         gunique athr_id if low_city== 1
         local low_city_movers= r(unique)
-
 
         // boston sf vs not those
         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_boston`delta_suf', clear
@@ -1057,8 +1079,9 @@ program coathr_prod
     preserve
     mat drop _all
     reghdfe `yvar' `leads' `lags' lead1 , absorb(`fes') vce(cluster inst)
-    gunique athr_id 
-    local num_movers = r(unique)
+    gunique athr_id  if !mi(`delta')
+
+    local num_movers =r(unique) 
     foreach var in `leads' `lags' lead1 {
         mat row = _b[`var'], _se[`var']
         if "`var'" == "lead1" {
