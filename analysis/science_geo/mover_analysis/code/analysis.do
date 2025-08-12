@@ -30,7 +30,7 @@ program main
     gen tot_ls = fed_ls_fund + nonfed_ls_fund
     gcollapse (mean) tot_ls fed_ls_fund nonfed_ls_fund, by(inst_id)
     save ../temp/merged_data, replace
-    foreach t in year_second { // {year_second_cns year year_firstlast year_first { 
+    foreach t in year_second year_second_cns year year_firstlast year_first { 
         di "SAMP: `t'"
         cns_Output, samp(`t')
         qui make_movers, samp(`t')
@@ -43,7 +43,7 @@ program main
         event_study, samp(`t') timeframe(10) startyr(1995) endyr(2023) delta(excluded_inst_ln_y_diff) ymax(1) ygap(0.1) fes(`main_fes') fol(main)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(inst_ln_x_diff) fes(`main_fes') fol(size)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(inst_cns_athr_diff) fes(`main_fes') fol(main)
-        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) fes(`main_fes') fol(main) het_analysis(0)
+        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(excluded_tot_diff) fes(`main_fes') fol(main) het_analysis(1)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(nonfed_ls_fund_diff) fes(`main_fes') fol(main) het_analysis(0) 
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(fed_ls_fund_diff) fes(`main_fes') fol(main) het_analysis(0) 
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(tot_ls_diff) fes(`main_fes') fol(main) het_analysis(0) 
@@ -759,14 +759,14 @@ program event_study
         // top vs mid vs low cities
         use ../temp/es_coefs_`startyr'_`endyr'_`samp'_top_city`delta_suf', clear
         gen cat = "top_city"
-        replace rel = rel - 0.18
+        replace rel = rel - 0.27
         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_mid_city`delta_suf'
         replace cat = "mid_city" if mi(cat)
         replace rel = rel - 0.09 if cat == "mid_city"
         append using ../temp/es_coefs_`startyr'_`endyr'_`samp'_low_city`delta_suf'
         replace cat = "low_city" if mi(cat)
         replace rel = rel + 0.09 if cat == "low_city"
-        tw rcap ub lb rel if rel != -1.18 & cat == "top_city",  lcolor(lavender%70) msize(vsmall) || ///
+        tw rcap ub lb rel if rel != -1.27 & cat == "top_city",  lcolor(lavender%70) msize(vsmall) || ///
            scatter b rel if cat == "top_city", mcolor(lavender%70) msize(small) || ///
            rcap ub lb rel if rel != -1.09 & cat == "mid_city",  lcolor(orange%70) msize(vsmall) || ///
            scatter b rel if cat == "mid_city", mcolor(orange%70) msymbol(smdiamond) msize(small) || /// 
