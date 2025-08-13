@@ -211,6 +211,7 @@ program make_dest_origin
         egen p95_value = pctile(ln_y), p(95) by(`loc' year)
         gen stars = ln_y if ln_y >= p95_value
         bys `loc' athr_id : gen `suf'_athr_cnt_id = _n == 1
+        bys `loc': egen `suf'_tot_movers = total(`suf'_athr_cnt_id & mover == 1)
         bys `loc'  : egen `suf'_athr_cnt = total(`suf'_athr_cnt_id)
         drop `suf'_athr_cnt_id
         bys `loc' athr_id year : gen `suf'_athr_cnt_id = _n == 1
@@ -229,17 +230,21 @@ program make_dest_origin
         gen star_`suf'_sum_ln_y = stars 
         drop if tot_yrs <= 5 
         if "`loc'" == "inst_id" {
-            drop if avg_athr_yrs <= 5
-            drop if `suf'_athr_cnt <= 25
+            drop if `suf'_athr_cnt < 100
+            drop if `suf'_tot_movers < 10
+/*            drop if avg_athr_yrs <= 5
+            drop if `suf'_athr_cnt <= 25*/
         }
         if "`loc'" == "msa_comb" {
-            drop if tot_insts <= 5
+            drop if `suf'_athr_cnt < 100
+            drop if `suf'_tot_movers < 10
+            /*drop if tot_insts <= 5
             drop if avg_athr_yrs <=20 
-            drop if `suf'_athr_cnt <=100 
+            drop if `suf'_athr_cnt <=100 */
         }
-        collapse (mean) ln_cns_y prob_cns avg_yr_ln_y  = ln_y avg_yr_stars = stars ln_x `suf'_athr_cnt `suf'_star_cnt cns_athr (sum) `suf'_sum_ln_y star_`suf'_sum_ln_y `suf'_athr_cnt_id star_`suf'_athr_cnt_id (firstnm) msa inst , by(`loc' ${time}) 
+        collapse (mean) ln_cns_y prob_cns avg_yr_ln_y  = ln_y avg_yr_stars = stars ln_x `suf'_athr_cnt `suf'_star_cnt cns_athr (sum) `suf'_sum_ln_y star_`suf'_sum_ln_y `suf'_athr_cnt_id star_`suf'_athr_cnt_id `suf'_y = y (firstnm) msa inst , by(`loc' ${time}) 
         save ../temp/`suf'_year_`samp'_collapsed, replace
-        collapse (mean) `suf'_ln_cns_y = ln_cns_y `suf'_prob_cns = prob_cns `suf'_ln_y = avg_yr_ln_y star_`suf'_ln_y = avg_yr_stars `suf'_ln_x = ln_x `suf'_athr_cnt `suf'_star_cnt `suf'_cns_athr = cns_athr (sum) `suf'_sum_ln_y star_`suf'_sum_ln_y (firstnm) msa inst (min) min_year=year (max) max_year = year, by(`loc')
+        collapse (mean) `suf'_ln_cns_y = ln_cns_y `suf'_prob_cns = prob_cns `suf'_ln_y = avg_yr_ln_y star_`suf'_ln_y = avg_yr_stars `suf'_ln_x = ln_x `suf'_athr_cnt `suf'_star_cnt `suf'_cns_athr = cns_athr (sum) `suf'_y `suf'_sum_ln_y star_`suf'_sum_ln_y (firstnm) msa inst (min) min_year=year (max) max_year = year, by(`loc')
         replace `suf'_prob_cns = . if `suf'_prob_cns == 0
         save ../temp/`suf'_`samp'_collapsed, replace
         restore
@@ -274,6 +279,7 @@ program make_dest_origin
     merge m:1 inst_id  year using ../temp/inst_year_`samp'_collapsed, assert(1 2 3) keep(3) nogen 
     bys inst_id: egen old_num = total(avg_yr_ln_y * tag)
     bys inst_id: egen old_star_num = total(avg_yr_stars * tag)
+    gen excluded_tot = inst_y - y 
     gen excluded_mean = (inst_sum_ln_y - ln_y)/(inst_athr_cnt_id - 1)
     gen excluded_star_mean = (star_inst_sum_ln_y - ln_y)/(star_inst_athr_cnt_id - 1)
     gen new_num = old_num + (excluded_mean - avg_yr_ln_y)
@@ -284,9 +290,10 @@ program make_dest_origin
     replace excluded_star_inst_ln_y = old_star_num/denom if stars == 0 
     merge m:1 inst_id  using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
     merge m:1 msa_comb using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x msa_athr_cnt) 
+    replace excluded_tot = ln(excluded_tot)
     save ../output/make_delta_figs_inst_`samp', replace
     hashsort athr_id which_place year
-    foreach var in avg_ln_y excluded_inst_ln_y excluded_star_inst_ln_y inst_ln_y x inst_ln_x msa_athr_cnt msa_ln_x star_inst_ln_y inst_prob_cns inst_ln_cns_y inst_cns_athr {
+    foreach var in avg_ln_y excluded_inst_ln_y excluded_star_inst_ln_y inst_ln_y x inst_ln_x msa_athr_cnt msa_ln_x star_inst_ln_y inst_prob_cns inst_ln_cns_y inst_cns_athr excluded_tot {
         if strpos("`var'", "avg_") == 0 {
             local type "Destination-Origin Difference in"
             local stem = subinstr(subinstr("`var'", "msa_","",.), "inst_", "",.)
@@ -299,7 +306,7 @@ program make_dest_origin
             local stem = subinstr("`var'", "avg_","",.)
             by athr_id (which_place year): gen `var'_diff = `var'[_n+1] - `var'
         }
-        if inlist("`var'" ,"inst_ln_y" , "star_inst_ln_y", "excluded_inst_ln_y" , "excluded_star_inst_ln_y", "inst_prob_cns", "inst_ln_cns_y", "inst_cns_athr") {
+        if inlist("`var'" ,"inst_ln_y" , "star_inst_ln_y", "excluded_inst_ln_y" , "excluded_star_inst_ln_y", "inst_prob_cns", "inst_ln_cns_y", "inst_cns_athr", "excluded_tot") {
             qui sum `var'_diff
             local N = r(N)
             local mean : dis %3.2f r(mean)
@@ -314,7 +321,7 @@ program make_dest_origin
     reg avg_ln_y_diff inst_ln_y_diff  
     local N = e(N)
     local coef : dis %3.2f _b[inst_ln_y_diff]
-    binscatter2 avg_ln_y_diff inst_ln_y_diff,  mcolor(gs5) lcolor(ebblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Difference in Log Output", size(vsmall)) ytitle("Change in Log Output after Move", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
+    binscatter2 avg_ln_y_diff excluded_tot_diff,  mcolor(gs5) lcolor(ebblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) xtitle("Destination-Origin Difference in Log Output", size(vsmall)) ytitle("Change in Log Output after Move", size(vsmall)) legend(on order(- "N (Movers) = `N'" ///
                                                             "Slope = `coef'") pos(5) ring(0) size(vsmall) region(fcolor(none)))
     graph export ../output/figures/place_effect_desc_`samp'.pdf , replace
     
