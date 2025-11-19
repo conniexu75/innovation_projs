@@ -1,4 +1,5 @@
-./fl/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/create_first_last_15jrnls/output/
+./splits/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/create_athr_samples/output/
 ./all/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output/
 ./mesh/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/clean_15jrnls_fund/output/
+./rank/ | /export/projects4/achandra_basicscience/analysis/science_geo/openalex/15jrnls/top_producers/output/
 
