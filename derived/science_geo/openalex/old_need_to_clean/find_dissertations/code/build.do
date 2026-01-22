@@ -6,18 +6,17 @@ set scheme modern
 pause on
 set seed 8975
 set maxvar 120000
-global temp "/export/scratch/cxu_sci_geo/dissertations"
-global output "/export/scratch/cxu_sci_geo/dissertations/output"
 
 program main
     append
 end
 
 program append
+//11442
     qui {
-        forval i = 10501/10966 {
+        forval i = 2211/7000 {
             import delimited ../external/pprs/openalex_authors`i', stringcols(_all) clear varn(1) bindquotes(strict) maxquotedrows(unlimited)
-            fmerge m:1 athr_id using ../external/athrs/list_of_athrs, assert(1 2 3) keep(3) nogen
+            fmerge m:1 athr_id using ../external/athrs/list_of_athrs_15jrnls, assert(1 2 3) keep(3) nogen
             gen lwr_title = strlower(title)
             destring which_athr, replace
             bys id: egen num_athrs = max(which_athr)
@@ -29,15 +28,14 @@ program append
                 gen year = yofd(date)
                 gcontract athr_id  id lwr_title year inst_id pub_date dissertation_tag
                 drop _freq
-                save ${temp}/ppr`i', replace
+                save ../temp/ppr`i', replace
             }
         }
     }
-    stop 
     clear
-    forval i = 1/10966 {
+    forval i = 1/11442 {
         di "`i'"
-        cap append using ${temp}/ppr`i'
+        cap append using ../temp/ppr`i'
     }
     drop if athr_id == "A9999999999"
     gduplicates tag athr_id, gen(dup)
@@ -50,7 +48,7 @@ program append
     rename (inst_id year) (phd_inst_id phd_year)
     gisid athr_id
     drop dup
-    save ${output}/appended_pprs, replace
+    save ../output/appended_pprs, replace
 end
 
 main

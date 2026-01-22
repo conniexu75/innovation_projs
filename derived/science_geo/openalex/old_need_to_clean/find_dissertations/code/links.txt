@@ -1,3 +1,2 @@
-./geo/ | /export/home/dor/cxu/innovation_projs/raw/geo/
-./pprs/ | /export/scratch/cxu_sci_geo/scrape_full_athr_hist2
-./athrs/ | /export/home/dor/cxu/innovation_projs/derived/science_geo/openalex/gather_author_pprs/output/
+./pprs/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/scrape_athr_inst_hist_15jrnls/output 
+./athrs/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/make_subjrnl_cuts/output                                    

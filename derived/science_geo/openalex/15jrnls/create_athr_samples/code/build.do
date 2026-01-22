@@ -9,7 +9,7 @@ here, set
 set maxvar 120000
 global temp "/export/scratch/cxu_sci_geo/clean_openalex"
 program main
-    foreach samp in firstlast last first {
+    foreach samp in firstlast last first second {
         create_athr_split, samp(15jrnls) cut(`samp')
         split_sample, cut(`samp')
     }
@@ -35,6 +35,9 @@ program create_athr_split
     }
     if "`cut'" == "first" {
         keep if which_athr == first_athr
+    }
+    if "`cut'" == "second" {
+        keep if which_athr == first_athr | which_athr == last_athr | which_athr == first_athr + 1 | which_athr == last_athr -  1
     }
     qui hashsort id which_athr which_affl
     cap drop author_id 

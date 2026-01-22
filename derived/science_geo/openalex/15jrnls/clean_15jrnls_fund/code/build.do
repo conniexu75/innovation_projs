@@ -31,7 +31,8 @@ program aggregate_insts
             cap append using ${temp}/inst_geo_chars`i'
         }
     }
-	  bys inst_id: gegen has_parent = max(associated_rel == "parent")
+
+    bys inst_id: gegen has_parent = max(associated_rel == "parent")
     keep if has_parent == 0  | (has_parent == 1 & associated_rel == "parent" ) 
     gen new_inst = ""
     gen new_inst_id = ""
@@ -69,11 +70,12 @@ program aggregate_insts
         replace new_inst`s' = associated`s' if strpos(associated, "Agricultural Research Service -")>0
     }
     // merge national institutions together
-    replace new_inst = "French National Centre for Scientific Research" if inlist(inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions") | inlist(inst,"Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
+    replace new_inst = "French National Centre for Scientific Research" if inlist(inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions") | inlist(inst,"Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions", "Centre National de la Recherche Scientifique")
     replace new_inst = "French National Centre for Scientific Research" if inlist(new_inst,"Institut des Sciences Biologiques", "Institut de Chimie", "Institut des Sciences Humaines et Sociales", "Institut National des Sciences de l'Univers", "Institut des Sciences de l'Ingénierie et des Systèmes", "Institut Écologie et Environnement", "Institut de Physique", "Institut National des Sciences Mathématiques et de leurs Interactions") | inlist(new_inst,"Institut National de Physique Nucléaire et de Physique des Particules", "Institut des Sciences de l'Information et de leurs Interactions")
     replace new_inst_id = "I1294671590" if new_inst =="French National Centre for Scientific Research"
     replace new_inst = "Russian Academy" if inlist(inst, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") | inlist(inst, "Russian Academy of Sciences", "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences") & country == "Russia"
     replace new_inst = "Russian Academy" if inlist(new_inst, "Department of Biological Sciences", "Department of Chemistry and Material Sciences", "Department of Energy, Engineering, Mechanics and Control Processes","Department of Agricultural Sciences", "Division of Historical and Philological Sciences", "Department of Mathematical Sciences", "Department of Physiological Sciences") | inlist(new_inst,"Russian Academy of Sciences", "Department of Earth Sciences", "Physical Sciences Division", "Department of Global Issues and International Relations", "Department of Medical Sciences", "Department of Social Sciences") & country == "Russia"
+
     replace new_inst_id = "I1313323035" if new_inst  == "Russian Academy"
     replace new_inst  = "Agricultural Research Service" if strpos(inst, "Agricultural Research Service - ")>0
     replace new_inst_id = "I1312222531" if new_inst == "Agricultural Research Service"
@@ -91,10 +93,11 @@ program aggregate_insts
     replace new_inst = "Northwestern University" if inlist(inst, "Northwestern Medicine")
     replace new_inst = "Northwestern University" if inlist(associated, "Northwestern Medicine")
     replace new_inst_id = "I111979921" if new_inst == "Northwestern University"
-    replace new_inst = "Harvard University" if inlist(inst, "Harvard Global Health Institute", "Harvard Pilgrim Health Care", "Harvard Affiliated Emergency Medicine Residency", "Harvard NeuroDiscovery Center")
+    replace new_inst = "Harvard University" if inlist(inst, "Harvard Global Health Institute", "Harvard Pilgrim Health Care", "Harvard Affiliated Emergency Medicine Residency", "Harvard NeuroDiscovery Center", "Harvard College Observatory")
     replace new_inst_id = "I136199984" if new_inst == "Harvard University"
     replace new_inst = "University of California, San Francisco" if inlist(inst, "Ernest Gallo Clinic and Research Center")
     replace new_inst_id = "I180670191" if new_inst == "University of California, San Francisco"
+    
     // health systems
     replace new_inst = "University of Virginia" if strpos(inst, "University of Virginia") > 0 & (strpos(inst, "Hospital") >0 | strpos(inst, "Medical")>0 | strpos(inst, "Health")>0)
     replace new_inst_id = "I51556381" if new_inst == "University of Virginia"
@@ -102,7 +105,7 @@ program aggregate_insts
     replace new_inst_id = "I76835614" if new_inst == "University of Missouri"
     replace new_inst = "Baylor University" if strpos(inst, "Baylor University Medical Center")>0
     replace new_inst_id = "I157394403" if new_inst == "Baylor University"
-    replace new_inst = "Columbia University" if strpos(inst, "Columbia University Irving")>0
+    replace new_inst = "Columbia University" if strpos(inst, "Columbia University")>0 
     replace new_inst_id = "I78577930" if new_inst == "Columbia University"
     replace new_inst = "Yale University" if strpos(inst, "Yale New Haven Health System")>0 | strpos(inst, "Yale New Haven Hospital")>0 | strpos(inst, "Yale Cancer Center") >0  
     replace new_inst_id = "I32971472" if new_inst == "Yale University"
@@ -118,29 +121,34 @@ program aggregate_insts
 	replace new_inst_id = "I170897317" if new_inst == "Duke University"
 	replace new_inst = "Washington University in St. Louis" if (inlist(inst, "Washington University") & city == "St Louis") 
 	replace new_inst_id = "I204465549" if new_inst == "Washington University in St. Louis" 
+
 	replace new_inst = "University of Michigan–Ann Arbor" if inst == "Michigan Medicine" | inst == "Michigan Center for Translational Pathology"
 	replace new_inst_id = "I27837315" if new_inst == "University of Michigan–Ann Arbor"
 	replace new_inst = "University of Pittsburgh" if strpos(inst, "UPMC")>0
 	replace new_inst_id = "I170201317" if new_inst == "University of Pittsburgh" 
 	replace new_inst = "Vanderbilt University" if inst == "Vanderbilt Health"
 	replace new_inst_id = "I200719446" if new_inst == "Vanderbilt University"ll
-	// fix the UCs
+	
+    // fix the UCs
 	replace new_inst = "University of California, San Francisco" if strpos(inst, "UCSF")>0 | inst == "University of California San Francisco"
 	replace new_inst_id = "I180670191" if new_inst == "University of California, San Francisco"
-	replace new_inst = "University of California, San Diego" if inst == "University of California San Diego"
-	replace new_inst_id = "I36258959" if inst == "University of California, San Diego" | strpos(inst, "UC San Diego") >0 | strpos(inst, "UCSD")>0
-	replace new_inst = "University of California, Davis" if inst == "University of California Davis"
-	replace new_inst_id = "I84218800" if inst == "University of California, Davis"
+	replace new_inst = "University of California, San Diego" if strpos(inst , "University of California San Diego") | strpos(inst, "UC San Diego") >0 | strpos(inst, "UCSD")>0
+	replace new_inst_id = "I36258959" if new_inst == "University of California, San Diego" 	
+
+    replace new_inst = "University of California, Davis" if inst == "University of California Davis"
+	replace new_inst_id = "I84218800" if new_inst == "University of California, Davis"
 	replace new_inst = "University of California, Los Angeles" if inst == "University of California Los Angeles" | strpos(inst , "UCLA") >0 
-	replace new_inst_id = "I161318765" if inst == "University of California, Los Angeles"
+	replace new_inst_id = "I161318765" if new_inst == "University of California, Los Angeles"
 	replace new_inst = "University of California, Berkeley" if inst == "University of California Berkeley"
-	replace new_inst_id = "I95457486" if inst == "University of California, Berkeley"
+	replace new_inst_id = "I95457486" if new_inst == "University of California, Berkeley"
 	replace new_inst = "University of California, Davis" if strpos(inst, "UC Davis") > 0
 	replace new_inst_id = "I84218800" if new_inst ==  "University of California, Davis" 
 	replace new_inst = "University of California, Irvine" if strpos(inst, "UC Irvine") > 0
 	replace new_inst_id = "I204250578" if new_inst ==  "University of California, Irvine" 
-	
+    
     // agencies
+    replace new_inst = "Dana-Farber Cancer Institute" if strpos(inst, "Dana-Farber") > 0
+    replace new_inst_id = "I4210117453" if new_inst == "Dana-Farber Cancer Institute"
     replace new_inst = "National Institute of Standards and Technology" if associated == "National Institute of Standards and Technology" &associated_rel == "parent"
     replace new_inst_id = "I1321296531" if new_inst ==  "National Institute of Standards and Technology"
 	replace new_inst = "National Institutes of Health" if inst == "Center for Cancer Research" | inst == "National Center for Biotechnology Information"
@@ -162,10 +170,11 @@ program aggregate_insts
     replace new_inst = "Genetics Institute" if inst_id == "I4210165860"
     replace city = "Cambridge" if inst_id == "I4210165860"
     replace region = "Massachusetts" if inst_id == "I4210165860"
+
     gen edit = 0
     foreach s in "Health System" "Clinic" "Hospital of the" "Hospital" "Medical Center" {
-        replace new_inst = subinstr(inst, "`s'", "", .) if (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 & edit == 0 & country_code == "US"
-        replace edit = 1 if  (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 &  country_code == "US"
+        replace new_inst = subinstr(inst, "`s'", "", .) if (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 & edit == 0 & country_code == "US" & strpos(new_inst, "`s'") > 0
+        replace edit = 1 if  (strpos(inst, "University")>0 | strpos(inst, "UC")>0) & strpos(inst, "`s'") > 0 &  country_code == "US" & strpos(new_inst, "`s'")
     }
     replace new_inst = strtrim(new_inst)
     bys new_inst (edit) : replace new_inst_id = new_inst_id[_n-1] if edit == 1 & !mi(new_inst_id[_n-1])  & city == city[_n-1]
@@ -177,9 +186,12 @@ program aggregate_insts
     gen diff = inst_id != new_inst_id
     bys inst_id : gegen has_new = max(diff)
     drop if dup > 0 & diff == 0 & has_new == 1
+    drop dup 
     gduplicates drop inst_id, force
     keep inst_id inst new_inst new_inst_id region city country country_code type 
     drop if mi(inst_id) 
+    gegen inst_grp = group(country city new_inst)
+    bys inst_grp:  replace new_inst_id = new_inst_id[_n-1] if new_inst_id != new_inst_id[_n-1] & inst_grp == inst_grp[_n-1]
     save ../output/all_inst_geo_chars, replace
 end
 
@@ -295,8 +307,8 @@ program clean_samps
     drop if has_lancet == 1 | has_london == 1 | has_bmj == 1 | has_jama == 1 | has_editor == 1
     drop is_lancet is_london is_bmj is_jama is_editor has_lancet has_london has_bmj has_jama has_editor
     // add in cite_ct
-    replace cite_count = cite_count + 1
-    assert cite_count > 0 
+*    replace cite_count = cite_count + 1
+*    assert cite_count > 0 
 
     save ${temp}/cleaned_all_`samp', replace
     cap drop author_id 
@@ -331,6 +343,7 @@ program clean_samps
     gen pat_affl_wt = patent_count * 1/num_affls * 1/num_athrs
     gen body_affl_wt = body_only * 1/num_affls * 1/num_athrs
     gen front_affl_wt = front_only * 1/num_affls * 1/num_athrs
+
     // now give each article a weight based on their ciatation count 
     qui gen years_since_pub = 2023-year+1
     qui gen avg_cite_yr = cite_count/years_since_pub
