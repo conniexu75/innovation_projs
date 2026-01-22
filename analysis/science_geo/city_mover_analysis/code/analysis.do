@@ -31,12 +31,12 @@ program main
     drop _freq
     drop if mi(move_year)
     drop if num_moves <= 0
+    drop if num_moves >= 5
     save ../temp/movers, replace
 
-    foreach t in year_firstlast {
+    foreach t in year_second {
         qui make_movers, samp(`t')
         make_dest_origin, samp(`t')
-        event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(msa_ln_y_diff)
         event_study, samp(`t') timeframe(10) ymax(1) ygap(0.1) delta(msa_wo_inst_diff)
     }
 end
@@ -98,6 +98,7 @@ end
 program make_dest_origin
     syntax, samp(str)
     use ../temp/mover_temp_`samp' , clear  
+    drop if num_moves >=5 
     gegen msa = group(msa_comb)
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
@@ -105,32 +106,55 @@ program make_dest_origin
     rename msa_size x
     foreach loc in inst_id msa_comb {
         preserve
+        drop if year == move_year & mover == 1 
         if "`loc'" == "inst_id" {
             local suf inst 
         }
         if "`loc'" == "msa_comb" {
             local suf msa 
         }
-        gcollapse (mean) `suf'_ln_y = ln_y `suf'_ln_x = ln_x  (firstnm) msa , by(`loc' ${time}) 
-        foreach v in `suf'_ln_y `suf'_ln_x {
+        bys `loc' athr_id : gen num_athrs = _n == 1
+        bys `loc' : egen `suf'_athr_cnt = total(num_athrs)
+        gen `suf'_sum_ln_y = ln_y
+        if "`loc'" == "inst_id" {
+            *gcollapse (mean) `suf'_ln_y = ln_y `suf'_ln_x = ln_x  (sum) num_athrs (firstnm) msa , by(`loc' ${time}) 
+            gcollapse (mean) ln_y ln_x `suf'_athr_cnt (sum) `suf'_sum_ln_y  (firstnm) msa , by(`loc') 
+            gcollapse (mean) `suf'_ln_y = ln_y `suf'_ln_x = ln_x `suf'_athr_cnt (sum) `suf'_sum_ln_y (firstnm) msa , by(`loc') 
+        }
+        if "`loc'" == "msa_comb" {
+            bys `loc' inst_id: gen inst_cnt_id = _n == 1
+            bys `loc' : egen inst_cnt = total(inst_cnt_id)
+            *gcollapse (mean) `suf'_ln_y = ln_y `suf'_ln_x = ln_x  (firstnm) msa (sum) inst_cnt num_athrs , by(`loc' ${time}) 
+            gcollapse (mean) ln_y  ln_x inst_cnt `suf'_athr_cnt (firstnm) msa (sum)  `suf'_sum_ln_y , by(`loc' ${time}) 
+            gcollapse (mean) `suf'_ln_y = ln_y `suf'_ln_x = ln_x inst_cnt `suf'_athr_cnt (firstnm) msa (sum)  `suf'_sum_ln_y , by(`loc') 
+            drop if inst_cnt == 1
+        }
+        *drop if num_athrs == 1 
+/*        foreach v in `suf'_ln_y `suf'_ln_x {
             bys `loc' (year): gen pre_`v' = (`v'+`v'[_n-1])/2
             bys `loc' (year): gen post_`v' = (`v'+`v'[_n+1])/2
-        }
+        }*/
         save ../temp/`suf'_`samp'_collapsed, replace
         restore
     }
 
     preserve
-    bys inst_id year: egen tot_inst_prod = total(ln_y)
-    bys msa_comb year: egen tot_msa_prod = total(ln_y)
-    bys msa_comb year: egen num_insts = count(inst_id)
-    gen msa_wo_inst = (tot_msa_prod - tot_inst_prod)/(num_insts - 1)
-    keep athr_id year msa_wo_inst
+    bys inst_id : egen tot_inst_prod = total(ln_y)
+    bys msa_comb: egen tot_msa_prod = total(ln_y)
+*    bys msa_comb year: egen num_insts = count(inst_id)
+*    gen msa_wo_inst = (tot_msa_prod - tot_inst_prod)/(num_insts - 1)
+*    keep athr_id year msa_wo_inst
+    merge m:1 msa_comb using ../temp/msa_`samp'_collapsed, assert(1 3) keep(1 3) nogen
+    merge m:1 inst_id using ../temp/inst_`samp'_collapsed, assert(1 3) keep(1 3) nogen
+    gen msa_wo_inst = (tot_msa_prod - tot_inst_prod)/(msa_athr_cnt-inst_athr_cnt)
+    *gen msa_wo_inst = (msa_sum_ln_y- inst_sum_ln_y)/(msa_athr_cnt-inst_athr_cnt)
+    keep athr_id msa_wo_inst year
     save ../temp/msa_wo_inst_`samp', replace
     restore
         
     use if analysis_cond == 1  using ../temp/mover_temp_`samp' , clear  
-    merge 1:1 athr_id year using ../temp/msa_wo_inst_`samp', assert(2 3) keep(3) nogen
+    merge 1:1 athr_id year using ../temp/msa_wo_inst_`samp', assert(1 2 3) keep(3) nogen
+   * merge m:1 athr_id using ../temp/msa_wo_inst_`samp', assert(2 3) keep(3) nogen
     merge m:1 athr_id using ../temp/mover_xw_`samp', assert(1 2 3) keep(3) nogen
     gen ln_y = ln(impact_cite_affl_wt)
     gen ln_x = ln(msa_size)
@@ -146,11 +170,13 @@ program make_dest_origin
     rename year current_year
     gen year = current_year if which_place == 1
     replace year = move_year if which_place == 2
-    merge m:1 inst_id year using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
-    merge m:1 msa_comb year using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x pre_msa_ln_x post_msa_ln_x msa_ln_y)
+    merge m:1 inst_id using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
+    merge m:1 msa_comb using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x msa_athr_cnt)
+    *merge m:1 inst_id year using ../temp/inst_`samp'_collapsed, assert(1 2 3) keep(3) nogen
+    *merge m:1 msa_comb year using ../temp/msa_`samp'_collapsed, assert(1 2 3) keep(3) nogen keepusing(msa_ln_x pre_msa_ln_x post_msa_ln_x msa_ln_y)
     save ../output/delta_dist_msa, replace
     hashsort athr_id which_place year
-    foreach var in avg_ln_x avg_ln_y inst_ln_y inst_ln_x msa_ln_x msa_ln_y msa_wo_inst {
+    foreach var in avg_ln_x avg_ln_y inst_ln_y inst_ln_x msa_ln_x msa_athr_cnt msa_wo_inst {
         if strpos("`var'", "avg_") == 0 {
             local type "Destination-Origin Difference in"
             local stem = subinstr(subinstr("`var'", "msa_","",.), "inst_", "",.)
@@ -176,7 +202,7 @@ program make_dest_origin
     hashsort athr_id which_place year
     by athr_id : replace dest_loc = dest_loc[_n+1] if mi(dest_loc)
     by athr_id : replace origin_loc = origin_loc[_n-1] if mi(origin_loc)
-    gcontract athr_id avg_ln_y_diff avg_ln_x_diff inst_ln_y_diff inst_ln_x_diff move_year origin_loc dest_loc msa_ln_x_diff msa_ln_y_diff msa_wo_inst_diff
+    gcontract athr_id avg_ln_y_diff avg_ln_x_diff inst_ln_y_diff inst_ln_x_diff move_year origin_loc dest_loc msa_ln_x_diff msa_athr_cnt_diff msa_wo_inst_diff
     drop _freq
     drop if mi(avg_ln_y_diff)
     save ../temp/dest_origin_changes, replace
@@ -231,8 +257,8 @@ program event_study
 	gen move_age_pub = move_year - first_pub_yr  + 1 + 25
     gen l2h_move = `delta'  > 0
     gen h2l_move = `delta' < 0
-    gen s2b_move = msa_ln_x_diff > 0
-    gen b2s_move = msa_ln_x_diff < 0
+    gen s2b_move = msa_athr_cnt_diff > 0
+    gen b2s_move = msa_athr_cnt_diff < 0
 	by athr_id: gen counter = _n == 1
 	sum move_age_pub if counter == 1, d
 	gen old = move_age_pub >= r(p50)
@@ -266,7 +292,7 @@ program event_study
         }
         preserve
         mat drop _all
-        reghdfe ln_y `lags' `leads' lag1 treat `int_lags' int_treat `int_leads' int_lag1  if `c' , absorb(year field field#year athr_fes = athr_id) vce(cluster msa)
+        reghdfe ln_y `lags' `leads' lag1 treat `int_lags' int_treat `int_leads' int_lag1  if `c' , absorb(year athr_fes = athr_id) vce(cluster msa)
         estimates save ../output/es_`startyr'_`endyr'_`samp'`suf'_`delta', replace
         gunique athr_id if `c'
         local num_movers = r(unique)
@@ -294,7 +320,7 @@ program event_study
         replace lb = -1 if lb < -1
         replace ub = 1 if ub > 1
 		save ../temp/es_coefs_`startyr'_`endyr'_`samp'`suf'_`delta', replace
-        tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(vsmall) || scatter b rel if se !=0 | rel == -1, mcolor(ebblue%50) msize(small) xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+        tw rcap ub lb rel if rel != -1,  lcolor(ebblue%50) msize(vsmall) || scatter b rel if se !=0 | rel == -1, mcolor(ebblue%50) msize(small) xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
           yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
           legend(on order(- "N (Movers) = `num_movers'" ///
                                                             "Pre-period mean = `pre_mean'" ///
@@ -327,7 +353,7 @@ program event_study
 	   scatter b rel if cat == "l2h", mcolor(lavender%70) msize(small) || ///
 	   rcap ub lb rel if rel != -0.91 & cat == "h2l",  lcolor(orange%70) msize(vsmall) || ///
 	   scatter b rel if cat == "h2l", mcolor(orange%70) msymbol(smdiamond) msize(small) /// 
-	   xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+	   xlab(-`timeframe'(1)`timeframe',  labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
           yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
           legend(on order(2 "Low to High Productivity Place Movers (N = `l2h_num_movers')" 4 "High to Low Productivity Place Movers (N = `h2l_num_movers')") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
     graph export ../output/figures/es`startyr'_`endyr'_`samp'_`delta'_prodchg.pdf, replace
@@ -343,7 +369,7 @@ program event_study
 	   scatter b rel if cat == "s2b", mcolor(lavender%70) msize(small) || ///
 	   rcap ub lb rel if rel != -0.91 & cat == "b2s",  lcolor(orange%70) msize(vsmall) || ///
 	   scatter b rel if cat == "b2s", mcolor(orange%70) msymbol(smdiamond) msize(small) /// 
-	   xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+	   xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
           yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
           legend(on order(2 "Small to Big Place Movers (N = `s2b_num_movers')" 4 "Big to Small Place Movers (N = `b2s_num_movers')") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
     graph export ../output/figures/es`startyr'_`endyr'_`samp'_`delta'_sizechg.pdf, replace
@@ -359,7 +385,7 @@ program event_study
 	   scatter b rel if cat == "young" & rel > -8, mcolor(lavender%70) msize(small) || ///
 	   rcap ub lb rel if rel != -0.91 & cat == "old",  lcolor(orange%70) msize(vsmall) || ///
 	   scatter b rel if cat == "old", mcolor(orange%70) msymbol(smdiamond) msize(small) /// 
-	   xlab(-`timeframe'(1)`timeframe', angle(45) labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
+	   xlab(-`timeframe'(1)`timeframe', labsize(vsmall)) ylab(-`ymax'(`ygap')`ymax', labsize(vsmall)) ///
           yline(0, lcolor(black) lpattern(solid)) xline(0, lcolor(gs12) lpattern(dash))  ///
           legend(on order(2 "Movers Aged < 40 (N = `young_num_movers')" 4 "Movers Aged >= 40 (N = `old_num_movers')") pos(5) ring(0) size(vsmall) region(fcolor(none))) xtitle("Relative Year to Move", size(vsmall)) ytitle("Log Productivity", size(vsmall))
     graph export ../output/figures/es`startyr'_`endyr'_`samp'_`delta'_age.pdf, replace

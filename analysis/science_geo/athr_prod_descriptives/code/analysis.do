@@ -22,11 +22,11 @@ program main
     di "OUTPUT START"
     foreach athr_type in year_second {
         identify_movers, athr(`athr_type')
-        *athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(1) loc(inst_id)
+        athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(1) loc(inst_id)
         athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(0) loc(inst_id)
         athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(0) loc(msa_comb)
         *athr_loc, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) global(1) loc(msa_c_world)
-        top_insts, athr(`athr_type') samp(all) wt_var(cite_affl_wt) 
+        top_insts, athr(`athr_type') samp(all) wt_var(impact_cite_affl_wt) 
         output_tables, athr(`athr_type') samp(all) 
     }
 end
@@ -43,6 +43,15 @@ program identify_movers
         replace msa_comb = "Los Angeles-Long Beach-Anaheim, CA"
         replace msatitle = "Los Angeles-Long Beach-Anaheim, CA"
     }
+    replace msa_comb = "Bay Area, CA" if inst_id == "I180670191"
+    replace msa_c_world = "Bay Area, US" if inst_id == "I180670191"
+    replace msacode  = "C1446" if inst_id == "I180670191"
+    replace us_state = "CA" if inst_id == "I180670191"
+    replace state = "San Francisco" if inst_id == "I180670191"
+    replace inst = "Mayo Clinic" if strpos(inst, "Mayo Clinic")
+    replace inst_id = "I1330342723" if inst == "Mayo Clinic"
+    replace msa_comb = "Rochester, MN" if inst == "Mayo Clinic"
+    keep if inrange(year, 2015, 2023)
     bys athr_id inst_id: gen id_cnt =_n == 1
     bys athr_id : egen mover = sum(id_cnt)
     replace mover = mover > 1
@@ -57,8 +66,16 @@ program athr_loc
     local jrnls = ""
     if "`samp'" == "cns" local jrnls "_cns"
     use ../external/samp/athr_panel_full_comb_`athr'`jrnls'_global, clear 
+    replace msa_comb = "Bay Area, CA" if inst_id == "I180670191"
+    replace msa_c_world = "Bay Area, US" if inst_id == "I180670191"
+    replace msacode  = "C1446" if inst_id == "I180670191"
+    replace us_state = "CA" if inst_id == "I180670191"
+    replace state = "San Francisco" if inst_id == "I180670191"
+    replace inst = "Mayo Clinic" if strpos(inst, "Mayo Clinic")
+    replace inst_id = "I1330342723" if inst == "Mayo Clinic"
+    replace msa_comb = "Rochester, MN" if inst == "Mayo Clinic"
     keep if inrange(year, 2015, 2023)
-    merge m:1 inst_id using ../temp/inst_stats, assert(3) keep(3) nogen
+    fmerge m:1 inst_id using ../temp/inst_stats, assert(2 3) keep(3) nogen
     local end 20
     if "`loc'" == "inst_id"  {
         local end 50
@@ -69,43 +86,13 @@ program athr_loc
     if `global' == 0 {
         keep if country == "United States" 
     }
-    preserve
     drop if mi(`loc')
     gen log_`wt_var'=log(`wt_var')
-    bys inst_id athr_id year : gen inst_athr_yr_cnt = _n == 1
-    bys inst_id year : egen inst_athr_yrs = total(inst_athr_yr_cnt) 
-    bys inst_id year: gen inst_yr_cnt = _n == 1
-    replace  inst_athr_yrs = . if inst_yr_cnt != 1
-    bys inst_id : egen inst_avg_athr_yrs = mean(inst_athr_yrs)
-    bys inst_id athr_id : gen inst_athr_cnt = _n == 1
-    bys inst_id : egen inst_num_athrs = total(inst_athr_cnt)
-    bys inst_id: egen num_inst_yrs = total(inst_yr_cnt)
-*    drop if num_inst_yrs < 5
-*    drop if inst_avg_athr_yrs < 5
     drop if tot_athrs <100 
-    drop if tot_movers < 25 
-
-    bys `loc' inst_id : gen inst_cnt = _n == 1
-    bys `loc' : egen tot_insts = total(inst_cnt) 
-    bys `loc' athr_id : gen athr_cnt = _n == 1
-    bys `loc' athr_id year : gen athr_yr_cnt = _n == 1
-    bys `loc' year : egen athr_yrs = total(athr_yr_cnt) 
-    bys `loc' year: gen athr_yr_id = _n == 1
-    replace athr_yrs = . if athr_yr_id != 1
-    bys `loc' : egen avg_athr_yrs = mean(athr_yrs)
-    bys `loc' : egen num_athrs = total(athr_cnt)
-
-    bys `loc': gen `loc'_cnt = _n == 1
-    sum num_athrs if `loc'_cnt == 1
-    bys `loc' year: gen yr_cnt = _n == 1
-    bys `loc': egen num_years = total(yr_cnt)
-    if "`loc'" != "inst_id" {
-*        drop if num_years < 5
-*        drop if tot_insts ==  1
-*        drop if avg_athr_yrs <= 15 
-*        drop if num_athrs <=75 
+    if `global' == 0 {
+        drop if tot_movers < 10
     }
-    collapse (mean) `wt_var'  log_`wt_var' tot* (firstnm) country inst,  by(`loc' year)
+    collapse (sum) tot_`wt_var' = `wt_var' (mean) `wt_var'  log_`wt_var' tot* (firstnm) country inst,  by(`loc' year)
     collapse (mean) `wt_var' log_`wt_var' tot* (firstnm) country inst,  by(`loc')
     tw hist log_`wt_var' , frac bin(50) color(ebblue%50) ytitle("Share of ${`loc'_name}") xtitle("Log Avg. Productivity")
     graph export ../output/figures/dist_`loc'_global`global'.pdf, replace
@@ -117,10 +104,15 @@ program athr_loc
     qui count
     local rank_end = min(r(N),`end') 
     if "`loc'" == "inst_id"  & `global' == 0 {
-        li inst `wt_var' log_`wt_var' in 1/`rank_end'
+        li inst `wt_var' in 1/`rank_end'
     }
     if "`loc'" == "inst_id"  & `global' == 1 {
         li inst country `wt_var' in 1/`rank_end'
+    }
+    if "`loc'" == "msa_comb" & `global' == 0 {
+        merge 1:1 msa_comb using ../external/rank/top_msa_comb_output, keep(3) nogen
+        qui hashsort -`wt_var'
+        li `loc' `wt_var' perc in 1/`rank_end'
     }
     else {
         li `loc' `wt_var' in 1/`rank_end'
@@ -172,6 +164,11 @@ program map
     save usa_msa_shp_clean.dta, replace
 
     use if !mi(msa_comb) & inrange(year, 1945, 2023) using ../external/samp/athr_panel_full_`athr'_global, clear
+    replace msa_comb = "Bay Area, CA" if inst_id == "I180670191"
+    replace msa_c_world = "Bay Area, US" if inst_id == "I180670191"
+    replace msacode  = "C1446" if inst_id == "I180670191"
+    replace us_state = "CA" if inst_id == "I180670191"
+    replace state = "San Francisco" if inst_id == "I180670191"
     merge m:1 msacode using ../external/geo/msas, assert(1 2 3) keep(1 3) nogen
     replace msa_comb = msatitle if !mi(msatitle)
     replace msa_comb = "San Francisco-Oakland-Hayward, CA" if msa_comb == "San Francisco-Oakland-Haywerd, CA"
@@ -221,6 +218,14 @@ program top_insts
     local jrnls = ""
     if "`samp'" == "cns" local jrnls "_cns"
     use ../external/samp/athr_panel_full_comb_`athr'`jrnls'_global, clear 
+    replace msa_comb = "Bay Area, CA" if inst_id == "I180670191"
+    replace msa_c_world = "Bay Area, US" if inst_id == "I180670191"
+    replace msacode  = "C1446" if inst_id == "I180670191"
+    replace us_state = "CA" if inst_id == "I180670191"
+    replace state = "San Francisco" if inst_id == "I180670191"
+    replace inst = "Mayo Clinic" if strpos(inst, "Mayo Clinic")
+    replace inst_id = "I1330342723" if inst == "Mayo Clinic"
+    replace msa_comb = "Rochester, MN" if inst == "Mayo Clinic"
     if inst == "City of Hope" {
         replace inst_id = "I1301076528"
         replace region = "California"
@@ -231,29 +236,11 @@ program top_insts
         replace msatitle = "Los Angeles-Long Beach-Anaheim, CA"
     }
     keep if inrange(year, 2015, 2023)
-    merge m:1 inst_id using ../temp/inst_stats, assert(3) keep(3) nogen
+    merge m:1 inst_id using ../temp/inst_stats, assert(2 3) keep(1 3) nogen
     keep if country == "United States"
     local end 10
-    preserve
-    bys inst_id athr_id : gen inst_athr_cnt = _n == 1
-    bys inst_id : egen inst_athrs=total(inst_athr_cnt)
-
-    bys inst_id athr_id year: gen inst_athr_yr_cnt = _n == 1
-    bys inst_id year: egen num_athr_yr = total(inst_athr_yr_cnt)
-    bys inst_id year: gen inst_yr_id = _n == 1
-    replace num_athr_yr = . if inst_yr_id != 1
-    bys inst_id : egen avg_inst_athr_yrs = mean(num_athr_yr)
-    
-    bys inst_id year: gen inst_yr_cnt = _n == 1
-    bys inst_id: egen num_inst_yrs = total(inst_yr_cnt)
     drop if tot_athrs <100 
-    drop if tot_movers < 25 
-    /*drop if num_inst_yrs < 5
-    drop if avg_inst_athr_yrs < 5
-    drop if inst_athrs < 25*/
-
-    bys msa_comb inst_id : gen msa_inst_cnt = _n == 1
-    bys msa_comb : egen tot_insts = total(msa_inst_cnt) 
+    drop if tot_movers < 10
     bys msa_comb athr_id : gen athr_cnt = _n == 1
     bys msa_comb athr_id year : gen athr_yr_cnt = _n == 1
     bys msa_comb : egen num_athrs = total(athr_cnt)
@@ -264,9 +251,6 @@ program top_insts
     bys msa_comb year: gen athr_yr_id = _n == 1
     replace athr_yrs = . if athr_yr_id != 1
     bys msa_comb : egen avg_athr_yrs = mean(athr_yrs)
-*    drop if num_years < 5
-*    drop if tot_insts == 1
-
     bys msa_comb year: egen avg_yr = mean(impact_cite_affl_wt)
     bys msa_comb year: gen id = _n == 1 
     replace avg_yr = . if id != 1
@@ -293,7 +277,6 @@ program top_insts
     li msa_comb inst  impact_cite_affl_wt
     mkmat impact_cite_affl_wt, mat(inst_msa_`athr'`jrnls')
     qui save ../temp/inst_in_msa_rank_`athr'`jrnls', replace
-    restore
 end
 
 
@@ -303,10 +286,10 @@ program output_tables
     if "`samp'" == "cns" local jrnls "_cns"
     cap mat state_msa_`athr'`jrnls' = top_us_state_`athr'`jrnls' \ top_msa_comb_`athr'`jrnls' 
     cap mat all_`athr'`jrnls' = top_us_state_`athr'`jrnls' \ top_msa_comb_`athr'`jrnls'  \ top_inst_`athr'`jrnls'
-    foreach file in top_inst inst_msa state_msa all {
+    foreach file in top_inst_id top_msa_comb inst_msa {
         cap qui matrix_to_txt, saving("../output/tables/`file'_`athr'`jrnls'.txt") matrix(`file'_`athr'`jrnls')  ///
            title(<tab:`file'_`athr'`jrnls'>) format(%20.4f) replace
          }
- end
+end
 ** 
 main

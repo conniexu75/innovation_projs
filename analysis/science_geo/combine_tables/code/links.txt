@@ -1,0 +1,4 @@
+./prod/ | /export/projects4/achandra_basicscience/analysis/science_geo/athr_prod_descriptives/temp
+./share/ | /export/projects4/achandra_basicscience/analysis/science_geo/top_producers/output
+
+

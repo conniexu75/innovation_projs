@@ -16,7 +16,7 @@ global time year
 
 program main
     qui get_full_mover_picture
-    local main_fes "year athr_fes = athr_id"
+    local main_fes "year athr_fes = athr_id" 
     local field "field year athr_fes = athr_id"
     foreach t in year_second { 
         di "SAMP: `t'"

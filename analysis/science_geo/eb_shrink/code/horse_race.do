@@ -21,16 +21,16 @@ program main
     save ../temp/inst_xw, replace
     foreach t in year_second {
         forval i = 0(5)150 {
-            add_decomp, samp(`t')  num_movers(`i')
+            *add_decomp, samp(`t')  num_movers(`i')
             var_decomp, samp(`t')  num_movers(`i')
             output_tables, samp(`t')  num_movers(`i')
         }
         clear
-        forval i = 50(25)150 {
-            append using ../output/values_`i'
-        }
-        save ../output/appended_values, replace
     }
+    forval i = 0(5)150 {
+        append using ../output/values_`i'
+    }
+    save ../output/appended_values, replace
     use ../../decomp/output/horse_race, clear
     gen cat = "no shrink"
     append using ../output/appended_values
@@ -39,13 +39,13 @@ program main
         scatter cov num_movers if cat == "no shrink", mcolor(lavender) || ///
         line cov num_movers if cat == "eb" , lcolor(dkorange)  || ///
         scatter cov num_movers if cat == "eb", mcolor(dkorange) ///
-        legend(on order(1 "Unadjusted" 3 "EB Adjusted") pos(11) ring(0) size(small)) xtitle("Min. Number of Movers at Institution") ytitle("Cov(Author FE, Institution FE)") xlab(0(25)150) ylab(-.5(.1).5)
+        legend(on order(1 "Unadjusted" 3 "EB Adjusted") pos(11) ring(0) size(small) region(fcolor(none))) xtitle("Min. Number of Movers at Institution") ytitle("Cov(Author FE, Institution FE)") xlab(0(5)150, labsize(small) angle(45)) ylab(-1.3(.2).5, labsize(small))
     graph export ../output/figures/comp_cov.pdf, replace
     tw line share_uni num_movers if cat == "no shrink" , lcolor(lavender) || ///
         scatter share_uni num_movers if cat == "no shrink", mcolor(lavender) || ///
         line share_uni num_movers if cat == "eb" , lcolor(dkorange)  || ///
         scatter share_uni num_movers if cat == "eb", mcolor(dkorange) ///
-        legend(on order(1 "Unadjusted" 3 "EB Adjusted") pos(11) ring(0) size(small)) xtitle("Min. Number of Movers at Institution") ytitle("share_uni") xlab(0(25)150) ylab(-.5(.1).5)
+        legend(on order(1 "Unadjusted" 3 "EB Adjusted") pos(11) ring(0) size(small) region(fcolor(none))) xtitle("Min. Number of Movers at Institution") ytitle("Share Attributable to Institutions") xlab(0(5)150, labsize(small) angle(45)) ylab(-.5(.1).5, labsize(small))
     graph export ../output/figures/comp_share_uni.pdf, replace
 
 end
@@ -184,6 +184,8 @@ program var_decomp
     drop if mi(y_hat)
     corr beta_eb athr_fes
     local corr = r(rho)
+    corr beta_eb athr_fes, cov
+    local cov = r(cov_12)
     sum y_hat, d
     local y_var = r(Var)
     sum beta_eb, d
@@ -194,16 +196,16 @@ program var_decomp
     di "variance reduction if we equalize place-factors is: " 1-`athr_var'/`y_var'
     di "variance reduction if we equalize person-factors is: " 1-`inst_var'/`y_var'
     mat var_decomp_`samp'`num_movers'   = `y_var' \ `inst_var' \ `athr_var' \ `corr' \  (1-`inst_var'/`y_var') \ (1-`athr_var'/`y_var') 
-    mat horse_race`num_movers'   = `num_movers',  (1-`athr_var'/`y_var'), `corr' 
+    mat horse_race`num_movers'   = `num_movers',  (1-`athr_var'/`y_var'), `corr' , `cov'
     svmat horse_race`num_movers'                                                                         
     drop if mi(horse_race`num_movers'1)                                            
     keep horse_race*
-    rename  (horse_race`num_movers'1 horse_race`num_movers'2 horse_race`num_movers'3) (num_movers share_uni cov)
+    rename  (horse_race`num_movers'1 horse_race`num_movers'2 horse_race`num_movers'3 horse_race`num_movers'4) (num_movers share_uni corr cov)
     save ../output/values_`num_movers', replace
 end
 program output_tables
     syntax, samp(str) num_movers(int)
-    foreach file in add_decomp var_decomp { 
+    foreach file in var_decomp { 
          qui matrix_to_txt, saving("../output/tables/`file'_`samp'`num_movers'.txt") matrix(`file'_`samp'`num_movers') ///
            title(<tab:`file'_`samp'`num_movers'>) format(%20.4f) replace
     }

@@ -17,15 +17,19 @@ program main
     global msa_world_name "metropolitan areas"
     global msa_c_world_name "metropolitan areas"
     global inst_name "institutions"
-    comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(impact_affl_wt)
-    comp_vars, samp(all_all_jrnls) var1(affl_wt) var2(impact_cite_affl_wt)
+/*    comp_vars, samp(all_15jrnls) var1(affl_wt) var2(impact_affl_wt)
+    comp_vars, samp(all_15jrnls) var1(affl_wt) var2(impact_cite_affl_wt)
 
-    comp_vars, samp(all_all_jrnls) var1(pat_adj_wt) var2(frnt_adj_wt)
-    comp_vars, samp(all_all_jrnls) var1(pat_adj_wt) var2(body_adj_wt)
-    mat corr_var = corr_uw_if \ corr_uw_if_wt 
+    comp_vars, samp(all_15jrnls) var1(pat_adj_wt) var2(frnt_adj_wt)
+    comp_vars, samp(all_15jrnls) var1(pat_adj_wt) var2(body_adj_wt)*/
+    comp_vars, samp(all_15jrnls) var1(impact_cite_affl_wt) var2(pat_adj_wt)
+    comp_vars, samp(all_15jrnls) var1(impact_cite_affl_wt) var2(frnt_adj_wt)
+    comp_vars, samp(all_15jrnls) var1(impact_cite_affl_wt) var2(body_adj_wt)
+    mat corr_us = corr_if_wt_pat \ corr_if_wt_frnt \ corr_if_wt_body
+/*    mat corr_var = corr_uw_if \ corr_uw_if_wt 
     mat corr_pat = corr_pat_frnt \ corr_pat_body 
-    mat corr_measures = corr_var \ corr_pat
-    foreach file in corr_var corr_pat corr_measures {
+    mat corr_measures = corr_var \ corr_pat*/
+    foreach file in corr_us { //corr_var corr_pat corr_measures corr_us {
         matrix_to_txt, saving("../output/tables/`file'.txt") matrix(`file') ///
           title(<tab:`file'>) format(%20.4f) replace
     }
@@ -44,8 +48,9 @@ program comp_vars
         if "`var`i''" == "frnt_adj_wt" local suf`i' "_frnt"
         if "`var`i''" == "body_adj_wt" local suf`i' "_body"
     }
-    foreach type in  country msa_c_world inst {
-        use ../external/cleaned_samps/cleaned_`samp', clear
+    foreach type in  us_state msa_c_world inst {  //country msa_c_world inst {
+        use ../external/cleaned_samps/second/cleaned_`samp', clear
+        keep if country == "United States"
         preserve 
         gcollapse (sum) `var1' `var2', by(`type')
         drop if mi(`type')

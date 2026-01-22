@@ -14,25 +14,107 @@ global x_name "Cluster Size"
 global ln_x_name "Log Cluster Size"
 global time year 
 program main
-    use ../external/samp/athr_panel_full_comb_year_firstlast, clear
+    use ../external/samp/athr_panel_full_comb_year_second, clear
     contract inst inst_id 
     drop _freq
     save ../temp/inst_xw, replace
-    foreach t in year_firstlast {
+    foreach t in year_second {
+        clustering, samp(`t')
         additive_decomp, samp(`t') 
         var_decomp, samp(`t') 
         output_tables, samp(`t') 
     }
 end
+program clustering
+    syntax, samp(str)
+    use ../external/movers/mover_temp_`samp', clear
+    bys inst_id athr_id : gen athr_cnter = _n == 1
+    bys inst_id  : egen athr_cnt= total(athr_cnter)
+    bys inst_id athr_id year : gen athr_cnt_id = _n == 1
+    bys inst_id year : egen athr_yrs = total(athr_cnt_id)
+    bys inst_id year : gen athr_yr_id = _n ==1
+    replace athr_yrs = . if athr_yr_id != 1
+    bys inst_id: egen avg_athr_yrs = mean(athr_yrs)
+    bys inst_id: egen tot_movers = total(athr_cnter &  mover == 1)
+    *drop if athr_cnt < 100 & tot_movers < 10
+*    drop if tot_movers < 10
+    gen ln_y = ln(impact_cite_affl_wt)
+    sum ln_y , d
+    local p1 = r(p1)
+    local p5 = r(p5)
+    local p10 = r(p10)
+    local p25 = r(p25)
+    local p50 = r(p50)
+    local p75 = r(p75)
+    local p90 = r(p90)
+    local p95 = r(p95)
+    local p99 = r(p99)
+    gen marker1 = ln_y <= `p1'
+    gen marker2 = ln_y <= `p5'
+    gen marker3 = ln_y <= `p10'
+    gen marker4 = ln_y <= `p25'
+    gen marker5 = ln_y <= `p50'
+    gen marker6 = ln_y <= `p75'
+    gen marker7 = ln_y <= `p90'
+    gen marker8 = ln_y <= `p95'
+    gen marker9 = ln_y <= `p99'
+    collapse (mean) marker* [fw = athr_cnt], by(inst_id inst)
+    cluster kmeans marker*, k(100) name(cluster)
+    save ../output/cluster, replace
+end
+
 program additive_decomp
     syntax, samp(str)
     use ../external/movers/mover_temp_`samp', clear
     merge m:1 athr_id using ../external/movers/mover_xw_`samp', keep(1 3) nogen
+    merge m:1 inst_id using ../output/cluster, assert(1 3) keep(3)  nogen
     gen ln_y = ln(impact_cite_affl_wt)
+    bys inst_id year: gen yr_cnt = _n == 1
+    bys inst_id: egen tot_yrs = total(yr_cnt)
+    bys inst_id athr_id : gen athr_cnter = _n == 1
+    bys inst_id  : egen athr_cnt= total(athr_cnter)
+    bys inst_id: egen tot_movers = total(athr_cnter &  mover == 1)
+    bys inst_id athr_id year : gen athr_cnt_id = _n == 1
+    bys inst_id year : egen athr_yrs = total(athr_cnt_id)
+    bys inst_id year : gen athr_yr_id = _n ==1
+    replace athr_yrs = . if athr_yr_id != 1
+    bys inst_id: egen avg_athr_yrs = mean(athr_yrs)
+    preserve
+    reghdfe ln_y i.cluster,  absorb(athr_fes = athr_id year_fes = year) residual  
+    predict y_hat , xbd
+    replace y_hat = y_hat -  year_fes
+
+    //eb shrink inst_cluster
+    glevelsof cluster, local(inst_clusters)
+    foreach i in `inst_clusters' {
+        cap mat eb = nullmat(eb) \ ( `i', _b[`i'.cluster], _se[`i'.cluster])       
+    }
+    svmat eb
+    keep eb1 eb2 eb3
+    rename (eb1 eb2 eb3) (cluster beta se)
+    drop if mi(beta)
+    drop if se == 0 
+    sum beta
+    local mean = r(mean)
+    gen eb = (beta-`mean')^2
+    gen se2 = se*se
+    gen sigma = eb - se2
+    sum sigma
+    local sigma = r(mean)
+    gen beta_eb = `mean'*(se2/(se2+`sigma'))+beta*(`sigma'/(se2+`sigma'))
+    keep cluster beta se beta_eb
+    save ../temp/eb_shrink, replace
+    restore
+    *drop if athr_cnt < 100 & tot_movers < 10
+    *drop if tot_movers < 10
+    *drop if avg_athr_yrs < 100 
+    gegen inst_str = group(inst_id)
     reghdfe ln_y, absorb(inst_fes = inst_id athr_fes = athr_id year_fes = year) residual
     predict y_hat , xbd
     replace y_hat = y_hat -  year_fes
     corr inst_fes athr_fes
+    merge m:1 cluster using ../temp/eb_shrink, assert(1 3) keep(1 3) nogen
+    corr beta_eb athr_fes
     preserve
     gcollapse (mean) y_hat , by(inst_id year)
     gcollapse (mean) y_hat , by(inst_id)
@@ -87,17 +169,55 @@ end
 program var_decomp
     syntax, samp(str)
     use ../external/movers/mover_temp_`samp', clear
-    merge m:1 athr_id using ../external/movers/mover_xw_`samp', keep(1 3) nogen
+    merge m:1 athr_id using ../external/movers/mover_xw_`samp', assert(1 3) keep(1 3) nogen
+    merge m:1 athr_id year using ../external/stars/stars_inst_id_`samp', assert(1 3) keep(1 3) 
+    merge m:1 inst_id using ../output/cluster, assert(1 3) keep(3)  nogen
+    rename _merge star
+    replace star = 0 if star != 3
+    replace star = 1 if star == 3
     gen ln_y = ln(impact_cite_affl_wt)
     bys inst_id athr_id: gen athr_tag = _n == 1 & analysis_cond == 1
     bys inst_id: egen num_athrs = total(athr_tag)
-    keep if num_athrs >= 25
-    reghdfe ln_y, absorb(inst_fes = inst_id athr_fes = athr_id year_fes = year) residual
+    bys inst_id year: gen yr_cnt = _n == 1
+    bys inst_id: egen tot_yrs = total(yr_cnt)
+    bys inst_id athr_id : gen athr_cnter = _n == 1
+    bys inst_id  : egen athr_cnt= total(athr_cnter)
+    bys inst_id athr_id year : gen athr_cnt_id = _n == 1
+    bys inst_id year : egen athr_yrs = total(athr_cnt_id)
+    bys inst_id year : gen athr_yr_id = _n ==1
+    replace athr_yrs = . if athr_yr_id != 1
+    bys inst_id: egen avg_athr_yrs = mean(athr_yrs)
+    bys inst_id: egen tot_movers = total(athr_cnter &  mover == 1)
+    *drop if avg_athr_yrs < 100 
+    *drop if athr_cnt < 100 &  tot_movers < 10
+    *drop if tot_movers < 10
+    gegen inst_str = group(inst_id)
+    reghdfe ln_y , absorb(inst_fes = cluster athr_fes = athr_id year_fes = year) residual
+    merge m:1 cluster using ../temp/eb_shrink, assert(1 3) keep(1 3) nogen
+    hashsort inst_id beta_eb
+    by inst_id:  replace beta_eb = beta_eb[_n-1] if mi(beta_eb)
+    hashsort year year_fes
+    by year:  replace year_fes = year_fes[_n-1] if mi(year_fes)
+    hashsort athr_id athr_fes
+    by athr_id:  replace athr_fes = athr_fes[_n-1] if mi(athr_fes)
+    replace beta_eb = 0 if mi(beta_eb)
+    replace athr_fes = 0 if mi(athr_fes)
+    replace year_fes = 0 if mi(year_fes)
+    hashsort inst_id inst_fes
+    by inst_id:  replace inst_fes = inst_fes[_n-1] if mi(inst_fes)
+    hashsort year year_fes
+    by year:  replace year_fes = year_fes[_n-1] if mi(year_fes)
+    hashsort athr_id athr_fes
+    by athr_id:  replace athr_fes = athr_fes[_n-1] if mi(athr_fes)
     predict y_hat , xbd
-    gcollapse (mean) y_hat ln_y athr_fes (firstnm) inst_fes , by(inst_id year)
-    gcollapse (mean) y_hat ln_y athr_fes (firstnm) inst_fes, by(inst_id)
+    replace y_hat = y_hat -  year_fes
+    gen star_athr_fes = athr_fes if star == 1
+    gcollapse (mean) y_hat ln_y athr_fes star_athr_fes (firstnm) inst_fes beta_eb, by(inst_id year)
+    gcollapse (mean) y_hat ln_y athr_fes star_athr_fes (firstnm) inst_fes beta_eb, by(inst_id)
     drop if mi(y_hat)
+    corr inst_fes star_athr_fes
     corr inst_fes athr_fes
+    corr beta_eb athr_fes
     local corr = r(rho)
     sum y_hat, d
     local y_var = r(Var)
@@ -105,6 +225,7 @@ program var_decomp
     local inst_var = r(Var)
     sum athr_fes, d
     local athr_var = r(Var)
+
     di "variance reduction if we equalize place-factors is: " 1-`athr_var'/`y_var'
     di "variance reduction if we equalize person-factors is: " 1-`inst_var'/`y_var'
     mat var_decomp_`samp' = `y_var' \ `inst_var' \ `athr_var' \ `corr' \  (1-`inst_var'/`y_var') \ (1-`athr_var'/`y_var') 

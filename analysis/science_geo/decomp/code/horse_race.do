@@ -59,6 +59,8 @@ program var_decomp
         drop if mi(y_hat)
         corr inst_fes athr_fes
         local corr = r(rho)
+        corr inst_fes athr_fes, cov
+        local cov = r(cov_12) 
         sum y_hat, d
         local y_var = r(Var)
         sum inst_fes, d
@@ -69,18 +71,19 @@ program var_decomp
         di "variance reduction if we equalize place-factors is: " 1-`athr_var'/`y_var'
         di "variance reduction if we equalize person-factors is: " 1-`inst_var'/`y_var'
         gunique inst_id
-        mat var_decomp_`samp' = nullmat(var_decomp_`samp') \ (`i',  (1-`inst_var'/`y_var'), `corr', r(unique)) 
+        mat var_decomp_`samp' = nullmat(var_decomp_`samp') \ (`i',  (1-`inst_var'/`y_var'), `corr', `cov', r(unique)) 
         restore
     }
     svmat var_decomp_`samp'
     drop if mi(var_decomp_`samp'1)
     keep var_decomp_`samp'*
-    tw line var_decomp_`samp'2 var_decomp_`samp'1, lcolor(lavender) || ///
-        scatter var_decomp_`samp'2 var_decomp_`samp'1, mcolor(lavender) || ///
-        line var_decomp_`samp'3 var_decomp_`samp'1, lcolor(dkorange) || ///
-        scatter var_decomp_`samp'3 var_decomp_`samp'1, mcolor(dkorange) xtitle("Number of Movers Per Institution") ytitle("") legend(on order(1 "Share of University Effect" 3 "Covariance(Author FE, Institution FE)") pos(11) ring(0) size(small)) ylabel(-0.5(0.1)0.5, labsize(small)) xlabel(0(5)150, labsize(small) angle(45)) 
+    rename (var_decomp_`samp'1 var_decomp_`samp'2 var_decomp_`samp'3 var_decomp_`samp'4 var_decomp_`samp'5) (num_movers share_uni corr cov num_insts)
+    tw line share_uni num_movers, lcolor(lavender) yaxis(1) || ///
+        scatter share_uni num_movers, mcolor(lavender) yaxis(1) || ///
+        line cov num_movers, lcolor(dkorange) yaxis(1) || ///
+        scatter cov num_movers, mcolor(dkorange) yaxis(1) ///
+        xtitle("Number of Movers Per Institution") ytitle("") legend(on order(1 "Share of University Effect" 3 "Cov(Author FE, Institution FE)") pos(5) ring(0) size(small) region(fcolor(none))) ylabel(-1.3(0.2)0.5, axis(1) labsize(small)) xlabel(0(5)150, labsize(small) angle(45)) 
     graph export ../output/figures/horse_race.pdf, replace
-    rename (var_decomp_`samp'1 var_decomp_`samp'2 var_decomp_`samp'3 var_decomp_`samp'4) (num_movers share_uni cov num_insts)
     save ../output/horse_race, replace
 end
 

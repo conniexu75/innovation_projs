@@ -32,10 +32,9 @@ end
 
 program inst_desc
     syntax, samp(str) 
-    use if !mi(inst_id) & inrange(year, 1945,2023) using ../external/samp/athr_panel_full_comb_`samp', clear 
-    keep if inrange(year, 2015,2023)
+    use if !mi(inst_id) & inrange(year, 2015,2023) using ../external/samp/athr_panel_full_comb_`samp', clear 
     keep if country_code == "US"
-    collapse (sum) patent_count pat_affl_wt impact_cite_affl_wt (firstnm) inst, by(inst_id)
+    collapse (sum) patent_count pat_affl_wt body_affl_wt impact_cite_affl_wt (firstnm) inst, by(inst_id)
     gen lab = "" 
     replace lab =  inst if inst == "Harvard University"
     replace lab =  inst if inst == "Massachusetts Institute of Technology"
@@ -52,15 +51,15 @@ program inst_desc
     local coef : dis %3.2f _b[pat_affl_wt]
     local cons : dis %3.2f _b[_cons]
     local N = e(N)
-    qui corr impact_cite_affl_wt pat_affl_wt 
+    qui corr impact_cite_affl_wt body_affl_wt 
     local corr : dis %3.2f r(rho)
-    qui reg impact_cite_affl_wt pat_affl_wt
-    local coef : dis %3.2f _b[pat_affl_wt]
+    qui reg body_affl_wt impact_cite_affl_wt 
+    local coef : dis %3.2f _b[impact_cite_affl_wt]
     local cons : dis %3.2f _b[_cons]
-    tw scatter impact_cite_affl_wt pat_affl_wt if pat_affl_wt > 0, mcolor(gs13%50) msize(vsmall) xlabel(0(1000)5000, labsize(vsmall)) ylab(0(1000)8000, labsize(vsmall)) || ///
-       scatter impact_cite_affl_wt pat_affl_wt if !mi(lab)& pat_affl_wt > 0 , mlabvp(clock) mcolor(ebblue) msize(vsmall)  mlabel(lab) mlabcolor(black) mlabsize(tiny) || ///
-      (function y=_b[pat_affl_wt]*x+_b[_cons] , range(0 5000) lpattern(dash) lcolor(lavender)), ytitle("Institutional Output", size(vsmall)) xtitle("Institutional Paper-to-Patent Citations", size(vsmall)) legend(on order(- "N = `N'" ///
-      "Correlation = `corr'") pos(5) ring(0) region(fcolor(none)) size(vsmall) lwidth(none))
+    tw scatter body_affl_wt impact_cite_affl_wt if pat_affl_wt > 0, mcolor(gs13%50) msize(vsmall) xlabel(0(1000)8000, labsize(small)) ylab(0(100)600, labsize(small)) || ///
+       scatter body_affl_wt impact_cite_affl_wt if !mi(lab)& pat_affl_wt > 0 , mlabvp(clock) mcolor(ebblue) msize(vsmall)  mlabel(lab) mlabcolor(black) mlabsize(tiny) || ///
+      (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 8000) lpattern(dash) lcolor(lavender)), xtitle("Institutional Output", size(small)) ytitle("Institutional Paper-to-Patent Citations", size(small)) legend(on order(- "N = `N'" ///
+      "Correlation = `corr'") pos(5) ring(0) region(fcolor(none)) size(small) lwidth(none))
     graph export ../output/figures/inst_pat_output_scatter_`samp'.pdf, replace
 end
 
@@ -86,14 +85,14 @@ program msa_desc
         local p50 :  dis %3.2f r(p50)
         local p75 :  dis %3.2f r(p75)
         local p95 :  dis %3.2f r(p95)
-        tw hist `var', frac ytitle("Share of author-years", size(vsmall)) xtitle("${`var'_name}", size(vsmall)) color(edkblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N = `N'" ///
+        tw hist `var', frac ytitle("Share of author-years", size(small)) xtitle("${`var'_name}", size(small)) color(edkblue) xlab(, labsize(small)) ylab(, labsize(small)) legend(on order(- "N = `N'" ///
                                                                 "Mean = `mean'" ///
                                                                 "            (`sd')" ///
                                                                 "p5 = `p5'" ///
                                                                 "p25 = `p25'" ///
                                                                 "p50 = `p50'" ///
                                                                 "p75 = `p75'" ///
-                                                                "p95 = `p95'") pos(1) ring(0) size(vsmall) region(fcolor(none)))
+                                                                "p95 = `p95'") pos(1) ring(0) size(small) region(fcolor(none)))
         *graph export ../output/figures/`var'_dist`samp'.pdf, replace
     }
     preserve
@@ -114,16 +113,16 @@ program msa_desc
     qui reg body_adj_wt impact_cite_affl_wt 
     local coef : dis %3.2f _b[impact_cite_affl_wt]
     local N = e(N)
-    binscatter2 body_adj_wt impact_cite_affl_wt , xtitle("Output", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
-                                                                                                                      "Corr. = `corr'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
+    binscatter2 body_adj_wt impact_cite_affl_wt , xtitle("Output", size(small)) ytitle("Paper-to-Patent Citations", size(small)) lcolor(ebblue) mcolor(gs3) xlab(, labsize(small)) ylab(, labsize(small)) legend(on order(- "N (MSAs) = `N'" ///
+                                                                                                                      "Corr. = `corr'") pos(5) ring(0) region(fcolor(none)) size(small))
     *graph export ../output/figures/msa_pat_prod_`samp'.pdf, replace
     gen ln_pat = ln(body_adj_wt)
     gen ln_y = ln(impact_cite_affl_wt)
     qui reg ln_pat ln_y 
     local coef : dis %3.2f _b[ln_y]
     local N = e(N)
-    binscatter2 ln_pat ln_y , xtitle("Log Output", size(vsmall)) ytitle("Log Paper-to-Patent Citations", size(vsmall)) lcolor(ebblue) mcolor(gs3)  xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
-                                                                                                                      "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
+    binscatter2 ln_pat ln_y , xtitle("Log Output", size(small)) ytitle("Log Paper-to-Patent Citations", size(small)) lcolor(ebblue) mcolor(gs3)  xlab(, labsize(small)) ylab(, labsize(small)) legend(on order(- "N (MSAs) = `N'" ///
+                                                                                                                      "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(small))
     *graph export ../output/figures/msa_log_pat_prod_`samp'.pdf, replace
     
     xtile p  = msa_size, nq(20)
@@ -141,16 +140,16 @@ program msa_desc
    egen clock = mlabvpos(msa_size econ_msa_size)
    replace clock = 9 if inlist(msa_lab , "New York-Newark-Jersey City, NY-NJ-PA","Boston-Cambridge-Newton, MA-NH")
    replace clock = 3 if inlist(msa_lab , "Minneapolis-St. Paul-Bloomington, MN-WI", "San Diego-Carlsbad, CA", "St. Louis, MO-IL", "Bay Area, CA", "Seattle-Tacoma-Bellevue, WA", "Washington-Arlington-Alexandria, DC-VA-MD-WV")
-    tw scatter impact_cite_affl_wt msa_size , mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || scatter impact_cite_affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(vsmall)) ytitle("MSA Output", size(vsmall))  jitter(5) legend(off)
+    tw scatter impact_cite_affl_wt msa_size , mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(small)) ylab(#10, labsize(small)) || scatter impact_cite_affl_wt msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) xtitle("MSA Cluster Size", size(small)) ytitle("MSA Output", size(small))  jitter(5) legend(off)
    *graph export ../output/figures/cluster_prod_scatter_`samp'.pdf, replace
     corr msa_size econ_msa_size 
     local slope : dis %3.2f r(rho) 
     reg msa_size econ_msa_size
     local N = e(N)
-    tw scatter msa_size econ_msa_size, mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || ///
+    tw scatter msa_size econ_msa_size, mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(small)) ylab(#10, labsize(small)) || ///
        scatter msa_size econ_msa_size if !mi(msa_lab) , mcolor(ebblue) mlabvp(clock) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
-       (function y = _b[econ_msa_size]*x + _b[_cons], range(0 900) lpattern(dash) lcolor(lavender)), ytitle("Fundamental Science Cluster Size", size(vsmall)) xtitle("Economics Research Cluster Size", size(vsmall))  legend(on order (- "N (MSAs) = `N'" ///
-                                                                                                                                                                              "Correlation = `slope'") pos(5) ring(0) region(fcolor(none)) size(vsmall) lwidth(none))
+       (function y = _b[econ_msa_size]*x + _b[_cons], range(0 900) lpattern(dash) lcolor(lavender)), ytitle("Fundamental Science Cluster Size", size(small)) xtitle("Economics Research Cluster Size", size(small))  legend(on order (- "N (MSAs) = `N'" ///
+                                                                                                                                                                              "Correlation = `slope'") pos(5) ring(0) region(fcolor(none)) size(small) lwidth(none))
     graph export ../output/figures/econ_v_ls_`samp'.pdf, replace
     drop clock
    xtile p_prod = impact_cite_affl_wt, nq(20)
@@ -174,11 +173,11 @@ program msa_desc
    local N = e(N)
    qui corr body_adj_wt impact_cite_affl_wt if body_adj_wt > 0
    local corr : dis %3.2f r(rho)
-   tw scatter body_adj_wt impact_cite_affl_wt  if body_adj_wt > 0, mcolor(gs13%50) msize(vsmall) xlabel(0(5000)25000, labsize(vsmall)) ylab(0(500)2500, labsize(vsmall)) || ///
+   tw scatter body_adj_wt impact_cite_affl_wt  if body_adj_wt > 0, mcolor(gs13%50) msize(vsmall) xlabel(0(5000)25000, labsize(small)) ylab(0(500)2500, labsize(small)) || ///
       scatter body_adj_wt impact_cite_affl_wt if !mi(msa_lab)& body_adj_wt > 0 , mlabvp(clock) mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
-      (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 25000) lpattern(dash) lcolor(lavender)), xtitle("MSA Output", size(vsmall)) ytitle("MSA Paper-to-Patent Citations", size(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
-                                                                                                                      "Corr. = `corr'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
-   graph export ../output/figures/pat_prod_scatter_`samp'.pdf, replace
+      (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 25000) lpattern(dash) lcolor(lavender)), xtitle("MSA Output", size(small)) ytitle("MSA Paper-to-Patent Citations", size(small)) legend(on order(- "N (MSAs) = `N'" ///
+                                                                                                                      "Corr. = `corr'") pos(5) ring(0) region(fcolor(none)) size(small))
+*   graph export ../output/figures/pat_prod_scatter_`samp'.pdf, replace
    qui reg body_affl_wt impact_cite_affl_wt 
    local coef : dis %3.2f _b[impact_cite_affl_wt]
    local cons : dis %3.2f _b[_cons]
@@ -187,10 +186,10 @@ program msa_desc
 
    local corr : dis %3.2f r(rho)
 
-   tw scatter body_affl_wt impact_cite_affl_wt if body_affl_wt > 0 , mcolor(gs13%50) msize(vsmall) xlabel(0(3000)24000, labsize(vsmall)) ylab(0(300)1500, labsize(vsmall)) || ///
+   tw scatter body_affl_wt impact_cite_affl_wt if body_affl_wt > 0 , mcolor(gs13%50) msize(vsmall) xlabel(0(3000)24000, labsize(small)) ylab(0(300)1500, labsize(small)) || ///
       scatter body_affl_wt impact_cite_affl_wt if !mi(msa_lab) & body_affl_wt > 0 , mlabvp(clock) mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
-      (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 24000) lpattern(dash) lcolor(lavender)), xtitle("MSA Output", size(vsmall)) ytitle("MSA Paper-to-Patent Citations", size(vsmall)) legend(on order(- "N (MSAs) = `N'" ///
-                                                                                                                      "Corr. = `corr'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
+      (function y=_b[impact_cite_affl_wt]*x+_b[_cons] , range(0 24000) lpattern(dash) lcolor(lavender)), xtitle("MSA Output", size(small)) ytitle("MSA Paper-to-Patent Citations", size(small)) legend(on order(- "N (MSAs) = `N'" ///
+                                                                                                                      "Corr. = `corr'") pos(5) ring(0) region(fcolor(none)) size(small))
    graph export ../output/figures/pat_cnt_prod_scatter_`samp'.pdf, replace
 end
 
@@ -282,14 +281,14 @@ program raw_bs
     qui reg body_adj_wt impact_cite_affl_wt 
     local coef : dis %3.2f _b[impact_cite_affl_wt]
     local N = e(N)
-    binscatter2 body_adj_wt impact_cite_affl_wt, xtitle("Output", size(vsmall)) ytitle("Paper-to-Patent Citations", size(vsmall)) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author-years) = `N'" ///
-                                                                                                                      "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
+    binscatter2 body_adj_wt impact_cite_affl_wt, xtitle("Output", size(small)) ytitle("Paper-to-Patent Citations", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author-years) = `N'" ///
+                                                                                                                      "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(small))
     *graph export ../output/figures/pat_prod_`samp'.pdf, replace
     qui reg ln_pat ln_y 
     local coef : dis %3.2f _b[ln_y]
     local N = e(N)
-    binscatter2 ln_pat ln_y , xtitle("Log Output", size(vsmall)) ytitle("Log Paper-to-Patent Citations", size(vsmall)) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author-years) = `N'" ///
-                                                                                                                      "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(vsmall))
+    binscatter2 ln_pat ln_y , xtitle("Log Output", size(small)) ytitle("Log Paper-to-Patent Citations", size(small)) xlab(, labsize(small)) ylab(, labsize(small)) mcolor(gs5) lcolor(ebblue) legend(on order(- "N (Author-years) = `N'" ///
+                                                                                                                      "Slope = `coef'") pos(5) ring(0) region(fcolor(none)) size(small))
     *graph export ../output/figures/log_pat_prod_`samp'.pdf, replace
 end
 
@@ -350,16 +349,16 @@ program regression
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Bay Area, CA" & year == 2015 
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 1997 
     replace msa_lab =  msa_comb + " " + string(${time})   if msa_comb == "Boston-Cambridge-Newton, MA-NH" & year == 2012 
-    tw scatter msa_size econ_msa_size, mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(vsmall)) ylab(#10, labsize(vsmall)) || ///
+    tw scatter msa_size econ_msa_size, mcolor(gs7%50) msize(vsmall) xlabel(#10, labsize(small)) ylab(#10, labsize(small)) || ///
        scatter msa_size econ_msa_size if !mi(msa_lab) , mcolor(ebblue) msize(vsmall)  mlabel(msa_lab) mlabcolor(black) mlabsize(tiny) || ///
-       (function y = _b[econ_msa_size]*x + _b[_cons], range(0 1250) lpattern(dash) lcolor(lavender)), ytitle("Fundamental Science Cluster Size", size(vsmall)) xtitle("Economics Research Cluster Size", size(vsmall))  legend(on order (- "N (MSAs) = `N'" ///
-                                                                                                                                                                              "Correlation = `slope'") pos(5) ring(0) region(fcolor(none)) size(vsmall) lwidth(none))
+       (function y = _b[econ_msa_size]*x + _b[_cons], range(0 1250) lpattern(dash) lcolor(lavender)), ytitle("Fundamental Science Cluster Size", size(small)) xtitle("Economics Research Cluster Size", size(small))  legend(on order (- "N (MSAs) = `N'" ///
+                                                                                                                                                                              "Correlation = `slope'") pos(5) ring(0) region(fcolor(none)) size(small) lwidth(none))
     
     use if !mi(msa_comb) & inrange(year, 1945, 2023) using ../external/samp/athr_panel_full_comb_`samp', clear 
     merge m:1 msa_comb year using  ../temp/econ_yr_cluster, assert(1 2 3) keep(1 3) nogen
 /*    corr msa_size econ_msa_size 
     local slope : dis %3.2f r(rho) 
-    binscatter2 msa_size econ_msa_size, mcolor(gs5) lcolor(ebblue) xlab(, labsize(vsmall)) ylab(, labsize(vsmall)) ytitle("Fundamental Science Research Cluster Size", size(vsmall)) xtitle("Economics Research Cluster Size", size(vsmall)) legend(on order(- "Correlation = `slope'") pos(5) ring(0) lwidth(none) size(vsmall) region(fcolor(none)))
+    binscatter2 msa_size econ_msa_size, mcolor(gs5) lcolor(ebblue) xlab(, labsize(small)) ylab(, labsize(small)) ytitle("Fundamental Science Research Cluster Size", size(small)) xtitle("Economics Research Cluster Size", size(small)) legend(on order(- "Correlation = `slope'") pos(5) ring(0) lwidth(none) size(small) region(fcolor(none)))
     graph export ../output/figures/econ_v_ls.pdf, replace*/
     local reg_eq "ln_y ln_x"
     local mat_est "_b[ln_x] \ _se[ln_x]"
@@ -528,35 +527,35 @@ program firm_externalities
         replace labely_lab = inst if mi(labely_lab)
         local w = 27
         graph tw `stacklines' (scatter labely year if year == 2023, ms(smcircle) ///
-          msize(0.2) mcolor(black%40) mlabsize(vsmall) mlabcolor(black) mlabel(labely_lab)), ///
-          ytitle("Relative Output Spillover Effect in Cluster", size(vsmall)) xtitle("Year", size(vsmall)) xlabel(1945(2)2023, angle(45) labsize(vsmall)) ylabel(0(10)100, labsize(vsmall)) ///
+          msize(0.2) mcolor(black%40) mlabsize(small) mlabcolor(black) mlabel(labely_lab)), ///
+          ytitle("Relative Output Spillover Effect in Cluster", size(small)) xtitle("Year", size(small)) xlabel(1945(2)2023, angle(45) labsize(small)) ylabel(0(10)100, labsize(small)) ///
           graphregion(margin(r+27)) plotregion(margin(zero)) ///
           legend(off)
         qui graph export ../output/figures/elasticity_trend_`suf'.pdf , replace
         restore
     }
     hashsort inst_id year
-    tw line firm_elasticity year if inst == "Harvard University", xlab(1945(5)2023, angle(45) labsize(vsmall)) ylab(0.04(0.02)0.16, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("Harvard University Output Externality", size(vsmall))
+    tw line firm_elasticity year if inst == "Harvard University", xlab(1945(5)2023, angle(45) labsize(small)) ylab(0.04(0.02)0.16, labsize(small)) xtitle("Year", size(small)) ytitle("Harvard University Output Externality", size(small))
     graph export ../output/figures/harvard_elasticity_trend.pdf, replace 
-    tw line firm_elasticity year if inst == "Massachusetts Institute of Technology", xlab(1945(5)2023, angle(45) labsize(vsmall)) ylab(0.01(0.01)0.05, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("MIT Output Externality", size(vsmall))
+    tw line firm_elasticity year if inst == "Massachusetts Institute of Technology", xlab(1945(5)2023, angle(45) labsize(small)) ylab(0.01(0.01)0.05, labsize(small)) xtitle("Year", size(small)) ytitle("MIT Output Externality", size(small))
     graph export ../output/figures/mit_elasticity_trend.pdf, replace 
-    tw line firm_elasticity year if inst == "Mass General Brigham", xlab(1945(5)2023, angle(45) labsize(vsmall)) ylab(0.01(0.01)0.05, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("MGH Output Externality", size(vsmall))
+    tw line firm_elasticity year if inst == "Mass General Brigham", xlab(1945(5)2023, angle(45) labsize(small)) ylab(0.01(0.01)0.05, labsize(small)) xtitle("Year", size(small)) ytitle("MGH Output Externality", size(small))
     graph export ../output/figures/mgh_elasticity_trend.pdf, replace 
     
     hashsort inst_id year
-    tw line firm_elasticity year if inst == "Stanford University", xlab(1945(5)2023, angle(45) labsize(vsmall)) ylab(0.04(0.01)0.08, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("Stanford University Output Externality", size(vsmall))
+    tw line firm_elasticity year if inst == "Stanford University", xlab(1945(5)2023, angle(45) labsize(small)) ylab(0.04(0.01)0.08, labsize(small)) xtitle("Year", size(small)) ytitle("Stanford University Output Externality", size(small))
     graph export ../output/figures/stanford_elasticity_trend.pdf, replace 
 
     hashsort inst_id year
-    tw line firm_elasticity year if inst == "National Institutes of Health", xlab(1945(5)2023, angle(45) labsize(vsmall)) ylab(0.02(0.02)0.12, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("NIH Output Externality", size(vsmall))
+    tw line firm_elasticity year if inst == "National Institutes of Health", xlab(1945(5)2023, angle(45) labsize(small)) ylab(0.02(0.02)0.12, labsize(small)) xtitle("Year", size(small)) ytitle("NIH Output Externality", size(small))
     graph export ../output/figures/nih_elasticity_trend.pdf, replace 
 
     hashsort inst_id year
-    tw line firm_elasticity year if inst == "Johns Hopkins University", xlab(1945(5)2023, angle(45) labsize(vsmall)) ylab(0.20(0.02)0.30, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("Johns Hopkins University Output Externality", size(vsmall))
+    tw line firm_elasticity year if inst == "Johns Hopkins University", xlab(1945(5)2023, angle(45) labsize(small)) ylab(0.20(0.02)0.30, labsize(small)) xtitle("Year", size(small)) ytitle("Johns Hopkins University Output Externality", size(small))
     graph export ../output/figures/jhu_elasticity_trend.pdf, replace 
 
     hashsort inst_id year
-    tw line firm_elasticity year if inst == "University of Michigan–Ann Arbor", xlab(1945(5)2023, angle(45) labsize(vsmall)) ylab(0.50(0.05)0.80, labsize(vsmall)) xtitle("Year", size(vsmall)) ytitle("University of Michigan-Ann Arbor Output Externality", size(vsmall))
+    tw line firm_elasticity year if inst == "University of Michigan–Ann Arbor", xlab(1945(5)2023, angle(45) labsize(small)) ylab(0.50(0.05)0.80, labsize(small)) xtitle("Year", size(small)) ytitle("University of Michigan-Ann Arbor Output Externality", size(small))
     graph export ../output/figures/umich_elasticity_trend.pdf, replace 
 end
 

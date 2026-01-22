@@ -10,80 +10,27 @@ global overall_fund tot_fund tot_fed_fund tot_bus_fund tot_inst_fund tot_state_f
 global external_fund_source contracts_fund grants_fund
 global science_fund med_sch_expend clin_trial_expend fed_ls_fund nonfed_ls_fund ls_cap_expend 
 global rd_type basic_expend basic_fed_expend applied_expend applied_fed_expend 
-global other_fund expend_salaries expend_capital expend_fed expend_nonfed rd_index
-global vars $overall_fund  $science_fund $rd_type $external_fund_source $other_fund body_adj_wt
+global other_fund expend_salaries expend_capital 
+global vars $overall_fund  $science_fund $rd_type $external_fund_source $other_fund 
 
 program main
-    merge_data, samp(year_firstlast)
+    merge_data, samp(year_second)
 end
 
 program merge_data
     syntax, samp(str)
-    use if analysis_cond == 1 & inrange(year, 1945, 2023)  using ../external/mover/mover_temp_`samp' , clear  
+    use  ../external/mover/mover_temp_`samp' , clear  
     merge m:1 athr_id using ../external/mover/mover_xw_`samp', assert(1 2 3) keep(3) nogen
-    keep athr_id inst field year msa_comb impact_cite_affl_wt msa_size which_place inst_id move_year first_pub_yr
-    hashsort athr_id year
-    gen rel = year - move_year
-    merge m:1 athr_id move_year using ../external/mover/dest_origin_changes, keep(3) nogen
-    hashsort athr_id year
-    gegen msa = group(msa_comb)
-    gegen inst = group(inst_id)
     gen ln_y = ln(impact_cite_affl_wt)
-    local timeframe 8
-    forval i = 1/`timeframe' {
-        gen lag`i' = 1 if rel == -`i'
-        gen lead`i' = 1 if rel == `i'
-        gen int_lag`i' = 1 if rel == -`i'
-        gen int_lead`i' = 1 if rel == `i'
-    }
-    ds int_lead* int_lag*
-    foreach var in `r(varlist)' {
-        replace `var' = 0 if mi(`var')
-        replace `var' = `var'*inst_ln_y_diff
-    }
-    ds lead* lag*
-    foreach var in `r(varlist)' {
-        replace `var' = 0 if mi(`var')
-    }
-    gen int_treat = inst_ln_y_diff if rel == 0  
-    gen treat = 1 if rel == 0  
-    replace int_treat = 0 if mi(int_treat)
-    replace treat = 0 if mi(treat)
-    local leads
-    local int_leads
-    local lags
-    local int_lags
-    forval i = 1/`timeframe' {
-        local leads `leads' lead`i'
-        local int_leads `int_leads' int_lead`i'
-    }
-    forval i = 2/`timeframe' {
-        local lags lag`i' `lags'
-        local int_lags int_lag`i' `int_lags'
-    }
-    gunique athr_id 
-    mat drop _all
-    reghdfe ln_y `lags' `leads' lag1 treat `int_lags' int_treat `int_leads' int_lag1  if inrange(rel,-8,8) , absorb(year field field#year athr_fes = athr_id) vce(cluster inst)
-    preserve
-    gcollapse (mean) ln_y athr_fes, by(athr_id)
-    gen ind_diff = ln_y - athr_fes
-    save ../temp/ind_diff, replace
-    restore
-    preserve
-    bys inst_id : egen place_avg = mean(ln_y)
-    merge m:1 athr_id using ../temp/ind_diff, assert(3) nogen
-    bys inst_id : egen ind_avg = mean(ind_diff)
-    gcontract inst_id ind_avg place_avg
-    gen b  = place_avg-ind_avg
+    bys inst_id athr_id: gen athr_tag = _n == 1 & analysis_cond == 1
+    bys inst_id: egen num_athrs = total(athr_tag)
+    keep if num_athrs>=25
+    reghdfe ln_y, absorb(inst_fes = inst_id athr_fes = athr_id year_fes = year) residual
+    gcontract inst_id inst_fes
+    drop _freq
+    drop if mi(inst_fes)
     save ../temp/inst_fes, replace
-    restore
 
-    preserve
-    reghdfe ln_y , absorb(field##year inst_fes = inst msa_fes = msa athr_id) vce(cluster inst) residuals
-    reghdfe inst_fes msa_fes, noabsorb
-    binscatter inst_fes msa_fes
-    graph export ../output/inst_on_msa.pdf, replace
-    restore
     use ../external/samp/athr_panel_full_comb_`samp', clear
     gcollapse (sum) body_adj_wt, by(inst_id)
     save ../temp/pat_measure, replace 
@@ -101,10 +48,10 @@ program merge_data
         qui sum `var', d
         replace `var' = (`var'-r(mean))/r(sd) 
     }
-    sum b, d
-    replace b= (b-r(mean))/r(sd)
+    sum inst_fes, d
+    replace inst_fes= (inst_fes-r(mean))/r(sd)
     foreach var in $vars { 
-        reg b `var'
+        reg inst_fes `var'
         estimates store `var'
     }
     label variable tot_fed_fund "R&D From Federal Gov't ($)" 

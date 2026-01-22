@@ -19,15 +19,15 @@ global ln_x_name "Log Cluster Size"
 global time year 
 
 program main
-*    get_athr_prod
+    get_athr_prod
     foreach t in year year_firstlast {
-        *find_age, samp(`t')
-        *make_movers, samp(`t')
-        *sum_stats, samp(`t')
+        find_age, samp(`t')
+        make_movers, samp(`t')
+        sum_stats, samp(`t')
         *qui output_tables, samp(`t')
-        *event_studies, samp(`t')
+        *Ievent_studies, samp(`t')
     }
-    plot_prod_profile
+*    plot_prod_profile
 end
 
 program get_athr_prod

@@ -1,1 +1,1 @@
-./cleaned_samps/ | /export/scratch/cxu_sci_geo/create_first_last
+./cleaned_samps/ | /export/projects4/achandra_basicscience/derived/science_geo/openalex/15jrnls/create_athr_samples/output 
